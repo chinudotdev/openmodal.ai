@@ -22,7 +22,7 @@ export default function RootLayout({
             </Link>
           </div>
 
-          {/* Right side - Model, Provider, and Theme controls */}
+          {/* Right side - Model, Provider, Author, and Theme controls */}
           <div className="flex items-center space-x-2">
             <Link href="/models">
               <Button variant="outline" size="sm">

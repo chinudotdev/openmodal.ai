@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeftFromLine,
   ArrowRightToLine,
@@ -374,14 +375,22 @@ export default function ModelsClient() {
                         {model.description}
                       </p>
 
-                      <p className="select-text text-muted-foreground text-xs">
-                        by{" "}
-                        <span className="cursor-pointer underline transition-colors hover:text-foreground hover:no-underline">
-                          {model.authorName}
-                        </span>{" "}
-                        | Created{" "}
-                        {new Date(model.createdAt).toLocaleDateString()}
-                      </p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <p>
+                          by{" "}
+                          <Link
+                            href={`/${model.authorId}`}
+                            className="cursor-pointer underline underline-offset-2 transition-colors hover:text-foreground hover:font-normal"
+                          >
+                            {model.authorId}
+                          </Link>
+                        </p>
+                        <span> | </span>
+                        <p>
+                          Created{" "}
+                          {new Date(model.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
