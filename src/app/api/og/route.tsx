@@ -1,7 +1,7 @@
-import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 import { getPlatformStats } from "@/actions/stats";
 import { getAuthor } from "@/actions/authors";
+import { ImageResponse } from "next/og";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
