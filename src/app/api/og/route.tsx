@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
           height: "100%",
           padding: "50px 200px",
           textAlign: "center",
+          display: "flex",
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -222,131 +223,241 @@ async function generateLandingOG() {
 }
 
 async function generateAuthorOG(authorId: string) {
-  const result = await getAuthor({ authorId });
+  try {
+    // Try to get actual author data
+    const authorData = await getAuthor({ authorId });
+    const authorName =
+      authorData?.author?.name ||
+      authorId.charAt(0).toUpperCase() + authorId.slice(1);
 
-  if (!result) {
-    throw new Error("Author not found");
-  }
-
-  const { author, modelCount } = result;
-
-  return new ImageResponse(
-    <div
-      style={{
-        background: "#ffffff",
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "80px",
-        fontFamily: "system-ui, sans-serif",
-      }}
-    >
-      {/* Author Logo Placeholder */}
+    return new ImageResponse(
       <div
         style={{
-          width: "120px",
-          height: "120px",
-          borderRadius: "50%",
-          border: "3px solid #e5e7eb",
-          backgroundColor: "#f8f9fa",
+          background: "#ffffff",
+          width: "100%",
+          height: "100%",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          marginBottom: "40px",
-          fontSize: "48px",
-          fontWeight: "bold",
-          color: "#666666",
+          justifyContent: "space-between",
+          padding: "80px",
+          fontFamily: "system-ui, sans-serif",
         }}
       >
-        {author.name.charAt(0).toUpperCase()}
-      </div>
-
-      {/* Author Name */}
-      <div
-        style={{
-          fontSize: "56px",
-          fontWeight: "bold",
-          color: "#1a1a1a",
-          marginBottom: "20px",
-          textAlign: "center",
-        }}
-      >
-        {author.name}
-      </div>
-
-      {/* Description */}
-      <div
-        style={{
-          fontSize: "24px",
-          color: "#666666",
-          marginBottom: "40px",
-          textAlign: "center",
-          maxWidth: "800px",
-          lineHeight: "1.4",
-          fontWeight: "400",
-        }}
-      >
-        {author.description}
-      </div>
-
-      {/* Model Count */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          backgroundColor: "#f8f9fa",
-          padding: "24px 40px",
-          borderRadius: "12px",
-          border: "1px solid #e5e7eb",
-          marginBottom: "40px",
-        }}
-      >
+        {/* Left Side - Text Content */}
         <div
           style={{
-            fontSize: "36px",
-            fontWeight: "bold",
-            color: "#1a1a1a",
-            marginRight: "16px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            flex: 1,
+            maxWidth: "600px",
           }}
         >
-          {modelCount}
+          {/* Main Title */}
+          <div
+            style={{
+              fontSize: "72px",
+              fontWeight: "bold",
+              color: "#1a1a1a",
+              marginBottom: "16px",
+              lineHeight: "1.1",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            {authorName}
+          </div>
+
+          {/* Subtitle */}
+          <div
+            style={{
+              fontSize: "28px",
+              color: "#666666",
+              fontWeight: "400",
+              lineHeight: "1.3",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            Browse models by {authorName}
+          </div>
         </div>
+
+        {/* Right Side - Author Logo */}
         <div
           style={{
-            fontSize: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flex: 1,
+            position: "relative",
+          }}
+        >
+          {authorData?.author?.logo ? (
+            // biome-ignore lint/performance/noImgElement: <explanation>
+            <img
+              width="256"
+              height="256"
+              alt={`${authorName} logo`}
+              src={authorData.author.logo}
+              style={{
+                borderRadius: 128,
+              }}
+            />
+          ) : (
+            /* Fallback - Author Initial */
+            <div
+              style={{
+                width: "200px",
+                height: "200px",
+                background:
+                  "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #8b5cf6 100%)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "80px",
+                fontWeight: "bold",
+                color: "white",
+              }}
+            >
+              {authorName.charAt(0).toUpperCase()}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Right Branding */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "40px",
+            right: "40px",
+            fontSize: "18px",
             color: "#666666",
-            fontWeight: "500",
+            fontWeight: "400",
           }}
         >
-          AI Models Available
+          &lt; OpenModal
         </div>
-      </div>
+      </div>,
+      {
+        width: 1200,
+        height: 630,
+      },
+    );
+  } catch (error) {
+    console.error("Error generating author OG:", error);
+    // Fallback to simple author name
+    const authorName = authorId.charAt(0).toUpperCase() + authorId.slice(1);
 
-      {/* Footer */}
+    return new ImageResponse(
       <div
         style={{
-          fontSize: "20px",
-          color: "#666666",
-          textAlign: "center",
-          fontWeight: "400",
+          background: "#ffffff",
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "80px",
+          fontFamily: "system-ui, sans-serif",
         }}
       >
-        Explore {author.name} models on OpenModal
-      </div>
-    </div>,
-    {
-      width: 1200,
-      height: 630,
-    },
-  );
+        {/* Left Side - Text Content */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            flex: 1,
+            maxWidth: "600px",
+          }}
+        >
+          {/* Main Title */}
+          <div
+            style={{
+              fontSize: "72px",
+              fontWeight: "bold",
+              color: "#1a1a1a",
+              marginBottom: "16px",
+              lineHeight: "1.1",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            {authorName}
+          </div>
+
+          {/* Subtitle */}
+          <div
+            style={{
+              fontSize: "28px",
+              color: "#666666",
+              fontWeight: "400",
+              lineHeight: "1.3",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            Browse models by {authorName}
+          </div>
+        </div>
+
+        {/* Right Side - Author Logo */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flex: 1,
+            position: "relative",
+          }}
+        >
+          {/* Fallback - Author Initial */}
+          <div
+            style={{
+              width: "200px",
+              height: "200px",
+              background:
+                "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #8b5cf6 100%)",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "80px",
+              fontWeight: "bold",
+              color: "white",
+            }}
+          >
+            {authorName.charAt(0).toUpperCase()}
+          </div>
+        </div>
+
+        {/* Bottom Right Branding */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "40px",
+            right: "40px",
+            fontSize: "18px",
+            color: "#666666",
+            fontWeight: "400",
+          }}
+        >
+          &lt; OpenModal
+        </div>
+      </div>,
+      {
+        width: 1200,
+        height: 630,
+      },
+    );
+  }
 }
 
 async function generateModelsOG() {
-  const stats = await getPlatformStats();
-
   return new ImageResponse(
     <div
       style={{
@@ -389,12 +500,11 @@ async function generateModelsOG() {
             maxWidth: "800px",
           }}
         >
-          Discover and explore {stats.totalModels}+ AI models from{" "}
-          {stats.totalProviders}+ providers
+          Discover and explore AI models from leading providers
         </div>
       </div>
 
-      {/* Modality Types */}
+      {/* Features Grid */}
       <div
         style={{
           display: "flex",
@@ -404,43 +514,141 @@ async function generateModelsOG() {
           justifyContent: "center",
         }}
       >
-        {stats.modalityTypes.slice(0, 4).map((modality) => (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            backgroundColor: "#f8f9fa",
+            padding: "24px 20px",
+            borderRadius: "12px",
+            border: "1px solid #e5e7eb",
+            minWidth: "120px",
+          }}
+        >
           <div
-            key={modality.name}
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              backgroundColor: "#f8f9fa",
-              padding: "24px 20px",
-              borderRadius: "12px",
-              border: "1px solid #e5e7eb",
-              minWidth: "120px",
+              fontSize: "32px",
+              fontWeight: "bold",
+              color: "#1a1a1a",
+              marginBottom: "8px",
             }}
           >
-            <div
-              style={{
-                fontSize: "32px",
-                fontWeight: "bold",
-                color: "#1a1a1a",
-                marginBottom: "8px",
-              }}
-            >
-              {modality.count}
-            </div>
-            <div
-              style={{
-                fontSize: "16px",
-                color: "#666666",
-                textAlign: "center",
-                textTransform: "capitalize",
-                fontWeight: "500",
-              }}
-            >
-              {modality.name}
-            </div>
+            Text
           </div>
-        ))}
+          <div
+            style={{
+              fontSize: "16px",
+              color: "#666666",
+              textAlign: "center",
+              fontWeight: "500",
+            }}
+          >
+            Language Models
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            backgroundColor: "#f8f9fa",
+            padding: "24px 20px",
+            borderRadius: "12px",
+            border: "1px solid #e5e7eb",
+            minWidth: "120px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "32px",
+              fontWeight: "bold",
+              color: "#1a1a1a",
+              marginBottom: "8px",
+            }}
+          >
+            Image
+          </div>
+          <div
+            style={{
+              fontSize: "16px",
+              color: "#666666",
+              textAlign: "center",
+              fontWeight: "500",
+            }}
+          >
+            Vision Models
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            backgroundColor: "#f8f9fa",
+            padding: "24px 20px",
+            borderRadius: "12px",
+            border: "1px solid #e5e7eb",
+            minWidth: "120px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "32px",
+              fontWeight: "bold",
+              color: "#1a1a1a",
+              marginBottom: "8px",
+            }}
+          >
+            Audio
+          </div>
+          <div
+            style={{
+              fontSize: "16px",
+              color: "#666666",
+              textAlign: "center",
+              fontWeight: "500",
+            }}
+          >
+            Speech Models
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            backgroundColor: "#f8f9fa",
+            padding: "24px 20px",
+            borderRadius: "12px",
+            border: "1px solid #e5e7eb",
+            minWidth: "120px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "32px",
+              fontWeight: "bold",
+              color: "#1a1a1a",
+              marginBottom: "8px",
+            }}
+          >
+            Video
+          </div>
+          <div
+            style={{
+              fontSize: "16px",
+              color: "#666666",
+              textAlign: "center",
+              fontWeight: "500",
+            }}
+          >
+            Video Models
+          </div>
+        </div>
       </div>
 
       {/* Footer */}
@@ -452,7 +660,7 @@ async function generateModelsOG() {
           fontWeight: "400",
         }}
       >
-        Find the perfect model for text, image, audio, and video tasks
+        Find the perfect model for your project
       </div>
     </div>,
     {
