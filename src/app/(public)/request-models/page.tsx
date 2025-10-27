@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Plus, ArrowLeft, Clock } from "lucide-react";
+import { Plus, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -22,12 +22,21 @@ export const metadata: Metadata = {
     type: "website",
     url: "/request-models",
     siteName: "OpenModal",
+    images: [
+      {
+        url: "/api/og?type=landing",
+        width: 1200,
+        height: 630,
+        alt: "Request Models | OpenModal",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Request Models | OpenModal",
     description:
       "Request new AI models to be added to OpenModal. Submit your model suggestions and help expand our comprehensive AI model catalog.",
+    images: ["/api/og?type=landing"],
   },
   robots: {
     index: true,

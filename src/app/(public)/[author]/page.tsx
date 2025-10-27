@@ -54,11 +54,20 @@ export async function generateMetadata({
       type: "website",
       url: `/${author.id}`,
       siteName: "OpenModal",
+      images: [
+        {
+          url: `/api/og?type=author&authorId=${author.id}`,
+          width: 1200,
+          height: 630,
+          alt: `${author.name} Models | OpenModal`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: `${author.name} Models | OpenModal`,
       description: `Browse ${result.modelCount} AI models from ${author.name}. ${author.description}`,
+      images: [`/api/og?type=author&authorId=${author.id}`],
     },
     robots: {
       index: true,

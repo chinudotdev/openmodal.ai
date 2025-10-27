@@ -24,12 +24,21 @@ export const metadata: Metadata = {
     type: "website",
     url: "/providers",
     siteName: "OpenModal",
+    images: [
+      {
+        url: "/api/og?type=landing",
+        width: 1200,
+        height: 630,
+        alt: "AI Providers | OpenModal",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "AI Providers | OpenModal",
     description:
       "Connect with 24+ leading AI providers including OpenAI, Anthropic, Google, and Meta. Access enterprise-grade AI services with comprehensive API management.",
+    images: ["/api/og?type=landing"],
   },
   robots: {
     index: true,
