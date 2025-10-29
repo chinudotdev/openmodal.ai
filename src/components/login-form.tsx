@@ -1,6 +1,5 @@
 "use client";
 
-import { signInEmail } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,14 +16,15 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { useForm } from "@tanstack/react-form";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import z from "zod";
 import { Input } from "./ui/input";
+import { Spinner } from "./ui/spinner";
 
 const formSchema = z.object({
   email: z.email(),
@@ -36,7 +36,6 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const form = useForm({
     defaultValues: {
       email: "",
@@ -48,25 +47,15 @@ export function LoginForm({
     onSubmit: async ({ value }) => {
       setError(null);
       try {
-        const response = await signInEmail(value.email, value.password);
-        if (response.success) {
-          router.push("/dashboard");
-        } else {
-          switch (response.code) {
-            case "INVALID_EMAIL_OR_PASSWORD":
-              // For security reasons, don't specify whether it's email or password
-              setError("Invalid email or password");
-              break;
-            case "EMAIL_NOT_VERIFIED":
-              setError("Please verify your email before logging in");
-              break;
-            case "ACCOUNT_LOCKED":
-              setError("Your account has been locked. Please contact support");
-              break;
-            default:
-              setError("An unknown error occurred");
-              break;
-          }
+        const { error } = await authClient.signIn.email({
+          email: value.email, // required
+          password: value.password, // required
+          rememberMe: true,
+          callbackURL: "/dashboard",
+        });
+
+        if (error) {
+          setError("Invalid email or password");
         }
       } catch (_) {
         setError("An unknown error occurred");
@@ -192,9 +181,22 @@ export function LoginForm({
                 }}
               />
               <Field>
-                <Button type="submit" form="login-form">
-                  Login
-                </Button>
+                <form.Subscribe
+                  selector={(formState) => [
+                    formState.canSubmit,
+                    formState.isSubmitting,
+                  ]}
+                >
+                  {([canSubmit, isSubmitting]) => (
+                    <Button
+                      type="submit"
+                      disabled={!canSubmit}
+                      form="login-form"
+                    >
+                      {isSubmitting ? <Spinner className="w-4 h-4" /> : "Login"}
+                    </Button>
+                  )}
+                </form.Subscribe>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account?{" "}
                   <Link href="/signup">Sign up</Link>

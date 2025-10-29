@@ -341,12 +341,6 @@ export default function ModelsClient() {
                             {model.name}
                           </h3>
                           <StatusBadges status={model.status} />
-                          <button
-                            type="button"
-                            className="p-1 hover:bg-muted rounded"
-                          >
-                            <Copy className="h-4 w-4 text-muted-foreground" />
-                          </button>
                         </div>
                         <div className="mb-2 flex items-center gap-2">
                           <div className="flex items-center gap-1.5">

@@ -26,12 +26,17 @@ export default function RootLayout({
           <div className="flex items-center space-x-2">
             <Link href="/models">
               <Button variant="outline" size="sm">
-                model
+                ai models
               </Button>
             </Link>
             <Link href="/providers">
               <Button variant="outline" size="sm">
-                provider
+                ai providers
+              </Button>
+            </Link>
+            <Link href="/contribute">
+              <Button variant="outline" size="sm">
+               contribute
               </Button>
             </Link>
 

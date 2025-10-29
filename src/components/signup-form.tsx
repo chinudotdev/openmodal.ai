@@ -1,6 +1,5 @@
 "use client";
 
-import { signUpEmail } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,14 +16,16 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { useForm } from "@tanstack/react-form";
+import { AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import z from "zod";
 import { Input } from "./ui/input";
-import { AlertCircle } from "lucide-react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Spinner } from "./ui/spinner";
 
 const formSchema = z.object({
   name: z.string().min(2),
@@ -36,8 +37,11 @@ export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+
+  const searchParams = useSearchParams();
+
+  const callbackURL = searchParams.get("callbackURL") || "/dashboard";
 
   const form = useForm({
     defaultValues: {
@@ -51,15 +55,14 @@ export function SignupForm({
     onSubmit: async ({ value }) => {
       setError(null);
       try {
-        const response = await signUpEmail(
-          value.name,
-          value.email,
-          value.password,
-        );
-        if (response.success) {
-          router.push("/dashboard");
-        } else {
-          switch (response.code) {
+        const { error } = await authClient.signUp.email({
+          name: value.name,
+          email: value.email,
+          password: value.password,
+          callbackURL,
+        });
+        if (error) {
+          switch (error.code) {
             case "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL":
               setError("User already exists. Please use another email.");
               break;
@@ -68,9 +71,8 @@ export function SignupForm({
               break;
           }
         }
-      } catch (error) {
-        console.error("Signup failed:", error);
-        // You can add toast notification here if you have a toast system
+      } catch (_) {
+        setError("An unknown error occurred");
       }
     },
   });
@@ -216,9 +218,26 @@ export function SignupForm({
                 }}
               />
               <Field>
-                <Button type="submit" form="signup-form">
-                  Sign up
-                </Button>
+                <form.Subscribe
+                  selector={(formState) => [
+                    formState.canSubmit,
+                    formState.isSubmitting,
+                  ]}
+                >
+                  {([canSubmit, isSubmitting]) => (
+                    <Button
+                      type="submit"
+                      disabled={!canSubmit}
+                      form="signup-form"
+                    >
+                      {isSubmitting ? (
+                        <Spinner className="w-4 h-4" />
+                      ) : (
+                        " Sign up"
+                      )}
+                    </Button>
+                  )}
+                </form.Subscribe>
                 <FieldDescription className="text-center">
                   Already have an account? <Link href="/login">Login</Link>
                 </FieldDescription>
