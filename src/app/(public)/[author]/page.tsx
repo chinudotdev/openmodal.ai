@@ -1,6 +1,6 @@
+import { getAllAuthors, getAuthor } from "@/actions/authors";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAuthor, getAllAuthors } from "@/actions/authors";
 import AuthorClient from "./_components/author-client";
 
 interface AuthorPageProps {

@@ -7,9 +7,13 @@ import {
   text,
 } from "drizzle-orm/sqlite-core";
 
+export * from "./auth";
+
 // Helper function for timestamp columns
 const timestamp = (columnName: string) =>
-  text(columnName).notNull().default(sql`(CURRENT_TIMESTAMP)`);
+  text(columnName)
+    .notNull()
+    .default(sql`(CURRENT_TIMESTAMP)`);
 
 // Core Tables
 export const author = sqliteTable("author", {
@@ -32,7 +36,7 @@ export const models = sqliteTable(
       .notNull(),
     createdAt: timestamp("created_at"),
   },
-  (table) => [index("models_author_idx").on(table.authorId)],
+  (table) => [index("models_author_idx").on(table.authorId)]
 );
 
 // Modalities lookup table
@@ -44,7 +48,7 @@ export const modalities = sqliteTable(
     type: text("type", { enum: ["input", "output"] }).notNull(),
     createdAt: timestamp("created_at"),
   },
-  (table) => [index("modalities_name_type_idx").on(table.name, table.type)],
+  (table) => [index("modalities_name_type_idx").on(table.name, table.type)]
 );
 
 // Many-to-many: models <-> modalities
@@ -62,7 +66,7 @@ export const modelModalities = sqliteTable(
     primaryKey({ columns: [table.modelId, table.modalityId] }),
     index("model_modalities_model_idx").on(table.modelId),
     index("model_modalities_modality_idx").on(table.modalityId),
-  ],
+  ]
 );
 
 // Status flags as separate table
@@ -86,7 +90,7 @@ export const modelStatus = sqliteTable(
     index("model_status_reasoning_idx").on(table.isReasoning),
     index("model_status_experimental_idx").on(table.isExperimental),
     index("model_status_preview_idx").on(table.isPreview),
-  ],
+  ]
 );
 
 // Tags
@@ -110,7 +114,7 @@ export const modelTags = sqliteTable(
     primaryKey({ columns: [table.modelId, table.tagId] }),
     index("model_tags_model_idx").on(table.modelId),
     index("model_tags_tag_idx").on(table.tagId),
-  ],
+  ]
 );
 
 // Model Requests
@@ -143,7 +147,7 @@ export const modelRequests = sqliteTable(
     index("model_requests_author_idx").on(table.authorId),
     index("model_requests_status_idx").on(table.requestStatus),
     index("model_requests_created_idx").on(table.createdAt),
-  ],
+  ]
 );
 
 // Model Request Modalities (separate from approved models)
@@ -161,7 +165,7 @@ export const modelRequestModalities = sqliteTable(
     primaryKey({ columns: [table.requestId, table.modalityId] }),
     index("model_request_modalities_request_idx").on(table.requestId),
     index("model_request_modalities_modality_idx").on(table.modalityId),
-  ],
+  ]
 );
 
 // Model Request Status
@@ -181,7 +185,5 @@ export const modelRequestStatus = sqliteTable(
       .default(false)
       .notNull(),
   },
-  (table) => [
-    index("model_request_status_reasoning_idx").on(table.isReasoning),
-  ],
+  (table) => [index("model_request_status_reasoning_idx").on(table.isReasoning)]
 );
