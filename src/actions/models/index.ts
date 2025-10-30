@@ -2,21 +2,21 @@
 
 import { db } from "@/db";
 import {
-  models,
   author,
-  modelModalities,
   modalities,
+  modelModalities,
+  models,
   modelStatus,
   modelTags,
   tags,
 } from "@/db/schema";
-import { and, desc, eq, like, or, sql, inArray } from "drizzle-orm";
+import { and, desc, eq, like, or, sql } from "drizzle-orm";
 import {
   GetModelsInputSchema,
   ModelsResponseSchema,
+  type ActionError,
   type GetModelsInput,
   type ModelsResponse,
-  type ActionError,
 } from "./dto";
 
 export async function getModels(
@@ -26,12 +26,15 @@ export async function getModels(
     // Validate input
     const validatedInput = GetModelsInputSchema.parse(input);
     const {
-      cursor,
+      page,
       limit,
       search = "",
       inputModalities = [],
       outputModalities = [],
     } = validatedInput;
+
+    // Calculate offset
+    const offset = (page - 1) * limit;
 
     // Build where conditions
     const whereConditions = [];
@@ -46,26 +49,52 @@ export async function getModels(
       );
     }
 
-    // Cursor condition for pagination
-    if (cursor) {
-      whereConditions.push(sql`${models.id} < ${cursor}`);
+    // Input modality filter - must have ALL selected input modalities
+    if (inputModalities.length > 0) {
+      whereConditions.push(
+        sql`(
+          SELECT COUNT(DISTINCT m.name) 
+          FROM model_modalities mm
+          JOIN modalities m ON mm.modality_id = m.id
+          WHERE mm.model_id = ${models.id}
+            AND m.type = 'input'
+            AND m.name IN (${sql.join(
+              inputModalities.map((m) => sql`${m}`),
+              sql`, `
+            )})
+        ) = ${inputModalities.length}`
+      );
+    }
+
+    // Output modality filter - must have ALL selected output modalities
+    if (outputModalities.length > 0) {
+      whereConditions.push(
+        sql`(
+          SELECT COUNT(DISTINCT m.name) 
+          FROM model_modalities mm
+          JOIN modalities m ON mm.modality_id = m.id
+          WHERE mm.model_id = ${models.id}
+            AND m.type = 'output'
+            AND m.name IN (${sql.join(
+              outputModalities.map((m) => sql`${m}`),
+              sql`, `
+            )})
+        ) = ${outputModalities.length}`
+      );
     }
 
     const whereClause =
       whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-    // Get total count (only on first page)
-    let total = 0;
-    if (!cursor) {
-      const countResult = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(models)
-        .where(whereClause);
-      total = countResult[0]?.count || 0;
-    }
+    // Get total count - includes all filters
+    const countResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(models)
+      .where(whereClause);
+    const total = countResult[0]?.count || 0;
 
-    // First, get all models with basic info and author
-    const baseResults = await db
+    // Optimized query using GROUP_CONCAT for SQLite to aggregate related data
+    const results = await db
       .select({
         id: models.id,
         name: models.name,
@@ -77,135 +106,61 @@ export async function getModels(
         authorWebsite: author.website,
         authorLogo: author.logo,
         authorDescription: author.description,
+        // Aggregate modalities
+        inputModalities: sql<string>`GROUP_CONCAT(DISTINCT CASE WHEN ${modalities.type} = 'input' THEN ${modalities.name} END)`,
+        outputModalities: sql<string>`GROUP_CONCAT(DISTINCT CASE WHEN ${modalities.type} = 'output' THEN ${modalities.name} END)`,
+        // Status flags
+        isReasoning: sql<number>`COALESCE(${modelStatus.isReasoning}, 0)`,
+        isExperimental: sql<number>`COALESCE(${modelStatus.isExperimental}, 0)`,
+        isPreview: sql<number>`COALESCE(${modelStatus.isPreview}, 0)`,
+        // Tags
+        tagsList: sql<string>`GROUP_CONCAT(DISTINCT ${tags.name})`,
       })
       .from(models)
       .innerJoin(author, eq(models.authorId, author.id))
+      .leftJoin(modelModalities, eq(models.id, modelModalities.modelId))
+      .leftJoin(modalities, eq(modelModalities.modalityId, modalities.id))
+      .leftJoin(modelStatus, eq(models.id, modelStatus.modelId))
+      .leftJoin(modelTags, eq(models.id, modelTags.modelId))
+      .leftJoin(tags, eq(modelTags.tagId, tags.id))
       .where(whereClause)
+      .groupBy(
+        models.id,
+        models.name,
+        models.description,
+        models.modelUrl,
+        models.createdAt,
+        author.id,
+        author.name,
+        author.website,
+        author.logo,
+        author.description,
+        modelStatus.isReasoning,
+        modelStatus.isExperimental,
+        modelStatus.isPreview
+      )
       .orderBy(desc(models.createdAt), desc(models.id))
-      .limit(limit + 1); // Fetch one extra to determine if there's a next page
+      .limit(limit)
+      .offset(offset);
 
-    const hasNextPage = baseResults.length > limit;
-    const modelData = hasNextPage ? baseResults.slice(0, -1) : baseResults;
-    const nextCursor = hasNextPage ? modelData[modelData.length - 1]?.id : null;
-
-    if (modelData.length === 0) {
-      return {
-        data: [],
-        nextCursor: null,
-        total,
-      };
-    }
-
-    const modelIds = modelData.map((m) => m.id);
-
-    // Get modalities for all models
-    const modalitiesData = await db
-      .select({
-        modelId: modelModalities.modelId,
-        modalityName: modalities.name,
-        modalityType: modalities.type,
-      })
-      .from(modelModalities)
-      .innerJoin(modalities, eq(modelModalities.modalityId, modalities.id))
-      .where(inArray(modelModalities.modelId, modelIds));
-
-    // Get status for all models
-    const statusData = await db
-      .select({
-        modelId: modelStatus.modelId,
-        isReasoning: modelStatus.isReasoning,
-        isExperimental: modelStatus.isExperimental,
-        isPreview: modelStatus.isPreview,
-      })
-      .from(modelStatus)
-      .where(inArray(modelStatus.modelId, modelIds));
-
-    // Get tags for all models
-    const tagsData = await db
-      .select({
-        modelId: modelTags.modelId,
-        tagName: tags.name,
-      })
-      .from(modelTags)
-      .innerJoin(tags, eq(modelTags.tagId, tags.id))
-      .where(inArray(modelTags.modelId, modelIds));
-
-    // Group modalities by model
-    const modalitiesByModel = modalitiesData.reduce((acc, item) => {
-      if (!acc[item.modelId]) {
-        acc[item.modelId] = { input: [], output: [] };
-      }
-      if (item.modalityType === "input") {
-        acc[item.modelId].input.push(item.modalityName);
-      } else {
-        acc[item.modelId].output.push(item.modalityName);
-      }
-      return acc;
-    }, {} as Record<string, { input: string[]; output: string[] }>);
-
-    // Group status by model
-    const statusByModel = statusData.reduce((acc, item) => {
-      acc[item.modelId] = {
-        reasoning: item.isReasoning,
-        experimental: item.isExperimental,
-        preview: item.isPreview,
-      };
-      return acc;
-    }, {} as Record<string, { reasoning: boolean; experimental: boolean; preview: boolean }>);
-
-    // Group tags by model
-    const tagsByModel = tagsData.reduce((acc, item) => {
-      if (!acc[item.modelId]) {
-        acc[item.modelId] = [];
-      }
-      acc[item.modelId].push(item.tagName);
-      return acc;
-    }, {} as Record<string, string[]>);
-
-    // Apply modality filters
-    let filteredModelData = modelData;
-
-    if (inputModalities.length > 0 || outputModalities.length > 0) {
-      filteredModelData = modelData.filter((model) => {
-        const modelModalities = modalitiesByModel[model.id] || {
-          input: [],
-          output: [],
-        };
-
-        // Check input modalities - must have ALL selected input modalities
-        if (inputModalities.length > 0) {
-          const hasAllInputModalities = inputModalities.every((modality) =>
-            modelModalities.input.includes(modality)
-          );
-          if (!hasAllInputModalities) return false;
-        }
-
-        // Check output modalities - must have ALL selected output modalities
-        if (outputModalities.length > 0) {
-          const hasAllOutputModalities = outputModalities.every((modality) =>
-            modelModalities.output.includes(modality)
-          );
-          if (!hasAllOutputModalities) return false;
-        }
-
-        return true;
-      });
-    }
-
-    // Build final response
-    const data = filteredModelData.map((model) => ({
+    // Transform results
+    const data = results.map((model) => ({
       id: model.id,
       name: model.name,
       description: model.description,
       modelUrl: model.modelUrl,
-      inputModalities: modalitiesByModel[model.id]?.input || [],
-      outputModalities: modalitiesByModel[model.id]?.output || [],
-      status: statusByModel[model.id] || {
-        reasoning: false,
-        experimental: false,
-        preview: false,
+      inputModalities: model.inputModalities
+        ? model.inputModalities.split(",").filter(Boolean)
+        : [],
+      outputModalities: model.outputModalities
+        ? model.outputModalities.split(",").filter(Boolean)
+        : [],
+      status: {
+        reasoning: Boolean(model.isReasoning),
+        experimental: Boolean(model.isExperimental),
+        preview: Boolean(model.isPreview),
       },
-      tags: tagsByModel[model.id] || [],
+      tags: model.tagsList ? model.tagsList.split(",").filter(Boolean) : [],
       createdAt: model.createdAt,
       authorId: model.authorId,
       authorName: model.authorName,
@@ -214,10 +169,15 @@ export async function getModels(
       authorDescription: model.authorDescription,
     }));
 
+    // Calculate if there are more pages
+    const hasMore = offset + data.length < total;
+
     const result = {
       data,
-      nextCursor,
       total,
+      page,
+      limit,
+      hasMore,
     };
 
     // Validate response

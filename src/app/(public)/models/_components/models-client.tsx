@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeftFromLine,
   ArrowRightToLine,
@@ -13,7 +12,6 @@ import {
   Type,
   Video,
   Volume2,
-  Copy,
 } from "lucide-react";
 import ModelsFilters from "./models-filters";
 import SearchInput from "@/components/search-input";
@@ -143,7 +141,7 @@ export default function ModelsClient() {
   const inputParam = searchParams.get("input") || "";
   const outputParam = searchParams.get("output") || "";
 
-  // Infinite query
+  // Infinite query with offset-based pagination
   const {
     data,
     fetchNextPage,
@@ -153,10 +151,10 @@ export default function ModelsClient() {
     error,
   } = useInfiniteQuery<ModelsResponse>({
     queryKey: ["models", { search, input: inputParam, output: outputParam }],
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam = 1 }) => {
       const result = await getModels({
-        cursor: pageParam as string,
-        limit: 5,
+        page: pageParam as number,
+        limit: 25,
         search: search || undefined,
         inputModalities: inputParam
           ? inputParam.split(",").filter(Boolean)
@@ -173,8 +171,9 @@ export default function ModelsClient() {
 
       return result;
     },
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    initialPageParam: undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.page + 1 : undefined,
+    initialPageParam: 1,
   });
 
   // Intersection observer for infinite scroll

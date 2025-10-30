@@ -2,8 +2,8 @@ import { z } from "zod";
 
 // Input DTOs
 export const GetModelsInputSchema = z.object({
-  cursor: z.string().optional(),
-  limit: z.number().min(1).max(100).default(50),
+  page: z.number().min(1).default(1),
+  limit: z.number().min(1).max(100).default(25),
   search: z.string().optional(),
   inputModalities: z.array(z.string()).optional(),
   outputModalities: z.array(z.string()).optional(),
@@ -45,8 +45,10 @@ export const ModelSchema = z.object({
 
 export const ModelsResponseSchema = z.object({
   data: z.array(ModelSchema),
-  nextCursor: z.string().nullable(),
   total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  hasMore: z.boolean(),
 });
 
 export type ModelStatus = z.infer<typeof ModelStatusSchema>;
