@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { getModels } from "@/actions/models";
 import type { Model, ModelsResponse } from "@/actions/models/dto";
 import Link from "next/link";
+import { ConfirmExternalDialogTrigger } from "@/components/confirm-external-dialog";
 
 // Types are now imported from the actions
 
@@ -326,67 +327,131 @@ export default function ModelsClient() {
                 </div>
               ) : (
                 <div className="bg-background">
-                  {allModels.map((model, index) => (
-                    <div
-                      key={model.id}
-                      className={`py-4 ${
-                        index < allModels.length - 1
-                          ? "border-b border-border"
-                          : ""
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2">
-                          <h3 className="select-text font-semibold text-xl hover:underline hover:underline-offset-3 transition-colors">
-                            {model.name}
-                          </h3>
-                          <StatusBadges status={model.status} />
+                  {allModels.map((model, index) =>
+                    model.modelUrl ? (
+                      <ConfirmExternalDialogTrigger
+                        key={model.id}
+                        url={model.modelUrl as string}
+                        className={`block w-full text-left py-4 ${
+                          index < allModels.length - 1
+                            ? "border-b border-border"
+                            : ""
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2">
+                            <h3 className="select-text font-semibold text-xl hover:underline hover:underline-offset-3 transition-colors">
+                              {model.name}
+                            </h3>
+                            <StatusBadges status={model.status} />
+                          </div>
+                          <div className="mb-2 flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex h-4 w-4 items-center justify-center rounded border border-blue-500/30 bg-blue-500/10">
+                                <ArrowRightToLine className="size-3 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <CapabilityIndicator
+                                modalities={model.inputModalities}
+                              />
+                            </div>
+
+                            <div className="h-3 w-px bg-foreground/30" />
+
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex h-4 w-4 items-center justify-center rounded border border-green-500/30 bg-green-500/10">
+                                <ArrowLeftFromLine className="size-3 text-green-600 dark:text-green-400" />
+                              </div>
+                              <CapabilityIndicator
+                                modalities={model.outputModalities}
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <div className="mb-2 flex items-center gap-2">
-                          <div className="flex items-center gap-1.5">
-                            <div className="flex h-4 w-4 items-center justify-center rounded border border-blue-500/30 bg-blue-500/10">
-                              <ArrowRightToLine className="size-3 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <CapabilityIndicator
-                              modalities={model.inputModalities}
-                            />
-                          </div>
 
-                          <div className="h-3 w-px bg-foreground/30" />
+                        <p className="mb-1 select-text text-muted-foreground leading-relaxed hover:text-foreground">
+                          {model.description}
+                        </p>
 
-                          <div className="flex items-center gap-1.5">
-                            <div className="flex h-4 w-4 items-center justify-center rounded border border-green-500/30 bg-green-500/10">
-                              <ArrowLeftFromLine className="size-3 text-green-600 dark:text-green-400" />
-                            </div>
-                            <CapabilityIndicator
-                              modalities={model.outputModalities}
-                            />
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <p>
+                            by{" "}
+                            <Link
+                              href={`/${model.authorId}`}
+                              className="cursor-pointer underline underline-offset-2 transition-colors hover:text-foreground hover:font-normal"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {model.authorId}
+                            </Link>
+                          </p>
+                          <span> | </span>
+                          <p>
+                            Created{" "}
+                            {new Date(model.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </ConfirmExternalDialogTrigger>
+                    ) : (
+                      <div
+                        key={model.id}
+                        className={`py-4 ${
+                          index < allModels.length - 1
+                            ? "border-b border-border"
+                            : ""
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2">
+                            <h3 className="select-text font-semibold text-xl hover:underline hover:underline-offset-3 transition-colors">
+                              {model.name}
+                            </h3>
+                            <StatusBadges status={model.status} />
                           </div>
+                          <div className="mb-2 flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex h-4 w-4 items-center justify-center rounded border border-blue-500/30 bg-blue-500/10">
+                                <ArrowRightToLine className="size-3 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <CapabilityIndicator
+                                modalities={model.inputModalities}
+                              />
+                            </div>
+
+                            <div className="h-3 w-px bg-foreground/30" />
+
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex h-4 w-4 items-center justify-center rounded border border-green-500/30 bg-green-500/10">
+                                <ArrowLeftFromLine className="size-3 text-green-600 dark:text-green-400" />
+                              </div>
+                              <CapabilityIndicator
+                                modalities={model.outputModalities}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <p className="mb-1 select-text text-muted-foreground leading-relaxed hover:text-foreground">
+                          {model.description}
+                        </p>
+
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <p>
+                            by{" "}
+                            <Link
+                              href={`/${model.authorId}`}
+                              className="cursor-pointer underline underline-offset-2 transition-colors hover:text-foreground hover:font-normal"
+                            >
+                              {model.authorId}
+                            </Link>
+                          </p>
+                          <span> | </span>
+                          <p>
+                            Created{" "}
+                            {new Date(model.createdAt).toLocaleDateString()}
+                          </p>
                         </div>
                       </div>
-
-                      <p className="mb-1 select-text text-muted-foreground leading-relaxed hover:text-foreground">
-                        {model.description}
-                      </p>
-
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <p>
-                          by{" "}
-                          <Link
-                            href={`/${model.authorId}`}
-                            className="cursor-pointer underline underline-offset-2 transition-colors hover:text-foreground hover:font-normal"
-                          >
-                            {model.authorId}
-                          </Link>
-                        </p>
-                        <span> | </span>
-                        <p>
-                          Created{" "}
-                          {new Date(model.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               )}
 

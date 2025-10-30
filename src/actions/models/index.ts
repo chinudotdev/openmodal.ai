@@ -70,6 +70,7 @@ export async function getModels(
         id: models.id,
         name: models.name,
         description: models.description,
+        modelUrl: models.modelUrl,
         createdAt: models.createdAt,
         authorId: author.id,
         authorName: author.name,
@@ -196,6 +197,7 @@ export async function getModels(
       id: model.id,
       name: model.name,
       description: model.description,
+      modelUrl: model.modelUrl,
       inputModalities: modalitiesByModel[model.id]?.input || [],
       outputModalities: modalitiesByModel[model.id]?.output || [],
       status: statusByModel[model.id] || {

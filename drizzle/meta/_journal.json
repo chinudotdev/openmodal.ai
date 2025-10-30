@@ -15,6 +15,13 @@
       "when": 1761717093938,
       "tag": "0001_slow_zzzax",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1761838567013,
+      "tag": "0002_friendly_toxin",
+      "breakpoints": true
     }
   ]
 }

@@ -31,6 +31,7 @@ export const models = sqliteTable(
     id: text("id").primaryKey(),
     name: text("name").notNull(),
     description: text("description").notNull(),
+    modelUrl: text("model_url"),
     authorId: text("author_id")
       .references(() => author.id, { onDelete: "cascade" })
       .notNull(),

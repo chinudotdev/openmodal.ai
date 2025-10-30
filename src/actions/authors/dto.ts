@@ -27,6 +27,7 @@ export const AuthorModelSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string(),
+  modelUrl: z.string().nullable().optional(),
   inputModalities: z.array(z.string()),
   outputModalities: z.array(z.string()),
   status: ModelStatusSchema,

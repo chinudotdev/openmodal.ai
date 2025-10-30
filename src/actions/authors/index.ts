@@ -44,6 +44,7 @@ export async function getAuthor(
         modelId: models.id,
         modelName: models.name,
         modelDescription: models.description,
+        modelUrl: models.modelUrl,
         modelCreatedAt: models.createdAt,
         // Modality fields
         modalityName: modalities.name,
@@ -87,6 +88,7 @@ export async function getAuthor(
         id: string;
         name: string;
         description: string;
+        modelUrl?: string | null;
         createdAt: string;
         inputModalities: string[];
         outputModalities: string[];
@@ -111,6 +113,7 @@ export async function getAuthor(
           id: row.modelId,
           name: row.modelName,
           description: row.modelDescription,
+          modelUrl: row.modelUrl,
           createdAt: row.modelCreatedAt,
           inputModalities: [],
           outputModalities: [],
