@@ -24,8 +24,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import z from "zod";
-import { Input } from "./ui/input";
-import { Spinner } from "./ui/spinner";
+import { Input } from "../ui/input";
+import { Spinner } from "../ui/spinner";
 
 const formSchema = z.object({
   email: z.email(),

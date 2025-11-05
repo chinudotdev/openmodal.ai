@@ -1,6 +1,6 @@
 import { GalleryVerticalEnd } from "lucide-react";
 
-import { LoginForm } from "@/components/login-form";
+import { LoginForm } from "@/components/auth/login-form";
 import { Spinner } from "@/components/ui/spinner";
 import { Suspense } from "react";
 import Link from "next/link";

@@ -21,11 +21,11 @@ import { cn } from "@/lib/utils";
 import { useForm } from "@tanstack/react-form";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import z from "zod";
-import { Input } from "./ui/input";
-import { Spinner } from "./ui/spinner";
+import { Input } from "../ui/input";
+import { Spinner } from "../ui/spinner";
 
 const formSchema = z.object({
   name: z.string().min(2),
@@ -38,7 +38,7 @@ export function SignupForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [error, setError] = useState<string | null>(null);
-
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const callbackURL = searchParams.get("callbackURL") || "/dashboard";
@@ -70,6 +70,9 @@ export function SignupForm({
               setError("An unknown error occurred");
               break;
           }
+        } else {
+          // Redirect to verify email page on successful signup
+          router.push(`/verify-email?email=${encodeURIComponent(value.email)}`);
         }
       } catch (_) {
         setError("An unknown error occurred");
@@ -133,7 +136,7 @@ export function SignupForm({
               </FieldSeparator>
               <form.Field
                 name="name"
-                // biome-ignore lint/correctness/noChildrenProp: <explanation>
+                // biome-ignore lint/correctness/noChildrenProp: TanStack Form requires children prop
                 children={(field) => {
                   const isInvalid =
                     field.state.meta.isTouched && !field.state.meta.isValid;
@@ -159,7 +162,7 @@ export function SignupForm({
               />
               <form.Field
                 name="email"
-                // biome-ignore lint/correctness/noChildrenProp: <explanation>
+                // biome-ignore lint/correctness/noChildrenProp: TanStack Form requires children prop
                 children={(field) => {
                   const isInvalid =
                     field.state.meta.isTouched && !field.state.meta.isValid;
@@ -185,7 +188,7 @@ export function SignupForm({
               />
               <form.Field
                 name="password"
-                // biome-ignore lint/correctness/noChildrenProp: <explanation>
+                // biome-ignore lint/correctness/noChildrenProp: TanStack Form requires children prop
                 children={(field) => {
                   const isInvalid =
                     field.state.meta.isTouched && !field.state.meta.isValid;
