@@ -1,16 +1,25 @@
+import { db } from "@/db";
+import { authSchema } from "@/db/schema";
+import { sendEmailVerification } from "@/emails";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "@/db";
-import { siwe } from "better-auth/plugins";
 import { generateRandomString } from "better-auth/crypto";
-import { verifyMessage, createPublicClient, http } from "viem";
-import { mainnet } from "viem/chains";
 import { nextCookies } from "better-auth/next-js";
-import { authSchema } from "@/db/schema";
+import { siwe } from "better-auth/plugins";
+import { createPublicClient, http, verifyMessage } from "viem";
+import { mainnet } from "viem/chains";
 
 export const auth = betterAuth({
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmailVerification({ to: user.email, url });
+    },
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+  },
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
   },
   database: drizzleAdapter(db, {
     provider: "sqlite",

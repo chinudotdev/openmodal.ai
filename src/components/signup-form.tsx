@@ -239,7 +239,12 @@ export function SignupForm({
                   )}
                 </form.Subscribe>
                 <FieldDescription className="text-center">
-                  Already have an account? <Link href="/login">Login</Link>
+                  Already have an account?{" "}
+                  <Link
+                    href={`/login?callbackURL=${encodeURIComponent(callbackURL)}`}
+                  >
+                    Login
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

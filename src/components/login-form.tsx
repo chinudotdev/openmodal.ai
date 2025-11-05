@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { useForm } from "@tanstack/react-form";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import z from "zod";
 import { Input } from "./ui/input";
@@ -36,6 +37,10 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
+  const callbackURL = searchParams.get("callbackURL") || "/dashboard";
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -51,11 +56,17 @@ export function LoginForm({
           email: value.email, // required
           password: value.password, // required
           rememberMe: true,
-          callbackURL: "/dashboard",
+          callbackURL,
         });
 
         if (error) {
-          setError("Invalid email or password");
+          if (error.code === "EMAIL_NOT_VERIFIED") {
+            setError(
+              "Email not verified. Please check your email for a verification link.",
+            );
+          } else {
+            setError("Invalid email or password");
+          }
         }
       } catch (_) {
         setError("An unknown error occurred");
@@ -199,7 +210,11 @@ export function LoginForm({
                 </form.Subscribe>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account?{" "}
-                  <Link href="/signup">Sign up</Link>
+                  <Link
+                    href={`/signup?callbackURL=${encodeURIComponent(callbackURL)}`}
+                  >
+                    Sign up
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
