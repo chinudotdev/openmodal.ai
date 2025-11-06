@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { Activity, ActivityType } from "@/lib/mock-data";
+import type { Activity, ActivityType } from "@/actions/capabilities";
 import {
   ArrowUp,
   MessageSquare,

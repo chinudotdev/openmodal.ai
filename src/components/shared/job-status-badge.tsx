@@ -43,4 +43,3 @@ export function JobStatusBadge({ status, className }: JobStatusBadgeProps) {
     </Badge>
   );
 }
-

@@ -49,7 +49,9 @@ export function CapabilityBadge({
         )}
       >
         <span className="font-medium">{capabilityName}</span>
-        <span className={cn("text-xs font-semibold", getProgressColor(progress))}>
+        <span
+          className={cn("text-xs font-semibold", getProgressColor(progress))}
+        >
           {progress}%
         </span>
         {importance && (
@@ -62,4 +64,3 @@ export function CapabilityBadge({
     </Link>
   );
 }
-

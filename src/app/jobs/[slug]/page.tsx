@@ -34,17 +34,17 @@ export async function generateStaticParams() {
     }
 
     const jobs = await db.select({ slug: job.slug }).from(job);
-    
+
     // Filter out any null/undefined slugs and ensure we have valid slugs
     const validJobs = jobs.filter((j) => j.slug && j.slug.trim().length > 0);
-    
+
     // Return at least one result to satisfy Next.js Cache Components requirement
     if (validJobs.length === 0) {
       // Return a non-existent slug - the page will handle it with notFound()
       // This satisfies Next.js requirement while gracefully handling empty database
       return [{ slug: "__no_jobs__" }];
     }
-    
+
     return validJobs.map((j) => ({ slug: j.slug! }));
   } catch (error) {
     console.error("Error generating static params for jobs:", error);

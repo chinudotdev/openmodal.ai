@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
-import { BarChart3 } from "lucide-react";
-import { HeroSection } from "@/components/agi-dashboard/hero-section";
-import { CapabilityList } from "@/components/agi-dashboard/capability-list";
-import { ActivityFeed } from "@/components/agi-dashboard/activity-feed";
+import { Suspense } from "react";
+import { headers } from "next/headers";
 import { QuickAccess } from "@/components/agi-dashboard/quick-access";
-import { StatsSection } from "@/components/agi-dashboard/stats-section";
+import { HeroSectionContent } from "./_components/hero-section-content";
+import { HeroSectionFallback } from "./_components/hero-section-fallback";
+import { CapabilityListContent } from "./_components/capability-list-content";
+import { CapabilityListFallback } from "./_components/capability-list-fallback";
+import { ActivityFeedContent } from "./_components/activity-feed-content";
+import { ActivityFeedFallback } from "./_components/activity-feed-fallback";
+import { StatsSectionContent } from "./_components/stats-section-content";
+import { StatsSectionFallback } from "./_components/stats-section-fallback";
 
 export const metadata: Metadata = {
   title: "OpenModal - AGI Progress Tracker & AI Capabilities Dashboard",
@@ -46,35 +51,32 @@ export const metadata: Metadata = {
   },
 };
 
+// Make the page async to prevent prerendering with Cache Components
+// Using headers() forces dynamic rendering without route segment config
 export default async function Home() {
+  // Force dynamic rendering by reading headers
+  // This prevents prerendering while working with Cache Components
+  await headers();
+
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
-      <HeroSection />
+      <Suspense fallback={<HeroSectionFallback />}>
+        <HeroSectionContent />
+      </Suspense>
 
       {/* Main Content: Two-Column Layout */}
       <section className="container mx-auto px-4 md:px-6 py-12 md:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-8 lg:gap-12 max-w-[1400px] mx-auto">
           {/* Left Column: Capability Progress */}
-          <div>
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <BarChart3 className="h-5 w-5 text-primary" />
-                <h2 className="text-2xl font-bold text-foreground">
-                  Capability Progress
-                </h2>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Core AI capabilities and their current status
-              </p>
-            </div>
-            <CapabilityList />
-          </div>
+          <Suspense fallback={<CapabilityListFallback />}>
+            <CapabilityListContent />
+          </Suspense>
 
           {/* Right Column: Activity Feed */}
-          <div>
-            <ActivityFeed />
-          </div>
+          <Suspense fallback={<ActivityFeedFallback />}>
+            <ActivityFeedContent />
+          </Suspense>
         </div>
       </section>
 
@@ -82,7 +84,9 @@ export default async function Home() {
       <QuickAccess />
 
       {/* Stats Section */}
-      <StatsSection />
+      <Suspense fallback={<StatsSectionFallback />}>
+        <StatsSectionContent />
+      </Suspense>
     </main>
   );
 }

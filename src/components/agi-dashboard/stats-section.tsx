@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { BarChart3 } from "lucide-react";
-import { mockStats } from "@/lib/mock-data";
+import type { Stats } from "@/actions/capabilities";
 
 interface StatCardProps {
   value: number;
@@ -76,7 +76,11 @@ function StatCard({ value, label, suffix = "" }: StatCardProps) {
   );
 }
 
-export function StatsSection() {
+interface StatsSectionProps {
+  stats: Stats;
+}
+
+export function StatsSection({ stats }: StatsSectionProps) {
   return (
     <section className="border-y border-border bg-background py-16 md:py-20">
       <div className="container mx-auto px-4 md:px-6">
@@ -97,10 +101,10 @@ export function StatsSection() {
 
         {/* Stats Grid */}
         <div className="flex flex-wrap items-center justify-center gap-12 md:gap-16">
-          <StatCard value={mockStats.reports} label="Reports" />
-          <StatCard value={mockStats.experts} label="Experts" />
-          <StatCard value={mockStats.papers} label="Papers" />
-          <StatCard value={mockStats.jobsSafe} label="Jobs Safe" suffix="M" />
+          <StatCard value={stats.reports} label="Reports" />
+          <StatCard value={stats.experts} label="Experts" />
+          <StatCard value={stats.papers} label="Papers" />
+          <StatCard value={stats.jobsSafe} label="Jobs Safe" suffix="M" />
         </div>
       </div>
     </section>

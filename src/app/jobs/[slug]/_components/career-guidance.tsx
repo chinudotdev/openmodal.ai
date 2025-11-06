@@ -18,7 +18,7 @@ export function CareerGuidance({ job }: CareerGuidanceProps) {
     .filter(
       (rj) =>
         rj.automationPercentage < job.automationPercentage &&
-        rj.automationStatus === "safe"
+        rj.automationStatus === "safe",
     )
     .slice(0, 3);
 
@@ -38,9 +38,7 @@ export function CareerGuidance({ job }: CareerGuidanceProps) {
           <ul className="space-y-2">
             <li className="flex items-start gap-2 text-sm text-muted-foreground">
               <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>
-                Specialize in complex cases AI can't handle
-              </span>
+              <span>Specialize in complex cases AI can't handle</span>
             </li>
             <li className="flex items-start gap-2 text-sm text-muted-foreground">
               <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -93,13 +91,10 @@ export function CareerGuidance({ job }: CareerGuidanceProps) {
 
         <div className="border-t pt-4">
           <Button variant="outline" className="w-full" asChild>
-            <Link href="#">
-              Read: "Why Healthcare Jobs Remain Safe" →
-            </Link>
+            <Link href="#">Read: "Why Healthcare Jobs Remain Safe" →</Link>
           </Button>
         </div>
       </CardContent>
     </Card>
   );
 }
-

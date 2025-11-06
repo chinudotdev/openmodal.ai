@@ -2,9 +2,13 @@
 
 import { Brain } from "lucide-react";
 import { ProgressMeter } from "./progress-meter";
-import { mockAGIProgress } from "@/lib/mock-data";
+import type { AGIProgress } from "@/actions/capabilities";
 
-export function HeroSection() {
+interface HeroSectionProps {
+  agiProgress: AGIProgress;
+}
+
+export function HeroSection({ agiProgress }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-muted to-background py-16 md:py-20">
       <div className="container mx-auto px-4 md:px-6">
@@ -38,7 +42,7 @@ export function HeroSection() {
             className="mb-6 animate-fade-in-up"
             style={{ animationDelay: "0.4s" }}
           >
-            <ProgressMeter percentage={mockAGIProgress.overall} />
+            <ProgressMeter percentage={agiProgress.overall} />
           </div>
 
           {/* Stats */}
@@ -47,13 +51,13 @@ export function HeroSection() {
             style={{ animationDelay: "0.6s" }}
           >
             <p>
-              Last updated {mockAGIProgress.lastUpdated} by @
-              {mockAGIProgress.lastUpdatedBy}
+              Last updated {agiProgress.lastUpdated} by @
+              {agiProgress.lastUpdatedBy}
             </p>
             <p className="mt-1">
-              {mockAGIProgress.contributors.toLocaleString()} contributors •{" "}
-              {mockAGIProgress.expertForecasts} expert forecasts •{" "}
-              {mockAGIProgress.reports.toLocaleString()} reports
+              {agiProgress.contributors.toLocaleString()} contributors •{" "}
+              {agiProgress.expertForecasts} expert forecasts •{" "}
+              {agiProgress.reports.toLocaleString()} reports
             </p>
           </div>
         </div>

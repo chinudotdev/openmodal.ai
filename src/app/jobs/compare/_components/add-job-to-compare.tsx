@@ -24,7 +24,8 @@ export function AddJobToCompare({ currentJobs = [] }: AddJobToCompareProps) {
   const [showAutocomplete, setShowAutocomplete] = useState(false);
 
   // Get current job slugs from URL
-  const currentJobSlugs = searchParams.get("jobs")?.split(",").filter(Boolean) || [];
+  const currentJobSlugs =
+    searchParams.get("jobs")?.split(",").filter(Boolean) || [];
 
   const handleJobSelect = (slug: string) => {
     // Don't add if already in the list
@@ -38,7 +39,7 @@ export function AddJobToCompare({ currentJobs = [] }: AddJobToCompareProps) {
     const newJobs = [...currentJobSlugs, slug];
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set("jobs", newJobs.join(","));
-    
+
     router.push(`/jobs/compare?${newParams.toString()}`);
     setSearch("");
     setShowAutocomplete(false);
@@ -47,13 +48,13 @@ export function AddJobToCompare({ currentJobs = [] }: AddJobToCompareProps) {
   const handleRemoveJob = (slug: string) => {
     const newJobs = currentJobSlugs.filter((job) => job !== slug);
     const newParams = new URLSearchParams(searchParams.toString());
-    
+
     if (newJobs.length > 0) {
       newParams.set("jobs", newJobs.join(","));
     } else {
       newParams.delete("jobs");
     }
-    
+
     router.push(`/jobs/compare?${newParams.toString()}`);
   };
 
@@ -77,7 +78,7 @@ export function AddJobToCompare({ currentJobs = [] }: AddJobToCompareProps) {
               setShowAutocomplete(e.target.value.length > 0);
             }}
             onFocus={() => setShowAutocomplete(search.length > 0)}
-            placeholder='Search for a job...'
+            placeholder="Search for a job..."
             className="pl-9"
           />
           {showAutocomplete && (
@@ -95,7 +96,8 @@ export function AddJobToCompare({ currentJobs = [] }: AddJobToCompareProps) {
         {currentJobSlugs.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">
-              Comparing {currentJobSlugs.length} job{currentJobSlugs.length !== 1 ? "s" : ""}:
+              Comparing {currentJobSlugs.length} job
+              {currentJobSlugs.length !== 1 ? "s" : ""}:
             </p>
             <div className="flex flex-wrap gap-2">
               {currentJobSlugs.map((slug) => {
@@ -123,4 +125,3 @@ export function AddJobToCompare({ currentJobs = [] }: AddJobToCompareProps) {
     </Card>
   );
 }
-

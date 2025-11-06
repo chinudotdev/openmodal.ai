@@ -16,22 +16,22 @@ export function TaskBreakdown({ job }: TaskBreakdownProps) {
   const safeTasks = tasks.filter((t) => t.automationStatus === "safe");
   const partialTasks = tasks.filter((t) => t.automationStatus === "partial");
   const replaceableTasks = tasks.filter(
-    (t) => t.automationStatus === "replaceable"
+    (t) => t.automationStatus === "replaceable",
   );
 
   const safePercentage = tasks.reduce(
     (sum, t) => sum + (t.automationStatus === "safe" ? t.percentageOfJob : 0),
-    0
+    0,
   );
   const partialPercentage = tasks.reduce(
     (sum, t) =>
       sum + (t.automationStatus === "partial" ? t.percentageOfJob : 0),
-    0
+    0,
   );
   const replaceablePercentage = tasks.reduce(
     (sum, t) =>
       sum + (t.automationStatus === "replaceable" ? t.percentageOfJob : 0),
-    0
+    0,
   );
 
   return (
@@ -58,12 +58,14 @@ export function TaskBreakdown({ job }: TaskBreakdownProps) {
             </div>
             <div>
               <span className="text-yellow-600 font-semibold">
-                Partial: {partialTasks.length} tasks ({partialPercentage.toFixed(0)}%)
+                Partial: {partialTasks.length} tasks (
+                {partialPercentage.toFixed(0)}%)
               </span>
             </div>
             <div>
               <span className="text-red-600 font-semibold">
-                Replaceable: {replaceableTasks.length} tasks ({replaceablePercentage.toFixed(0)}%)
+                Replaceable: {replaceableTasks.length} tasks (
+                {replaceablePercentage.toFixed(0)}%)
               </span>
             </div>
           </div>
@@ -72,4 +74,3 @@ export function TaskBreakdown({ job }: TaskBreakdownProps) {
     </Card>
   );
 }
-

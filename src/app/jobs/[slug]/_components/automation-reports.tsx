@@ -3,7 +3,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Package, AlertTriangle, ArrowRight, ThumbsUp, MessageSquare } from "lucide-react";
+import {
+  Package,
+  AlertTriangle,
+  ArrowRight,
+  ThumbsUp,
+  MessageSquare,
+} from "lucide-react";
 import { formatDistanceToNow } from "@/lib/date-utils";
 import type { getJobBySlug } from "@/actions/jobs";
 
@@ -149,4 +155,3 @@ export function AutomationReports({ job }: AutomationReportsProps) {
     </Card>
   );
 }
-

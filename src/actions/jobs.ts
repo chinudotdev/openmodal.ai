@@ -11,7 +11,7 @@ import {
   relatedJob,
   task,
   taskCapability,
-  type AutomationStatus
+  type AutomationStatus,
 } from "@/db/schema/jobs";
 import { generateRandomString } from "better-auth/crypto";
 import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
@@ -39,11 +39,7 @@ export type CommentVoteType = "up" | "down";
 
 // Get job by slug
 export async function getJobBySlug(slug: string) {
-  const result = await db
-    .select()
-    .from(job)
-    .where(eq(job.slug, slug))
-    .limit(1);
+  const result = await db.select().from(job).where(eq(job.slug, slug)).limit(1);
 
   if (result.length === 0) {
     return null;
@@ -71,10 +67,7 @@ export async function getJobBySlug(slug: string) {
             capability: capability,
           })
           .from(taskCapability)
-          .innerJoin(
-            capability,
-            eq(taskCapability.capabilityId, capability.id)
-          )
+          .innerJoin(capability, eq(taskCapability.capabilityId, capability.id))
           .where(inArray(taskCapability.taskId, taskIds))
       : [];
 
@@ -101,7 +94,10 @@ export async function getJobBySlug(slug: string) {
     .from(jobCapability)
     .innerJoin(capability, eq(jobCapability.capabilityId, capability.id))
     .where(eq(jobCapability.jobId, jobData.id))
-    .orderBy(desc(jobCapability.blockingAutomation), desc(jobCapability.percentageOfJob));
+    .orderBy(
+      desc(jobCapability.blockingAutomation),
+      desc(jobCapability.percentageOfJob),
+    );
 
   // Get geographic data
   const geographicData = await db
@@ -151,7 +147,7 @@ export async function getJobs(
   filters: JobFilters = {},
   sort: JobSort = "risk_desc",
   limit = 20,
-  offset = 0
+  offset = 0,
 ) {
   // Build conditions array
   const conditions = [];
@@ -186,8 +182,8 @@ export async function getJobs(
         ilike(job.title, `%${filters.search}%`),
         ilike(job.shortDescription, `%${filters.search}%`),
         ilike(job.industry, `%${filters.search}%`),
-        ilike(job.category, `%${filters.search}%`)
-      )
+        ilike(job.category, `%${filters.search}%`),
+      ),
     );
   }
 
@@ -380,7 +376,7 @@ export async function createJobComment(
   jobId: string,
   userId: string,
   content: string,
-  parentId?: string
+  parentId?: string,
 ) {
   const id = generateRandomString(32);
   await db.insert(jobComment).values({
@@ -399,7 +395,7 @@ export async function createJobComment(
 export async function voteJobComment(
   commentId: string,
   userId: string,
-  voteType: CommentVoteType
+  voteType: CommentVoteType,
 ) {
   // Note: This is a simplified version. In a full implementation,
   // you'd have a job_comment_vote table similar to capability_comment_vote
@@ -464,10 +460,7 @@ export async function getJobTasks(jobId: string) {
             capability: capability,
           })
           .from(taskCapability)
-          .innerJoin(
-            capability,
-            eq(taskCapability.capabilityId, capability.id)
-          )
+          .innerJoin(capability, eq(taskCapability.capabilityId, capability.id))
           .where(inArray(taskCapability.taskId, taskIds))
       : [];
 
@@ -501,7 +494,10 @@ export async function getJobCapabilities(jobId: string) {
     .from(jobCapability)
     .innerJoin(capability, eq(jobCapability.capabilityId, capability.id))
     .where(eq(jobCapability.jobId, jobId))
-    .orderBy(desc(jobCapability.blockingAutomation), desc(jobCapability.percentageOfJob));
+    .orderBy(
+      desc(jobCapability.blockingAutomation),
+      desc(jobCapability.percentageOfJob),
+    );
 
   return jobCaps.map((jc) => ({
     ...jc.capability,
@@ -534,12 +530,11 @@ export async function searchJobs(query: string, limit = 10) {
       or(
         ilike(job.title, `%${query}%`),
         ilike(job.shortDescription, `%${query}%`),
-        ilike(job.industry, `%${query}%`)
-      )
+        ilike(job.industry, `%${query}%`),
+      ),
     )
     .orderBy(asc(job.title))
     .limit(limit);
 
   return results;
 }
-

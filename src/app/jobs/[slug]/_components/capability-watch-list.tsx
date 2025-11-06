@@ -14,9 +14,8 @@ interface CapabilityWatchListProps {
 }
 
 export function CapabilityWatchList({ job }: CapabilityWatchListProps) {
-  const blockingCapabilities = job.capabilities?.filter(
-    (c) => c.blockingAutomation
-  ) || [];
+  const blockingCapabilities =
+    job.capabilities?.filter((c) => c.blockingAutomation) || [];
 
   if (blockingCapabilities.length === 0) {
     return null;
@@ -67,4 +66,3 @@ export function CapabilityWatchList({ job }: CapabilityWatchListProps) {
     </Card>
   );
 }
-

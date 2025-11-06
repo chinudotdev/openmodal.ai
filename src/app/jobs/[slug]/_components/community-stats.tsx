@@ -53,4 +53,3 @@ export function CommunityStats({ job }: CommunityStatsProps) {
     </Card>
   );
 }
-

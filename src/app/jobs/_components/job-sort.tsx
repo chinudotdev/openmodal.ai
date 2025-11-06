@@ -52,4 +52,3 @@ export function JobSort({ currentSort }: JobSortProps) {
     </Card>
   );
 }
-

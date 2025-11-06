@@ -39,4 +39,3 @@ export function ShareButton({ slug }: ShareButtonProps) {
     </Button>
   );
 }
-

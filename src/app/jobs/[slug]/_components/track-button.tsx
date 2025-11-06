@@ -71,4 +71,3 @@ export function TrackButton({ jobId }: TrackButtonProps) {
     </Button>
   );
 }
-

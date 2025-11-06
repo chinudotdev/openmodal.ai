@@ -61,11 +61,10 @@ async function JobsContent({ searchParams }: PageProps) {
       ? jobs.reduce((sum, job) => sum + job.automationPercentage, 0) /
         jobs.length
       : 0;
-  const protectedWorkers =
-    jobs.reduce(
-      (sum, job) => sum + (job.totalWorkersGlobal || 0),
-      0
-    );
+  const protectedWorkers = jobs.reduce(
+    (sum, job) => sum + (job.totalWorkersGlobal || 0),
+    0,
+  );
 
   return (
     <>
@@ -153,4 +152,3 @@ export default async function JobsListPage({ searchParams }: PageProps) {
     </div>
   );
 }
-

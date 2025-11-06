@@ -16,6 +16,7 @@ import {
   type PredictionBackground,
   type PredictionConfidence,
 } from "@/db/schema/capabilities";
+import { job, jobComment } from "@/db/schema/jobs";
 import { generateRandomString } from "better-auth/crypto";
 import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 
@@ -41,7 +42,7 @@ export async function getCapabilityBySlug(slug: string) {
     .from(capability)
     .leftJoin(
       capabilityCategory,
-      eq(capability.categoryId, capabilityCategory.id)
+      eq(capability.categoryId, capabilityCategory.id),
     )
     .where(eq(capability.slug, slug))
     .limit(1);
@@ -69,7 +70,7 @@ export async function getCapabilityBySlug(slug: string) {
     .from(capabilityOrganization)
     .innerJoin(
       organization,
-      eq(capabilityOrganization.organizationId, organization.id)
+      eq(capabilityOrganization.organizationId, organization.id),
     )
     .where(eq(capabilityOrganization.capabilityId, cap.id));
 
@@ -89,7 +90,7 @@ export async function getCapabilities(
   filters: CapabilityFilters = {},
   sort: CapabilitySort = "progress_desc",
   limit = 20,
-  offset = 0
+  offset = 0,
 ) {
   // Build conditions array
   const conditions = [];
@@ -111,22 +112,22 @@ export async function getCapabilities(
         or(
           ilike(capability.timelineEstimate, "%0-5%"),
           ilike(capability.timelineEstimate, "%1-5%"),
-          ilike(capability.timelineEstimate, "%2-5%")
-        )
+          ilike(capability.timelineEstimate, "%2-5%"),
+        ),
       );
     } else if (filters.timeline === "medium") {
       conditions.push(
         or(
           ilike(capability.timelineEstimate, "%5-15%"),
-          ilike(capability.timelineEstimate, "%10-15%")
-        )
+          ilike(capability.timelineEstimate, "%10-15%"),
+        ),
       );
     } else if (filters.timeline === "far") {
       conditions.push(
         or(
           ilike(capability.timelineEstimate, "%15+%"),
-          ilike(capability.timelineEstimate, "%20+%")
-        )
+          ilike(capability.timelineEstimate, "%20+%"),
+        ),
       );
     }
   }
@@ -135,8 +136,8 @@ export async function getCapabilities(
     conditions.push(
       or(
         ilike(capability.name, `%${filters.search}%`),
-        ilike(capability.description, `%${filters.search}%`)
-      )
+        ilike(capability.description, `%${filters.search}%`),
+      ),
     );
   }
 
@@ -176,8 +177,8 @@ export async function getCapabilities(
     .where(
       inArray(
         capabilityCategory.id,
-        results.map((r) => r.categoryId)
-      )
+        results.map((r) => r.categoryId),
+      ),
     );
 
   const categoryMap = new Map(categories.map((c) => [c.id, c]));
@@ -205,8 +206,8 @@ export async function trackCapability(capabilityId: string, userId: string) {
     .where(
       and(
         eq(capabilityTracking.capabilityId, capabilityId),
-        eq(capabilityTracking.userId, userId)
-      )
+        eq(capabilityTracking.userId, userId),
+      ),
     )
     .limit(1);
 
@@ -248,8 +249,8 @@ export async function untrackCapability(capabilityId: string, userId: string) {
     .where(
       and(
         eq(capabilityTracking.capabilityId, capabilityId),
-        eq(capabilityTracking.userId, userId)
-      )
+        eq(capabilityTracking.userId, userId),
+      ),
     );
 
   // Update tracking count
@@ -274,7 +275,7 @@ export async function untrackCapability(capabilityId: string, userId: string) {
 // Check if user is tracking
 export async function isTrackingCapability(
   capabilityId: string,
-  userId: string
+  userId: string,
 ) {
   const result = await db
     .select()
@@ -282,8 +283,8 @@ export async function isTrackingCapability(
     .where(
       and(
         eq(capabilityTracking.capabilityId, capabilityId),
-        eq(capabilityTracking.userId, userId)
-      )
+        eq(capabilityTracking.userId, userId),
+      ),
     )
     .limit(1);
 
@@ -300,7 +301,7 @@ export async function submitPrediction(
     confidence: PredictionConfidence;
     reasoning?: string;
     background: PredictionBackground;
-  }
+  },
 ) {
   // Check if prediction exists
   const existing = await db
@@ -309,8 +310,8 @@ export async function submitPrediction(
     .where(
       and(
         eq(capabilityPrediction.capabilityId, capabilityId),
-        eq(capabilityPrediction.userId, userId)
-      )
+        eq(capabilityPrediction.userId, userId),
+      ),
     )
     .limit(1);
 
@@ -364,8 +365,8 @@ export async function getUserPrediction(capabilityId: string, userId: string) {
     .where(
       and(
         eq(capabilityPrediction.capabilityId, capabilityId),
-        eq(capabilityPrediction.userId, userId)
-      )
+        eq(capabilityPrediction.userId, userId),
+      ),
     )
     .limit(1);
 
@@ -377,7 +378,7 @@ export async function createComment(
   capabilityId: string,
   userId: string,
   content: string,
-  parentId?: string
+  parentId?: string,
 ) {
   const id = generateRandomString(32);
   await db.insert(capabilityComment).values({
@@ -396,7 +397,7 @@ export async function createComment(
 export async function updateComment(
   commentId: string,
   userId: string,
-  content: string
+  content: string,
 ) {
   // Verify ownership
   const comment = await db
@@ -405,8 +406,8 @@ export async function updateComment(
     .where(
       and(
         eq(capabilityComment.id, commentId),
-        eq(capabilityComment.userId, userId)
-      )
+        eq(capabilityComment.userId, userId),
+      ),
     )
     .limit(1);
 
@@ -434,8 +435,8 @@ export async function deleteComment(commentId: string, userId: string) {
     .where(
       and(
         eq(capabilityComment.id, commentId),
-        eq(capabilityComment.userId, userId)
-      )
+        eq(capabilityComment.userId, userId),
+      ),
     )
     .limit(1);
 
@@ -452,7 +453,7 @@ export async function deleteComment(commentId: string, userId: string) {
 export async function voteComment(
   commentId: string,
   userId: string,
-  voteType: CommentVoteType
+  voteType: CommentVoteType,
 ) {
   // Check if vote exists
   const existing = await db
@@ -461,8 +462,8 @@ export async function voteComment(
     .where(
       and(
         eq(capabilityCommentVote.commentId, commentId),
-        eq(capabilityCommentVote.userId, userId)
-      )
+        eq(capabilityCommentVote.userId, userId),
+      ),
     )
     .limit(1);
 
@@ -555,7 +556,7 @@ export async function getComments(capabilityId: string, parentId?: string) {
     .where(and(...conditions))
     .orderBy(
       desc(capabilityComment.upvotes),
-      desc(capabilityComment.createdAt)
+      desc(capabilityComment.createdAt),
     );
 
   // Get user info for each comment
@@ -573,7 +574,7 @@ export async function getComments(capabilityId: string, parentId?: string) {
           .where(inArray(capabilityComment.parentId, commentIds))
           .orderBy(
             desc(capabilityComment.upvotes),
-            desc(capabilityComment.createdAt)
+            desc(capabilityComment.createdAt),
           )
       : [];
 
@@ -610,4 +611,330 @@ export async function incrementViewCount(capabilityId: string) {
   }
 
   return { success: true };
+}
+
+// Get activities for activity feed
+export type ActivityType =
+  | "breakthrough"
+  | "setback"
+  | "deployment"
+  | "research"
+  | "funding"
+  | "technology";
+
+export interface Activity {
+  id: string;
+  type: ActivityType;
+  title: string;
+  description: string;
+  url?: string;
+  timestamp: string;
+  author: {
+    username: string;
+    avatar?: string;
+  };
+  upvotes: number;
+  comments: number;
+  tags: string[];
+}
+
+export async function getActivities(limit = 10): Promise<Activity[]> {
+  try {
+    const activities: Activity[] = [];
+
+    // Get recent capability comments
+    const recentComments = await db
+      .select({
+        id: capabilityComment.id,
+        content: capabilityComment.content,
+        upvotes: capabilityComment.upvotes,
+        createdAt: capabilityComment.createdAt,
+        userId: capabilityComment.userId,
+        capabilityId: capabilityComment.capabilityId,
+        capabilityName: capability.name,
+        capabilitySlug: capability.slug,
+      })
+      .from(capabilityComment)
+      .innerJoin(capability, eq(capabilityComment.capabilityId, capability.id))
+      .where(sql`${capabilityComment.parentId} IS NULL`)
+      .orderBy(desc(capabilityComment.createdAt))
+      .limit(limit);
+
+    for (const comment of recentComments) {
+      // Get reply count
+      const replyCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(capabilityComment)
+        .where(eq(capabilityComment.parentId, comment.id));
+
+      // Get user info (simplified - in real app you'd join with user table)
+      const username = comment.userId.slice(0, 16) || "anonymous";
+
+      activities.push({
+        id: `comment-${comment.id}`,
+        type: "research",
+        title: `New discussion on ${comment.capabilityName}`,
+        description: comment.content.slice(0, 200),
+        url: `/capabilities/${comment.capabilitySlug}`,
+        timestamp: formatRelativeTime(comment.createdAt),
+        author: {
+          username,
+        },
+        upvotes: comment.upvotes,
+        comments: Number(replyCount[0]?.count || 0),
+        tags: [comment.capabilityName],
+      });
+    }
+
+    // Get recent predictions
+    const recentPredictions = await db
+      .select({
+        id: capabilityPrediction.id,
+        predictedYear: capabilityPrediction.predictedYear,
+        confidence: capabilityPrediction.confidence,
+        reasoning: capabilityPrediction.reasoning,
+        createdAt: capabilityPrediction.createdAt,
+        userId: capabilityPrediction.userId,
+        capabilityName: capability.name,
+        capabilitySlug: capability.slug,
+        capabilityStatus: capability.status,
+      })
+      .from(capabilityPrediction)
+      .innerJoin(
+        capability,
+        eq(capabilityPrediction.capabilityId, capability.id),
+      )
+      .orderBy(desc(capabilityPrediction.createdAt))
+      .limit(limit);
+
+    for (const prediction of recentPredictions) {
+      const username = prediction.userId.slice(0, 16) || "expert";
+      const isBreakthrough =
+        prediction.capabilityStatus === "solved" ||
+        (prediction.capabilityStatus === "partial" &&
+          prediction.confidence === "high");
+
+      activities.push({
+        id: `prediction-${prediction.id}`,
+        type: isBreakthrough ? "breakthrough" : "research",
+        title: `${username} predicted ${prediction.capabilityName} by ${prediction.predictedYear}`,
+        description:
+          prediction.reasoning?.slice(0, 200) ||
+          `New prediction for ${prediction.capabilityName} with ${prediction.confidence} confidence`,
+        url: `/capabilities/${prediction.capabilitySlug}`,
+        timestamp: formatRelativeTime(prediction.createdAt),
+        author: {
+          username,
+        },
+        upvotes: 0,
+        comments: 0,
+        tags: [prediction.capabilityName, "Prediction"],
+      });
+    }
+
+    // Get recent capability updates
+    const recentUpdates = await db
+      .select({
+        id: capability.id,
+        name: capability.name,
+        slug: capability.slug,
+        updatedAt: capability.updatedAt,
+        recentBreakthroughDate: capability.recentBreakthroughDate,
+        status: capability.status,
+      })
+      .from(capability)
+      .where(sql`${capability.updatedAt} > NOW() - INTERVAL '7 days'`)
+      .orderBy(desc(capability.updatedAt))
+      .limit(limit);
+
+    for (const update of recentUpdates) {
+      if (update.recentBreakthroughDate) {
+        activities.push({
+          id: `update-${update.id}`,
+          type: "breakthrough",
+          title: `Breakthrough in ${update.name}`,
+          description: `Recent progress update on ${update.name} capability`,
+          url: `/capabilities/${update.slug}`,
+          timestamp: formatRelativeTime(update.updatedAt),
+          author: {
+            username: "community",
+          },
+          upvotes: 0,
+          comments: 0,
+          tags: [update.name],
+        });
+      }
+    }
+
+    // Sort by timestamp (most recent first)
+    // Since we're getting activities from different sources, we need to sort them
+    // Activities are already sorted by createdAt DESC from individual queries
+    // We'll keep them in the order they were added (most recent first from each query)
+    // For a more accurate sort, we'd need to store the actual Date and sort by that
+    // For now, we'll just take the first N items as they're already roughly sorted
+
+    return activities.slice(0, limit);
+  } catch (error) {
+    console.error("Error fetching activities:", error);
+    return [];
+  }
+}
+
+// Helper function to format relative time
+function formatRelativeTime(date: Date | null): string {
+  if (!date) return "unknown";
+  const now = new Date();
+  const diffMs = now.getTime() - new Date(date).getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 60) return `${diffMins}m`;
+  if (diffHours < 24) return `${diffHours}h`;
+  if (diffDays < 7) return `${diffDays}d`;
+  return `${Math.floor(diffDays / 7)}w`;
+}
+
+// Get stats
+export interface Stats {
+  reports: number;
+  experts: number;
+  papers: number;
+  jobsSafe: number;
+}
+
+export async function getStats(): Promise<Stats> {
+  try {
+    // Count reports (capability comments + job comments)
+    const capabilityCommentsCount = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(capabilityComment);
+
+    const jobCommentsCount = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(jobComment);
+
+    const reports =
+      Number(capabilityCommentsCount[0]?.count || 0) +
+      Number(jobCommentsCount[0]?.count || 0);
+
+    // Count experts (users who made predictions)
+    const expertsResult = await db
+      .selectDistinct({ userId: capabilityPrediction.userId })
+      .from(capabilityPrediction);
+
+    const experts = expertsResult.length;
+
+    // Papers not in database - return 0
+    const papers = 0;
+
+    // Jobs Safe: Sum of totalWorkersGlobal for jobs with automationPercentage < 50
+    const jobsSafeResult = await db
+      .select({
+        total: sql<number>`sum(${job.totalWorkersGlobal})`,
+      })
+      .from(job)
+      .where(sql`${job.automationPercentage} < 50`);
+
+    const jobsSafe = Number(jobsSafeResult[0]?.total || 0);
+
+    return {
+      reports,
+      experts,
+      papers,
+      jobsSafe,
+    };
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    return {
+      reports: 0,
+      experts: 0,
+      papers: 0,
+      jobsSafe: 0,
+    };
+  }
+}
+
+// Get AGI Progress
+export interface AGIProgress {
+  overall: number;
+  lastUpdated: string;
+  lastUpdatedBy: string;
+  contributors: number;
+  expertForecasts: number;
+  reports: number;
+}
+
+export async function getAGIProgress(): Promise<AGIProgress> {
+  try {
+    // Calculate overall progress as average of all capabilities
+    const capabilitiesResult = await db
+      .select({
+        avgProgress: sql<number>`avg(${capability.progressPercentage})`,
+        maxUpdated: sql<Date>`max(${capability.updatedAt})`,
+      })
+      .from(capability);
+
+    const overall = Math.round(Number(capabilitiesResult[0]?.avgProgress || 0));
+
+    // Get most recent update
+    const mostRecent = capabilitiesResult[0]?.maxUpdated;
+    const lastUpdated = mostRecent ? formatRelativeTime(mostRecent) : "unknown";
+
+    // Count contributors (unique users from comments + predictions + tracking)
+    const contributorsFromComments = await db
+      .selectDistinct({ userId: capabilityComment.userId })
+      .from(capabilityComment);
+
+    const contributorsFromPredictions = await db
+      .selectDistinct({ userId: capabilityPrediction.userId })
+      .from(capabilityPrediction);
+
+    const contributorsFromTracking = await db
+      .selectDistinct({ userId: capabilityTracking.userId })
+      .from(capabilityTracking);
+
+    const contributorSet = new Set<string>();
+    contributorsFromComments.forEach((c) => contributorSet.add(c.userId));
+    contributorsFromPredictions.forEach((c) => contributorSet.add(c.userId));
+    contributorsFromTracking.forEach((c) => contributorSet.add(c.userId));
+
+    const contributors = contributorSet.size;
+
+    // Count expert forecasts (predictions)
+    const forecastsResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(capabilityPrediction);
+
+    const expertForecasts = Number(forecastsResult[0]?.count || 0);
+
+    // Count reports (capability comments)
+    const reportsResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(capabilityComment);
+
+    const reports = Number(reportsResult[0]?.count || 0);
+
+    // Get last updated by (simplified - would need to join with user table)
+    const lastUpdatedBy = "community";
+
+    return {
+      overall,
+      lastUpdated,
+      lastUpdatedBy,
+      contributors,
+      expertForecasts,
+      reports,
+    };
+  } catch (error) {
+    console.error("Error fetching AGI progress:", error);
+    return {
+      overall: 0,
+      lastUpdated: "unknown",
+      lastUpdatedBy: "community",
+      contributors: 0,
+      expertForecasts: 0,
+      reports: 0,
+    };
+  }
 }

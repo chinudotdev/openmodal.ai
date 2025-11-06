@@ -44,8 +44,7 @@ export function JobHeader({ job }: JobHeaderProps) {
             </span>
             <span>•</span>
             <span>
-              Updated{" "}
-              {formatDistanceToNow(job.updatedAt, { addSuffix: true })}
+              Updated {formatDistanceToNow(job.updatedAt, { addSuffix: true })}
             </span>
           </div>
         </div>
@@ -80,7 +79,10 @@ export function JobHeader({ job }: JobHeaderProps) {
               <div className="flex items-center gap-4">
                 <JobStatusBadge status={job.automationStatus} />
                 <span className="text-muted-foreground">
-                  {getStatusMessage(job.automationStatus, job.automationPercentage)}
+                  {getStatusMessage(
+                    job.automationStatus,
+                    job.automationPercentage,
+                  )}
                 </span>
               </div>
             </div>
@@ -90,4 +92,3 @@ export function JobHeader({ job }: JobHeaderProps) {
     </div>
   );
 }
-

@@ -15,7 +15,7 @@ export function AutomationTimeline({ job }: AutomationTimelineProps) {
   const currentYear = new Date().getFullYear();
   const estimatedYear = job.estimatedAutomationYear || 2050;
   const years = [];
-  
+
   for (let year = currentYear; year <= estimatedYear + 5; year += 5) {
     years.push(year);
   }
@@ -25,7 +25,7 @@ export function AutomationTimeline({ job }: AutomationTimelineProps) {
     const target = 75; // High risk threshold
     const yearsToTarget = estimatedYear - currentYear;
     if (yearsToTarget <= 0) return current;
-    
+
     const progress = (year - currentYear) / yearsToTarget;
     return Math.min(current + (target - current) * progress, 100);
   };
@@ -77,4 +77,3 @@ export function AutomationTimeline({ job }: AutomationTimelineProps) {
     </Card>
   );
 }
-

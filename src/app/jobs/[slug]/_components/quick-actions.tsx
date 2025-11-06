@@ -35,4 +35,3 @@ export function QuickActions({ jobId, slug }: QuickActionsProps) {
     </Card>
   );
 }
-

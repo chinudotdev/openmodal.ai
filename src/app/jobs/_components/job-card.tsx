@@ -58,16 +58,17 @@ export function JobCard({ job }: JobCardProps) {
   };
 
   // Get top 3 capabilities
-  const topCapabilities = job.capabilities
-    ?.filter((jc) => jc.capability)
-    .slice(0, 3)
-    .map((jc) => ({
-      capabilityId: jc.capability!.id,
-      capabilitySlug: jc.capability!.slug,
-      capabilityName: jc.capability!.name,
-      progress: jc.capability!.progressPercentage,
-      importance: jc.importance || "minor",
-    })) || [];
+  const topCapabilities =
+    job.capabilities
+      ?.filter((jc) => jc.capability)
+      .slice(0, 3)
+      .map((jc) => ({
+        capabilityId: jc.capability!.id,
+        capabilitySlug: jc.capability!.slug,
+        capabilityName: jc.capability!.name,
+        progress: jc.capability!.progressPercentage,
+        importance: jc.importance || "minor",
+      })) || [];
 
   return (
     <Link href={`/jobs/${job.slug}`}>
@@ -98,7 +99,10 @@ export function JobCard({ job }: JobCardProps) {
                 {job.automationPercentage}%
               </span>
             </div>
-            <AutomationProgressBar progress={job.automationPercentage} size="md" />
+            <AutomationProgressBar
+              progress={job.automationPercentage}
+              size="md"
+            />
           </div>
 
           {/* Quick Stats */}
@@ -144,8 +148,7 @@ export function JobCard({ job }: JobCardProps) {
 
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span>
-              Updated{" "}
-              {formatDistanceToNow(job.updatedAt, { addSuffix: true })}
+              Updated {formatDistanceToNow(job.updatedAt, { addSuffix: true })}
             </span>
           </div>
         </CardContent>
@@ -160,4 +163,3 @@ export function JobCard({ job }: JobCardProps) {
     </Link>
   );
 }
-

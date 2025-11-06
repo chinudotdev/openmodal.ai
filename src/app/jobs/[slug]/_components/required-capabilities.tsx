@@ -19,7 +19,7 @@ export function RequiredCapabilities({ job }: RequiredCapabilitiesProps) {
 
   const blockingCapabilities = capabilities.filter((c) => c.blockingAutomation);
   const nonBlockingCapabilities = capabilities.filter(
-    (c) => !c.blockingAutomation
+    (c) => !c.blockingAutomation,
   );
 
   const getProgressColor = (progress: number) => {
@@ -73,13 +73,13 @@ export function RequiredCapabilities({ job }: RequiredCapabilitiesProps) {
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Used in {cap.taskCount} tasks ({cap.percentageOfJob}% of
-                          job)
+                          Used in {cap.taskCount} tasks ({cap.percentageOfJob}%
+                          of job)
                         </p>
                       </div>
                       <span
                         className={`text-lg font-bold ${getProgressColor(
-                          cap.progressPercentage
+                          cap.progressPercentage,
                         )}`}
                       >
                         {cap.progressPercentage}%
@@ -126,13 +126,13 @@ export function RequiredCapabilities({ job }: RequiredCapabilitiesProps) {
                           </h4>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Used in {cap.taskCount} tasks ({cap.percentageOfJob}% of
-                          job)
+                          Used in {cap.taskCount} tasks ({cap.percentageOfJob}%
+                          of job)
                         </p>
                       </div>
                       <span
                         className={`text-lg font-bold ${getProgressColor(
-                          cap.progressPercentage
+                          cap.progressPercentage,
                         )}`}
                       >
                         {cap.progressPercentage}%
@@ -158,11 +158,12 @@ export function RequiredCapabilities({ job }: RequiredCapabilitiesProps) {
 
         {capabilities.length > 5 && (
           <Button variant="outline" className="w-full" asChild>
-            <Link href="#capabilities">View all {capabilities.length} capabilities</Link>
+            <Link href="#capabilities">
+              View all {capabilities.length} capabilities
+            </Link>
           </Button>
         )}
       </CardContent>
     </Card>
   );
 }
-

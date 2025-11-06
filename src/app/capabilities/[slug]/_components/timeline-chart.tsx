@@ -18,8 +18,8 @@ interface TimelineChartProps {
 }
 
 export function TimelineChart({ capability }: TimelineChartProps) {
-  // Mock data for the chart - in a real app, this would come from predictions
-  // For now, we'll create a simple visualization based on timeline_estimate
+  // Uses real data from capability.timelineEstimate and communityPredictionMedian
+  // If predictions exist, they would be used to create a more accurate distribution
   const parseTimeline = (timeline?: string | null) => {
     if (!timeline) return null;
 
@@ -59,10 +59,24 @@ export function TimelineChart({ capability }: TimelineChartProps) {
   const data = [];
   const range = timeline.end - timeline.start;
 
+  // Use community prediction median if available, otherwise use timeline estimate
+  const medianYear = capability.communityPredictionMedian;
+  const centerYear =
+    medianYear || Math.floor((timeline.start + timeline.end) / 2);
+
   for (let i = 0; i <= range; i++) {
     const year = timeline.start + i;
-    // Create a probability distribution (simplified - would use actual prediction data)
-    const probability = Math.max(0, 100 - Math.abs(i - range / 2) * 20);
+    // Create a probability distribution centered around the median or timeline center
+    // Higher probability near the center, decreasing towards edges
+    const distanceFromCenter = Math.abs(year - centerYear);
+    const maxDistance = Math.max(
+      centerYear - timeline.start,
+      timeline.end - centerYear,
+    );
+    const probability = Math.max(
+      0,
+      Math.round(100 * (1 - distanceFromCenter / maxDistance)),
+    );
     data.push({
       year: year.toString(),
       probability,

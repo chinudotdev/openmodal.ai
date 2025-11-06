@@ -59,4 +59,3 @@ export function AtAGlance({ job }: AtAGlanceProps) {
     </Card>
   );
 }
-

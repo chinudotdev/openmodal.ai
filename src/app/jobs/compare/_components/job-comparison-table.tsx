@@ -1,7 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { JobStatusBadge } from "@/components/shared/job-status-badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -124,7 +131,9 @@ export function JobComparisonTable({ jobs }: JobComparisonTableProps) {
                 <TableCell className="font-medium">Growth</TableCell>
                 {jobs.map((job) => (
                   <TableCell key={job.id}>
-                    {formatGrowth(job.growthRate ? Number(job.growthRate) : null)}
+                    {formatGrowth(
+                      job.growthRate ? Number(job.growthRate) : null,
+                    )}
                   </TableCell>
                 ))}
               </TableRow>
@@ -145,4 +154,3 @@ export function JobComparisonTable({ jobs }: JobComparisonTableProps) {
     </Card>
   );
 }
-
