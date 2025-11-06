@@ -1,0 +1,79 @@
+---
+description: General code style and formatting conventions
+globs:
+alwaysApply: true
+---
+
+# Code Style & Formatting
+
+## General Conventions
+- Use 2-space indentation (configured in biome.json)
+- Use TypeScript for all files (.ts, .tsx)
+- Use functional components with hooks (no class components)
+- Use async/await over promise chains
+- Prefer named exports over default exports for components
+- Use destructuring for props and imports
+- Use template literals for string concatenation
+- Keep files under 300 lines when possible
+
+## Naming Conventions
+- **Files**: kebab-case for all files (e.g., `capability-card.tsx`, `auth-client.ts`)
+- **Components**: PascalCase (e.g., `CapabilityCard`, `ActivityFeed`)
+- **Functions/Variables**: camelCase (e.g., `getUserCapabilities`, `isLoading`)
+- **Constants**: UPPER_SNAKE_CASE for true constants (e.g., `MAX_PREDICTIONS`, `API_ROUTES`)
+- **Types/Interfaces**: PascalCase with descriptive names (e.g., `CapabilityWithDetails`, `PredictionFormData`)
+- **Database Tables**: snake_case (following PostgreSQL convention)
+- **Enums**: snake_case for values (e.g., `capability_status`, `confidence_level`)
+
+## Formatting with Biome
+- Run `bun run lint` before commits
+- Run `bun run format` to auto-format
+- Follow configured rules (no overrides without team discussion)
+
+## Component Structure Order
+1. Imports (grouped: React, Next.js, third-party, local)
+2. Types/Interfaces
+3. Component definition
+4. Hooks (in order: state, effects, custom hooks)
+5. Event handlers
+6. Render logic
+
+Example:
+```typescript
+// 1. Imports
+import { type ReactNode } from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+
+// 2. Types
+interface ComponentProps {
+  title: string
+  children?: ReactNode
+  className?: string
+}
+
+// 3. Component
+export function Component({ title, children, className }: ComponentProps) {
+  // 4. Hooks
+  // 5. Event handlers
+  // 6. Render
+  return (
+    <div className={cn("base-classes", className)}>
+      {/* ... */}
+    </div>
+  )
+}
+```
+
+## Error Handling
+- Always wrap async operations in try-catch
+- Provide user-friendly error messages
+- Log errors with context in development
+- Never expose sensitive data in error messages
+
+## Comments
+- Add JSDoc for public functions and complex logic
+- Explain WHY, not WHAT (code should be self-documenting)
+- Remove commented-out code (use git history)
+- Add TODO comments with context and assignee if needed

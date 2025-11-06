@@ -1,0 +1,201 @@
+---
+description: Database patterns with Drizzle ORM and PostgreSQL
+globs:
+  - "src/db/**/*"
+  - "src/actions/**/*"
+  - "drizzle/**/*"
+alwaysApply: false
+---
+
+# Database Patterns (Drizzle ORM)
+
+## Schema Definition
+- Define schemas in `/src/db/schema/`
+- Use snake_case for table and column names
+- Group related tables in the same schema file
+- Export types from schema using `$inferSelect` and `$inferInsert`
+- Use appropriate data types (text, integer, boolean, timestamp, etc.)
+
+Example:
+```typescript
+import { pgTable, text, integer, timestamp, uuid } from "drizzle-orm/pg-core"
+
+export const capability = pgTable("capability", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  status: text("status").$type<"solved" | "partial" | "unsolved">(),
+  progressPercentage: integer("progress_percentage").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
+
+// Export types
+export type Capability = typeof capability.$inferSelect
+export type NewCapability = typeof capability.$inferInsert
+```
+
+## Relationships
+- Use `references()` for foreign keys
+- Define relations using `relations()` helper
+- Use one-to-many and many-to-many patterns appropriately
+
+Example:
+```typescript
+import { relations } from "drizzle-orm"
+
+export const capabilityRelations = relations(capability, ({ one, many }) => ({
+  category: one(capabilityCategory, {
+    fields: [capability.categoryId],
+    references: [capabilityCategory.id],
+  }),
+  bottlenecks: many(bottleneck),
+  predictions: many(capabilityPrediction),
+}))
+```
+
+## Querying
+- Use Drizzle's query builder (type-safe)
+- Use `.with()` for eager loading related data
+- Implement pagination with `limit()` and `offset()`
+- Use `.$dynamic()` for conditional query building
+- Return only needed columns with `.select()`
+
+Example:
+```typescript
+import { db } from "@/db"
+import { capability, capabilityCategory } from "@/db/schema"
+import { eq, desc } from "drizzle-orm"
+
+// Basic query
+const capabilities = await db
+  .select()
+  .from(capability)
+  .where(eq(capability.status, "partial"))
+  .orderBy(desc(capability.createdAt))
+  .limit(20)
+
+// Query with relations
+const capabilityWithCategory = await db.query.capability.findFirst({
+  where: eq(capability.id, id),
+  with: {
+    category: true,
+    bottlenecks: true,
+  },
+})
+
+// Conditional query building
+const query = db.select().from(capability).$dynamic()
+
+if (status) {
+  query.where(eq(capability.status, status))
+}
+
+const results = await query
+```
+
+## Mutations
+- Use transactions for multi-table operations
+- Use `.returning()` to get inserted/updated data
+- Validate input with Zod before inserting
+- Handle unique constraint violations
+
+Example:
+```typescript
+// Insert
+const [newCapability] = await db
+  .insert(capability)
+  .values({
+    title: "New capability",
+    slug: "new-capability",
+  })
+  .returning()
+
+// Update
+const [updated] = await db
+  .update(capability)
+  .set({ status: "solved" })
+  .where(eq(capability.id, id))
+  .returning()
+
+// Delete
+await db
+  .delete(capability)
+  .where(eq(capability.id, id))
+
+// Transaction
+await db.transaction(async (tx) => {
+  const [capability] = await tx
+    .insert(capability)
+    .values(capabilityData)
+    .returning()
+
+  await tx
+    .insert(bottleneck)
+    .values({
+      capabilityId: capability.id,
+      type: "hardware",
+    })
+})
+```
+
+## Migrations
+- Generate migrations: `bun run db:generate`
+- Run migrations: `bun run db:migrate`
+- Review generated SQL before applying
+- Never edit migrations manually after they're applied
+- Keep migrations in version control
+
+## Database Connection
+- Use Neon serverless driver for PostgreSQL
+- Connection is configured in `/src/db/index.ts`
+- Connection string from `DATABASE_URL` environment variable
+- HTTP-based connection (no connection pooling overhead)
+
+Example:
+```typescript
+import { neon } from "@neondatabase/serverless"
+import { drizzle } from "drizzle-orm/neon-http"
+import * as schema from "./schema"
+
+const sql = neon(process.env.DATABASE_URL!)
+export const db = drizzle(sql, { schema })
+```
+
+## Best Practices
+- Use prepared statements for repeated queries
+- Index frequently queried columns
+- Avoid N+1 queries (use eager loading with `.with()`)
+- Use database constraints (unique, not null, foreign keys)
+- Set appropriate default values
+- Use timestamps (createdAt, updatedAt) for audit trails
+- Consider using database-generated UUIDs for primary keys
+
+## Performance Tips
+- Use `.select()` to limit returned columns
+- Implement pagination for large datasets
+- Use indexes on foreign keys and frequently filtered columns
+- Consider using database views for complex queries
+- Monitor query performance with Drizzle Studio (`bun run db:studio`)
+
+## Enums
+- Define enums using PostgreSQL enum types or text with type casting
+- Export enum values as TypeScript types
+- Use in Zod schemas for validation
+
+Example:
+```typescript
+import { pgEnum } from "drizzle-orm/pg-core"
+
+export const capabilityStatusEnum = pgEnum("capability_status", [
+  "solved",
+  "partial",
+  "unsolved",
+])
+
+export const capability = pgTable("capability", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  status: capabilityStatusEnum("status").default("unsolved"),
+})
+```

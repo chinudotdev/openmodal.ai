@@ -1,0 +1,150 @@
+---
+description: TypeScript guidelines and type safety practices
+globs:
+  - "**/*.ts"
+  - "**/*.tsx"
+alwaysApply: false
+---
+
+# TypeScript Guidelines
+
+## Type Safety
+- Enable strict mode (already configured in tsconfig.json)
+- Avoid `any` types - use `unknown` if type is truly unknown
+- Prefer interfaces for object shapes, types for unions/intersections
+- Use Zod schemas for runtime validation (especially for forms and API inputs)
+- Export types separately from implementation when shared
+- Use type inference when possible, explicit types when clarity is needed
+
+## Type Definitions
+- Prefer `interface` for extendable object shapes
+- Prefer `type` for complex types, unions, intersections
+- Use `type` for function signatures and aliases
+- Define return types explicitly for public functions
+
+## Examples
+
+### Good Type Usage
+```typescript
+// Interface for objects
+interface User {
+  id: string
+  email: string
+  name: string | null
+}
+
+// Type for unions/intersections
+type UserWithProfile = User & {
+  profile: Profile
+}
+
+// Type for function signatures
+type FetchUser = (id: string) => Promise<User>
+
+// Explicit return type for public functions
+export async function getUser(id: string): Promise<User | null> {
+  // implementation
+}
+```
+
+### Bad Type Usage
+```typescript
+// Don't use any
+function processData(data: any) { } // ❌
+
+// Use unknown instead
+function processData(data: unknown) { } // ✅
+
+// Don't omit return types for exported functions
+export async function getUser(id: string) { } // ❌
+
+// Do include explicit return types
+export async function getUser(id: string): Promise<User | null> { } // ✅
+```
+
+## Zod Validation
+- Use Zod for form validation
+- Use Zod for API input validation
+- Use Zod for environment variable validation
+- Define schemas in `/src/lib/validations/` or co-located with usage
+
+Example:
+```typescript
+import { z } from "zod"
+
+const userSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(2).max(100),
+  age: z.number().int().positive().optional(),
+})
+
+type UserInput = z.infer<typeof userSchema>
+
+export async function createUser(input: unknown) {
+  const validated = userSchema.parse(input)
+  // use validated data
+}
+```
+
+## Drizzle ORM Types
+- Infer types from schema using `$inferSelect` and `$inferInsert`
+- Export types from schema files
+- Use inferred types in Server Actions and API routes
+
+Example:
+```typescript
+import { capability } from "@/db/schema"
+
+export type Capability = typeof capability.$inferSelect
+export type NewCapability = typeof capability.$inferInsert
+```
+
+## Generic Types
+- Use descriptive generic parameter names when appropriate
+- Default to `T`, `U`, `V` for simple cases
+- Use descriptive names for complex generics
+
+Example:
+```typescript
+// Simple generic
+function identity<T>(value: T): T {
+  return value
+}
+
+// Descriptive generic names
+function mapRecord<Key extends string, Value, Result>(
+  record: Record<Key, Value>,
+  mapper: (value: Value) => Result
+): Record<Key, Result> {
+  // implementation
+}
+```
+
+## Utility Types
+- Use built-in utility types when appropriate:
+  - `Pick<T, K>` - Select properties
+  - `Omit<T, K>` - Exclude properties
+  - `Partial<T>` - Make all properties optional
+  - `Required<T>` - Make all properties required
+  - `Record<K, V>` - Object with specific key/value types
+  - `Exclude<T, U>` - Exclude from union
+  - `Extract<T, U>` - Extract from union
+  - `NonNullable<T>` - Exclude null/undefined
+  - `ReturnType<T>` - Get function return type
+  - `Parameters<T>` - Get function parameters
+
+## Type Guards
+- Create type guards for runtime type checking
+- Use `is` keyword for type predicates
+
+Example:
+```typescript
+function isUser(value: unknown): value is User {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    "email" in value
+  )
+}
+```

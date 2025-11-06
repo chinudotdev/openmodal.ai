@@ -1,0 +1,275 @@
+---
+description: React component patterns and best practices
+globs:
+  - "src/components/**/*.tsx"
+alwaysApply: false
+---
+
+# React Component Patterns
+
+## Component Best Practices
+- Use functional components with hooks (no class components)
+- Keep components small and focused (single responsibility)
+- Prefer composition over prop drilling
+- Use Context sparingly (only for truly global state)
+- Memoize expensive calculations with `useMemo`
+- Memoize callbacks with `useCallback` when needed
+
+## Props
+- Destructure props in function signature
+- Use TypeScript interfaces for prop types
+- Make optional props explicit with `?`
+- Provide sensible defaults using default parameters
+
+Example:
+```typescript
+interface CardProps {
+  title: string
+  description?: string
+  onClick?: () => void
+  className?: string
+}
+
+export function Card({
+  title,
+  description = "No description provided",
+  onClick,
+  className,
+}: CardProps) {
+  return (
+    <div className={cn("card", className)} onClick={onClick}>
+      <h3>{title}</h3>
+      <p>{description}</p>
+    </div>
+  )
+}
+```
+
+## State Management
+- Use `useState` for local component state
+- Use `useReducer` for complex state logic
+- Keep state as local as possible (lift only when needed)
+- Use React Query (TanStack Query) for server state
+
+Example:
+```typescript
+// Local state
+const [isOpen, setIsOpen] = useState(false)
+
+// Complex state
+const [state, dispatch] = useReducer(reducer, initialState)
+
+// Server state
+const { data, isLoading } = useQuery({
+  queryKey: ["capabilities"],
+  queryFn: getCapabilities,
+})
+```
+
+## Hooks
+- Place hooks at the top of the component
+- Follow the order: state hooks, effect hooks, custom hooks
+- Don't call hooks conditionally
+- Create custom hooks for reusable logic (prefix with `use`)
+
+Example:
+```typescript
+export function useCapabilityTracking(capabilityId: string) {
+  const [isTracking, setIsTracking] = useState(false)
+
+  const { mutate: toggleTracking } = useMutation({
+    mutationFn: () => toggleCapabilityTracking(capabilityId),
+    onSuccess: () => setIsTracking(prev => !prev),
+  })
+
+  return { isTracking, toggleTracking }
+}
+```
+
+## React Query (TanStack Query)
+- Use for client-side server state caching
+- Use `useQuery` for GET operations
+- Use `useMutation` for mutations
+- Implement optimistic updates
+- Set appropriate cache times
+
+Example:
+```typescript
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+
+export function CapabilitiesList() {
+  const queryClient = useQueryClient()
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["capabilities"],
+    queryFn: getCapabilities,
+  })
+
+  const { mutate: trackCapability } = useMutation({
+    mutationFn: (id: string) => trackCapability(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["capabilities"] })
+    },
+  })
+
+  if (isLoading) return <Spinner />
+
+  return (
+    <div>
+      {data?.map(cap => (
+        <CapabilityCard
+          key={cap.id}
+          capability={cap}
+          onTrack={() => trackCapability(cap.id)}
+        />
+      ))}
+    </div>
+  )
+}
+```
+
+## Form Handling
+- Use TanStack React Form for complex forms
+- Use Server Actions for form submissions
+- Implement Zod validation schemas
+- Show loading states during submission
+- Display error messages clearly
+
+Example:
+```typescript
+import { useForm } from "@tanstack/react-form"
+
+export function CapabilityForm() {
+  const form = useForm({
+    defaultValues: {
+      title: "",
+      description: "",
+    },
+    onSubmit: async ({ value }) => {
+      const result = await createCapability(value)
+      if (result.success) {
+        toast.success("Capability created!")
+      }
+    },
+  })
+
+  return (
+    <form onSubmit={(e) => {
+      e.preventDefault()
+      form.handleSubmit()
+    }}>
+      {/* form fields */}
+    </form>
+  )
+}
+```
+
+## shadcn/ui Components
+- Install via: `npx shadcn@latest add [component]`
+- Located in `/src/components/ui/`
+- Customize as needed (they're copied to your project)
+- Use `cn()` utility for conditional className merging
+- Follow the "new-york" style variant
+
+Example:
+```typescript
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+
+export function CustomButton({ className, ...props }: ButtonProps) {
+  return (
+    <Button
+      className={cn("custom-styles", className)}
+      {...props}
+    />
+  )
+}
+```
+
+## Accessibility
+- Use semantic HTML elements
+- Provide alt text for images
+- Ensure keyboard navigation works
+- Use ARIA labels when needed (but prefer semantic HTML)
+- Maintain color contrast ratios (WCAG AA)
+
+Example:
+```typescript
+<button
+  type="button"
+  aria-label="Close dialog"
+  aria-pressed={isOpen}
+  onClick={handleClose}
+>
+  <X className="h-4 w-4" />
+</button>
+```
+
+## Performance Optimization
+- Use `React.memo` for expensive pure components
+- Use `useMemo` for expensive calculations
+- Use `useCallback` for callbacks passed to memoized children
+- Avoid anonymous functions in JSX when possible for memoized components
+
+Example:
+```typescript
+import { memo, useMemo, useCallback } from "react"
+
+export const ExpensiveList = memo(function ExpensiveList({ items, onItemClick }) {
+  const sortedItems = useMemo(() => {
+    return items.sort((a, b) => a.name.localeCompare(b.name))
+  }, [items])
+
+  const handleClick = useCallback((id: string) => {
+    onItemClick(id)
+  }, [onItemClick])
+
+  return (
+    <div>
+      {sortedItems.map(item => (
+        <Item key={item.id} item={item} onClick={handleClick} />
+      ))}
+    </div>
+  )
+})
+```
+
+## Error Boundaries
+- Wrap components in error boundaries
+- Provide fallback UI for errors
+- Log errors appropriately
+
+Example:
+```typescript
+"use client"
+
+import { Component, type ReactNode } from "react"
+
+interface Props {
+  children: ReactNode
+  fallback?: ReactNode
+}
+
+export class ErrorBoundary extends Component<Props, { hasError: boolean }> {
+  constructor(props: Props) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error) {
+    console.error("Error boundary caught:", error)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || <div>Something went wrong</div>
+    }
+
+    return this.props.children
+  }
+}
+```

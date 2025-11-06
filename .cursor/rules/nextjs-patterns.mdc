@@ -1,0 +1,198 @@
+---
+description: Next.js 16 App Router patterns and best practices
+globs:
+  - "src/app/**/*"
+  - "src/components/**/*"
+alwaysApply: false
+---
+
+# Next.js Patterns
+
+## App Router (Next.js 16)
+- Use Server Components by default
+- Add `"use client"` directive only when necessary
+- Use Suspense boundaries with fallback UI for async components
+- Implement proper error boundaries with error.tsx
+- Use loading.tsx for loading states
+
+## Server Components (Default)
+- Fetch data directly in the component
+- Use async/await syntax
+- No need for useState, useEffect for data fetching
+- Can directly access database, environment variables, server-side APIs
+- Keep Server Components as the default choice
+
+Example:
+```typescript
+// app/capabilities/page.tsx
+import { db } from "@/db"
+import { capability } from "@/db/schema"
+
+export default async function CapabilitiesPage() {
+  const capabilities = await db.select().from(capability)
+
+  return (
+    <div>
+      {capabilities.map(cap => (
+        <CapabilityCard key={cap.id} capability={cap} />
+      ))}
+    </div>
+  )
+}
+```
+
+## Client Components
+- Add `"use client"` at the top of the file
+- Use for: interactivity, browser APIs, React hooks, event handlers
+- Keep client components small and focused
+- Prefer Server Components for data fetching, pass data as props to Client Components
+
+Example:
+```typescript
+"use client"
+
+import { useState } from "react"
+
+export function InteractiveButton() {
+  const [count, setCount] = useState(0)
+
+  return (
+    <button onClick={() => setCount(count + 1)}>
+      Clicked {count} times
+    </button>
+  )
+}
+```
+
+## Dynamic Imports
+- Wrap client imports with dynamic imports when used in server components
+- Prevents hydration mismatches
+- Reduces initial bundle size
+
+Example:
+```typescript
+import dynamic from "next/dynamic"
+
+const ClientComponent = dynamic(() => import("@/components/client-component"), {
+  loading: () => <Spinner />,
+  ssr: false, // if component uses browser-only APIs
+})
+```
+
+## Server Actions
+- Place in `/src/actions/` directory
+- Add `"use server"` directive at the top
+- Export async functions
+- Use Zod for input validation
+- Return serializable data (no class instances, functions, etc.)
+- Handle errors with try-catch, return error states
+- Call `revalidatePath()` or `revalidateTag()` after mutations
+
+Example:
+```typescript
+"use server"
+
+import { revalidatePath } from "next/cache"
+import { db } from "@/db"
+import { capability } from "@/db/schema"
+
+export async function createCapability(input: unknown) {
+  try {
+    // Validate input
+    const validated = createCapabilitySchema.parse(input)
+
+    // Insert into database
+    const [newCapability] = await db
+      .insert(capability)
+      .values(validated)
+      .returning()
+
+    // Revalidate the capabilities page
+    revalidatePath("/capabilities")
+
+    return { success: true, data: newCapability }
+  } catch (error) {
+    return { success: false, error: "Failed to create capability" }
+  }
+}
+```
+
+## API Routes
+- Use for: webhooks, third-party integrations, non-Next.js clients
+- Prefer Server Actions for app mutations
+- Return `Response` or use `NextResponse`
+- Implement proper error handling (status codes)
+- Validate inputs with Zod schemas
+
+Example:
+```typescript
+// app/api/webhooks/route.ts
+import { NextRequest, NextResponse } from "next/server"
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+
+    // Process webhook
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
+  }
+}
+```
+
+## Metadata
+- Use `generateMetadata()` for dynamic metadata
+- Export static metadata object for static pages
+- Include OpenGraph and Twitter card metadata
+
+Example:
+```typescript
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Capabilities | OpenModal.ai",
+  description: "Track AGI capability development",
+}
+
+// Or dynamic
+export async function generateMetadata({ params }): Promise<Metadata> {
+  const capability = await getCapability(params.slug)
+
+  return {
+    title: capability.title,
+    description: capability.description,
+  }
+}
+```
+
+## Route Groups
+- Use route groups for layout organization: `(public)`, `(dashboard)`, `(auth)`
+- Route groups don't affect URL structure
+- Each group can have its own layout
+
+## Loading and Error States
+- Create `loading.tsx` for route loading states
+- Create `error.tsx` for error boundaries
+- Use Suspense for component-level loading
+
+## Performance
+- Use Next.js Image component for all images
+- Implement lazy loading with Suspense
+- Minimize client-side JavaScript
+- Use React Query's caching for client-side data
+
+## Revalidation
+- Use `revalidatePath("/path")` after mutations to specific paths
+- Use `revalidateTag("tag")` for more granular control
+- Set revalidation time in route segment config for time-based ISR
+
+Example:
+```typescript
+// app/capabilities/[slug]/page.tsx
+export const revalidate = 3600 // Revalidate every hour
+```

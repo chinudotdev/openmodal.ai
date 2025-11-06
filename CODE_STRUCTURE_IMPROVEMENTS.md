@@ -3,6 +3,22 @@
 ## Overview
 This document outlines recommended improvements to the OpenModal.ai codebase structure. The current codebase is well-organized with modern technologies, but there are several areas where enhancements could improve maintainability, scalability, and developer experience.
 
+## Cursor Rules ✅ COMPLETED
+**Project Rules** have been implemented to guide AI assistants (Cursor, Claude Code, etc.) when working on the codebase:
+
+- **`.cursor/rules/`** - Directory containing focused, composable rules in MDC format:
+  - `code-style.mdc` - General code style and formatting conventions
+  - `typescript.mdc` - TypeScript guidelines and type safety practices
+  - `nextjs-patterns.mdc` - Next.js 16 App Router patterns
+  - `react-components.mdc` - React component best practices
+  - `database.mdc` - Drizzle ORM and PostgreSQL patterns
+  - `styling.mdc` - Tailwind CSS and theming guidelines
+  - `auth.mdc` - Authentication patterns with Better Auth
+
+- **`AGENTS.md`** - High-level agent instructions in the project root for quick reference
+
+These rules will automatically apply when working with relevant files, ensuring consistent coding standards and best practices across the project.
+
 ## Current State Analysis
 
 ### Strengths ✅

@@ -1,0 +1,211 @@
+---
+description: Styling with Tailwind CSS and theming
+globs:
+  - "src/components/**/*.tsx"
+  - "src/app/**/*.tsx"
+alwaysApply: false
+---
+
+# Styling Guidelines
+
+## Tailwind CSS
+- Use Tailwind classes for all styling
+- Use `cn()` utility from `/src/lib/utils.ts` for conditional classes
+- Follow mobile-first responsive design (`sm:`, `md:`, `lg:`, `xl:`, `2xl:`)
+- Use Tailwind's spacing scale (4px increments: 1, 2, 4, 8, 16, etc.)
+- Prefer Tailwind utilities over custom CSS when possible
+
+Example:
+```typescript
+import { cn } from "@/lib/utils"
+
+export function Card({ className, isActive }: CardProps) {
+  return (
+    <div
+      className={cn(
+        "rounded-lg border bg-card p-6",
+        "hover:shadow-lg transition-shadow",
+        isActive && "ring-2 ring-primary",
+        className
+      )}
+    >
+      {/* content */}
+    </div>
+  )
+}
+```
+
+## Responsive Design
+- Use mobile-first approach (base styles for mobile, then add breakpoints)
+- Standard breakpoints: `sm` (640px), `md` (768px), `lg` (1024px), `xl` (1280px), `2xl` (1536px)
+- Test on multiple screen sizes
+- Consider touch targets (minimum 44x44px for interactive elements)
+
+Example:
+```typescript
+<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+  {/* cards */}
+</div>
+```
+
+## Theme Support
+- Use `next-themes` for dark mode
+- Define colors in CSS variables (configured in `app.css`)
+- Use semantic color names (e.g., `bg-background`, `text-foreground`)
+- Test both light and dark modes
+- Respect system preference
+
+Example:
+```typescript
+// Use semantic colors
+<div className="bg-background text-foreground">
+  <h1 className="text-primary">Title</h1>
+  <p className="text-muted-foreground">Description</p>
+</div>
+```
+
+## CSS Variables
+- Theme colors defined in `app.css`:
+  - `--background`, `--foreground`
+  - `--primary`, `--primary-foreground`
+  - `--secondary`, `--secondary-foreground`
+  - `--muted`, `--muted-foreground`
+  - `--accent`, `--accent-foreground`
+  - `--destructive`, `--destructive-foreground`
+  - `--border`, `--input`, `--ring`
+  - `--radius`
+
+## Spacing
+- Use consistent spacing throughout the app
+- Common spacing values: 2, 4, 6, 8, 12, 16, 24, 32
+- Use `space-y-*` for vertical spacing between elements
+- Use `gap-*` for grid/flex gaps
+
+Example:
+```typescript
+<div className="space-y-4">
+  <div>Item 1</div>
+  <div>Item 2</div>
+  <div>Item 3</div>
+</div>
+```
+
+## Typography
+- Font family defined in root layout (Geist Sans, Geist Mono)
+- Use semantic heading tags: `h1`, `h2`, `h3`, etc.
+- Use Tailwind text utilities: `text-sm`, `text-base`, `text-lg`, `text-xl`, etc.
+- Line height: `leading-tight`, `leading-normal`, `leading-relaxed`
+
+Example:
+```typescript
+<div>
+  <h1 className="text-4xl font-bold tracking-tight">Main Title</h1>
+  <h2 className="text-2xl font-semibold">Section Title</h2>
+  <p className="text-base text-muted-foreground leading-relaxed">
+    Body text
+  </p>
+</div>
+```
+
+## Animations
+- Use `tw-animate-css` for animations
+- Keep animations subtle and purposeful
+- Respect `prefers-reduced-motion`
+- Common animations: fade-in, slide-up, pulse, spin
+
+Example:
+```typescript
+<div className="animate-fade-in">
+  {/* content */}
+</div>
+
+<button className="hover:animate-pulse">
+  Click me
+</button>
+```
+
+## Layout Patterns
+- Use flexbox for one-dimensional layouts
+- Use grid for two-dimensional layouts
+- Use container for content width constraints
+- Use fixed positioning sparingly
+
+Example:
+```typescript
+// Flex layout
+<div className="flex items-center justify-between">
+  <div>Left</div>
+  <div>Right</div>
+</div>
+
+// Grid layout
+<div className="grid grid-cols-3 gap-4">
+  <div>1</div>
+  <div>2</div>
+  <div>3</div>
+</div>
+
+// Container
+<div className="container mx-auto px-4">
+  {/* content */}
+</div>
+```
+
+## Component Styling Patterns
+
+### Card Pattern
+```typescript
+<div className="rounded-lg border bg-card p-6 shadow-sm">
+  <h3 className="font-semibold">Card Title</h3>
+  <p className="text-sm text-muted-foreground">Card content</p>
+</div>
+```
+
+### Button Variants (use shadcn/ui Button)
+```typescript
+import { Button } from "@/components/ui/button"
+
+<Button variant="default">Primary</Button>
+<Button variant="secondary">Secondary</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="destructive">Delete</Button>
+```
+
+### Form Styling
+```typescript
+<div className="space-y-4">
+  <div className="space-y-2">
+    <label className="text-sm font-medium">Label</label>
+    <input
+      type="text"
+      className="w-full rounded-md border border-input bg-background px-3 py-2"
+    />
+  </div>
+</div>
+```
+
+## Accessibility
+- Maintain color contrast ratios (WCAG AA minimum)
+- Use focus indicators (ring classes)
+- Test keyboard navigation
+- Provide visual feedback for interactive elements
+
+Example:
+```typescript
+<button className="focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+  Accessible button
+</button>
+```
+
+## Custom CSS
+- Avoid custom CSS when possible (use Tailwind first)
+- If custom CSS is needed, use CSS modules or styled components
+- Document why Tailwind couldn't be used
+- Keep custom styles co-located with components
+
+## Performance
+- Purge unused styles (configured in tailwind.config)
+- Use JIT mode (enabled by default in Tailwind 4)
+- Avoid deeply nested @apply directives
+- Consider bundle size when adding custom animations

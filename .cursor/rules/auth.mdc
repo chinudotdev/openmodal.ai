@@ -1,0 +1,258 @@
+---
+description: Authentication patterns with Better Auth and Web3
+globs:
+  - "src/lib/auth.ts"
+  - "src/lib/auth-client.ts"
+  - "src/app/**/login/**/*"
+  - "src/app/**/signup/**/*"
+alwaysApply: false
+---
+
+# Authentication Patterns
+
+## Better Auth Setup
+- Server-side auth: `/src/lib/auth.ts`
+- Client-side auth: `/src/lib/auth-client.ts`
+- Session provider wraps the app in `/src/app/providers.tsx`
+- API routes handled at `/src/app/api/auth/[...all]/route.ts`
+
+## Authentication Methods
+1. **Email/Password**: Standard authentication
+2. **Google OAuth**: Social authentication
+3. **SIWE (Sign In With Ethereum)**: Web3 wallet authentication with ENS support
+
+## Using Auth in Components
+
+### Server Components
+```typescript
+import { auth } from "@/lib/auth"
+import { headers } from "next/headers"
+
+export default async function ProtectedPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+
+  if (!session) {
+    redirect("/login")
+  }
+
+  return <div>Welcome {session.user.name}</div>
+}
+```
+
+### Client Components
+```typescript
+"use client"
+
+import { useSession } from "@/lib/auth-client"
+
+export function UserProfile() {
+  const { data: session, isPending } = useSession()
+
+  if (isPending) return <Spinner />
+  if (!session) return <LoginButton />
+
+  return (
+    <div>
+      <p>Welcome {session.user.name}</p>
+      <p>{session.user.email}</p>
+    </div>
+  )
+}
+```
+
+## Protected Routes
+- Check session in page component or layout
+- Redirect to `/login` if unauthorized
+- Pass return URL for redirecting back after login
+
+Example:
+```typescript
+// app/dashboard/page.tsx
+import { auth } from "@/lib/auth"
+import { redirect } from "next/navigation"
+import { headers } from "next/headers"
+
+export default async function DashboardPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+
+  if (!session) {
+    redirect("/login?returnTo=/dashboard")
+  }
+
+  return <Dashboard user={session.user} />
+}
+```
+
+## Web3 Authentication
+
+### SIWE (Sign In With Ethereum)
+```typescript
+"use client"
+
+import { signIn } from "@/lib/auth-client"
+import { useAccount, useSignMessage } from "wagmi"
+
+export function WalletLoginButton() {
+  const { address } = useAccount()
+  const { signMessageAsync } = useSignMessage()
+
+  const handleLogin = async () => {
+    if (!address) return
+
+    await signIn.wallet({
+      address,
+      signMessage: async (message) => {
+        return await signMessageAsync({ message })
+      },
+    })
+  }
+
+  return <button onClick={handleLogin}>Sign in with Wallet</button>
+}
+```
+
+### ENS Name Resolution
+```typescript
+// Automatically resolved by Better Auth
+// Display ENS name if available, fallback to truncated address
+export function WalletDisplay({ address, ensName }: Props) {
+  return (
+    <div>
+      {ensName || `${address.slice(0, 6)}...${address.slice(-4)}`}
+    </div>
+  )
+}
+```
+
+## Session Management
+
+### Sign Out
+```typescript
+"use client"
+
+import { signOut } from "@/lib/auth-client"
+
+export function SignOutButton() {
+  return (
+    <button onClick={() => signOut()}>
+      Sign out
+    </button>
+  )
+}
+```
+
+### Check Auth Status
+```typescript
+"use client"
+
+import { useSession } from "@/lib/auth-client"
+
+export function AuthStatus() {
+  const { data: session, isPending } = useSession()
+
+  if (isPending) return <div>Loading...</div>
+
+  return (
+    <div>
+      {session ? (
+        <span>Signed in as {session.user.email}</span>
+      ) : (
+        <span>Not signed in</span>
+      )}
+    </div>
+  )
+}
+```
+
+## Server Actions with Auth
+- Always check session before performing protected actions
+- Return appropriate errors for unauthorized requests
+
+Example:
+```typescript
+"use server"
+
+import { auth } from "@/lib/auth"
+import { headers } from "next/headers"
+
+export async function createCapability(input: unknown) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+
+  if (!session) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  // Proceed with action
+  const userId = session.user.id
+  // ...
+}
+```
+
+## API Routes with Auth
+```typescript
+import { auth } from "@/lib/auth"
+import { NextRequest, NextResponse } from "next/server"
+
+export async function GET(request: NextRequest) {
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  })
+
+  if (!session) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    )
+  }
+
+  // Handle request
+  return NextResponse.json({ data: "protected data" })
+}
+```
+
+## Security Best Practices
+- Never trust client-side session data
+- Always verify session server-side for protected operations
+- Use HTTPS in production
+- Validate wallet signatures server-side via Better Auth
+- Handle wallet disconnection gracefully
+- Set appropriate session expiration times
+- Use CSRF protection (built into Better Auth)
+
+## Environment Variables
+Required auth environment variables:
+```
+BETTER_AUTH_SECRET=<random_secret_32+_chars>
+BETTER_AUTH_URL=<your_app_url>
+GOOGLE_CLIENT_ID=<google_oauth_client_id>
+GOOGLE_CLIENT_SECRET=<google_oauth_client_secret>
+```
+
+## Error Handling
+- Handle authentication errors gracefully
+- Provide clear error messages to users
+- Log authentication failures for security monitoring
+- Implement rate limiting for login attempts
+
+Example:
+```typescript
+try {
+  await signIn.email({
+    email,
+    password,
+  })
+  router.push("/dashboard")
+} catch (error) {
+  if (error.code === "INVALID_CREDENTIALS") {
+    setError("Invalid email or password")
+  } else {
+    setError("An error occurred. Please try again.")
+  }
+}
+```
