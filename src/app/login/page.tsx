@@ -16,7 +16,7 @@ export default function LoginPage() {
           <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
             <GalleryVerticalEnd className="size-4" />
           </div>
-          Acme Inc.
+          OpenModal.ai
         </Link>
         <Suspense fallback={<Spinner className="w-4 h-4" />}>
           <LoginForm />
