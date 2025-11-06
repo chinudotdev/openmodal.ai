@@ -23,13 +23,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // Generate static params for common/popular capabilities
 export async function generateStaticParams() {
-  // Fetch all capabilities to generate static params
-  // Limit to first 100 to avoid too many static pages
-  const capabilities = await getCapabilities({}, "progress_desc", 100, 0);
+  try {
+    // Fetch all capabilities to generate static params
+    // Limit to first 100 to avoid too many static pages
+    const capabilities = await getCapabilities({}, "progress_desc", 100, 0);
 
-  return capabilities.map((capability) => ({
-    slug: capability.slug,
-  }));
+    // Handle case when there are no capabilities in the database
+    // With Cache Components, we must return at least one result
+    // Return a placeholder slug that will result in 404
+    if (!capabilities || capabilities.length === 0) {
+      return [{ slug: "__placeholder__no_capabilities__" }];
+    }
+
+    return capabilities.map((capability) => ({
+      slug: capability.slug,
+    }));
+  } catch (error) {
+    // If there's an error fetching capabilities (e.g., database connection issue),
+    // return a placeholder to satisfy Cache Components requirement
+    // The placeholder will result in 404, which is handled by the page component
+    console.error("Error generating static params for capabilities:", error);
+    return [{ slug: "__placeholder__error__" }];
+  }
 }
 
 interface PageProps {
