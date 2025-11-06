@@ -76,6 +76,43 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
+
+  /* AGI Dashboard Design System Colors */
+  /* Primary Blues */
+  --primary-600: #2563eb;
+  --primary-500: #3b82f6;
+  --primary-400: #60a5fa;
+  --primary-100: #dbeafe;
+  --primary-50: #eff6ff;
+
+  /* Purples (Secondary) */
+  --purple-600: #7c3aed;
+  --purple-500: #8b5cf6;
+  --purple-100: #e9d5ff;
+  --purple-50: #f5f3ff;
+
+  /* Status Colors */
+  --green-600: #059669;
+  --green-500: #10b981;
+  --green-100: #d1fae5;
+  --yellow-600: #d97706;
+  --yellow-500: #f59e0b;
+  --yellow-100: #fef3c7;
+  --red-600: #dc2626;
+  --red-500: #ef4444;
+  --red-100: #fee2e2;
+
+  /* Neutral Grays */
+  --gray-900: #111827;
+  --gray-800: #1f2937;
+  --gray-700: #374151;
+  --gray-600: #4b5563;
+  --gray-500: #6b7280;
+  --gray-400: #9ca3af;
+  --gray-300: #d1d5db;
+  --gray-200: #e5e7eb;
+  --gray-100: #f3f4f6;
+  --gray-50: #f9fafb;
 }
 
 .dark {
@@ -119,4 +156,32 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* AGI Dashboard Animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
 }

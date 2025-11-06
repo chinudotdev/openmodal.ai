@@ -12,7 +12,7 @@ export async function proxy(request: NextRequest) {
     const callbackPath = request.nextUrl.pathname;
     const queryParams = request.nextUrl.search;
     return NextResponse.redirect(
-      new URL("/login?callbackURL=" + callbackPath + queryParams, request.url)
+      new URL("/login?callbackURL=" + callbackPath + queryParams, request.url),
     );
   }
   return NextResponse.next();

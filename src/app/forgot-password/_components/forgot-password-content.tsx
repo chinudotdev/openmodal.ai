@@ -39,7 +39,7 @@ export function ForgotPasswordContent() {
             <p className="text-sm text-muted-foreground">
               We recommend using social login for a seamless experience.
             </p>
-            
+
             <Button variant="outline" className="w-full" asChild>
               <Link href="/login">
                 <svg
@@ -64,9 +64,7 @@ export function ForgotPasswordContent() {
               Need additional help? Contact me at
             </p>
             <Button variant="outline" className="w-full" asChild>
-              <a href="mailto:chinudotdev@gmail.com">
-                chinudotdev@gmail.com
-              </a>
+              <a href="mailto:chinudotdev@gmail.com">chinudotdev@gmail.com</a>
             </Button>
           </div>
 
@@ -81,4 +79,3 @@ export function ForgotPasswordContent() {
     </div>
   );
 }
-
