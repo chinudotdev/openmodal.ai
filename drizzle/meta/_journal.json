@@ -15,6 +15,13 @@
       "when": 1762405888015,
       "tag": "0001_workable_justice",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1762434606371,
+      "tag": "0002_familiar_lizard",
+      "breakpoints": true
     }
   ]
 }
