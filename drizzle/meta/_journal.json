@@ -8,6 +8,13 @@
       "when": 1762398531821,
       "tag": "0000_chubby_kabuki",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1762405888015,
+      "tag": "0001_workable_justice",
+      "breakpoints": true
     }
   ]
 }
