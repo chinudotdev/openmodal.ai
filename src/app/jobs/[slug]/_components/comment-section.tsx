@@ -1,0 +1,71 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CommentThread } from "./comment-thread";
+import { CommentForm } from "./comment-form";
+import { getJobComments } from "@/actions/jobs";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface CommentSectionProps {
+  jobId: string;
+}
+
+export function CommentSection({ jobId }: CommentSectionProps) {
+  const [comments, setComments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadComments = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await getJobComments(jobId);
+      setComments(data);
+    } catch (error) {
+      console.error("Failed to load comments:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [jobId]);
+
+  useEffect(() => {
+    loadComments();
+  }, [loadComments]);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Discussion</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <CommentForm jobId={jobId} onCommentAdded={loadComments} />
+
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            ))}
+          </div>
+        ) : comments.length === 0 ? (
+          <p className="text-center text-sm text-muted-foreground">
+            No comments yet. Be the first to comment!
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {comments.map((comment) => (
+              <CommentThread
+                key={comment.id}
+                comment={comment}
+                jobId={jobId}
+                onCommentAdded={loadComments}
+              />
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
