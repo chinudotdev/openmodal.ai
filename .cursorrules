@@ -1,0 +1,449 @@
+# OpenModal.ai Cursor Rules
+
+## Project Overview
+This is an AGI Progress Tracker Platform built with Next.js 16, React 19, TypeScript, Tailwind CSS 4, and PostgreSQL (via Neon). The platform enables community-driven capability tracking with Web3 integration, real-time filtering, predictions, and discussions around AI development timelines.
+
+## Tech Stack
+- **Frontend**: Next.js 16 (App Router), React 19, TypeScript 5, Tailwind CSS 4
+- **UI Components**: shadcn/ui (Radix UI), Lucide icons, Recharts
+- **Backend**: Next.js API routes, Server Actions
+- **Database**: PostgreSQL (Neon serverless) with Drizzle ORM
+- **Authentication**: Better Auth with SIWE (Sign In With Ethereum), ENS lookup, Google OAuth
+- **Web3**: Wagmi, Viem, RainbowKit
+- **Email**: Resend with React Email templates
+- **Analytics**: PostHog
+- **Code Quality**: Biome (linter/formatter), TypeScript strict mode
+
+## Code Style & Formatting
+
+### General Conventions
+- Use 2-space indentation (configured in biome.json)
+- Use TypeScript for all files (.ts, .tsx)
+- Use functional components with hooks (no class components)
+- Use async/await over promises chains
+- Prefer named exports over default exports for components
+- Use destructuring for props and imports
+- Use template literals for string concatenation
+- Keep files under 300 lines when possible
+
+### Naming Conventions
+- **Files**: kebab-case for all files (e.g., `capability-card.tsx`, `auth-client.ts`)
+- **Components**: PascalCase (e.g., `CapabilityCard`, `ActivityFeed`)
+- **Functions/Variables**: camelCase (e.g., `getUserCapabilities`, `isLoading`)
+- **Constants**: UPPER_SNAKE_CASE for true constants (e.g., `MAX_PREDICTIONS`, `API_ROUTES`)
+- **Types/Interfaces**: PascalCase with descriptive names (e.g., `CapabilityWithDetails`, `PredictionFormData`)
+- **Database Tables**: snake_case (following PostgreSQL convention)
+- **Enums**: snake_case for values (e.g., `capability_status`, `confidence_level`)
+
+### TypeScript Guidelines
+- Enable strict mode (already configured)
+- Avoid `any` types - use `unknown` if type is truly unknown
+- Prefer interfaces for object shapes, types for unions/intersections
+- Use Zod schemas for runtime validation (especially for forms and API inputs)
+- Export types separately from implementation
+- Use type inference when possible, explicit types when clarity is needed
+- Prefer `type` for complex types, `interface` for extendable object shapes
+
+### React Best Practices
+- Use Server Components by default (Next.js 16 App Router)
+- Add `"use client"` directive only when necessary (hooks, browser APIs, interactivity)
+- Wrap client imports with dynamic imports when used in server components
+- Use Suspense boundaries with fallback UI for async components
+- Implement proper error boundaries
+- Use React Query for client-side data fetching and caching
+- Prefer composition over prop drilling (use Context sparingly)
+- Memoize expensive calculations with `useMemo`, callbacks with `useCallback`
+
+### Next.js Patterns
+- Use Server Actions for data mutations (`/src/actions/`)
+- Place API routes in `/src/app/api/` following Next.js conventions
+- Use route groups for layout organization (e.g., `(public)`, `(dashboard)`)
+- Implement loading.tsx for loading states
+- Implement error.tsx for error handling
+- Use `generateMetadata()` for dynamic metadata
+- Optimize images with Next.js Image component
+- Use `revalidatePath()` or `revalidateTag()` after mutations
+
+## File Structure
+
+### Directory Organization
+```
+src/
+├── app/                    # Next.js App Router (pages, layouts, routes)
+│   ├── (public)/          # Public routes group
+│   ├── api/               # API routes
+│   └── layout.tsx         # Root layout
+├── components/            # React components
+│   ├── ui/                # shadcn/ui primitives (21+ components)
+│   ├── [feature]/         # Feature-specific components (e.g., agi-dashboard/, auth/)
+│   └── shared/            # Reusable utilities
+├── actions/               # Server Actions (grouped by domain)
+├── db/                    # Database layer
+│   ├── schema/            # Drizzle schemas
+│   └── index.ts           # DB connection
+├── lib/                   # Utilities, helpers, configs
+│   ├── auth.ts            # Better Auth setup
+│   ├── auth-client.ts     # Client-side auth
+│   ├── email.ts           # Email service
+│   └── utils.ts           # Utility functions
+├── hooks/                 # Custom React hooks
+├── contexts/              # React contexts
+└── emails/                # Email templates
+```
+
+### File Organization Rules
+- Co-locate related files (keep components near their pages when specific to one route)
+- Use `_components/` folders for page-specific components
+- Keep shared components in `/src/components/`
+- Group server actions by domain (e.g., all capability-related actions in `capabilities.ts`)
+- One component per file (except for small, tightly coupled sub-components)
+- Place types in the same file as implementation, or in `types.ts` if shared
+
+## Component Guidelines
+
+### Component Structure
+```typescript
+// 1. Imports (grouped: React, Next.js, third-party, local)
+import { type ReactNode } from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+
+// 2. Types/Interfaces
+interface ComponentProps {
+  title: string
+  children?: ReactNode
+  className?: string
+}
+
+// 3. Component definition
+export function Component({ title, children, className }: ComponentProps) {
+  // 4. Hooks (in order: state, effects, custom hooks)
+  // 5. Event handlers
+  // 6. Render logic
+  return (
+    <div className={cn("base-classes", className)}>
+      {/* ... */}
+    </div>
+  )
+}
+```
+
+### Server Components (Default)
+- Fetch data directly in the component
+- Use async/await syntax
+- No need for useState, useEffect for data fetching
+- Can directly access database, environment variables, server-side APIs
+
+### Client Components
+- Add `"use client"` at the top of the file
+- Use for: interactivity, browser APIs, React hooks, event handlers
+- Keep client components small and focused
+- Prefer Server Components for data fetching, pass data as props to Client Components
+
+### shadcn/ui Components
+- Install via: `npx shadcn@latest add [component]`
+- Located in `/src/components/ui/`
+- Customize as needed (they're copied to your project)
+- Use `cn()` utility for conditional className merging
+- Follow the "new-york" style variant
+
+## State Management
+
+### Server State (Preferred)
+- Use Server Components and Server Actions for server state
+- Use React Query (TanStack Query) for client-side server state caching
+- Implement optimistic updates with `useMutation`
+- Use `useQuery` for GET operations, `useMutation` for mutations
+
+### Client State
+- Use `useState` for local component state
+- Use `useReducer` for complex state logic
+- Use Context only when necessary (avoid prop drilling for deeply nested trees)
+- Keep state as local as possible
+
+### Form State
+- Use TanStack React Form for complex forms
+- Use Server Actions for form submissions
+- Implement Zod validation schemas
+- Show loading states during submission
+- Display error messages clearly
+
+## Database & ORM
+
+### Drizzle ORM Patterns
+- Define schemas in `/src/db/schema/`
+- Use snake_case for table and column names
+- Group related tables in the same schema file
+- Export types from schema: `export type Capability = typeof capability.$inferSelect`
+- Use transactions for multi-table operations
+- Prefer prepared statements for repeated queries
+
+### Migrations
+- Generate migrations: `bun run db:generate`
+- Run migrations: `bun run db:migrate`
+- Review generated SQL before applying
+- Never edit migrations manually after they're applied
+
+### Querying
+- Use Drizzle's query builder (type-safe)
+- Use `.with()` for eager loading related data
+- Implement pagination with `limit()` and `offset()`
+- Use `.$dynamic()` for conditional query building
+- Return only needed columns with `.select()`
+
+## Authentication
+
+### Better Auth Setup
+- Server-side auth: `@/lib/auth`
+- Client-side auth: `@/lib/auth-client`
+- Session provider wraps the app in `/src/app/providers.tsx`
+- Use `useSession()` hook in client components
+- Check auth in Server Components by importing from `@/lib/auth`
+- SIWE integration for wallet authentication
+- ENS lookup for wallet addresses
+
+### Protected Routes
+- Check session in page component
+- Redirect to `/login` if unauthorized
+- Use middleware for route protection when applicable
+
+## API & Server Actions
+
+### Server Actions
+- Place in `/src/actions/` directory
+- Add `"use server"` directive at the top
+- Export async functions
+- Use Zod for input validation
+- Return serializable data (no class instances, functions, etc.)
+- Handle errors with try-catch, return error states
+- Call `revalidatePath()` or `revalidateTag()` after mutations
+- Keep actions focused and single-purpose
+
+### API Routes
+- Use for: webhooks, third-party integrations, non-Next.js clients
+- Prefer Server Actions for app mutations
+- Return `Response` or use `NextResponse`
+- Implement proper error handling (status codes)
+- Validate inputs with Zod schemas
+
+## Styling
+
+### Tailwind CSS
+- Use Tailwind classes for all styling
+- Use `cn()` utility from `/src/lib/utils.ts` for conditional classes
+- Follow mobile-first responsive design (`sm:`, `md:`, `lg:`, `xl:`, `2xl:`)
+- Use Tailwind's spacing scale (4px increments)
+- Prefer Tailwind utilities over custom CSS when possible
+- Use CSS variables for theme colors (configured in `app.css`)
+
+### Theme Support
+- Use `next-themes` for dark mode
+- Define colors in CSS variables
+- Use semantic color names (e.g., `bg-background`, `text-foreground`)
+- Test both light and dark modes
+
+### Animations
+- Use `tw-animate-css` for animations
+- Keep animations subtle and purposeful
+- Respect `prefers-reduced-motion`
+
+## Error Handling
+
+### Client-Side
+- Use error boundaries for component errors
+- Use toast notifications (Sonner) for user-facing errors
+- Log errors to console in development, analytics in production
+- Provide helpful error messages (avoid technical jargon)
+
+### Server-Side
+- Wrap async operations in try-catch
+- Return error states from Server Actions: `{ error: string }`
+- Log errors with context
+- Never expose sensitive error details to client
+
+## Performance
+
+### Optimization Strategies
+- Use Next.js Image component for all images
+- Implement lazy loading with `Suspense` and `lazy()`
+- Use `loading.tsx` for route loading states
+- Minimize client-side JavaScript (prefer Server Components)
+- Code split with dynamic imports
+- Optimize bundle size (tree shaking, minimize dependencies)
+- Use React Query's caching to avoid redundant requests
+
+### Database Performance
+- Use database indexes on frequently queried columns
+- Implement pagination for large datasets
+- Use `.select()` to limit returned columns
+- Consider using database views for complex queries
+- Monitor query performance with Drizzle Studio
+
+## Testing (TODO: Not yet implemented)
+
+### Future Testing Strategy
+- Use Vitest for unit/integration tests
+- Use Playwright or Cypress for E2E tests
+- Test user flows, not implementation details
+- Mock external dependencies (database, APIs)
+- Test error states and edge cases
+- Aim for meaningful coverage, not 100%
+
+## Security
+
+### Best Practices
+- Never commit secrets (use `.env.local`, check `.env.example`)
+- Validate all user inputs (Zod schemas)
+- Sanitize data before rendering
+- Use CSRF protection (built into Server Actions)
+- Implement rate limiting for public APIs
+- Use HTTPS in production
+- Keep dependencies updated
+- Follow OWASP guidelines
+
+### Web3 Security
+- Verify wallet signatures server-side
+- Never trust client-side wallet data
+- Use ENS lookup for display names only (not for auth)
+- Handle wallet disconnection gracefully
+
+## Environment Variables
+
+### Naming Convention
+- Use UPPER_SNAKE_CASE
+- Prefix public vars with `NEXT_PUBLIC_`
+- Document all required vars in `.env.example`
+- Validate env vars at runtime (consider using Zod)
+
+### Required Variables
+```
+DATABASE_URL              # Neon PostgreSQL connection string
+BETTER_AUTH_SECRET        # Secret for session encryption
+BETTER_AUTH_URL          # Base URL for callbacks
+GOOGLE_CLIENT_ID         # Google OAuth
+GOOGLE_CLIENT_SECRET     # Google OAuth
+RESEND_API_KEY          # Email service
+POSTHOG_KEY             # Analytics (optional)
+POSTHOG_HOST            # Analytics (optional)
+```
+
+## Code Comments
+
+### When to Comment
+- Complex business logic
+- Non-obvious workarounds
+- TODO items with context
+- Public APIs (use JSDoc)
+- Regex patterns (explain the pattern)
+
+### When NOT to Comment
+- Obvious code (let the code speak)
+- Redundant descriptions
+- Commented-out code (use git history)
+
+### JSDoc for Functions
+```typescript
+/**
+ * Fetches a capability by its slug with related data
+ * @param slug - The URL-friendly identifier for the capability
+ * @param userId - Optional user ID to include user-specific data
+ * @returns Capability with organizations, bottlenecks, and user predictions
+ */
+export async function getCapabilityBySlug(slug: string, userId?: string) {
+  // ...
+}
+```
+
+## Git Workflow
+
+### Commit Messages
+- Use conventional commits: `type(scope): message`
+- Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+- Keep first line under 72 characters
+- Use imperative mood: "add feature" not "added feature"
+
+### Branch Naming
+- Feature: `feat/description`
+- Bug fix: `fix/description`
+- Chore: `chore/description`
+
+## Accessibility
+
+### Guidelines
+- Use semantic HTML elements
+- Provide alt text for images
+- Ensure keyboard navigation works
+- Use ARIA labels when needed
+- Maintain color contrast ratios (WCAG AA)
+- Test with screen readers
+
+## AI-Specific Guidelines
+
+### When Generating Code
+1. Always check existing patterns in the codebase first
+2. Follow the established file structure
+3. Use existing components and utilities before creating new ones
+4. Match the existing code style (indentation, naming, formatting)
+5. Add proper TypeScript types
+6. Implement error handling
+7. Consider mobile responsiveness
+8. Add loading states for async operations
+9. Update related documentation if adding new patterns
+
+### When Refactoring
+1. Preserve existing functionality
+2. Update tests if they exist
+3. Check for breaking changes
+4. Update imports across the codebase
+5. Verify type safety after changes
+
+### When Debugging
+1. Check the terminal for build errors
+2. Review browser console for client-side errors
+3. Check server logs for server-side errors
+4. Verify environment variables are set
+5. Check database connection and schema
+
+## Domain-Specific Rules
+
+### Capability Management
+- All capability queries should include filtering and sorting options
+- Use Drizzle's query builder for complex joins
+- Implement optimistic updates for tracking/predictions
+- Cache capability lists with React Query
+
+### Comments & Voting
+- Implement optimistic updates for votes
+- Show loading states during submission
+- Validate comment content length (max character limit)
+- Support threaded discussions (parent/child relationships)
+
+### Web3 Integration
+- Handle wallet connection errors gracefully
+- Support ENS name resolution
+- Verify signatures server-side via Better Auth
+- Provide fallback authentication (email/password)
+
+## Resources
+
+### Documentation
+- Next.js: https://nextjs.org/docs
+- React: https://react.dev
+- Tailwind CSS: https://tailwindcss.com/docs
+- shadcn/ui: https://ui.shadcn.com
+- Drizzle ORM: https://orm.drizzle.team
+- Better Auth: https://better-auth.com
+- TanStack Query: https://tanstack.com/query
+
+### Internal Files
+- Database schema: `/src/db/schema/`
+- Auth config: `/src/lib/auth.ts`
+- UI components: `/src/components/ui/`
+- Utility functions: `/src/lib/utils.ts`
+- Example env vars: `.env.example`
+
+---
+
+**Last Updated**: 2025-11-06
+**Version**: 1.0.0
