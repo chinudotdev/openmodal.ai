@@ -42,7 +42,7 @@ export function SignupForm({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const callbackURL = searchParams.get("callbackURL") || "/dashboard";
+  const callbackURL = searchParams.get("callbackURL") || "/contribute";
 
   const form = useForm({
     defaultValues: {

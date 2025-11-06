@@ -22,7 +22,7 @@ export const auth = betterAuth({
     requireEmailVerification: true,
   },
   database: drizzleAdapter(db, {
-    provider: "sqlite",
+    provider: "pg",
     schema: authSchema,
   }),
   socialProviders: {

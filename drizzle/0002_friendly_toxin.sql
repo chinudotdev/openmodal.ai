@@ -1,1 +1,0 @@
-ALTER TABLE `models` ADD `model_url` text;
