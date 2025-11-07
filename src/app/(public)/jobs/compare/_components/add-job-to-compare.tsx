@@ -3,7 +3,7 @@
 import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { JobAutocomplete } from "@/app/jobs/_components/job-autocomplete";
+import { JobAutocomplete } from "@/app/(public)/jobs/_components/job-autocomplete";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -108,13 +108,12 @@ export function AddJobToCompare({ currentJobs = [] }: AddJobToCompareProps) {
                     className="flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-1.5 text-sm"
                   >
                     <span>{title}</span>
-                    <button
+                    <Button
                       onClick={() => handleRemoveJob(slug)}
                       className="hover:text-destructive transition-colors"
-                      aria-label={`Remove ${title}`}
                     >
                       <X className="h-3 w-3" />
-                    </button>
+                    </Button>
                   </div>
                 );
               })}

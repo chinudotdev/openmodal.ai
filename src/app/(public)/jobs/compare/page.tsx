@@ -1,6 +1,5 @@
-import { Suspense } from "react";
-import { Navbar } from "@/components/navigation/navbar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
 import { CompareContent } from "./_components";
 
 interface PageProps {
@@ -12,7 +11,6 @@ interface PageProps {
 export default async function CompareJobsPage({ searchParams }: PageProps) {
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <Suspense
         fallback={
           <div className="container mx-auto px-4 py-8">

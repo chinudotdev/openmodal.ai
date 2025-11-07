@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/navigation/navbar";
+import { Suspense } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,14 +7,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Suspense } from "react";
-import { DashboardComponent } from "./_components";
 import { Spinner } from "@/components/ui/spinner";
+import { DashboardComponent } from "./_components";
 
 export default async function CapabilitiesDashboardPage() {
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       {/* Breadcrumb */}
       <div className="border-b border-border bg-muted/40">
         <div className="container mx-auto px-4 py-3">

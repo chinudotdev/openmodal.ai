@@ -1,9 +1,7 @@
-import { Suspense } from "react";
 import {
   getCapabilities,
   getCapabilityCategories,
 } from "@/actions/capabilities";
-import { Navbar } from "@/components/navigation/navbar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,10 +10,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Skeleton } from "@/components/ui/skeleton";
-import { CapabilityFilters } from "./_components/capability-filters";
-import { CapabilityGrid } from "./_components/capability-grid";
-import { CapabilitySort } from "./_components/capability-sort";
+import { CapabilityFilters } from "./capability-filters";
+import { CapabilityGrid } from "./capability-grid";
+import { CapabilitySort } from "./capability-sort";
 
 interface PageProps {
   searchParams: Promise<{
@@ -28,7 +25,7 @@ interface PageProps {
   }>;
 }
 
-async function CapabilitiesContent({ searchParams }: PageProps) {
+export async function CapabilitiesContent({ searchParams }: PageProps) {
   const params = await searchParams;
 
   const filters = {
@@ -103,37 +100,5 @@ async function CapabilitiesContent({ searchParams }: PageProps) {
         </div>
       </div>
     </>
-  );
-}
-
-export default async function CapabilitiesListPage({
-  searchParams,
-}: PageProps) {
-  return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <Suspense
-        fallback={
-          <div className="container mx-auto px-4 py-8">
-            <div className="space-y-6">
-              <Skeleton className="h-12 w-64" />
-              <Skeleton className="h-6 w-96" />
-              <div className="grid grid-cols-1 lg:grid-cols-[25%_75%] gap-8">
-                <div className="space-y-4">
-                  <Skeleton className="h-64" />
-                  <Skeleton className="h-64" />
-                </div>
-                <div className="space-y-4">
-                  <Skeleton className="h-64" />
-                  <Skeleton className="h-64" />
-                </div>
-              </div>
-            </div>
-          </div>
-        }
-      >
-        <CapabilitiesContent searchParams={searchParams} />
-      </Suspense>
-    </div>
   );
 }

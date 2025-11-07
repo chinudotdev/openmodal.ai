@@ -1,6 +1,4 @@
-import { Suspense } from "react";
 import { getJobCategories, getJobs } from "@/actions/jobs";
-import { Navbar } from "@/components/navigation/navbar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,6 +8,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
 import { CompareJobsButton } from "./_components/compare-jobs-button";
 import { JobFilters } from "./_components/job-filters";
 import { JobGrid } from "./_components/job-grid";
@@ -126,7 +125,6 @@ async function JobsContent({ searchParams }: PageProps) {
 export default async function JobsListPage({ searchParams }: PageProps) {
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <Suspense
         fallback={
           <div className="container mx-auto px-4 py-8">
