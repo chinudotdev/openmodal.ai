@@ -2,8 +2,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
 import { JobContent } from "./_components";
 
-
-
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

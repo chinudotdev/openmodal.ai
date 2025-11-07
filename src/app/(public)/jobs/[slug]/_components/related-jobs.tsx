@@ -1,4 +1,3 @@
-
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { getJobBySlug } from "@/actions/jobs";

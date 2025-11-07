@@ -1,4 +1,3 @@
-
 import type { getJobBySlug } from "@/actions/jobs";
 import { JobStatusBadge } from "@/components/shared/job-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

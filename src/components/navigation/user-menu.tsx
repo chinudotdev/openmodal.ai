@@ -25,8 +25,6 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-
-
 export function UserMenu() {
   const { user, isLoading } = useSession();
   const router = useRouter();

@@ -14,7 +14,7 @@ export function Navbar() {
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">
         <div className="flex items-center gap-4">
           <Suspense fallback={<Spinner className="h-8 w-8" />}>
-          <MobileMenu />
+            <MobileMenu />
           </Suspense>
           <Link
             href="/"

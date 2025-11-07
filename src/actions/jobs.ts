@@ -54,7 +54,7 @@ export type JobComparisonData = {
 
 // Compare jobs (up to 3)
 export async function compareJobs(
-  slugs: string[]
+  slugs: string[],
 ): Promise<JobComparisonData[]> {
   "use cache";
   cacheLife({ stale: 3600, revalidate: 3600 * 4 });
@@ -100,7 +100,7 @@ export async function compareJobs(
             : null,
           estimatedAutomationYear: job.estimatedAutomationYear,
           growthRate: job.growthRate ? Number(job.growthRate) : null,
-        })
+        }),
       );
   } catch (error) {
     console.error("Error comparing jobs:", error);
@@ -145,7 +145,7 @@ export async function getJobBySlug(slug: string) {
       .where(eq(jobCapability.jobId, jobData.id))
       .orderBy(
         desc(jobCapability.blockingAutomation),
-        desc(jobCapability.percentageOfJob)
+        desc(jobCapability.percentageOfJob),
       ),
     // Get geographic data
     db
@@ -221,7 +221,7 @@ export async function getJobs(
   filters: JobFilters = {},
   sort: JobSort = "risk_desc",
   limit = 20,
-  offset = 0
+  offset = 0,
 ) {
   "use cache";
   cacheLife({ stale: 300, revalidate: 3600 * 1 });
@@ -258,8 +258,8 @@ export async function getJobs(
         ilike(job.title, `%${filters.search}%`),
         ilike(job.shortDescription, `%${filters.search}%`),
         ilike(job.industry, `%${filters.search}%`),
-        ilike(job.category, `%${filters.search}%`)
-      )
+        ilike(job.category, `%${filters.search}%`),
+      ),
     );
   }
 
@@ -455,7 +455,7 @@ export async function createJobComment(
   jobId: string,
   userId: string,
   content: string,
-  parentId?: string
+  parentId?: string,
 ) {
   // Check onboarding completion from session
   const onboardingCompleted = await checkOnboardingFromSession();
@@ -486,7 +486,7 @@ export async function createJobComment(
 export async function voteJobComment(
   commentId: string,
   userId: string,
-  voteType: CommentVoteType
+  voteType: CommentVoteType,
 ) {
   // Check onboarding completion from session
   const onboardingCompleted = await checkOnboardingFromSession();
@@ -599,7 +599,7 @@ export async function getJobCapabilities(jobId: string) {
     .where(eq(jobCapability.jobId, jobId))
     .orderBy(
       desc(jobCapability.blockingAutomation),
-      desc(jobCapability.percentageOfJob)
+      desc(jobCapability.percentageOfJob),
     );
 
   return jobCaps.map((jc) => ({
@@ -633,8 +633,8 @@ export async function searchJobs(query: string, limit = 10) {
       or(
         ilike(job.title, `%${query}%`),
         ilike(job.shortDescription, `%${query}%`),
-        ilike(job.industry, `%${query}%`)
-      )
+        ilike(job.industry, `%${query}%`),
+      ),
     )
     .orderBy(asc(job.title))
     .limit(limit);

@@ -27,4 +27,3 @@ export function CopyLinkButton({ reportId }: CopyLinkButtonProps) {
     </Button>
   );
 }
-

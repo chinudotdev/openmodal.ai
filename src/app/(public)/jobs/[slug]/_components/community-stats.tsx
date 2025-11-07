@@ -1,4 +1,3 @@
-
 import { Bell, Eye, FileText, MessageSquare } from "lucide-react";
 import type { getJobBySlug } from "@/actions/jobs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

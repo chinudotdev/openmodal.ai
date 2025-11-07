@@ -8,7 +8,7 @@ import {
   user,
   userBadge,
   userProfile,
-  userReputation
+  userReputation,
 } from "@/db/schema";
 import { capability, capabilityCategory } from "@/db/schema/capabilities";
 import { job } from "@/db/schema/jobs";
@@ -31,7 +31,7 @@ import { z } from "zod";
  */
 async function createOrGetJob(
   jobTitle: string,
-  industry?: string
+  industry?: string,
 ): Promise<string> {
   // Try to find existing job by title
   const existing = await db
@@ -79,7 +79,7 @@ async function createOrGetJob(
  */
 async function createOrGetCapability(
   capabilityName: string,
-  categoryId?: string
+  categoryId?: string,
 ): Promise<string> {
   // Try to find existing capability by name
   const existing = await db
@@ -133,7 +133,7 @@ async function createOrGetCapability(
  */
 export async function submitReport(
   userId: string,
-  reportData: DeploymentReportInput | BarrierReportInput | ResearchReportInput
+  reportData: DeploymentReportInput | BarrierReportInput | ResearchReportInput,
 ) {
   try {
     // Check onboarding completion from session
@@ -174,7 +174,7 @@ export async function submitReport(
       } else if (validatedData.step1.jobTitle) {
         jobId = await createOrGetJob(
           validatedData.step1.jobTitle,
-          undefined // industry not in schema
+          undefined, // industry not in schema
         );
       }
     }
@@ -187,7 +187,7 @@ export async function submitReport(
         validatedData.step1.capabilityName
       ) {
         capabilityId = await createOrGetCapability(
-          validatedData.step1.capabilityName
+          validatedData.step1.capabilityName,
         );
       }
     }
@@ -300,7 +300,7 @@ export async function saveReportDraft(
   userId: string,
   reportData: Partial<
     DeploymentReportInput | BarrierReportInput | ResearchReportInput
-  >
+  >,
 ) {
   try {
     // Check onboarding completion from session
@@ -362,8 +362,8 @@ export async function publishDraft(reportId: string, userId: string) {
           eq(report.id, reportId),
           eq(report.userId, userId),
           eq(report.isDraft, true),
-          isNull(report.deletedAt)
-        )
+          isNull(report.deletedAt),
+        ),
       )
       .limit(1);
 
@@ -424,8 +424,8 @@ export async function getUserDrafts(userId: string) {
         and(
           eq(report.userId, userId),
           eq(report.isDraft, true),
-          isNull(report.deletedAt)
-        )
+          isNull(report.deletedAt),
+        ),
       )
       .orderBy(desc(report.createdAt));
 
@@ -504,7 +504,7 @@ export async function updateReport(
   userId: string,
   reportData: Partial<
     DeploymentReportInput | BarrierReportInput | ResearchReportInput
-  >
+  >,
 ) {
   try {
     // Check onboarding completion from session
@@ -527,8 +527,8 @@ export async function updateReport(
         and(
           eq(report.id, reportId),
           eq(report.userId, userId),
-          isNull(report.deletedAt)
-        )
+          isNull(report.deletedAt),
+        ),
       )
       .limit(1);
 
@@ -585,8 +585,8 @@ export async function softDeleteReport(reportId: string, userId: string) {
         and(
           eq(report.id, reportId),
           eq(report.userId, userId),
-          isNull(report.deletedAt)
-        )
+          isNull(report.deletedAt),
+        ),
       )
       .limit(1);
 
@@ -676,8 +676,8 @@ export async function getApprovedReports(limit = 20, offset = 0) {
         and(
           eq(report.status, "approved"),
           eq(report.isDraft, false),
-          isNull(report.deletedAt)
-        )
+          isNull(report.deletedAt),
+        ),
       )
       .orderBy(desc(report.createdAt))
       .limit(limit)

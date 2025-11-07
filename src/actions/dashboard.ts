@@ -1,6 +1,6 @@
 "use server";
 
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   capabilityTracking,
@@ -12,66 +12,107 @@ import {
   userProfile,
   userReputation,
 } from "@/db/schema";
+import { cacheLife, cacheTag } from "next/cache";
 
 /**
  * Get user dashboard data
  */
 export async function getUserDashboard(userId: string) {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 3600 * 2 });
+  cacheTag(`dashboard:${userId}`);
+
   try {
-    // Get user reputation
-    const reputation = await db
-      .select()
+    // Single query with LEFT JOINs and JSON aggregation subqueries
+    const result = await db
+      .select({
+        reputation: userReputation,
+        profile: userProfile,
+        badges: sql<Array<typeof userBadge.$inferSelect>>`
+          COALESCE(
+            (SELECT json_agg(b.* ORDER BY b.earned_at DESC)
+             FROM ${userBadge} b
+             WHERE b.user_id = ${sql`${userId}`}),
+            '[]'::json
+          )
+        `.as("badges"),
+        reports: sql<Array<typeof report.$inferSelect>>`
+          COALESCE(
+            (SELECT json_agg(r.* ORDER BY r.created_at DESC)
+             FROM (
+               SELECT * FROM ${report}
+               WHERE user_id = ${sql`${userId}`}
+                 AND deleted_at IS NULL
+               ORDER BY created_at DESC
+               LIMIT 10
+             ) r),
+            '[]'::json
+          )
+        `.as("reports"),
+        trackedJobs: sql<Array<typeof jobTracking.$inferSelect>>`
+          COALESCE(
+            (SELECT json_agg(jt.*)
+             FROM (
+               SELECT * FROM ${jobTracking}
+               WHERE user_id = ${sql`${userId}`}
+               LIMIT 10
+             ) jt),
+            '[]'::json
+          )
+        `.as("tracked_jobs"),
+        trackedCapabilities: sql<Array<typeof capabilityTracking.$inferSelect>>`
+          COALESCE(
+            (SELECT json_agg(ct.*)
+             FROM (
+               SELECT * FROM ${capabilityTracking}
+               WHERE user_id = ${sql`${userId}`}
+               LIMIT 10
+             ) ct),
+            '[]'::json
+          )
+        `.as("tracked_capabilities"),
+        statsReports: sql<number>`
+          (SELECT COUNT(*) FROM ${report}
+           WHERE user_id = ${sql.raw(`'${userId}'`)}
+             AND deleted_at IS NULL)
+        `.as("stats_reports"),
+        statsVerifications: sql<number>`
+          (SELECT COUNT(*) FROM ${reportVerification}
+           WHERE user_id = ${sql.raw(`'${userId}'`)}
+             AND deleted_at IS NULL
+             AND can_verify = true)
+        `.as("stats_verifications"),
+        statsComments: sql<number>`
+          (SELECT COUNT(*) FROM ${reportComment}
+           WHERE user_id = ${sql.raw(`'${userId}'`)}
+             AND deleted_at IS NULL)
+        `.as("stats_comments"),
+      })
       .from(userReputation)
+      .leftJoin(userProfile, eq(userProfile.userId, userReputation.userId))
       .where(eq(userReputation.userId, userId))
       .limit(1);
 
-    // Get user badges
-    const badges = await db
-      .select()
-      .from(userBadge)
-      .where(eq(userBadge.userId, userId))
-      .orderBy(desc(userBadge.earnedAt));
+    if (result.length === 0) {
+      return null;
+    }
 
-    // Get user profile
-    const profile = await db
-      .select()
-      .from(userProfile)
-      .where(eq(userProfile.userId, userId))
-      .limit(1);
-
-    // Get user stats
-    const stats = await getUserStats(userId);
-
-    // Get user reports
-    const reports = await db
-      .select()
-      .from(report)
-      .where(and(eq(report.userId, userId), isNull(report.deletedAt)))
-      .orderBy(desc(report.createdAt))
-      .limit(10);
-
-    // Get tracked jobs
-    const trackedJobs = await db
-      .select()
-      .from(jobTracking)
-      .where(eq(jobTracking.userId, userId))
-      .limit(10);
-
-    // Get tracked capabilities
-    const trackedCapabilities = await db
-      .select()
-      .from(capabilityTracking)
-      .where(eq(capabilityTracking.userId, userId))
-      .limit(10);
+    const data = result[0];
 
     return {
-      reputation: reputation[0] || null,
-      badges: badges || [],
-      profile: profile[0] || null,
-      stats,
-      reports: reports || [],
-      trackedJobs: trackedJobs || [],
-      trackedCapabilities: trackedCapabilities || [],
+      reputation: data.reputation || null,
+      badges: (data.badges || []) as (typeof userBadge.$inferSelect)[],
+      profile: data.profile || null,
+      stats: {
+        reports: Number(data.statsReports || 0),
+        verifications: Number(data.statsVerifications || 0),
+        comments: Number(data.statsComments || 0),
+      },
+      reports: (data.reports || []) as (typeof report.$inferSelect)[],
+      trackedJobs: (data.trackedJobs ||
+        []) as (typeof jobTracking.$inferSelect)[],
+      trackedCapabilities: (data.trackedCapabilities ||
+        []) as (typeof capabilityTracking.$inferSelect)[],
     };
   } catch (error) {
     console.error("Error getting user dashboard:", error);

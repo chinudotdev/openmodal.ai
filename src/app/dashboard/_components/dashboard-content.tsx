@@ -1,60 +1,24 @@
-"use client";
-
 import { getUserDashboard } from "@/actions/dashboard";
 import { Card, CardContent } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
-import { useSession } from "@/contexts/session-context";
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { DashboardOverview } from "./dashboard-overview";
 import { DashboardStats } from "./dashboard-stats";
 import { UserReportsList } from "./user-reports-list";
 
-export function DashboardContent() {
-  const { user, isLoading: isSessionLoading } = useSession();
-  const router = useRouter();
-
-  // Call useQuery unconditionally at the top level
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["dashboard", user?.id],
-    queryFn: () => {
-      if (!user?.id) {
-        throw new Error("User ID is required");
-      }
-      return getUserDashboard(user.id);
-    },
-    enabled: !!user?.id, // Only run query when user exists
+export async function DashboardContent() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
   });
 
-  // Redirect if no user (after session loads)
-  useEffect(() => {
-    if (!isSessionLoading && !user) {
-      router.push("/");
-    }
-  }, [user, isSessionLoading, router]);
-
-  if (isSessionLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spinner className="h-8 w-8" />
-      </div>
-    );
+  if (!session) {
+    redirect("/login?callbackURL=/dashboard");
   }
 
-  if (!user) {
-    return null;
-  }
+  const data = await getUserDashboard(session.user.id);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spinner className="h-8 w-8" />
-      </div>
-    );
-  }
-
-  if (error || !data) {
+  if (!data) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card>

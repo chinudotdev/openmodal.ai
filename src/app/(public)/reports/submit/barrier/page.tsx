@@ -1,4 +1,3 @@
-
 import { Suspense } from "react";
 import { BarrierReportForm } from "./_components/barrier-report-form";
 import { Spinner } from "@/components/ui/spinner";
