@@ -16,13 +16,14 @@ import {
 } from "@/db/schema";
 import { checkOnboardingFromSession } from "@/lib/session-utils";
 import { disputeSchema, verificationSchema } from "@/lib/validations";
+import { cacheLife } from "next/cache";
 
 /**
  * Verify report
  */
 export async function verifyReport(
   userId: string,
-  verificationData: z.infer<typeof verificationSchema>,
+  verificationData: z.infer<typeof verificationSchema>
 ) {
   try {
     // Check onboarding completion from session
@@ -59,8 +60,8 @@ export async function verifyReport(
         and(
           eq(reportVerification.reportId, validated.reportId),
           eq(reportVerification.userId, userId),
-          isNull(reportVerification.deletedAt),
-        ),
+          isNull(reportVerification.deletedAt)
+        )
       )
       .limit(1);
 
@@ -203,7 +204,7 @@ export async function verifyReport(
  */
 export async function disputeReport(
   userId: string,
-  disputeData: z.infer<typeof disputeSchema>,
+  disputeData: z.infer<typeof disputeSchema>
 ) {
   try {
     // Check onboarding completion from session
@@ -240,8 +241,8 @@ export async function disputeReport(
         and(
           eq(reportDispute.reportId, validated.reportId),
           eq(reportDispute.userId, userId),
-          isNull(reportDispute.deletedAt),
-        ),
+          isNull(reportDispute.deletedAt)
+        )
       )
       .limit(1);
 
@@ -278,7 +279,7 @@ export async function disputeReport(
  */
 export async function softDeleteVerification(
   verificationId: string,
-  userId: string,
+  userId: string
 ) {
   try {
     // Check onboarding completion from session
@@ -304,8 +305,8 @@ export async function softDeleteVerification(
         and(
           eq(reportVerification.id, verificationId),
           eq(reportVerification.userId, userId),
-          isNull(reportVerification.deletedAt),
-        ),
+          isNull(reportVerification.deletedAt)
+        )
       )
       .limit(1);
 
@@ -320,8 +321,8 @@ export async function softDeleteVerification(
       .where(
         and(
           eq(reportVerification.reportId, existing[0].reportId),
-          isNull(reportVerification.deletedAt),
-        ),
+          isNull(reportVerification.deletedAt)
+        )
       );
 
     if (reportVerifications.length > 1) {
@@ -391,8 +392,8 @@ export async function softDeleteDispute(disputeId: string, userId: string) {
         and(
           eq(reportDispute.id, disputeId),
           eq(reportDispute.userId, userId),
-          isNull(reportDispute.deletedAt),
-        ),
+          isNull(reportDispute.deletedAt)
+        )
       )
       .limit(1);
 
@@ -420,6 +421,8 @@ export async function softDeleteDispute(disputeId: string, userId: string) {
  * Get report verifications
  */
 export async function getReportVerifications(reportId: string) {
+  "use cache";
+  cacheLife({ stale: 900, revalidate: 3600 * 1 });
   try {
     const verifications = await db
       .select({
@@ -451,8 +454,8 @@ export async function getReportVerifications(reportId: string) {
       .where(
         and(
           eq(reportVerification.reportId, reportId),
-          isNull(reportVerification.deletedAt),
-        ),
+          isNull(reportVerification.deletedAt)
+        )
       )
       .orderBy(desc(reportVerification.createdAt));
 
@@ -460,8 +463,8 @@ export async function getReportVerifications(reportId: string) {
       new Set(
         verifications
           .map((entry) => entry.verification.userId)
-          .filter((id): id is string => Boolean(id)),
-      ),
+          .filter((id): id is string => Boolean(id))
+      )
     );
 
     const badges = verifierIds.length
@@ -506,8 +509,8 @@ export async function getUserVerifications(userId: string) {
       .where(
         and(
           eq(reportVerification.userId, userId),
-          isNull(reportVerification.deletedAt),
-        ),
+          isNull(reportVerification.deletedAt)
+        )
       )
       .orderBy(desc(reportVerification.createdAt));
 

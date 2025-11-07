@@ -1,7 +1,7 @@
-import { notFound } from "next/navigation";
 import { getReportById } from "@/actions/reports";
 import { getReportVerifications } from "@/actions/verifications";
-import { ReportDetailWrapper } from "./report-detail-wrapper";
+import { notFound } from "next/navigation";
+import { ReportDetailContent } from "./report-detail-content";
 
 interface ReportDataLoaderProps {
   reportId: string;
@@ -9,11 +9,12 @@ interface ReportDataLoaderProps {
 
 export async function ReportDataLoader({ reportId }: ReportDataLoaderProps) {
   const report = await getReportById(reportId);
+
   if (!report) {
     notFound();
   }
 
   const verifications = await getReportVerifications(reportId);
 
-  return <ReportDetailWrapper report={report} verifications={verifications} />;
+  return <ReportDetailContent report={report} verifications={verifications} />;
 }

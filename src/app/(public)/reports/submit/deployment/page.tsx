@@ -1,19 +1,8 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import { Suspense } from "react";
 import { DeploymentReportForm } from "./_components/deployment-report-form";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function DeploymentReportPage() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
@@ -22,8 +11,9 @@ export default function DeploymentReportPage() {
           Report AI/automation actually being used in real work environments
         </p>
       </div>
-
-      <DeploymentReportForm />
+      <Suspense fallback={<Spinner className="h-8 w-8" />}>
+        <DeploymentReportForm />
+      </Suspense>
     </div>
   );
 }

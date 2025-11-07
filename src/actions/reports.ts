@@ -1,18 +1,14 @@
 "use server";
 
-import { generateRandomString } from "better-auth/crypto";
-import { and, desc, eq, isNull } from "drizzle-orm";
-import { z } from "zod";
 import { db } from "@/db";
 import {
-  type ReportStatus,
-  type ReportType,
   report,
   reportEvidence,
+  type ReportStatus,
   user,
   userBadge,
   userProfile,
-  userReputation,
+  userReputation
 } from "@/db/schema";
 import { capability, capabilityCategory } from "@/db/schema/capabilities";
 import { job } from "@/db/schema/jobs";
@@ -25,13 +21,17 @@ import {
   type ResearchReportInput,
   researchReportSchema,
 } from "@/lib/validations";
+import { generateRandomString } from "better-auth/crypto";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { cacheLife } from "next/cache";
+import { z } from "zod";
 
 /**
  * Helper: Create or get job by title
  */
 async function createOrGetJob(
   jobTitle: string,
-  industry?: string,
+  industry?: string
 ): Promise<string> {
   // Try to find existing job by title
   const existing = await db
@@ -79,7 +79,7 @@ async function createOrGetJob(
  */
 async function createOrGetCapability(
   capabilityName: string,
-  categoryId?: string,
+  categoryId?: string
 ): Promise<string> {
   // Try to find existing capability by name
   const existing = await db
@@ -133,7 +133,7 @@ async function createOrGetCapability(
  */
 export async function submitReport(
   userId: string,
-  reportData: DeploymentReportInput | BarrierReportInput | ResearchReportInput,
+  reportData: DeploymentReportInput | BarrierReportInput | ResearchReportInput
 ) {
   try {
     // Check onboarding completion from session
@@ -174,7 +174,7 @@ export async function submitReport(
       } else if (validatedData.step1.jobTitle) {
         jobId = await createOrGetJob(
           validatedData.step1.jobTitle,
-          undefined, // industry not in schema
+          undefined // industry not in schema
         );
       }
     }
@@ -187,7 +187,7 @@ export async function submitReport(
         validatedData.step1.capabilityName
       ) {
         capabilityId = await createOrGetCapability(
-          validatedData.step1.capabilityName,
+          validatedData.step1.capabilityName
         );
       }
     }
@@ -300,7 +300,7 @@ export async function saveReportDraft(
   userId: string,
   reportData: Partial<
     DeploymentReportInput | BarrierReportInput | ResearchReportInput
-  >,
+  >
 ) {
   try {
     // Check onboarding completion from session
@@ -362,8 +362,8 @@ export async function publishDraft(reportId: string, userId: string) {
           eq(report.id, reportId),
           eq(report.userId, userId),
           eq(report.isDraft, true),
-          isNull(report.deletedAt),
-        ),
+          isNull(report.deletedAt)
+        )
       )
       .limit(1);
 
@@ -424,8 +424,8 @@ export async function getUserDrafts(userId: string) {
         and(
           eq(report.userId, userId),
           eq(report.isDraft, true),
-          isNull(report.deletedAt),
-        ),
+          isNull(report.deletedAt)
+        )
       )
       .orderBy(desc(report.createdAt));
 
@@ -440,10 +440,27 @@ export async function getUserDrafts(userId: string) {
  * Get report by ID
  */
 export async function getReportById(reportId: string) {
+  "use cache";
+  cacheLife({ stale: 1800, revalidate: 3600 * 2 });
   try {
+    // Single query with LEFT JOINs for report, user, profile, and reputation
     const result = await db
-      .select()
+      .select({
+        report,
+        author: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          displayUsername: user.displayUsername,
+          image: user.image,
+        },
+        authorProfile: userProfile,
+        authorReputation: userReputation,
+      })
       .from(report)
+      .leftJoin(user, eq(report.userId, user.id))
+      .leftJoin(userProfile, eq(userProfile.userId, user.id))
+      .leftJoin(userReputation, eq(userReputation.userId, user.id))
       .where(and(eq(report.id, reportId), isNull(report.deletedAt)))
       .limit(1);
 
@@ -451,47 +468,26 @@ export async function getReportById(reportId: string) {
       return null;
     }
 
-    // Get evidence
-    const evidence = await db
-      .select()
-      .from(reportEvidence)
-      .where(eq(reportEvidence.reportId, reportId));
+    const reportData = result[0];
+    const userId = reportData.report.userId;
 
-    const [author] = await db
-      .select({
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        displayUsername: user.displayUsername,
-        image: user.image,
-      })
-      .from(user)
-      .where(eq(user.id, result[0].userId))
-      .limit(1);
-
-    const [profile] = await db
-      .select()
-      .from(userProfile)
-      .where(eq(userProfile.userId, result[0].userId))
-      .limit(1);
-
-    const [reputation] = await db
-      .select()
-      .from(userReputation)
-      .where(eq(userReputation.userId, result[0].userId))
-      .limit(1);
-
-    const authorBadges = await db
-      .select()
-      .from(userBadge)
-      .where(eq(userBadge.userId, result[0].userId));
+    // Fetch one-to-many relationships (evidence, badges) in parallel
+    const [evidence, authorBadges] = await Promise.all([
+      db
+        .select()
+        .from(reportEvidence)
+        .where(eq(reportEvidence.reportId, reportId)),
+      userId
+        ? db.select().from(userBadge).where(eq(userBadge.userId, userId))
+        : Promise.resolve([]),
+    ]);
 
     return {
-      ...result[0],
+      ...reportData.report,
       evidence,
-      author: author || null,
-      authorProfile: profile || null,
-      authorReputation: reputation || null,
+      author: reportData.author || null,
+      authorProfile: reportData.authorProfile || null,
+      authorReputation: reportData.authorReputation || null,
       authorBadges,
     };
   } catch (error) {
@@ -508,7 +504,7 @@ export async function updateReport(
   userId: string,
   reportData: Partial<
     DeploymentReportInput | BarrierReportInput | ResearchReportInput
-  >,
+  >
 ) {
   try {
     // Check onboarding completion from session
@@ -531,8 +527,8 @@ export async function updateReport(
         and(
           eq(report.id, reportId),
           eq(report.userId, userId),
-          isNull(report.deletedAt),
-        ),
+          isNull(report.deletedAt)
+        )
       )
       .limit(1);
 
@@ -589,8 +585,8 @@ export async function softDeleteReport(reportId: string, userId: string) {
         and(
           eq(report.id, reportId),
           eq(report.userId, userId),
-          isNull(report.deletedAt),
-        ),
+          isNull(report.deletedAt)
+        )
       )
       .limit(1);
 
@@ -670,6 +666,8 @@ export async function restoreReport(reportId: string, userId: string) {
  * Get all approved reports (for public feed)
  */
 export async function getApprovedReports(limit = 20, offset = 0) {
+  "use cache";
+  cacheLife({ stale: 900, revalidate: 3600 * 2 });
   try {
     const reports = await db
       .select()
@@ -678,28 +676,39 @@ export async function getApprovedReports(limit = 20, offset = 0) {
         and(
           eq(report.status, "approved"),
           eq(report.isDraft, false),
-          isNull(report.deletedAt),
-        ),
+          isNull(report.deletedAt)
+        )
       )
       .orderBy(desc(report.createdAt))
       .limit(limit)
       .offset(offset);
 
-    // Get evidence for each report
-    const reportsWithEvidence = await Promise.all(
-      reports.map(async (r) => {
-        const evidence = await db
-          .select()
-          .from(reportEvidence)
-          .where(eq(reportEvidence.reportId, r.id));
-        return {
-          ...r,
-          evidence,
-        };
-      }),
-    );
+    // Get all evidence for all reports in a single query
+    const reportIds = reports.map((r) => r.id);
+    const allEvidence =
+      reportIds.length > 0
+        ? await db
+            .select()
+            .from(reportEvidence)
+            .where(inArray(reportEvidence.reportId, reportIds))
+        : [];
 
-    return reportsWithEvidence;
+    // Group evidence by reportId
+    const evidenceMap = new Map<string, typeof allEvidence>();
+    for (const evidence of allEvidence) {
+      const existing = evidenceMap.get(evidence.reportId);
+      if (existing) {
+        existing.push(evidence);
+      } else {
+        evidenceMap.set(evidence.reportId, [evidence]);
+      }
+    }
+
+    // Map reports with their evidence
+    return reports.map((r) => ({
+      ...r,
+      evidence: evidenceMap.get(r.id) || [],
+    }));
   } catch (error) {
     console.error("Error getting approved reports:", error);
     return [];

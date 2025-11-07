@@ -1,13 +1,16 @@
-import { CheckCircle2 } from "lucide-react";
-import { Suspense } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { CheckCircle2 } from "lucide-react";
+import { Suspense } from "react";
 import { ReportActions } from "./_components/report-actions";
 import { ReportActionsFallback } from "./_components/report-actions-fallback";
 import { ReportNextSteps } from "./_components/report-next-steps";
-import { ReportNextStepsFallback } from "./_components/report-next-steps-fallback";
 
-export default function SubmissionSuccessPage() {
+export default async function SubmissionSuccessPage({
+  params,
+}: {
+  params: Promise<{ reportId: string }>;
+}) {
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Card>
@@ -41,12 +44,9 @@ export default function SubmissionSuccessPage() {
               </div>
             </div>
 
-            <Suspense fallback={<ReportNextStepsFallback />}>
-              <ReportNextSteps />
-            </Suspense>
-
+            <ReportNextSteps />
             <Suspense fallback={<ReportActionsFallback />}>
-              <ReportActions />
+              <ReportActions params={params} />
             </Suspense>
           </div>
         </CardContent>

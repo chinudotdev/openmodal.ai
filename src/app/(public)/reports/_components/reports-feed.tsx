@@ -1,44 +1,23 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { getApprovedReports } from "@/actions/reports";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowDown,
   ArrowUp,
   Briefcase,
   CheckCircle2,
+  Cpu,
+  FlaskConical,
   MapPin,
   MessageSquare,
   Rocket,
   Shield,
-  FlaskConical,
-  Cpu,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Spinner } from "@/components/ui/spinner";
-import { getApprovedReports } from "@/actions/reports";
+import Link from "next/link";
 
-export function ReportsFeed() {
-  const [reports, setReports] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function load() {
-      setIsLoading(true);
-      try {
-        const approvedReports = await getApprovedReports(20, 0);
-        setReports(approvedReports);
-      } catch (error) {
-        console.error("Error loading reports:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    load();
-  }, []);
-
+export async function ReportsFeed() {
+  const reports = await getApprovedReports(20, 0);
   const formatType = (type?: string) => {
     switch (type) {
       case "deployment":
@@ -67,14 +46,6 @@ export function ReportsFeed() {
         };
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner className="h-8 w-8" />
-      </div>
-    );
-  }
 
   if (reports.length === 0) {
     return (

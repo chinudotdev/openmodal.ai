@@ -14,9 +14,7 @@ export function ReportNextSteps() {
       <div className="grid gap-3">
         {reportId && (
           <Button asChild variant="outline" className="w-full">
-            <Link href={`/reports/${reportId}`}>
-              View Your Pending Report
-            </Link>
+            <Link href={`/reports/${reportId}`}>View Your Pending Report</Link>
           </Button>
         )}
         <Button asChild variant="outline" className="w-full">
@@ -32,4 +30,3 @@ export function ReportNextSteps() {
     </div>
   );
 }
-

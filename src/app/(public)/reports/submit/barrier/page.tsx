@@ -1,19 +1,9 @@
-"use client";
 
-import { useState, useEffect } from "react";
+import { Suspense } from "react";
 import { BarrierReportForm } from "./_components/barrier-report-form";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function BarrierReportPage() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
@@ -23,7 +13,9 @@ export default function BarrierReportPage() {
         </p>
       </div>
 
-      <BarrierReportForm />
+      <Suspense fallback={<Spinner className="h-8 w-8" />}>
+        <BarrierReportForm />
+      </Suspense>
     </div>
   );
 }
