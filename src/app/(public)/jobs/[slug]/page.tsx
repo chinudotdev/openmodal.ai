@@ -1,38 +1,8 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { db } from "@/db";
-import { job } from "@/db/schema/jobs";
 import { Suspense } from "react";
 import { JobContent } from "./_components";
 
-export async function generateStaticParams() {
-  try {
-    // Check if database connection is available
-    if (!process.env.DATABASE_URL) {
-      console.warn("DATABASE_URL not configured, returning fallback params");
-      // Return a non-existent slug - the page will handle it with notFound()
-      return [{ slug: "__no_jobs__" }];
-    }
 
-    const jobs = await db.select({ slug: job.slug }).from(job);
-
-    // Filter out any null/undefined slugs and ensure we have valid slugs
-    const validJobs = jobs.filter((j) => j.slug && j.slug.trim().length > 0);
-
-    // Return at least one result to satisfy Next.js Cache Components requirement
-    if (validJobs.length === 0) {
-      // Return a non-existent slug - the page will handle it with notFound()
-      // This satisfies Next.js requirement while gracefully handling empty database
-      return [{ slug: "__no_jobs__" }];
-    }
-
-    return validJobs.map((j) => ({ slug: j.slug }));
-  } catch (error) {
-    console.error("Error generating static params for jobs:", error);
-    // Return a non-existent slug - the page will handle it with notFound()
-    // This satisfies Next.js requirement while gracefully handling errors
-    return [{ slug: "__no_jobs__" }];
-  }
-}
 
 interface PageProps {
   params: Promise<{ slug: string }>;

@@ -1,5 +1,3 @@
-"use client";
-
 import { MessageSquare } from "lucide-react";
 import type { getJobBySlug } from "@/actions/jobs";
 import { AutomationProgressBar } from "@/components/shared/automation-progress-bar";

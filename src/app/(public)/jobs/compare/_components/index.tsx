@@ -1,4 +1,4 @@
-import { getJobBySlug } from "@/actions/jobs";
+import { compareJobs } from "@/actions/jobs";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,18 +20,8 @@ export async function CompareContent({ searchParams }: PageProps) {
   const params = await searchParams;
   const jobSlugs = params.jobs?.split(",").filter(Boolean) || [];
 
-  // Fetch jobs by slugs
-  const jobs = await Promise.all(
-    jobSlugs.map(async (slug) => {
-      const job = await getJobBySlug(slug.trim());
-      return job;
-    }),
-  );
-
-  // Filter out null jobs (jobs that don't exist)
-  const validJobs = jobs.filter(
-    (job): job is NonNullable<typeof job> => job !== null,
-  );
+  // Fetch jobs for comparison (up to 3 jobs)
+  const validJobs = await compareJobs(jobSlugs.map((slug) => slug.trim()));
 
   return (
     <>
@@ -80,7 +70,6 @@ export async function CompareContent({ searchParams }: PageProps) {
             }))}
           />
 
-          {/* Comparison Table or Empty State */}
           {validJobs.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">
@@ -90,21 +79,7 @@ export async function CompareContent({ searchParams }: PageProps) {
               </p>
             </div>
           ) : (
-            <JobComparisonTable
-              jobs={validJobs.map((job) => ({
-                id: job.id,
-                slug: job.slug,
-                title: job.title,
-                automationPercentage: job.automationPercentage,
-                automationStatus: job.automationStatus,
-                totalWorkersGlobal: job.totalWorkersGlobal,
-                medianSalaryUsa: job.medianSalaryUsa
-                  ? Number(job.medianSalaryUsa)
-                  : null,
-                estimatedAutomationYear: job.estimatedAutomationYear,
-                growthRate: job.growthRate ? Number(job.growthRate) : null,
-              }))}
-            />
+            <JobComparisonTable jobs={validJobs} />
           )}
         </div>
       </div>

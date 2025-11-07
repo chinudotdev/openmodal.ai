@@ -1,5 +1,3 @@
-"use client";
-
 import type { getJobBySlug } from "@/actions/jobs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TaskCard } from "./task-card";

@@ -11,12 +11,12 @@ interface AtAGlanceProps {
   job: NonNullable<Job>;
 }
 
-export function AtAGlance({ job }: AtAGlanceProps) {
-  const formatYear = (year: number | null) => {
-    if (!year) return "2050+";
-    return year.toString();
-  };
+const formatYear = (year: number | null) => {
+  if (!year) return "2050+";
+  return year.toString();
+};
 
+export function AtAGlance({ job }: AtAGlanceProps) {
   return (
     <Card>
       <CardHeader>

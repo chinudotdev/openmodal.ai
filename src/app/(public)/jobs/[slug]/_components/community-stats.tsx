@@ -1,4 +1,3 @@
-"use client";
 
 import { Bell, Eye, FileText, MessageSquare } from "lucide-react";
 import type { getJobBySlug } from "@/actions/jobs";

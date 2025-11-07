@@ -1,5 +1,3 @@
-"use client";
-
 import type { getJobBySlug } from "@/actions/jobs";
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

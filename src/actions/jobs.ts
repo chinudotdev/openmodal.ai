@@ -16,7 +16,7 @@ import {
   taskCapability,
 } from "@/db/schema/jobs";
 import { checkOnboardingFromSession } from "@/lib/session-utils";
-import { cacheTag } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
 // Types
 export type JobFilters = {
@@ -39,8 +39,80 @@ export type JobSort =
 
 export type CommentVoteType = "up" | "down";
 
+// Type for job comparison data (matches JobComparisonTable props)
+export type JobComparisonData = {
+  id: string;
+  slug: string;
+  title: string;
+  automationPercentage: number;
+  automationStatus: "safe" | "partial" | "high_risk" | "automated";
+  totalWorkersGlobal: number | null;
+  medianSalaryUsa: number | null;
+  estimatedAutomationYear: number | null;
+  growthRate: number | null;
+};
+
+// Compare jobs (up to 3)
+export async function compareJobs(
+  slugs: string[]
+): Promise<JobComparisonData[]> {
+  "use cache";
+  cacheLife({ stale: 3600, revalidate: 3600 * 4 });
+
+  // Limit to 3 jobs
+  const jobSlugs = slugs.slice(0, 3).filter(Boolean);
+
+  if (jobSlugs.length === 0) {
+    return [];
+  }
+
+  try {
+    // Fetch only the fields needed for comparison in a single query
+    const jobs = await db
+      .select({
+        id: job.id,
+        slug: job.slug,
+        title: job.title,
+        automationPercentage: job.automationPercentage,
+        automationStatus: job.automationStatus,
+        totalWorkersGlobal: job.totalWorkersGlobal,
+        medianSalaryUsa: job.medianSalaryUsa,
+        estimatedAutomationYear: job.estimatedAutomationYear,
+        growthRate: job.growthRate,
+      })
+      .from(job)
+      .where(inArray(job.slug, jobSlugs));
+
+    // Return jobs in the order of the slugs provided, with proper type conversions
+    return jobSlugs
+      .map((slug) => jobs.find((job) => job.slug === slug))
+      .filter((job): job is NonNullable<typeof job> => job !== undefined)
+      .map(
+        (job): JobComparisonData => ({
+          id: job.id,
+          slug: job.slug,
+          title: job.title,
+          automationPercentage: job.automationPercentage,
+          automationStatus: job.automationStatus,
+          totalWorkersGlobal: job.totalWorkersGlobal,
+          medianSalaryUsa: job.medianSalaryUsa
+            ? Number(job.medianSalaryUsa)
+            : null,
+          estimatedAutomationYear: job.estimatedAutomationYear,
+          growthRate: job.growthRate ? Number(job.growthRate) : null,
+        })
+      );
+  } catch (error) {
+    console.error("Error comparing jobs:", error);
+    return [];
+  }
+}
+
 // Get job by slug
 export async function getJobBySlug(slug: string) {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 3600 * 2 });
+
   const result = await db.select().from(job).where(eq(job.slug, slug)).limit(1);
 
   if (result.length === 0) {
@@ -151,7 +223,9 @@ export async function getJobs(
   limit = 20,
   offset = 0
 ) {
-  // Build conditions array
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 3600 * 1 });
+
   const conditions = [];
 
   if (filters.industry) {
@@ -226,7 +300,7 @@ export async function getJobs(
 // Get job categories/industries
 export async function getJobCategories() {
   "use cache";
-  cacheTag("job-categories");
+  cacheLife({ stale: 600, revalidate: 3600 * 5 });
   const results = await db
     .selectDistinct({ industry: job.industry })
     .from(job)

@@ -915,45 +915,38 @@ export interface Stats {
 }
 
 export async function getStats(): Promise<Stats> {
+  "use cache";
+
+  cacheLife({ stale: 3600, revalidate: 3600 * 24 });
   try {
-    // Count reports (capability comments + job comments)
-    const capabilityCommentsCount = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(capabilityComment);
-
-    const jobCommentsCount = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(jobComment);
-
-    const reports =
-      Number(capabilityCommentsCount[0]?.count || 0) +
-      Number(jobCommentsCount[0]?.count || 0);
-
-    // Count experts (users who made predictions)
-    const expertsResult = await db
-      .selectDistinct({ userId: capabilityPrediction.userId })
-      .from(capabilityPrediction);
-
-    const experts = expertsResult.length;
-
-    // Papers not in database - return 0
-    const papers = 0;
-
-    // Jobs Safe: Sum of totalWorkersGlobal for jobs with automationPercentage < 50
-    const jobsSafeResult = await db
+    // Single query with subqueries to get all stats at once
+    const result = await db
       .select({
-        total: sql<number>`sum(${job.totalWorkersGlobal})`,
+        capabilityCommentsCount: sql<number>`
+          (SELECT COUNT(*) FROM ${capabilityComment})
+        `.as("capability_comments_count"),
+        jobCommentsCount: sql<number>`
+          (SELECT COUNT(*) FROM ${jobComment})
+        `.as("job_comments_count"),
+        expertsCount: sql<number>`
+          (SELECT COUNT(DISTINCT ${capabilityPrediction.userId}) FROM ${capabilityPrediction})
+        `.as("experts_count"),
+        jobsSafe: sql<number>`
+          (SELECT COALESCE(SUM(${job.totalWorkersGlobal}), 0) FROM ${job} WHERE ${job.automationPercentage} < 50)
+        `.as("jobs_safe"),
       })
-      .from(job)
-      .where(sql`${job.automationPercentage} < 50`);
+      .from(capability)
+      .limit(1);
 
-    const jobsSafe = Number(jobsSafeResult[0]?.total || 0);
+    const stats = result[0];
 
     return {
-      reports,
-      experts,
-      papers,
-      jobsSafe,
+      reports:
+        Number(stats?.capabilityCommentsCount || 0) +
+        Number(stats?.jobCommentsCount || 0),
+      experts: Number(stats?.expertsCount || 0),
+      papers: 0, // Papers not in database
+      jobsSafe: Number(stats?.jobsSafe || 0),
     };
   } catch (error) {
     console.error("Error fetching stats:", error);
