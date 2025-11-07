@@ -1,8 +1,8 @@
 "use client";
 
 import { Brain } from "lucide-react";
-import { ProgressMeter } from "./progress-meter";
 import type { AGIProgress } from "@/actions/capabilities";
+import { ProgressMeter } from "./progress-meter";
 
 interface HeroSectionProps {
   agiProgress: AGIProgress;

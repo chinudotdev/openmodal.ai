@@ -1,5 +1,9 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { JobStatusBadge } from "@/components/shared/job-status-badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -9,10 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { JobStatusBadge } from "@/components/shared/job-status-badge";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 
 interface JobComparisonTableProps {
   jobs: Array<{

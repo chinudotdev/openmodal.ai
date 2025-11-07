@@ -1,8 +1,8 @@
 "use client";
 
+import type { getJobBySlug } from "@/actions/jobs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TaskCard } from "./task-card";
-import type { getJobBySlug } from "@/actions/jobs";
 
 type Job = Awaited<ReturnType<typeof getJobBySlug>>;
 

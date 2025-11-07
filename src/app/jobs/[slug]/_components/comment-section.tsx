@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CommentThread } from "./comment-thread";
-import { CommentForm } from "./comment-form";
+import { useCallback, useEffect, useState } from "react";
 import { getJobComments } from "@/actions/jobs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CommentForm } from "./comment-form";
+import { CommentThread } from "./comment-thread";
 
 interface CommentSectionProps {
   jobId: string;

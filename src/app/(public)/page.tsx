@@ -1,15 +1,9 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { headers } from "next/headers";
 import { QuickAccess } from "@/components/agi-dashboard/quick-access";
-import { HeroSectionContent } from "./_components/hero-section-content";
-import { HeroSectionFallback } from "./_components/hero-section-fallback";
-import { CapabilityListContent } from "./_components/capability-list-content";
-import { CapabilityListFallback } from "./_components/capability-list-fallback";
+import type { Metadata } from "next";
 import { ActivityFeedContent } from "./_components/activity-feed-content";
-import { ActivityFeedFallback } from "./_components/activity-feed-fallback";
+import { CapabilityListContent } from "./_components/capability-list-content";
+import { HeroSectionContent } from "./_components/hero-section-content";
 import { StatsSectionContent } from "./_components/stats-section-content";
-import { StatsSectionFallback } from "./_components/stats-section-fallback";
 
 export const metadata: Metadata = {
   title: "OpenModal - AGI Progress Tracker & AI Capabilities Dashboard",
@@ -51,32 +45,20 @@ export const metadata: Metadata = {
   },
 };
 
-// Make the page async to prevent prerendering with Cache Components
-// Using headers() forces dynamic rendering without route segment config
-export default async function Home() {
-  // Force dynamic rendering by reading headers
-  // This prevents prerendering while working with Cache Components
-  await headers();
-
+export default function Home() {
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
-      <Suspense fallback={<HeroSectionFallback />}>
-        <HeroSectionContent />
-      </Suspense>
+      <HeroSectionContent />
 
       {/* Main Content: Two-Column Layout */}
       <section className="container mx-auto px-4 md:px-6 py-12 md:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-8 lg:gap-12 max-w-[1400px] mx-auto">
           {/* Left Column: Capability Progress */}
-          <Suspense fallback={<CapabilityListFallback />}>
-            <CapabilityListContent />
-          </Suspense>
+          <CapabilityListContent />
 
           {/* Right Column: Activity Feed */}
-          <Suspense fallback={<ActivityFeedFallback />}>
-            <ActivityFeedContent />
-          </Suspense>
+          <ActivityFeedContent />
         </div>
       </section>
 
@@ -84,9 +66,7 @@ export default async function Home() {
       <QuickAccess />
 
       {/* Stats Section */}
-      <Suspense fallback={<StatsSectionFallback />}>
-        <StatsSectionContent />
-      </Suspense>
+      <StatsSectionContent />
     </main>
   );
 }

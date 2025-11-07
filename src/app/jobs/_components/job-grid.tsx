@@ -1,10 +1,10 @@
 "use client";
 
-import { JobCard } from "./job-card";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { JobCard } from "./job-card";
 
 interface JobGridProps {
   jobs: any[];

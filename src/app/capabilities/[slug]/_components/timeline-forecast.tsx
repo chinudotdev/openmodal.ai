@@ -1,10 +1,10 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PredictionForm } from "./prediction-form";
-import { PredictionDisplay } from "./prediction-display";
-import { TimelineChart } from "./timeline-chart";
 import type { getCapabilityBySlug } from "@/actions/capabilities";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PredictionDisplay } from "./prediction-display";
+import { PredictionForm } from "./prediction-form";
+import { TimelineChart } from "./timeline-chart";
 
 type Capability = Awaited<ReturnType<typeof getCapabilityBySlug>>;
 

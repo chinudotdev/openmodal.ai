@@ -1,26 +1,26 @@
 "use client";
 
-import Link from "next/link";
-import type { Activity, ActivityType } from "@/actions/capabilities";
 import {
+  AlertCircle,
   ArrowUp,
+  Cpu,
+  DollarSign,
+  FileText,
   MessageSquare,
+  Rocket,
   Share2,
   Zap,
-  AlertCircle,
-  Rocket,
-  FileText,
-  DollarSign,
-  Cpu,
 } from "lucide-react";
+import Link from "next/link";
+import type { Activity, ActivityType } from "@/actions/capabilities";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardHeader,
-  CardTitle,
   CardContent,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 

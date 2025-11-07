@@ -1,10 +1,10 @@
 "use client";
 
-import { CapabilityCard } from "./capability-card";
-import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { getCapabilities } from "@/actions/capabilities";
+import { Button } from "@/components/ui/button";
+import { CapabilityCard } from "./capability-card";
 
 type Capability = Awaited<ReturnType<typeof getCapabilities>>[0];
 

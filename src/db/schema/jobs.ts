@@ -1,13 +1,13 @@
+import { sql } from "drizzle-orm";
 import {
-  pgTable,
-  text,
-  integer,
-  timestamp,
   boolean,
   decimal,
+  integer,
   pgEnum,
+  pgTable,
+  text,
+  timestamp,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { capability } from "./capabilities"; // Import from your existing schema
 
 // ============================================

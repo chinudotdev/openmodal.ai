@@ -1,27 +1,27 @@
-import { Suspense } from "react";
-import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Navbar } from "@/components/navigation/navbar";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { getJobBySlug, incrementViewCount } from "@/actions/jobs";
-import { JobHeader } from "./_components/job-header";
-import { QuickStatsGrid } from "./_components/quick-stats-grid";
-import { AboutSection } from "./_components/about-section";
-import { TaskBreakdown } from "./_components/task-breakdown";
-import { RequiredCapabilities } from "./_components/required-capabilities";
-import { AutomationTimeline } from "./_components/automation-timeline";
-import { GeographicBreakdown } from "./_components/geographic-breakdown";
-import { AutomationReports } from "./_components/automation-reports";
-import { CareerGuidance } from "./_components/career-guidance";
-import { CommentSection } from "./_components/comment-section";
-import { QuickActions } from "./_components/quick-actions";
-import { AtAGlance } from "./_components/at-a-glance";
-import { RelatedJobs } from "./_components/related-jobs";
-import { CapabilityWatchList } from "./_components/capability-watch-list";
-import { CommunityStats } from "./_components/community-stats";
-import { ContributeSection } from "./_components/contribute-section";
+import { Navbar } from "@/components/navigation/navbar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { db } from "@/db";
 import { job } from "@/db/schema/jobs";
+import { AboutSection } from "./_components/about-section";
+import { AtAGlance } from "./_components/at-a-glance";
+import { AutomationReports } from "./_components/automation-reports";
+import { AutomationTimeline } from "./_components/automation-timeline";
+import { CapabilityWatchList } from "./_components/capability-watch-list";
+import { CareerGuidance } from "./_components/career-guidance";
+import { CommentSection } from "./_components/comment-section";
+import { CommunityStats } from "./_components/community-stats";
+import { ContributeSection } from "./_components/contribute-section";
+import { GeographicBreakdown } from "./_components/geographic-breakdown";
+import { JobHeader } from "./_components/job-header";
+import { QuickActions } from "./_components/quick-actions";
+import { QuickStatsGrid } from "./_components/quick-stats-grid";
+import { RelatedJobs } from "./_components/related-jobs";
+import { RequiredCapabilities } from "./_components/required-capabilities";
+import { TaskBreakdown } from "./_components/task-breakdown";
 
 // Generate static params for all jobs
 export async function generateStaticParams() {
@@ -45,7 +45,7 @@ export async function generateStaticParams() {
       return [{ slug: "__no_jobs__" }];
     }
 
-    return validJobs.map((j) => ({ slug: j.slug! }));
+    return validJobs.map((j) => ({ slug: j.slug }));
   } catch (error) {
     console.error("Error generating static params for jobs:", error);
     // Return a non-existent slug - the page will handle it with notFound()

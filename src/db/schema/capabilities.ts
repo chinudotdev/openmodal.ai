@@ -1,13 +1,13 @@
+import { sql } from "drizzle-orm";
 import {
+  boolean,
+  integer,
+  pgEnum,
   pgTable,
   text,
   timestamp,
-  integer,
-  boolean,
-  pgEnum,
   unique,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { user } from "./auth";
 
 // Enums

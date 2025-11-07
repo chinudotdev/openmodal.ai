@@ -1,11 +1,10 @@
 "use client";
 
-import { Flame } from "lucide-react";
-import type { Activity } from "@/actions/capabilities";
-import { ActivityCard } from "./activity-card";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Flame } from "lucide-react";
 import Link from "next/link";
+import type { Activity } from "@/actions/capabilities";
+import { Button } from "@/components/ui/button";
+import { ActivityCard } from "./activity-card";
 
 interface ActivityFeedProps {
   activities: Activity[];

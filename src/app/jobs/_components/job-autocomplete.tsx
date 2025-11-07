@@ -1,11 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { searchJobs } from "@/actions/jobs";
+import { JobStatusBadge } from "@/components/shared/job-status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { JobStatusBadge } from "@/components/shared/job-status-badge";
-import { searchJobs } from "@/actions/jobs";
-import Link from "next/link";
 
 interface JobAutocompleteProps {
   query: string;

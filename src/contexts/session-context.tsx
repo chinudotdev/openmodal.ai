@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, type ReactNode, useContext } from "react";
 import { authClient } from "@/lib/auth-client";
 
 interface SessionUser {
@@ -8,6 +8,7 @@ interface SessionUser {
   name: string;
   email: string;
   image?: string;
+  onboardingCompleted?: boolean;
 }
 
 interface SessionContextType {
@@ -29,6 +30,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         name: session.user.name,
         email: session.user.email,
         image: session.user.image ?? undefined,
+        onboardingCompleted:
+          (session.user as { onboardingCompleted?: boolean })
+            .onboardingCompleted ?? false,
       }
     : null;
 

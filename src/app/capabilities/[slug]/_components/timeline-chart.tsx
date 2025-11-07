@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
 import type { getCapabilityBySlug } from "@/actions/capabilities";
 

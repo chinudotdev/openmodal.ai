@@ -1,8 +1,8 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ProgressBar } from "@/components/shared/progress-bar";
 import type { getJobBySlug } from "@/actions/jobs";
+import { ProgressBar } from "@/components/shared/progress-bar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Job = Awaited<ReturnType<typeof getJobBySlug>>;
 

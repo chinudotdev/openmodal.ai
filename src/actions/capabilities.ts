@@ -1,8 +1,12 @@
 "use server";
 
+import { generateRandomString } from "better-auth/crypto";
+import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   bottleneck,
+  type CapabilityStatus,
+  type CommentVoteType,
   capability,
   capabilityCategory,
   capabilityComment,
@@ -11,14 +15,12 @@ import {
   capabilityPrediction,
   capabilityTracking,
   organization,
-  type CapabilityStatus,
-  type CommentVoteType,
   type PredictionBackground,
   type PredictionConfidence,
 } from "@/db/schema/capabilities";
 import { job, jobComment } from "@/db/schema/jobs";
-import { generateRandomString } from "better-auth/crypto";
-import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { checkOnboardingFromSession } from "@/lib/session-utils";
+import { cacheTag } from "next/cache";
 
 // Types
 export type CapabilityFilters = {
@@ -42,7 +44,7 @@ export async function getCapabilityBySlug(slug: string) {
     .from(capability)
     .leftJoin(
       capabilityCategory,
-      eq(capability.categoryId, capabilityCategory.id),
+      eq(capability.categoryId, capabilityCategory.id)
     )
     .where(eq(capability.slug, slug))
     .limit(1);
@@ -70,7 +72,7 @@ export async function getCapabilityBySlug(slug: string) {
     .from(capabilityOrganization)
     .innerJoin(
       organization,
-      eq(capabilityOrganization.organizationId, organization.id),
+      eq(capabilityOrganization.organizationId, organization.id)
     )
     .where(eq(capabilityOrganization.capabilityId, cap.id));
 
@@ -90,7 +92,7 @@ export async function getCapabilities(
   filters: CapabilityFilters = {},
   sort: CapabilitySort = "progress_desc",
   limit = 20,
-  offset = 0,
+  offset = 0
 ) {
   // Build conditions array
   const conditions = [];
@@ -112,22 +114,22 @@ export async function getCapabilities(
         or(
           ilike(capability.timelineEstimate, "%0-5%"),
           ilike(capability.timelineEstimate, "%1-5%"),
-          ilike(capability.timelineEstimate, "%2-5%"),
-        ),
+          ilike(capability.timelineEstimate, "%2-5%")
+        )
       );
     } else if (filters.timeline === "medium") {
       conditions.push(
         or(
           ilike(capability.timelineEstimate, "%5-15%"),
-          ilike(capability.timelineEstimate, "%10-15%"),
-        ),
+          ilike(capability.timelineEstimate, "%10-15%")
+        )
       );
     } else if (filters.timeline === "far") {
       conditions.push(
         or(
           ilike(capability.timelineEstimate, "%15+%"),
-          ilike(capability.timelineEstimate, "%20+%"),
-        ),
+          ilike(capability.timelineEstimate, "%20+%")
+        )
       );
     }
   }
@@ -136,8 +138,8 @@ export async function getCapabilities(
     conditions.push(
       or(
         ilike(capability.name, `%${filters.search}%`),
-        ilike(capability.description, `%${filters.search}%`),
-      ),
+        ilike(capability.description, `%${filters.search}%`)
+      )
     );
   }
 
@@ -177,8 +179,8 @@ export async function getCapabilities(
     .where(
       inArray(
         capabilityCategory.id,
-        results.map((r) => r.categoryId),
-      ),
+        results.map((r) => r.categoryId)
+      )
     );
 
   const categoryMap = new Map(categories.map((c) => [c.id, c]));
@@ -191,6 +193,8 @@ export async function getCapabilities(
 
 // Get capability categories
 export async function getCapabilityCategories() {
+  "use cache";
+  cacheTag("capability-categories");
   return db
     .select()
     .from(capabilityCategory)
@@ -199,6 +203,18 @@ export async function getCapabilityCategories() {
 
 // Track capability
 export async function trackCapability(capabilityId: string, userId: string) {
+  // Check onboarding completion from session
+  const onboardingCompleted = await checkOnboardingFromSession();
+  if (onboardingCompleted === null) {
+    return { success: false, error: "Please sign in to track capabilities" };
+  }
+  if (!onboardingCompleted) {
+    return {
+      success: false,
+      error: "Please complete onboarding before tracking capabilities",
+    };
+  }
+
   // Check if already tracking
   const existing = await db
     .select()
@@ -206,8 +222,8 @@ export async function trackCapability(capabilityId: string, userId: string) {
     .where(
       and(
         eq(capabilityTracking.capabilityId, capabilityId),
-        eq(capabilityTracking.userId, userId),
-      ),
+        eq(capabilityTracking.userId, userId)
+      )
     )
     .limit(1);
 
@@ -215,59 +231,56 @@ export async function trackCapability(capabilityId: string, userId: string) {
     return { success: true, alreadyTracking: true };
   }
 
-  // Create tracking record
-  await db.insert(capabilityTracking).values({
-    id: generateRandomString(32),
-    capabilityId,
-    userId,
-    notificationsEnabled: true,
-  });
-
-  // Update tracking count
-  const current = await db
-    .select({ trackingCount: capability.trackingCount })
-    .from(capability)
-    .where(eq(capability.id, capabilityId))
-    .limit(1);
-
-  if (current.length > 0) {
-    await db
+  // Create tracking record and update tracking count in parallel
+  await Promise.all([
+    db.insert(capabilityTracking).values({
+      id: generateRandomString(32),
+      capabilityId,
+      userId,
+      notificationsEnabled: true,
+    }),
+    db
       .update(capability)
       .set({
-        trackingCount: current[0].trackingCount + 1,
+        trackingCount: sql`${capability.trackingCount} + 1`,
       })
-      .where(eq(capability.id, capabilityId));
-  }
+      .where(eq(capability.id, capabilityId)),
+  ]);
 
   return { success: true, alreadyTracking: false };
 }
 
 // Untrack capability
 export async function untrackCapability(capabilityId: string, userId: string) {
-  const result = await db
-    .delete(capabilityTracking)
-    .where(
-      and(
-        eq(capabilityTracking.capabilityId, capabilityId),
-        eq(capabilityTracking.userId, userId),
+  // Check onboarding completion from session
+  const onboardingCompleted = await checkOnboardingFromSession();
+  if (onboardingCompleted === null) {
+    return { success: false, error: "Please sign in to untrack capabilities" };
+  }
+  if (!onboardingCompleted) {
+    return {
+      success: false,
+      error: "Please complete onboarding before untracking capabilities",
+    };
+  }
+
+  // Delete tracking record and update tracking count in parallel
+  await Promise.all([
+    db
+      .delete(capabilityTracking)
+      .where(
+        and(
+          eq(capabilityTracking.capabilityId, capabilityId),
+          eq(capabilityTracking.userId, userId)
+        )
       ),
-    );
-
-  // Update tracking count
-  const current = await db
-    .select({ trackingCount: capability.trackingCount })
-    .from(capability)
-    .where(eq(capability.id, capabilityId))
-    .limit(1);
-
-  if (current.length > 0 && current[0].trackingCount > 0) {
-    await db
+    db
       .update(capability)
       .set({
-        trackingCount: current[0].trackingCount - 1,
+        trackingCount: sql`GREATEST(${capability.trackingCount} - 1, 0)`,
       })
-      .where(eq(capability.id, capabilityId));
-  }
+      .where(eq(capability.id, capabilityId)),
+  ]);
 
   return { success: true };
 }
@@ -275,7 +288,7 @@ export async function untrackCapability(capabilityId: string, userId: string) {
 // Check if user is tracking
 export async function isTrackingCapability(
   capabilityId: string,
-  userId: string,
+  userId: string
 ) {
   const result = await db
     .select()
@@ -283,8 +296,8 @@ export async function isTrackingCapability(
     .where(
       and(
         eq(capabilityTracking.capabilityId, capabilityId),
-        eq(capabilityTracking.userId, userId),
-      ),
+        eq(capabilityTracking.userId, userId)
+      )
     )
     .limit(1);
 
@@ -301,8 +314,20 @@ export async function submitPrediction(
     confidence: PredictionConfidence;
     reasoning?: string;
     background: PredictionBackground;
-  },
+  }
 ) {
+  // Check onboarding completion from session
+  const onboardingCompleted = await checkOnboardingFromSession();
+  if (onboardingCompleted === null) {
+    return { success: false, error: "Please sign in to submit predictions" };
+  }
+  if (!onboardingCompleted) {
+    return {
+      success: false,
+      error: "Please complete onboarding before submitting predictions",
+    };
+  }
+
   // Check if prediction exists
   const existing = await db
     .select()
@@ -310,8 +335,8 @@ export async function submitPrediction(
     .where(
       and(
         eq(capabilityPrediction.capabilityId, capabilityId),
-        eq(capabilityPrediction.userId, userId),
-      ),
+        eq(capabilityPrediction.userId, userId)
+      )
     )
     .limit(1);
 
@@ -334,22 +359,21 @@ export async function submitPrediction(
     });
   }
 
-  // Recalculate community median
-  const allPredictions = await db
-    .select()
+  // Recalculate community median using SQL
+  const result = await db
+    .select({
+      median: sql<number>`
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY ${capabilityPrediction.predictedYear})
+      `,
+    })
     .from(capabilityPrediction)
     .where(eq(capabilityPrediction.capabilityId, capabilityId));
 
-  if (allPredictions.length > 0) {
-    const years = allPredictions
-      .map((p) => p.predictedYear)
-      .sort((a, b) => a - b);
-    const median = years[Math.floor(years.length / 2)];
-
+  if (result.length > 0 && result[0].median !== null) {
     await db
       .update(capability)
       .set({
-        communityPredictionMedian: median,
+        communityPredictionMedian: Math.round(result[0].median),
       })
       .where(eq(capability.id, capabilityId));
   }
@@ -365,8 +389,8 @@ export async function getUserPrediction(capabilityId: string, userId: string) {
     .where(
       and(
         eq(capabilityPrediction.capabilityId, capabilityId),
-        eq(capabilityPrediction.userId, userId),
-      ),
+        eq(capabilityPrediction.userId, userId)
+      )
     )
     .limit(1);
 
@@ -378,8 +402,20 @@ export async function createComment(
   capabilityId: string,
   userId: string,
   content: string,
-  parentId?: string,
+  parentId?: string
 ) {
+  // Check onboarding completion from session
+  const onboardingCompleted = await checkOnboardingFromSession();
+  if (onboardingCompleted === null) {
+    return { success: false, error: "Please sign in to comment" };
+  }
+  if (!onboardingCompleted) {
+    return {
+      success: false,
+      error: "Please complete onboarding before commenting",
+    };
+  }
+
   const id = generateRandomString(32);
   await db.insert(capabilityComment).values({
     id,
@@ -397,8 +433,20 @@ export async function createComment(
 export async function updateComment(
   commentId: string,
   userId: string,
-  content: string,
+  content: string
 ) {
+  // Check onboarding completion from session
+  const onboardingCompleted = await checkOnboardingFromSession();
+  if (onboardingCompleted === null) {
+    return { success: false, error: "Please sign in to update comments" };
+  }
+  if (!onboardingCompleted) {
+    return {
+      success: false,
+      error: "Please complete onboarding before updating comments",
+    };
+  }
+
   // Verify ownership
   const comment = await db
     .select()
@@ -406,8 +454,8 @@ export async function updateComment(
     .where(
       and(
         eq(capabilityComment.id, commentId),
-        eq(capabilityComment.userId, userId),
-      ),
+        eq(capabilityComment.userId, userId)
+      )
     )
     .limit(1);
 
@@ -428,6 +476,18 @@ export async function updateComment(
 
 // Delete comment
 export async function deleteComment(commentId: string, userId: string) {
+  // Check onboarding completion from session
+  const onboardingCompleted = await checkOnboardingFromSession();
+  if (onboardingCompleted === null) {
+    return { success: false, error: "Please sign in to delete comments" };
+  }
+  if (!onboardingCompleted) {
+    return {
+      success: false,
+      error: "Please complete onboarding before deleting comments",
+    };
+  }
+
   // Verify ownership
   const comment = await db
     .select()
@@ -435,8 +495,8 @@ export async function deleteComment(commentId: string, userId: string) {
     .where(
       and(
         eq(capabilityComment.id, commentId),
-        eq(capabilityComment.userId, userId),
-      ),
+        eq(capabilityComment.userId, userId)
+      )
     )
     .limit(1);
 
@@ -453,8 +513,20 @@ export async function deleteComment(commentId: string, userId: string) {
 export async function voteComment(
   commentId: string,
   userId: string,
-  voteType: CommentVoteType,
+  voteType: CommentVoteType
 ) {
+  // Check onboarding completion from session
+  const onboardingCompleted = await checkOnboardingFromSession();
+  if (onboardingCompleted === null) {
+    return { success: false, error: "Please sign in to vote" };
+  }
+  if (!onboardingCompleted) {
+    return {
+      success: false,
+      error: "Please complete onboarding before voting",
+    };
+  }
+
   // Check if vote exists
   const existing = await db
     .select()
@@ -462,8 +534,8 @@ export async function voteComment(
     .where(
       and(
         eq(capabilityCommentVote.commentId, commentId),
-        eq(capabilityCommentVote.userId, userId),
-      ),
+        eq(capabilityCommentVote.userId, userId)
+      )
     )
     .limit(1);
 
@@ -556,7 +628,7 @@ export async function getComments(capabilityId: string, parentId?: string) {
     .where(and(...conditions))
     .orderBy(
       desc(capabilityComment.upvotes),
-      desc(capabilityComment.createdAt),
+      desc(capabilityComment.createdAt)
     );
 
   // Get user info for each comment
@@ -574,7 +646,7 @@ export async function getComments(capabilityId: string, parentId?: string) {
           .where(inArray(capabilityComment.parentId, commentIds))
           .orderBy(
             desc(capabilityComment.upvotes),
-            desc(capabilityComment.createdAt),
+            desc(capabilityComment.createdAt)
           )
       : [];
 
@@ -597,18 +669,12 @@ export async function getComments(capabilityId: string, parentId?: string) {
 
 // Increment view count
 export async function incrementViewCount(capabilityId: string) {
-  const current = await db
-    .select({ viewCount: capability.viewCount })
-    .from(capability)
-    .where(eq(capability.id, capabilityId))
-    .limit(1);
-
-  if (current.length > 0) {
-    await db
-      .update(capability)
-      .set({ viewCount: current[0].viewCount + 1 })
-      .where(eq(capability.id, capabilityId));
-  }
+  await db
+    .update(capability)
+    .set({
+      viewCount: sql`${capability.viewCount} + 1`,
+    })
+    .where(eq(capability.id, capabilityId));
 
   return { success: true };
 }
@@ -642,7 +708,7 @@ export async function getActivities(limit = 10): Promise<Activity[]> {
   try {
     const activities: Activity[] = [];
 
-    // Get recent capability comments
+    // Get recent capability comments with reply count as subquery
     const recentComments = await db
       .select({
         id: capabilityComment.id,
@@ -653,6 +719,10 @@ export async function getActivities(limit = 10): Promise<Activity[]> {
         capabilityId: capabilityComment.capabilityId,
         capabilityName: capability.name,
         capabilitySlug: capability.slug,
+        replyCount: sql<number>`
+          (SELECT COUNT(*) FROM ${capabilityComment} c2 
+           WHERE c2.parent_id = ${capabilityComment.id})
+        `.as("reply_count"),
       })
       .from(capabilityComment)
       .innerJoin(capability, eq(capabilityComment.capabilityId, capability.id))
@@ -661,12 +731,6 @@ export async function getActivities(limit = 10): Promise<Activity[]> {
       .limit(limit);
 
     for (const comment of recentComments) {
-      // Get reply count
-      const replyCount = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(capabilityComment)
-        .where(eq(capabilityComment.parentId, comment.id));
-
       // Get user info (simplified - in real app you'd join with user table)
       const username = comment.userId.slice(0, 16) || "anonymous";
 
@@ -681,7 +745,7 @@ export async function getActivities(limit = 10): Promise<Activity[]> {
           username,
         },
         upvotes: comment.upvotes,
-        comments: Number(replyCount[0]?.count || 0),
+        comments: Number(comment.replyCount || 0),
         tags: [comment.capabilityName],
       });
     }
@@ -702,7 +766,7 @@ export async function getActivities(limit = 10): Promise<Activity[]> {
       .from(capabilityPrediction)
       .innerJoin(
         capability,
-        eq(capabilityPrediction.capabilityId, capability.id),
+        eq(capabilityPrediction.capabilityId, capability.id)
       )
       .orderBy(desc(capabilityPrediction.createdAt))
       .limit(limit);

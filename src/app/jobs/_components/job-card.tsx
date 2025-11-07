@@ -1,19 +1,19 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { AutomationProgressBar } from "@/components/shared/automation-progress-bar";
+import { CapabilityBadge } from "@/components/shared/capability-badge";
+import { JobStatusBadge } from "@/components/shared/job-status-badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
-import { JobStatusBadge } from "@/components/shared/job-status-badge";
-import { AutomationProgressBar } from "@/components/shared/automation-progress-bar";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "@/lib/date-utils";
-import { CapabilityBadge } from "@/components/shared/capability-badge";
 
 interface JobCardProps {
   job: {

@@ -1,10 +1,10 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import type { ImportanceLevel } from "@/db/schema/jobs";
 import { cn } from "@/lib/utils";
-import { ArrowRight } from "lucide-react";
-import { type ImportanceLevel } from "@/db/schema/jobs";
 
 interface CapabilityBadgeProps {
   capabilityId: string;

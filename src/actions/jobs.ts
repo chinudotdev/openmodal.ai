@@ -1,8 +1,11 @@
 "use server";
 
+import { generateRandomString } from "better-auth/crypto";
+import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { capability } from "@/db/schema/capabilities";
 import {
+  type AutomationStatus,
   job,
   jobCapability,
   jobComment,
@@ -11,10 +14,9 @@ import {
   relatedJob,
   task,
   taskCapability,
-  type AutomationStatus,
 } from "@/db/schema/jobs";
-import { generateRandomString } from "better-auth/crypto";
-import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { checkOnboardingFromSession } from "@/lib/session-utils";
+import { cacheTag } from "next/cache";
 
 // Types
 export type JobFilters = {
@@ -47,14 +49,53 @@ export async function getJobBySlug(slug: string) {
 
   const jobData = result[0];
 
-  // Get tasks
-  const tasks = await db
-    .select()
-    .from(task)
-    .where(eq(task.jobId, jobData.id))
-    .orderBy(asc(task.percentageOfJob));
+  // Run independent queries in parallel
+  const [tasks, jobCaps, geographicData, related] = await Promise.all([
+    // Get tasks
+    db
+      .select()
+      .from(task)
+      .where(eq(task.jobId, jobData.id))
+      .orderBy(asc(task.percentageOfJob)),
+    // Get job capabilities (rollup)
+    db
+      .select({
+        capabilityId: jobCapability.capabilityId,
+        importance: jobCapability.importance,
+        taskCount: jobCapability.taskCount,
+        percentageOfJob: jobCapability.percentageOfJob,
+        blockingAutomation: jobCapability.blockingAutomation,
+        notes: jobCapability.notes,
+        capability: capability,
+      })
+      .from(jobCapability)
+      .innerJoin(capability, eq(jobCapability.capabilityId, capability.id))
+      .where(eq(jobCapability.jobId, jobData.id))
+      .orderBy(
+        desc(jobCapability.blockingAutomation),
+        desc(jobCapability.percentageOfJob)
+      ),
+    // Get geographic data
+    db
+      .select()
+      .from(jobGeographicData)
+      .where(eq(jobGeographicData.jobId, jobData.id))
+      .orderBy(desc(jobGeographicData.workersCount)),
+    // Get related jobs
+    db
+      .select({
+        relatedJob: job,
+        similarityScore: relatedJob.similarityScore,
+        relationshipType: relatedJob.relationshipType,
+      })
+      .from(relatedJob)
+      .innerJoin(job, eq(relatedJob.relatedJobId, job.id))
+      .where(eq(relatedJob.jobId, jobData.id))
+      .orderBy(desc(relatedJob.similarityScore))
+      .limit(10),
+  ]);
 
-  // Get task capabilities
+  // Get task capabilities (depends on tasks)
   const taskIds = tasks.map((t) => t.id);
   const taskCaps =
     taskIds.length > 0
@@ -79,45 +120,6 @@ export async function getJobBySlug(slug: string) {
     }
     capabilitiesByTask.get(tc.taskId)!.push(tc);
   }
-
-  // Get job capabilities (rollup)
-  const jobCaps = await db
-    .select({
-      capabilityId: jobCapability.capabilityId,
-      importance: jobCapability.importance,
-      taskCount: jobCapability.taskCount,
-      percentageOfJob: jobCapability.percentageOfJob,
-      blockingAutomation: jobCapability.blockingAutomation,
-      notes: jobCapability.notes,
-      capability: capability,
-    })
-    .from(jobCapability)
-    .innerJoin(capability, eq(jobCapability.capabilityId, capability.id))
-    .where(eq(jobCapability.jobId, jobData.id))
-    .orderBy(
-      desc(jobCapability.blockingAutomation),
-      desc(jobCapability.percentageOfJob),
-    );
-
-  // Get geographic data
-  const geographicData = await db
-    .select()
-    .from(jobGeographicData)
-    .where(eq(jobGeographicData.jobId, jobData.id))
-    .orderBy(desc(jobGeographicData.workersCount));
-
-  // Get related jobs
-  const related = await db
-    .select({
-      relatedJob: job,
-      similarityScore: relatedJob.similarityScore,
-      relationshipType: relatedJob.relationshipType,
-    })
-    .from(relatedJob)
-    .innerJoin(job, eq(relatedJob.relatedJobId, job.id))
-    .where(eq(relatedJob.jobId, jobData.id))
-    .orderBy(desc(relatedJob.similarityScore))
-    .limit(10);
 
   return {
     ...jobData,
@@ -147,7 +149,7 @@ export async function getJobs(
   filters: JobFilters = {},
   sort: JobSort = "risk_desc",
   limit = 20,
-  offset = 0,
+  offset = 0
 ) {
   // Build conditions array
   const conditions = [];
@@ -182,8 +184,8 @@ export async function getJobs(
         ilike(job.title, `%${filters.search}%`),
         ilike(job.shortDescription, `%${filters.search}%`),
         ilike(job.industry, `%${filters.search}%`),
-        ilike(job.category, `%${filters.search}%`),
-      ),
+        ilike(job.category, `%${filters.search}%`)
+      )
     );
   }
 
@@ -223,6 +225,8 @@ export async function getJobs(
 
 // Get job categories/industries
 export async function getJobCategories() {
+  "use cache";
+  cacheTag("job-categories");
   const results = await db
     .selectDistinct({ industry: job.industry })
     .from(job)
@@ -233,6 +237,18 @@ export async function getJobCategories() {
 
 // Track job
 export async function trackJob(jobId: string, userId: string) {
+  // Check onboarding completion from session
+  const onboardingCompleted = await checkOnboardingFromSession();
+  if (onboardingCompleted === null) {
+    return { success: false, error: "Please sign in to track jobs" };
+  }
+  if (!onboardingCompleted) {
+    return {
+      success: false,
+      error: "Please complete onboarding before tracking jobs",
+    };
+  }
+
   // Check if already tracking
   const existing = await db
     .select()
@@ -244,54 +260,51 @@ export async function trackJob(jobId: string, userId: string) {
     return { success: true, alreadyTracking: true };
   }
 
-  // Create tracking record
-  await db.insert(jobTracking).values({
-    id: generateRandomString(32),
-    jobId,
-    userId,
-    emailNotifications: true,
-  });
-
-  // Update tracking count
-  const current = await db
-    .select({ trackingCount: job.trackingCount })
-    .from(job)
-    .where(eq(job.id, jobId))
-    .limit(1);
-
-  if (current.length > 0) {
-    await db
+  // Create tracking record and update tracking count in parallel
+  await Promise.all([
+    db.insert(jobTracking).values({
+      id: generateRandomString(32),
+      jobId,
+      userId,
+      emailNotifications: true,
+    }),
+    db
       .update(job)
       .set({
-        trackingCount: current[0].trackingCount + 1,
+        trackingCount: sql`${job.trackingCount} + 1`,
       })
-      .where(eq(job.id, jobId));
-  }
+      .where(eq(job.id, jobId)),
+  ]);
 
   return { success: true, alreadyTracking: false };
 }
 
 // Untrack job
 export async function untrackJob(jobId: string, userId: string) {
-  await db
-    .delete(jobTracking)
-    .where(and(eq(jobTracking.jobId, jobId), eq(jobTracking.userId, userId)));
+  // Check onboarding completion from session
+  const onboardingCompleted = await checkOnboardingFromSession();
+  if (onboardingCompleted === null) {
+    return { success: false, error: "Please sign in to untrack jobs" };
+  }
+  if (!onboardingCompleted) {
+    return {
+      success: false,
+      error: "Please complete onboarding before untracking jobs",
+    };
+  }
 
-  // Update tracking count
-  const current = await db
-    .select({ trackingCount: job.trackingCount })
-    .from(job)
-    .where(eq(job.id, jobId))
-    .limit(1);
-
-  if (current.length > 0 && current[0].trackingCount > 0) {
-    await db
+  // Delete tracking record and update tracking count in parallel
+  await Promise.all([
+    db
+      .delete(jobTracking)
+      .where(and(eq(jobTracking.jobId, jobId), eq(jobTracking.userId, userId))),
+    db
       .update(job)
       .set({
-        trackingCount: current[0].trackingCount - 1,
+        trackingCount: sql`GREATEST(${job.trackingCount} - 1, 0)`,
       })
-      .where(eq(job.id, jobId));
-  }
+      .where(eq(job.id, jobId)),
+  ]);
 
   return { success: true };
 }
@@ -309,20 +322,12 @@ export async function isTrackingJob(jobId: string, userId: string) {
 
 // Increment view count
 export async function incrementViewCount(jobId: string) {
-  const current = await db
-    .select({ viewCount: job.viewCount })
-    .from(job)
-    .where(eq(job.id, jobId))
-    .limit(1);
-
-  if (current.length > 0) {
-    await db
-      .update(job)
-      .set({
-        viewCount: current[0].viewCount + 1,
-      })
-      .where(eq(job.id, jobId));
-  }
+  await db
+    .update(job)
+    .set({
+      viewCount: sql`${job.viewCount} + 1`,
+    })
+    .where(eq(job.id, jobId));
 
   return { success: true };
 }
@@ -376,8 +381,20 @@ export async function createJobComment(
   jobId: string,
   userId: string,
   content: string,
-  parentId?: string,
+  parentId?: string
 ) {
+  // Check onboarding completion from session
+  const onboardingCompleted = await checkOnboardingFromSession();
+  if (onboardingCompleted === null) {
+    return { success: false, error: "Please sign in to comment" };
+  }
+  if (!onboardingCompleted) {
+    return {
+      success: false,
+      error: "Please complete onboarding before commenting",
+    };
+  }
+
   const id = generateRandomString(32);
   await db.insert(jobComment).values({
     id,
@@ -395,8 +412,20 @@ export async function createJobComment(
 export async function voteJobComment(
   commentId: string,
   userId: string,
-  voteType: CommentVoteType,
+  voteType: CommentVoteType
 ) {
+  // Check onboarding completion from session
+  const onboardingCompleted = await checkOnboardingFromSession();
+  if (onboardingCompleted === null) {
+    return { success: false, error: "Please sign in to vote" };
+  }
+  if (!onboardingCompleted) {
+    return {
+      success: false,
+      error: "Please complete onboarding before voting",
+    };
+  }
+
   // Note: This is a simplified version. In a full implementation,
   // you'd have a job_comment_vote table similar to capability_comment_vote
   // For now, we'll just update upvotes directly
@@ -496,7 +525,7 @@ export async function getJobCapabilities(jobId: string) {
     .where(eq(jobCapability.jobId, jobId))
     .orderBy(
       desc(jobCapability.blockingAutomation),
-      desc(jobCapability.percentageOfJob),
+      desc(jobCapability.percentageOfJob)
     );
 
   return jobCaps.map((jc) => ({
@@ -530,8 +559,8 @@ export async function searchJobs(query: string, limit = 10) {
       or(
         ilike(job.title, `%${query}%`),
         ilike(job.shortDescription, `%${query}%`),
-        ilike(job.industry, `%${query}%`),
-      ),
+        ilike(job.industry, `%${query}%`)
+      )
     )
     .orderBy(asc(job.title))
     .limit(limit);

@@ -1,17 +1,17 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
-  Package,
   AlertTriangle,
   ArrowRight,
-  ThumbsUp,
   MessageSquare,
+  Package,
+  ThumbsUp,
 } from "lucide-react";
-import { formatDistanceToNow } from "@/lib/date-utils";
 import type { getJobBySlug } from "@/actions/jobs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDistanceToNow } from "@/lib/date-utils";
 
 type Job = Awaited<ReturnType<typeof getJobBySlug>>;
 

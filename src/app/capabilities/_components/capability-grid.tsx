@@ -1,11 +1,11 @@
 "use client";
 
-import { CapabilityCard } from "./capability-card";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { CapabilityCard } from "./capability-card";
 
 interface CapabilityGridProps {
   capabilities: any[];

@@ -1,10 +1,4 @@
-import {
-  pgTable,
-  text,
-  timestamp,
-  boolean,
-  integer,
-} from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -17,6 +11,8 @@ export const user = pgTable("user", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  username: text("username").unique(),
+  displayUsername: text("display_username"),
 });
 
 export const session = pgTable("session", {
@@ -66,21 +62,9 @@ export const verification = pgTable("verification", {
     .notNull(),
 });
 
-export const walletAddress = pgTable("wallet_address", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  address: text("address").notNull(),
-  chainId: integer("chain_id").notNull(),
-  isPrimary: boolean("is_primary").default(false),
-  createdAt: timestamp("created_at").notNull(),
-});
-
 export const authSchema = {
   user,
   session,
   account,
   verification,
-  walletAddress,
 };

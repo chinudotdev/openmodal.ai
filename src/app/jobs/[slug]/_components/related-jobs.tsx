@@ -1,11 +1,11 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import type { getJobBySlug } from "@/actions/jobs";
 import { JobStatusBadge } from "@/components/shared/job-status-badge";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import type { getJobBySlug } from "@/actions/jobs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Job = Awaited<ReturnType<typeof getJobBySlug>>;
 

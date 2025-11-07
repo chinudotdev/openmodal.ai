@@ -1,5 +1,5 @@
-import { type StatusType } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
+import type { StatusType } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 interface StatusBadgeProps {

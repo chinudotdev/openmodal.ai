@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { FileText, AlertTriangle, Edit, MessageSquare } from "lucide-react";
+import { AlertTriangle, Edit, FileText, MessageSquare } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ContributeSectionProps {
   jobId: string;

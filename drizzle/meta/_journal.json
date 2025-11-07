@@ -22,6 +22,20 @@
       "when": 1762434606371,
       "tag": "0002_familiar_lizard",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1762493388529,
+      "tag": "0003_grey_silverclaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1762495752061,
+      "tag": "0004_wide_skrulls",
+      "breakpoints": true
     }
   ]
 }

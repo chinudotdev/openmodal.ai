@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
 import { BarChart3 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { Stats } from "@/actions/capabilities";
 
 interface StatCardProps {

@@ -1,10 +1,10 @@
 "use client";
 
-import { getUserPrediction } from "@/actions/capabilities";
-import { useSession } from "@/contexts/session-context";
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import type { getCapabilityBySlug } from "@/actions/capabilities";
+import { getUserPrediction } from "@/actions/capabilities";
+import { Card, CardContent } from "@/components/ui/card";
+import { useSession } from "@/contexts/session-context";
 
 type Capability = Awaited<ReturnType<typeof getCapabilityBySlug>>;
 

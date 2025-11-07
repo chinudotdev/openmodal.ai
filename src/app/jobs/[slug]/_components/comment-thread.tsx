@@ -1,14 +1,16 @@
 "use client";
 
+import { ArrowUp, MessageSquare, Reply } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { createJobComment, voteJobComment } from "@/actions/jobs";
+import { OnboardingModal } from "@/components/onboarding-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowUp, MessageSquare, Reply } from "lucide-react";
-import { voteJobComment, createJobComment } from "@/actions/jobs";
 import { useSession } from "@/contexts/session-context";
-import { toast } from "sonner";
-import { CommentForm } from "./comment-form";
+import { useOnboardingCheck } from "@/hooks/use-onboarding-check";
 import { formatDistanceToNow } from "@/lib/date-utils";
+import { CommentForm } from "./comment-form";
 
 interface CommentThreadProps {
   comment: any;
@@ -22,20 +24,51 @@ export function CommentThread({
   onCommentAdded,
 }: CommentThreadProps) {
   const { user } = useSession();
+  const {
+    checkOnboarding,
+    showOnboardingModal,
+    setShowOnboardingModal,
+    pendingAction,
+  } = useOnboardingCheck();
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
   const [upvotes, setUpvotes] = useState(comment.upvotes || 0);
 
   const handleVote = async () => {
-    if (!user) {
-      toast.error("Please sign in to vote");
+    // Check onboarding before voting
+    const canProceed = checkOnboarding("vote", async () => {
+      await performVote();
+    });
+
+    if (!canProceed) {
       return;
     }
 
+    await performVote();
+  };
+
+  const performVote = async () => {
+    if (!user) return;
+
     setIsVoting(true);
     try {
-      await voteJobComment(comment.id, user.id, "up");
-      setUpvotes(upvotes + 1);
+      const result = await voteJobComment(comment.id, user.id, "up");
+
+      // Handle backend error responses
+      if (result && !result.success) {
+        if (result.error?.includes("onboarding")) {
+          setShowOnboardingModal(true);
+          return;
+        }
+        toast.error(result.error || "Failed to vote");
+        return;
+      }
+
+      // Refresh comment data to get updated vote count
+      // The backend handles vote toggling, so we need to get the actual count
+      // For now, we'll trigger a refresh by calling onCommentAdded
+      // In a full implementation, you'd fetch the updated comment data
+      onCommentAdded();
     } catch (error) {
       toast.error("Failed to vote");
     } finally {
@@ -44,13 +77,39 @@ export function CommentThread({
   };
 
   const handleReply = async (content: string) => {
-    if (!user) {
-      toast.error("Please sign in to reply");
+    // Check onboarding before replying
+    const canProceed = checkOnboarding("reply", async () => {
+      await performReply(content);
+    });
+
+    if (!canProceed) {
       return;
     }
 
+    await performReply(content);
+  };
+
+  const performReply = async (content: string) => {
+    if (!user) return;
+
     try {
-      await createJobComment(jobId, user.id, content, comment.id);
+      const result = await createJobComment(
+        jobId,
+        user.id,
+        content,
+        comment.id,
+      );
+
+      // Handle backend error responses
+      if (result && !result.success) {
+        if (result.error?.includes("onboarding")) {
+          setShowOnboardingModal(true);
+          return;
+        }
+        toast.error(result.error || "Failed to post reply");
+        return;
+      }
+
       setShowReplyForm(false);
       onCommentAdded();
       toast.success("Reply posted!");
@@ -60,78 +119,85 @@ export function CommentThread({
   };
 
   return (
-    <div className="space-y-3">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="space-y-3">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="mb-2 flex items-center gap-2 text-sm">
-                  <span className="font-medium text-foreground">
-                    {comment.userId}
-                  </span>
-                  <span className="text-muted-foreground">•</span>
-                  <span className="text-muted-foreground">
-                    {formatDistanceToNow(comment.createdAt, {
-                      addSuffix: true,
-                    })}
-                  </span>
+    <>
+      <div className="space-y-3">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="mb-2 flex items-center gap-2 text-sm">
+                    <span className="font-medium text-foreground">
+                      {comment.userId}
+                    </span>
+                    <span className="text-muted-foreground">•</span>
+                    <span className="text-muted-foreground">
+                      {formatDistanceToNow(comment.createdAt, {
+                        addSuffix: true,
+                      })}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground whitespace-pre-line">
+                    {comment.content}
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground whitespace-pre-line">
-                  {comment.content}
-                </p>
               </div>
-            </div>
 
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleVote}
-                disabled={isVoting}
-                className="gap-2 h-8"
-              >
-                <ArrowUp className="h-4 w-4" />
-                {upvotes}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowReplyForm(!showReplyForm)}
-                className="gap-2 h-8"
-              >
-                <Reply className="h-4 w-4" />
-                Reply
-              </Button>
-            </div>
-
-            {showReplyForm && (
-              <div className="mt-3 border-t pt-3">
-                <CommentForm
-                  jobId={jobId}
-                  parentId={comment.id}
-                  onSubmit={handleReply}
-                  onCancel={() => setShowReplyForm(false)}
-                />
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleVote}
+                  disabled={isVoting}
+                  className="gap-2 h-8"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                  {upvotes}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowReplyForm(!showReplyForm)}
+                  className="gap-2 h-8"
+                >
+                  <Reply className="h-4 w-4" />
+                  Reply
+                </Button>
               </div>
-            )}
+
+              {showReplyForm && (
+                <div className="mt-3 border-t pt-3">
+                  <CommentForm
+                    jobId={jobId}
+                    parentId={comment.id}
+                    onSubmit={handleReply}
+                    onCancel={() => setShowReplyForm(false)}
+                  />
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Replies */}
+        {comment.replies && comment.replies.length > 0 && (
+          <div className="ml-8 space-y-3">
+            {comment.replies.map((reply: any) => (
+              <CommentThread
+                key={reply.id}
+                comment={reply}
+                jobId={jobId}
+                onCommentAdded={onCommentAdded}
+              />
+            ))}
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Replies */}
-      {comment.replies && comment.replies.length > 0 && (
-        <div className="ml-8 space-y-3">
-          {comment.replies.map((reply: any) => (
-            <CommentThread
-              key={reply.id}
-              comment={reply}
-              jobId={jobId}
-              onCommentAdded={onCommentAdded}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+      <OnboardingModal
+        open={showOnboardingModal}
+        onOpenChange={setShowOnboardingModal}
+        action={pendingAction || "perform this action"}
+      />
+    </>
   );
 }

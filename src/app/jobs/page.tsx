@@ -1,12 +1,6 @@
 import { Suspense } from "react";
+import { getJobCategories, getJobs } from "@/actions/jobs";
 import { Navbar } from "@/components/navigation/navbar";
-import { getJobs, getJobCategories } from "@/actions/jobs";
-import { JobFilters } from "./_components/job-filters";
-import { JobSort } from "./_components/job-sort";
-import { JobGrid } from "./_components/job-grid";
-import { JobHero } from "./_components/job-hero";
-import { JobStatsBar } from "./_components/job-stats-bar";
-import { CompareJobsButton } from "./_components/compare-jobs-button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,6 +10,12 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CompareJobsButton } from "./_components/compare-jobs-button";
+import { JobFilters } from "./_components/job-filters";
+import { JobGrid } from "./_components/job-grid";
+import { JobHero } from "./_components/job-hero";
+import { JobSort } from "./_components/job-sort";
+import { JobStatsBar } from "./_components/job-stats-bar";
 
 interface PageProps {
   searchParams: Promise<{

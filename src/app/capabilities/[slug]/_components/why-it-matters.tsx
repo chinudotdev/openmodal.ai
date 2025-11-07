@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { getCapabilityBySlug } from "@/actions/capabilities";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Capability = Awaited<ReturnType<typeof getCapabilityBySlug>>;
 
