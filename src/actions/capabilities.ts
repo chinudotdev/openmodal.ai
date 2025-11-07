@@ -40,8 +40,42 @@ export type CapabilitySort =
 
 // Get capability by slug
 export async function getCapabilityBySlug(slug: string) {
+  "use cache";
+  cacheLife({ stale: 3600, revalidate: 3600 * 24 });
+
+  // Single query with JSON aggregation for bottlenecks and organizations
   const result = await db
-    .select()
+    .select({
+      capability,
+      category: capabilityCategory,
+      bottlenecks: sql<Array<typeof bottleneck.$inferSelect>>`
+        COALESCE(
+          (SELECT json_agg(b.* ORDER BY b.severity DESC)
+           FROM ${bottleneck} b
+           WHERE b.capability_id = ${capability.id}),
+          '[]'::json
+        )
+      `.as("bottlenecks"),
+      organizations: sql<
+        Array<{
+          organization: typeof organization.$inferSelect;
+          focusArea: string | null;
+        }>
+      >`
+        COALESCE(
+          (SELECT json_agg(
+            json_build_object(
+              'organization', row_to_json(o.*),
+              'focusArea', co.focus_area
+            )
+           )
+           FROM ${capabilityOrganization} co
+           INNER JOIN ${organization} o ON co.organization_id = o.id
+           WHERE co.capability_id = ${capability.id}),
+          '[]'::json
+        )
+      `.as("organizations"),
+    })
     .from(capability)
     .leftJoin(
       capabilityCategory,
@@ -54,36 +88,15 @@ export async function getCapabilityBySlug(slug: string) {
     return null;
   }
 
-  const cap = result[0].capability;
-  const category = result[0].capability_category;
-
-  // Get bottlenecks
-  const bottlenecks = await db
-    .select()
-    .from(bottleneck)
-    .where(eq(bottleneck.capabilityId, cap.id))
-    .orderBy(desc(bottleneck.severity));
-
-  // Get organizations
-  const orgs = await db
-    .select({
-      organization: organization,
-      focusArea: capabilityOrganization.focusArea,
-    })
-    .from(capabilityOrganization)
-    .innerJoin(
-      organization,
-      eq(capabilityOrganization.organizationId, organization.id)
-    )
-    .where(eq(capabilityOrganization.capabilityId, cap.id));
+  const data = result[0];
 
   return {
-    ...cap,
-    category,
-    bottlenecks,
-    organizations: orgs.map((o) => ({
-      ...o.organization,
-      focusArea: o.focusArea,
+    ...data.capability,
+    category: data.category || undefined,
+    bottlenecks: data.bottlenecks || [],
+    organizations: (data.organizations || []).map((org) => ({
+      ...org.organization,
+      focusArea: org.focusArea,
     })),
   };
 }
@@ -195,7 +208,8 @@ export async function getCapabilities(
 // Get capability categories
 export async function getCapabilityCategories() {
   "use cache";
-  cacheTag("capability-categories");
+  cacheLife({ stale: 3600, revalidate: 3600 * 24 });
+
   return db
     .select()
     .from(capabilityCategory)
@@ -706,7 +720,6 @@ export interface Activity {
 }
 
 export async function getActivities(limit = 10): Promise<Activity[]> {
-
   "use cache";
 
   cacheLife({ stale: 3600, revalidate: 3600 * 4 });

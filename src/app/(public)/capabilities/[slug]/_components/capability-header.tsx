@@ -1,12 +1,9 @@
-"use client";
-
-import { Building2, Share2, Users } from "lucide-react";
 import type { getCapabilityBySlug } from "@/actions/capabilities";
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from "@/lib/date-utils";
+import { Building2, Share2, Users } from "lucide-react";
 import { ShareButton } from "./share-button";
 import { TrackButton } from "./track-button";
 
@@ -89,7 +86,7 @@ export function CapabilityHeader({ capability }: CapabilityHeaderProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Tracking</p>
                 <p className="text-lg font-semibold text-foreground">
-                  {capability.trackingCount.toLocaleString()}
+                  {capability.trackingCount.toLocaleString("en-US")}
                 </p>
               </div>
             </div>
@@ -119,7 +116,7 @@ export function CapabilityHeader({ capability }: CapabilityHeaderProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Views</p>
                 <p className="text-lg font-semibold text-foreground">
-                  {capability.viewCount.toLocaleString()}
+                  {capability.viewCount.toLocaleString("en-US")}
                 </p>
               </div>
             </div>

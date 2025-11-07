@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { ProgressBar } from "@/components/shared/progress-bar";
@@ -69,7 +67,9 @@ export function CapabilityCard({ capability }: CapabilityCardProps) {
           </div>
 
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <span>{capability.trackingCount.toLocaleString()} tracking</span>
+            <span>
+              {capability.trackingCount.toLocaleString("en-US")} tracking
+            </span>
             <span>•</span>
             <span>{capability.researchActivityCount} organizations</span>
           </div>

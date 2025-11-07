@@ -1,33 +1,21 @@
-"use client";
-
+import { Button } from "@/components/ui/button";
 import { Bell, Brain } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { useSession } from "@/contexts/session-context";
-import { cn } from "@/lib/utils";
 import { MobileMenu } from "./mobile-menu";
-import { MoreDropdown } from "./more-dropdown";
+import { NavLinks } from "./nav-links";
 import { SearchBar } from "./search-bar";
 import { UserMenu } from "./user-menu";
+import { Suspense } from "react";
+import { Spinner } from "../ui/spinner";
 
 export function Navbar() {
-  const pathname = usePathname();
-  const { user, isLoading } = useSession();
-
-  const navLinks = [
-    { href: "/", label: "AGI" },
-    { href: "/jobs", label: "Jobs" },
-    { href: "/technologies", label: "Technologies" },
-    { href: "/reports", label: "Reports" },
-  ];
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center justify-between px-4 lg:px-6">
-        {/* Left: Mobile menu + Logo */}
         <div className="flex items-center gap-4">
+          <Suspense fallback={<Spinner className="h-8 w-8" />}>
           <MobileMenu />
+          </Suspense>
           <Link
             href="/"
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -39,30 +27,12 @@ export function Navbar() {
 
         {/* Center: Desktop navigation + Search */}
         <div className="hidden lg:flex items-center gap-6 flex-1 justify-center max-w-3xl mx-8">
-          <nav className="flex items-center gap-1">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "relative px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                    isActive
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent",
-                  )}
-                >
-                  {link.label}
-                  {isActive && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-primary rounded-full" />
-                  )}
-                </Link>
-              );
-            })}
-            <MoreDropdown />
-          </nav>
-          <SearchBar />
+          <Suspense fallback={<Spinner className="h-8 w-8" />}>
+            <NavLinks />
+          </Suspense>
+          <Suspense fallback={<Spinner className="h-8 w-8" />}>
+            <SearchBar />
+          </Suspense>
         </div>
 
         {/* Right: Notifications + User menu */}
@@ -73,10 +43,11 @@ export function Navbar() {
             className="relative text-muted-foreground hover:text-foreground"
           >
             <Bell className="h-5 w-5" />
-            {/* Notification badge */}
             <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-destructive rounded-full ring-2 ring-background" />
           </Button>
-          <UserMenu user={user} isLoading={isLoading} />
+          <Suspense fallback={<Spinner className="h-8 w-8" />}>
+            <UserMenu />
+          </Suspense>
         </div>
       </div>
     </header>

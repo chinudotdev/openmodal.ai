@@ -13,7 +13,6 @@ import { DashboardComponent } from "./_components";
 export default async function CapabilitiesDashboardPage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Breadcrumb */}
       <div className="border-b border-border bg-muted/40">
         <div className="container mx-auto px-4 py-3">
           <Breadcrumb>

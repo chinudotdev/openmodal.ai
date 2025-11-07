@@ -1,5 +1,3 @@
-"use client";
-
 import { AlertCircle, ArrowRight, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { ProgressBar } from "@/components/shared/progress-bar";

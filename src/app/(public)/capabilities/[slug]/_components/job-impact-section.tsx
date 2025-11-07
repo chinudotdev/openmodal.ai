@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowRight } from "lucide-react";
 import type { getCapabilityBySlug } from "@/actions/capabilities";
 import { Button } from "@/components/ui/button";
@@ -20,7 +18,7 @@ export function JobImpactSection({ capability }: JobImpactSectionProps) {
       <CardContent className="space-y-4">
         <div>
           <p className="text-2xl font-bold text-foreground">
-            {capability.jobsProtectedCount.toLocaleString()} jobs
+            {capability.jobsProtectedCount.toLocaleString("en-US")} jobs
           </p>
           <p className="text-sm text-muted-foreground">
             globally depend on this capability
@@ -51,8 +49,8 @@ export function JobImpactSection({ capability }: JobImpactSectionProps) {
 
         {capability.jobsProtectedCount > 5 && (
           <Button variant="outline" className="w-full gap-2">
-            View all {capability.jobsProtectedCount.toLocaleString()} affected
-            jobs
+            View all {capability.jobsProtectedCount.toLocaleString("en-US")}{" "}
+            affected jobs
             <ArrowRight className="h-4 w-4" />
           </Button>
         )}

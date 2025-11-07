@@ -1,5 +1,16 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useSession } from "@/contexts/session-context";
+import { authClient } from "@/lib/auth-client";
 import {
   Bell,
   FileText,
@@ -13,24 +24,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { authClient } from "@/lib/auth-client";
-import type { SessionUser } from "@/contexts/session-context";
 
-interface UserMenuProps {
-  user?: SessionUser | null;
-  isLoading?: boolean;
-}
 
-export function UserMenu({ user, isLoading }: UserMenuProps) {
+
+export function UserMenu() {
+  const { user, isLoading } = useSession();
   const router = useRouter();
 
   const handleLogout = async () => {

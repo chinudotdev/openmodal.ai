@@ -1,9 +1,8 @@
+import {
+  getCapabilityBySlug
+} from "@/actions/capabilities";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  getCapabilityBySlug,
-  incrementViewCount,
-} from "@/actions/capabilities";
 import { BottleneckCards } from "./bottleneck-cards";
 import { CapabilityDescription } from "./capability-description";
 import { CapabilityHeader } from "./capability-header";
@@ -23,9 +22,6 @@ export async function CapabilityContent({ slug }: { slug: string }) {
   if (!capability) {
     notFound();
   }
-
-  // Increment view count (fire and forget)
-  incrementViewCount(capability.id).catch(console.error);
 
   return (
     <>

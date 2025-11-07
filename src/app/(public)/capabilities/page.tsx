@@ -1,6 +1,14 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
 import { CapabilitiesContent } from "./_components";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 interface PageProps {
   searchParams: Promise<{
@@ -18,6 +26,21 @@ export default async function CapabilitiesListPage({
 }: PageProps) {
   return (
     <div className="min-h-screen bg-background">
+      <div className="border-b border-border bg-muted/40">
+        <div className="container mx-auto px-4 py-3">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Capabilities</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      </div>
       <Suspense
         fallback={
           <div className="container mx-auto px-4 py-8">

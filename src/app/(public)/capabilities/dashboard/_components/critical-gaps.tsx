@@ -1,5 +1,3 @@
-"use client";
-
 import { AlertTriangle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -56,7 +54,8 @@ export function CriticalGaps({ gaps }: CriticalGapsProps) {
                 </span>
                 <span>•</span>
                 <span>
-                  Protects {capability.jobsProtectedCount.toLocaleString()} jobs
+                  Protects{" "}
+                  {capability.jobsProtectedCount.toLocaleString("en-US")} jobs
                 </span>
                 <span>•</span>
                 <span>

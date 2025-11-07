@@ -2,14 +2,6 @@ import {
   getCapabilities,
   getCapabilityCategories,
 } from "@/actions/capabilities";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { CapabilityFilters } from "./capability-filters";
 import { CapabilityGrid } from "./capability-grid";
 import { CapabilitySort } from "./capability-sort";
@@ -47,24 +39,6 @@ export async function CapabilitiesContent({ searchParams }: PageProps) {
 
   return (
     <>
-      {/* Breadcrumb */}
-      <div className="border-b border-border bg-muted/40">
-        <div className="container mx-auto px-4 py-3">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Capabilities</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </div>
-
-      {/* Header */}
       <div className="border-b border-border bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="space-y-2">
@@ -81,10 +55,8 @@ export async function CapabilitiesContent({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[25%_75%] gap-8">
-          {/* Filters Sidebar */}
           <div className="space-y-6">
             <CapabilityFilters
               categories={categories}
@@ -93,7 +65,6 @@ export async function CapabilitiesContent({ searchParams }: PageProps) {
             <CapabilitySort currentSort={sort} />
           </div>
 
-          {/* Capabilities Grid */}
           <div>
             <CapabilityGrid capabilities={capabilities} currentPage={page} />
           </div>
