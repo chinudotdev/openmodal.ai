@@ -1,0 +1,271 @@
+"use server";
+
+import { generateRandomString } from "better-auth/crypto";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { z } from "zod";
+import { db } from "@/db";
+import { report, reputationHistory, userReputation } from "@/db/schema";
+import {
+  approveReportSchema,
+  rejectReportSchema,
+  requestChangesSchema,
+} from "@/lib/validations";
+
+/**
+ * Get pending reports
+ */
+export async function getPendingReports(limit = 20, offset = 0) {
+  try {
+    const reports = await db
+      .select()
+      .from(report)
+      .where(and(eq(report.status, "pending"), isNull(report.deletedAt)))
+      .orderBy(desc(report.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return reports;
+  } catch (error) {
+    console.error("Error getting pending reports:", error);
+    return [];
+  }
+}
+
+/**
+ * Approve report
+ */
+export async function approveReportAction(
+  moderatorId: string,
+  approvalData: z.infer<typeof approveReportSchema>,
+) {
+  try {
+    // Validate input
+    const validated = approveReportSchema.parse(approvalData);
+
+    // Check if report exists
+    const reportData = await db
+      .select()
+      .from(report)
+      .where(and(eq(report.id, validated.reportId), isNull(report.deletedAt)))
+      .limit(1);
+
+    if (reportData.length === 0) {
+      return { success: false, error: "Report not found" };
+    }
+
+    // Update report status
+    await db
+      .update(report)
+      .set({
+        status: "approved",
+        moderationNotes: validated.moderationNotes || null,
+        moderatedBy: moderatorId,
+        moderatedAt: new Date(),
+        publishedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(report.id, validated.reportId));
+
+    // Award reputation points to author
+    const pointsToAward =
+      reportData[0].type === "deployment"
+        ? 100
+        : reportData[0].type === "barrier"
+          ? 75
+          : 50;
+
+    const authorReputation = await db
+      .select()
+      .from(userReputation)
+      .where(eq(userReputation.userId, reportData[0].userId))
+      .limit(1);
+
+    const authorPoints = authorReputation[0]?.reputationPoints || 0;
+    const authorNewPoints = authorPoints + pointsToAward;
+    const authorTier =
+      authorNewPoints < 200
+        ? "observer"
+        : authorNewPoints < 1000
+          ? "contributor"
+          : authorNewPoints < 5000
+            ? "trusted"
+            : "expert";
+
+    if (authorReputation.length === 0) {
+      await db.insert(userReputation).values({
+        id: generateRandomString(32),
+        userId: reportData[0].userId,
+        reputationPoints: authorNewPoints,
+        tier: authorTier,
+      });
+    } else {
+      await db
+        .update(userReputation)
+        .set({
+          reputationPoints: authorNewPoints,
+          tier: authorTier,
+          updatedAt: new Date(),
+        })
+        .where(eq(userReputation.userId, reportData[0].userId));
+    }
+
+    await db.insert(reputationHistory).values({
+      id: generateRandomString(32),
+      userId: reportData[0].userId,
+      pointsChange: pointsToAward,
+      reason: "report_approved",
+      relatedEntityType: "report",
+      relatedEntityId: validated.reportId,
+    });
+
+    return { success: true, pointsAwarded: pointsToAward };
+  } catch (error) {
+    console.error("Error approving report:", error);
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: error.issues[0]?.message || "Validation failed",
+      };
+    }
+    return { success: false, error: "Failed to approve report" };
+  }
+}
+
+/**
+ * Reject report
+ */
+export async function rejectReport(
+  moderatorId: string,
+  rejectionData: z.infer<typeof rejectReportSchema>,
+) {
+  try {
+    // Validate input
+    const validated = rejectReportSchema.parse(rejectionData);
+
+    // Check if report exists
+    const reportData = await db
+      .select()
+      .from(report)
+      .where(and(eq(report.id, validated.reportId), isNull(report.deletedAt)))
+      .limit(1);
+
+    if (reportData.length === 0) {
+      return { success: false, error: "Report not found" };
+    }
+
+    // Update report status
+    await db
+      .update(report)
+      .set({
+        status: "rejected",
+        moderationReason: validated.moderationReason,
+        moderationNotes: validated.moderationNotes || null,
+        moderatedBy: moderatorId,
+        moderatedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(report.id, validated.reportId));
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error rejecting report:", error);
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: error.issues[0]?.message || "Validation failed",
+      };
+    }
+    return { success: false, error: "Failed to reject report" };
+  }
+}
+
+/**
+ * Request changes to report
+ */
+export async function requestReportChanges(
+  moderatorId: string,
+  changesData: z.infer<typeof requestChangesSchema>,
+) {
+  try {
+    // Validate input
+    const validated = requestChangesSchema.parse(changesData);
+
+    // Check if report exists
+    const reportData = await db
+      .select()
+      .from(report)
+      .where(and(eq(report.id, validated.reportId), isNull(report.deletedAt)))
+      .limit(1);
+
+    if (reportData.length === 0) {
+      return { success: false, error: "Report not found" };
+    }
+
+    // Update report status
+    await db
+      .update(report)
+      .set({
+        status: "changes_requested",
+        moderationNotes: validated.moderationNotes,
+        moderatedBy: moderatorId,
+        moderatedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(report.id, validated.reportId));
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error requesting changes:", error);
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: error.issues[0]?.message || "Validation failed",
+      };
+    }
+    return { success: false, error: "Failed to request changes" };
+  }
+}
+
+/**
+ * Get moderation statistics
+ */
+export async function getModerationStats() {
+  try {
+    const pending = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(report)
+      .where(and(eq(report.status, "pending"), isNull(report.deletedAt)));
+
+    const approved = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(report)
+      .where(and(eq(report.status, "approved"), isNull(report.deletedAt)));
+
+    const rejected = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(report)
+      .where(and(eq(report.status, "rejected"), isNull(report.deletedAt)));
+
+    const changesRequested = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(report)
+      .where(
+        and(eq(report.status, "changes_requested"), isNull(report.deletedAt)),
+      );
+
+    return {
+      pending: Number(pending[0]?.count || 0),
+      approved: Number(approved[0]?.count || 0),
+      rejected: Number(rejected[0]?.count || 0),
+      changesRequested: Number(changesRequested[0]?.count || 0),
+    };
+  } catch (error) {
+    console.error("Error getting moderation stats:", error);
+    return {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      changesRequested: 0,
+    };
+  }
+}

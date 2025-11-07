@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CommentThread } from "./comment-thread";
-import { CommentForm } from "./comment-form";
+import { useEffect, useState } from "react";
 import { getComments } from "@/actions/capabilities";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CommentForm } from "./comment-form";
+import { CommentThread } from "./comment-thread";
 
 interface CommentSectionProps {
   capabilityId: string;

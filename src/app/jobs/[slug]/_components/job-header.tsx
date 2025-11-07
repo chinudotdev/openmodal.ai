@@ -1,14 +1,14 @@
 "use client";
 
-import { TrackButton } from "./track-button";
-import { ShareButton } from "./share-button";
-import { JobStatusBadge } from "@/components/shared/job-status-badge";
-import { AutomationProgressBar } from "@/components/shared/automation-progress-bar";
-import { formatDistanceToNow } from "@/lib/date-utils";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 import type { getJobBySlug } from "@/actions/jobs";
+import { AutomationProgressBar } from "@/components/shared/automation-progress-bar";
+import { JobStatusBadge } from "@/components/shared/job-status-badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { formatDistanceToNow } from "@/lib/date-utils";
+import { ShareButton } from "./share-button";
+import { TrackButton } from "./track-button";
 
 type Job = Awaited<ReturnType<typeof getJobBySlug>>;
 

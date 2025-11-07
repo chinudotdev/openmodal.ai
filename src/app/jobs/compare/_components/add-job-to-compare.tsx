@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { JobAutocomplete } from "@/app/jobs/_components/job-autocomplete";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
-import { JobAutocomplete } from "@/app/jobs/_components/job-autocomplete";
 
 interface JobInfo {
   slug: string;

@@ -1,13 +1,13 @@
 import {
-  Html,
-  Head,
   Body,
-  Container,
-  Section,
-  Text,
   Button,
+  Container,
+  Head,
   Hr,
+  Html,
+  Section,
   Tailwind,
+  Text,
 } from "@react-email/components";
 
 const EmailVerification = ({ url }: { url: string }) => {

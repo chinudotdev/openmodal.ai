@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { JobStatusBadge } from "@/components/shared/job-status-badge";
-import { formatDistanceToNow } from "@/lib/date-utils";
 import type { getJobBySlug } from "@/actions/jobs";
+import { JobStatusBadge } from "@/components/shared/job-status-badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDistanceToNow } from "@/lib/date-utils";
 
 type Job = Awaited<ReturnType<typeof getJobBySlug>>;
 

@@ -1,18 +1,9 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { ThemeProvider } from "@/components/theme-provider";
 import { PostHogProvider } from "@/components/ph-provider";
 import { QueryProvider } from "@/components/query-provider";
-
-// Dynamically import SessionProvider to avoid SSR issues
-const SessionProvider = dynamic(
-  () =>
-    import("@/contexts/session-context").then((mod) => ({
-      default: mod.SessionProvider,
-    })),
-  { ssr: false },
-);
+import { ThemeProvider } from "@/components/theme-provider";
+import { SessionProvider } from "@/contexts/session-context";
 
 export function Provider({ children }: { children: React.ReactNode }) {
   return (

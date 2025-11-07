@@ -1,24 +1,24 @@
 "use client";
 
-import Link from "next/link";
-import type { Capability } from "@/lib/mock-data";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { ProgressBar } from "@/components/shared/progress-bar";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
 import {
   ArrowRight,
-  Eye,
   Brain,
-  MessageSquare,
+  Eye,
   Hand,
+  MessageSquare,
   Target,
 } from "lucide-react";
+import Link from "next/link";
+import { ProgressBar } from "@/components/shared/progress-bar";
+import { StatusBadge } from "@/components/shared/status-badge";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import type { Capability } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 interface CapabilityCardProps {

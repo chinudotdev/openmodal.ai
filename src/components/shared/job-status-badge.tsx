@@ -1,5 +1,5 @@
-import { type AutomationStatus } from "@/db/schema/jobs";
 import { Badge } from "@/components/ui/badge";
+import type { AutomationStatus } from "@/db/schema/jobs";
 import { cn } from "@/lib/utils";
 
 interface JobStatusBadgeProps {

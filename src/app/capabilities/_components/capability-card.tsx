@@ -1,17 +1,17 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { ProgressBar } from "@/components/shared/progress-bar";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { ProgressBar } from "@/components/shared/progress-bar";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "@/lib/date-utils";
 
 interface CapabilityCardProps {

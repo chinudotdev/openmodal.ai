@@ -1,10 +1,10 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, AlertCircle, Info } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { AlertCircle, AlertTriangle, Info } from "lucide-react";
 import type { getCapabilityBySlug } from "@/actions/capabilities";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 type Capability = Awaited<ReturnType<typeof getCapabilityBySlug>>;
 

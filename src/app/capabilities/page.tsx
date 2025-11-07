@@ -1,12 +1,9 @@
 import { Suspense } from "react";
-import { Navbar } from "@/components/navigation/navbar";
 import {
   getCapabilities,
   getCapabilityCategories,
 } from "@/actions/capabilities";
-import { CapabilityFilters } from "./_components/capability-filters";
-import { CapabilitySort } from "./_components/capability-sort";
-import { CapabilityGrid } from "./_components/capability-grid";
+import { Navbar } from "@/components/navigation/navbar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,6 +13,9 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CapabilityFilters } from "./_components/capability-filters";
+import { CapabilityGrid } from "./_components/capability-grid";
+import { CapabilitySort } from "./_components/capability-sort";
 
 interface PageProps {
   searchParams: Promise<{

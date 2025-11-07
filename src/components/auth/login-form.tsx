@@ -1,5 +1,11 @@
 "use client";
 
+import { useForm } from "@tanstack/react-form";
+import { AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,12 +24,6 @@ import {
 } from "@/components/ui/field";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { useForm } from "@tanstack/react-form";
-import { AlertCircle } from "lucide-react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import z from "zod";
 import { Input } from "../ui/input";
 import { Spinner } from "../ui/spinner";
 import { GoogleLogin } from "./google-login";

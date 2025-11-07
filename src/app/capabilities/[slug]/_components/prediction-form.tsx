@@ -1,10 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+import type { getCapabilityBySlug } from "@/actions/capabilities";
+import { submitPrediction } from "@/actions/capabilities";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -12,14 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RadioGroup } from "@/components/ui/radio-group";
-import { RadioGroupItem } from "@/components/ui/radio-group";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { submitPrediction } from "@/actions/capabilities";
+import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/contexts/session-context";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import type { getCapabilityBySlug } from "@/actions/capabilities";
 
 type Capability = Awaited<ReturnType<typeof getCapabilityBySlug>>;
 

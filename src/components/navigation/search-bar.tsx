@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { Loader2, Search } from "lucide-react";
 import Link from "next/link";
-import { Search, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { SearchResult } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 export function SearchBar() {
   const [query, setQuery] = useState("");

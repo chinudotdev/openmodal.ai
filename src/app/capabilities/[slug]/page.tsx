@@ -1,25 +1,25 @@
-import { Suspense } from "react";
-import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Navbar } from "@/components/navigation/navbar";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import {
+  getCapabilities,
   getCapabilityBySlug,
   incrementViewCount,
-  getCapabilities,
 } from "@/actions/capabilities";
-import { CapabilityHeader } from "./_components/capability-header";
-import { CapabilityDescription } from "./_components/capability-description";
-import { WhyItMatters } from "./_components/why-it-matters";
-import { CurrentState } from "./_components/current-state";
-import { BottleneckCards } from "./_components/bottleneck-cards";
-import { TimelineForecast } from "./_components/timeline-forecast";
-import { JobImpactSection } from "./_components/job-impact-section";
-import { CommentSection } from "./_components/comment-section";
-import { QuickFacts } from "./_components/quick-facts";
-import { JobsProtected } from "./_components/jobs-protected";
-import { TopOrganizations } from "./_components/top-organizations";
-import { RelatedCapabilities } from "./_components/related-capabilities";
+import { Navbar } from "@/components/navigation/navbar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BottleneckCards } from "./_components/bottleneck-cards";
+import { CapabilityDescription } from "./_components/capability-description";
+import { CapabilityHeader } from "./_components/capability-header";
+import { CommentSection } from "./_components/comment-section";
+import { CurrentState } from "./_components/current-state";
+import { JobImpactSection } from "./_components/job-impact-section";
+import { JobsProtected } from "./_components/jobs-protected";
+import { QuickFacts } from "./_components/quick-facts";
+import { RelatedCapabilities } from "./_components/related-capabilities";
+import { TimelineForecast } from "./_components/timeline-forecast";
+import { TopOrganizations } from "./_components/top-organizations";
+import { WhyItMatters } from "./_components/why-it-matters";
 
 // Generate static params for common/popular capabilities
 export async function generateStaticParams() {

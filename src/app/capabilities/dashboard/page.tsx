@@ -1,12 +1,5 @@
 import { Navbar } from "@/components/navigation/navbar";
 import {
-  getCapabilities,
-  getCapabilityCategories,
-} from "@/actions/capabilities";
-import { OverallProgress } from "./_components/overall-progress";
-import { CategoryBreakdown } from "./_components/category-breakdown";
-import { CriticalGaps } from "./_components/critical-gaps";
-import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -14,72 +7,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Suspense } from "react";
+import { DashboardComponent } from "./_components";
+import { Spinner } from "@/components/ui/spinner";
 
 export default async function CapabilitiesDashboardPage() {
-  const [allCapabilities, categories] = await Promise.all([
-    getCapabilities({}, "progress_desc", 1000, 0), // Get all capabilities
-    getCapabilityCategories(),
-  ]);
-
-  // Calculate overall AGI progress (average of all capabilities)
-  const overallProgress =
-    allCapabilities.length > 0
-      ? Math.round(
-          allCapabilities.reduce(
-            (sum, cap) => sum + cap.progressPercentage,
-            0,
-          ) / allCapabilities.length,
-        )
-      : 0;
-
-  // Group capabilities by category
-  const capabilitiesByCategory = categories.map((category) => ({
-    category,
-    capabilities: allCapabilities.filter(
-      (cap) => cap.categoryId === category.id,
-    ),
-  }));
-
-  // Calculate category progress
-  const categoryProgress = capabilitiesByCategory.map(
-    ({ category, capabilities }) => {
-      const categoryProgress =
-        capabilities.length > 0
-          ? Math.round(
-              capabilities.reduce(
-                (sum, cap) => sum + cap.progressPercentage,
-                0,
-              ) / capabilities.length,
-            )
-          : 0;
-
-      const solved = capabilities.filter(
-        (cap) => cap.status === "solved",
-      ).length;
-      const partial = capabilities.filter(
-        (cap) => cap.status === "partial",
-      ).length;
-      const unsolved = capabilities.filter(
-        (cap) => cap.status === "unsolved",
-      ).length;
-
-      return {
-        category,
-        progress: categoryProgress,
-        solved,
-        partial,
-        unsolved,
-        capabilities,
-      };
-    },
-  );
-
-  // Get critical gaps (capabilities protecting most jobs)
-  const criticalGaps = allCapabilities
-    .filter((cap) => cap.status === "unsolved" || cap.status === "partial")
-    .sort((a, b) => b.jobsProtectedCount - a.jobsProtectedCount)
-    .slice(0, 5);
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -114,13 +46,9 @@ export default async function CapabilitiesDashboardPage() {
           </h1>
         </div>
       </div>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 space-y-8">
-        <OverallProgress progress={overallProgress} />
-        <CategoryBreakdown categories={categoryProgress} />
-        <CriticalGaps gaps={criticalGaps} />
-      </div>
+      <Suspense fallback={<Spinner className="h-8 w-8" />}>
+        <DashboardComponent />
+      </Suspense>
     </div>
   );
 }

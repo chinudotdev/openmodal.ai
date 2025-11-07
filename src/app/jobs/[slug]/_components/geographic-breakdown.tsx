@@ -1,5 +1,7 @@
 "use client";
 
+import type { getJobBySlug } from "@/actions/jobs";
+import { JobStatusBadge } from "@/components/shared/job-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -9,8 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { JobStatusBadge } from "@/components/shared/job-status-badge";
-import type { getJobBySlug } from "@/actions/jobs";
 
 type Job = Awaited<ReturnType<typeof getJobBySlug>>;
 

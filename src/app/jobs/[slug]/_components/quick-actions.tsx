@@ -1,11 +1,11 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Bell, Share2, BarChart3, MessageSquare } from "lucide-react";
-import { TrackButton } from "./track-button";
-import { ShareButton } from "./share-button";
+import { BarChart3, Bell, MessageSquare, Share2 } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ShareButton } from "./share-button";
+import { TrackButton } from "./track-button";
 
 interface QuickActionsProps {
   jobId: string;

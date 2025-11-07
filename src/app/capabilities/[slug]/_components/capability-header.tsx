@@ -1,14 +1,14 @@
 "use client";
 
-import { TrackButton } from "./track-button";
-import { ShareButton } from "./share-button";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { ProgressBar } from "@/components/shared/progress-bar";
-import { formatDistanceToNow } from "@/lib/date-utils";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Share2, Users, Building2 } from "lucide-react";
+import { Building2, Share2, Users } from "lucide-react";
 import type { getCapabilityBySlug } from "@/actions/capabilities";
+import { ProgressBar } from "@/components/shared/progress-bar";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { formatDistanceToNow } from "@/lib/date-utils";
+import { ShareButton } from "./share-button";
+import { TrackButton } from "./track-button";
 
 type Capability = Awaited<ReturnType<typeof getCapabilityBySlug>>;
 

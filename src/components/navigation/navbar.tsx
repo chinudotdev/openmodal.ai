@@ -1,22 +1,22 @@
 "use client";
 
+import { Bell, Brain } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSession } from "@/contexts/session-context";
 import { cn } from "@/lib/utils";
-import { SearchBar } from "./search-bar";
-import { UserMenu } from "./user-menu";
 import { MobileMenu } from "./mobile-menu";
 import { MoreDropdown } from "./more-dropdown";
-import { useSession } from "@/contexts/session-context";
+import { SearchBar } from "./search-bar";
+import { UserMenu } from "./user-menu";
 
 export function Navbar() {
   const pathname = usePathname();
   const { user, isLoading } = useSession();
 
   const navLinks = [
-    { href: "/", label: "AGI Status" },
+    { href: "/", label: "AGI" },
     { href: "/jobs", label: "Jobs" },
     { href: "/technologies", label: "Technologies" },
     { href: "/reports", label: "Reports" },

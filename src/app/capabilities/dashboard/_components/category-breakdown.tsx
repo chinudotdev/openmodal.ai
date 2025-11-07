@@ -1,10 +1,10 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertCircle, ArrowRight, CheckCircle2, XCircle } from "lucide-react";
+import Link from "next/link";
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
-import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface CategoryBreakdownProps {
   categories: Array<{

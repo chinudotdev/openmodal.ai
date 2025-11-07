@@ -1,9 +1,9 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ProgressBar } from "@/components/shared/progress-bar";
-import { formatDistanceToNow } from "@/lib/date-utils";
 import type { getCapabilityBySlug } from "@/actions/capabilities";
+import { ProgressBar } from "@/components/shared/progress-bar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDistanceToNow } from "@/lib/date-utils";
 
 type Capability = Awaited<ReturnType<typeof getCapabilityBySlug>>;
 

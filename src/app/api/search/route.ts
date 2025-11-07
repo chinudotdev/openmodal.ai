@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { ilike, or } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { capability } from "@/db/schema/capabilities";
 import { job } from "@/db/schema/jobs";
-import { or, ilike } from "drizzle-orm";
 
 export interface SearchResult {
   id: string;
@@ -14,8 +14,9 @@ export interface SearchResult {
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const query = searchParams.get("q");
+    // Access searchParams in a way that prevents prerendering
+    const url = new URL(request.url);
+    const query = url.searchParams.get("q");
 
     // Validate query
     if (!query || query.trim().length < 2) {

@@ -1,9 +1,8 @@
 import { GalleryVerticalEnd } from "lucide-react";
-
+import Link from "next/link";
+import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import { Spinner } from "@/components/ui/spinner";
-import { Suspense } from "react";
-import Link from "next/link";
 
 export default function LoginPage() {
   return (

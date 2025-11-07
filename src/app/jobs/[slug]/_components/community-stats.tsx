@@ -1,8 +1,8 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Bell, MessageSquare, FileText } from "lucide-react";
+import { Bell, Eye, FileText, MessageSquare } from "lucide-react";
 import type { getJobBySlug } from "@/actions/jobs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Job = Awaited<ReturnType<typeof getJobBySlug>>;
 
