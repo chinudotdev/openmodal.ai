@@ -22,7 +22,17 @@ import {
   researchReportSchema,
 } from "@/lib/validations";
 import { generateRandomString } from "better-auth/crypto";
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNull,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import { cacheLife } from "next/cache";
 import { z } from "zod";
 
@@ -711,6 +721,98 @@ export async function getApprovedReports(limit = 20, offset = 0) {
     }));
   } catch (error) {
     console.error("Error getting approved reports:", error);
+    return [];
+  }
+}
+
+/**
+ * Get personalized reports based on user's job title and industry
+ */
+export async function getPersonalizedReports(
+  jobTitle?: string | null,
+  industry?: string | null,
+  limit = 10,
+) {
+  "use cache";
+  cacheLife({ stale: 120, revalidate: 3600 * 2 });
+  try {
+    const conditions = [
+      eq(report.status, "approved"),
+      eq(report.isDraft, false),
+      isNull(report.deletedAt),
+    ];
+
+    // If user has job title or industry, filter by them
+    if (jobTitle || industry) {
+      const jobConditions: SQL<unknown>[] = [];
+      if (jobTitle) {
+        const jobTitlePattern = `%${jobTitle}%`;
+        // Match reports with same job title (from jobId or jobTitle field)
+        const jobTitleCondition = or(
+          ilike(report.jobTitle, jobTitlePattern),
+          sql`EXISTS (
+            SELECT 1 FROM ${job} j
+            WHERE j.id = ${report.jobId}
+            AND j.title ILIKE ${jobTitlePattern}
+          )`,
+        );
+        if (jobTitleCondition) {
+          jobConditions.push(jobTitleCondition);
+        }
+      }
+      if (industry) {
+        const industryPattern = `%${industry}%`;
+        // Match reports with same industry
+        const industryCondition = sql`EXISTS (
+          SELECT 1 FROM ${job} j
+          WHERE j.id = ${report.jobId}
+          AND j.industry ILIKE ${industryPattern}
+        )`;
+        jobConditions.push(industryCondition);
+      }
+      if (jobConditions.length > 0) {
+        const combinedCondition = or(...jobConditions);
+        if (combinedCondition) {
+          conditions.push(combinedCondition);
+        }
+      }
+    }
+
+    const reports = await db
+      .select()
+      .from(report)
+      .where(and(...conditions))
+      .orderBy(desc(report.upvotes), desc(report.createdAt))
+      .limit(limit);
+
+    // Get all evidence for all reports in a single query
+    const reportIds = reports.map((r) => r.id);
+    const allEvidence =
+      reportIds.length > 0
+        ? await db
+            .select()
+            .from(reportEvidence)
+            .where(inArray(reportEvidence.reportId, reportIds))
+        : [];
+
+    // Group evidence by reportId
+    const evidenceMap = new Map<string, typeof allEvidence>();
+    for (const evidence of allEvidence) {
+      const existing = evidenceMap.get(evidence.reportId);
+      if (existing) {
+        existing.push(evidence);
+      } else {
+        evidenceMap.set(evidence.reportId, [evidence]);
+      }
+    }
+
+    // Map reports with their evidence
+    return reports.map((r) => ({
+      ...r,
+      evidence: evidenceMap.get(r.id) || [],
+    }));
+  } catch (error) {
+    console.error("Error getting personalized reports:", error);
     return [];
   }
 }

@@ -8,6 +8,7 @@ import {
   notification,
   notificationPreference,
 } from "@/db/schema";
+import { cacheLife, cacheTag } from "next/cache";
 
 /**
  * Create notification
@@ -68,6 +69,9 @@ export async function getUserNotifications(
   limit = 20,
   offset = 0,
 ) {
+  "use cache";
+  cacheLife({ stale: 60, revalidate: 120 });
+  cacheTag(`notifications:${userId}`);
   try {
     const notifications = await db
       .select()

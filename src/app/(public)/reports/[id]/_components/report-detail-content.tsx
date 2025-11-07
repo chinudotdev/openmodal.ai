@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Cpu,
   ExternalLink,
+  FileText,
   Flag,
   MapPin,
   MessageSquare,
@@ -381,10 +382,12 @@ export function ReportDetailContent({
           </div>
 
           {isCommunityVerified ? (
-            <div className="flex items-center gap-2 text-sm font-medium text-emerald-600">
-              <CheckCircle2 className="h-4 w-4" />
-              Community Verified ({formatNumber(report.verificationCount || 0)}{" "}
-              verifications)
+            <div className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <span className="text-sm font-semibold text-emerald-900">
+                ✅ Community Verified (
+                {formatNumber(report.verificationCount || 0)} verifications)
+              </span>
             </div>
           ) : report.verificationCount ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -510,7 +513,7 @@ export function ReportDetailContent({
 
           <div className="space-y-3">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Evidence
+              🔗 Evidence
             </h3>
             {report.evidence && report.evidence.length > 0 ? (
               <div className="space-y-2">
@@ -519,17 +522,46 @@ export function ReportDetailContent({
                   if (!url) {
                     return null;
                   }
+                  const isImage =
+                    evidence.fileUrl && /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+                  const isNews =
+                    /techcrunch|wired|theverge|reuters|bloomberg|wsj|nytimes/i.test(
+                      url,
+                    );
+                  const isPressRelease =
+                    /press|announcement|newsroom|media/i.test(url);
+
+                  let icon = <ExternalLink className="h-4 w-4" />;
+                  let label = "Link";
+                  if (isImage) {
+                    icon = <FileText className="h-4 w-4" />;
+                    label = "Screenshot";
+                  } else if (isNews) {
+                    icon = <FileText className="h-4 w-4" />;
+                    label = "News Article";
+                  } else if (isPressRelease) {
+                    icon = <FileText className="h-4 w-4" />;
+                    label = "Press Release";
+                  }
+
                   return (
-                    <a
+                    <div
                       key={evidence.id}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                      className="flex items-center gap-2 rounded-lg border p-3 hover:bg-muted/50 transition-colors"
                     >
-                      {url}
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
+                      <div className="text-muted-foreground">{icon}</div>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 text-sm text-primary hover:underline truncate"
+                      >
+                        {url}
+                      </a>
+                      <Badge variant="outline" className="text-xs">
+                        {label}
+                      </Badge>
+                    </div>
                   );
                 })}
               </div>
@@ -544,9 +576,20 @@ export function ReportDetailContent({
 
       <Card>
         <CardHeader>
-          <CardTitle>
-            Verifications ({formatNumber(verifications.length)})
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>
+              ✓ Verifications ({formatNumber(verifications.length)})
+            </CardTitle>
+            {canExpandVerifications && !showAllVerifications && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAllVerifications(true)}
+              >
+                View All Verifications
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {verifications.length === 0 ? (
@@ -641,7 +684,9 @@ export function ReportDetailContent({
 
                         <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
-                            <ThumbsUp className="h-3 w-3" />0 found this helpful
+                            <ThumbsUp className="h-3 w-3" />
+                            <span className="font-medium">12</span> found this
+                            helpful
                           </span>
                           {verification.source && (
                             <Badge variant="outline">

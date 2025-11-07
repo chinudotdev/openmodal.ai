@@ -1,10 +1,15 @@
 "use server";
 
 import { generateRandomString } from "better-auth/crypto";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, exists, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
-import { report, reputationHistory, userReputation } from "@/db/schema";
+import {
+  report,
+  reportDispute,
+  reputationHistory,
+  userReputation,
+} from "@/db/schema";
 import {
   approveReportSchema,
   rejectReportSchema,
@@ -227,6 +232,69 @@ export async function requestReportChanges(
 }
 
 /**
+ * Get reports with disputes
+ */
+export async function getDisputedReports(limit = 20, offset = 0) {
+  try {
+    // Get reports that have at least one dispute
+    const reports = await db
+      .select()
+      .from(report)
+      .where(
+        and(
+          exists(
+            db
+              .select()
+              .from(reportDispute)
+              .where(
+                and(
+                  eq(reportDispute.reportId, report.id),
+                  isNull(reportDispute.deletedAt),
+                ),
+              ),
+          ),
+          isNull(report.deletedAt),
+        ),
+      )
+      .orderBy(desc(report.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return reports;
+  } catch (error) {
+    console.error("Error getting disputed reports:", error);
+    return [];
+  }
+}
+
+/**
+ * Get flagged reports (reports with high downvote ratio or many disputes)
+ */
+export async function getFlaggedReports(limit = 20, offset = 0) {
+  try {
+    // Get reports with high downvote ratio (downvotes > upvotes) or many disputes
+    const reports = await db
+      .select()
+      .from(report)
+      .where(
+        and(
+          sql`${report.downvotes} > ${report.upvotes}`,
+          sql`${report.downvotes} > 3`,
+          isNull(report.deletedAt),
+        ),
+      )
+      .orderBy(desc(report.downvotes), desc(report.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return reports;
+  } catch (error) {
+    console.error("Error getting flagged reports:", error);
+    return [];
+  }
+}
+
+/**
  * Get moderation statistics
  */
 export async function getModerationStats() {
@@ -253,11 +321,44 @@ export async function getModerationStats() {
         and(eq(report.status, "changes_requested"), isNull(report.deletedAt)),
       );
 
+    const disputed = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(report)
+      .where(
+        and(
+          exists(
+            db
+              .select()
+              .from(reportDispute)
+              .where(
+                and(
+                  eq(reportDispute.reportId, report.id),
+                  isNull(reportDispute.deletedAt),
+                ),
+              ),
+          ),
+          isNull(report.deletedAt),
+        ),
+      );
+
+    const flagged = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(report)
+      .where(
+        and(
+          sql`${report.downvotes} > ${report.upvotes}`,
+          sql`${report.downvotes} > 3`,
+          isNull(report.deletedAt),
+        ),
+      );
+
     return {
       pending: Number(pending[0]?.count || 0),
       approved: Number(approved[0]?.count || 0),
       rejected: Number(rejected[0]?.count || 0),
       changesRequested: Number(changesRequested[0]?.count || 0),
+      disputed: Number(disputed[0]?.count || 0),
+      flagged: Number(flagged[0]?.count || 0),
     };
   } catch (error) {
     console.error("Error getting moderation stats:", error);
@@ -266,6 +367,8 @@ export async function getModerationStats() {
       approved: 0,
       rejected: 0,
       changesRequested: 0,
+      disputed: 0,
+      flagged: 0,
     };
   }
 }

@@ -6,6 +6,9 @@ import { redirect } from "next/navigation";
 import { DashboardOverview } from "./dashboard-overview";
 import { DashboardStats } from "./dashboard-stats";
 import { UserReportsList } from "./user-reports-list";
+import { DashboardNotifications } from "./dashboard-notifications";
+import { TrackedCapabilities } from "./tracked-capabilities";
+import { PersonalizedFeed } from "./personalized-feed";
 
 export async function DashboardContent() {
   const session = await auth.api.getSession({
@@ -40,6 +43,11 @@ export async function DashboardContent() {
         profile={data.profile}
       />
       <DashboardStats stats={data.stats} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <DashboardNotifications userId={session.user.id} />
+        <TrackedCapabilities capabilities={data.trackedCapabilities} />
+      </div>
+      <PersonalizedFeed userId={session.user.id} />
       <UserReportsList reports={data.reports} />
     </div>
   );
