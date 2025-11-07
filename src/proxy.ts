@@ -12,7 +12,7 @@ export async function proxy(request: NextRequest) {
     const callbackPath = request.nextUrl.pathname;
     const queryParams = request.nextUrl.search;
     return NextResponse.redirect(
-      new URL(`/login?callbackURL=${callbackPath}${queryParams}`, request.url),
+      new URL(`/login?callbackURL=${callbackPath}${queryParams}`, request.url)
     );
   }
 
@@ -30,8 +30,8 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(
         new URL(
           `/onboarding?callbackURL=${callbackPath}${queryParams}`,
-          request.url,
-        ),
+          request.url
+        )
       );
     }
   }
@@ -39,5 +39,5 @@ export async function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 export const config = {
-  matcher: ["/dashboard", "/contribute", "/onboarding"], // Apply middleware to specific routes
+  matcher: ["/dashboard", "/onboarding"], // Apply middleware to specific routes
 };

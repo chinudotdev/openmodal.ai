@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { getCapabilities } from "@/actions/capabilities";
@@ -10,17 +8,22 @@ type Capability = Awaited<ReturnType<typeof getCapabilities>>[0];
 
 interface CapabilityListProps {
   capabilities: Capability[];
-  totalCount?: number;
 }
 
-export function CapabilityList({
-  capabilities,
-  totalCount,
-}: CapabilityListProps) {
-  // Show first 5 capabilities
-  const displayedCapabilities = capabilities.slice(0, 5);
+// Deterministic hash function to replace Math.random()
+// Generates a consistent value between 0 and max based on the input string
+function deterministicHash(str: string, max: number): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash) % max;
+}
 
-  if (displayedCapabilities.length === 0) {
+export function CapabilityList({ capabilities }: CapabilityListProps) {
+  if (capabilities.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-muted p-8 text-center">
         <p className="text-sm text-muted-foreground">
@@ -30,8 +33,7 @@ export function CapabilityList({
     );
   }
 
-  // Transform database capability to mock data format for compatibility
-  const transformedCapabilities = displayedCapabilities.map((cap) => ({
+  const transformedCapabilities = capabilities.map((cap) => ({
     id: cap.slug,
     name: cap.name,
     icon: cap.category?.icon || "Brain",
@@ -39,13 +41,13 @@ export function CapabilityList({
     status: cap.status,
     strongAreas: (cap.whatWorks || []).slice(0, 3).map((area) => ({
       name: area,
-      progress: cap.progressPercentage + Math.floor(Math.random() * 20),
+      progress: cap.progressPercentage + deterministicHash(area, 20),
     })),
     keyGaps: (cap.whatStruggles || []).slice(0, 2).map((gap) => ({
       name: gap,
       progress: Math.max(
         0,
-        cap.progressPercentage - Math.floor(Math.random() * 30),
+        cap.progressPercentage - deterministicHash(gap, 30),
       ),
     })),
     jobsProtected: cap.jobsProtectedCount || 0,
@@ -66,7 +68,7 @@ export function CapabilityList({
       <div className="pt-2">
         <Link href="/capabilities">
           <Button variant="outline" className="w-full group">
-            View all {totalCount ?? capabilities.length} capabilities
+            View all capabilities
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </Link>

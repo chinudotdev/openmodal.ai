@@ -19,8 +19,9 @@ import {
   type PredictionConfidence,
 } from "@/db/schema/capabilities";
 import { job, jobComment } from "@/db/schema/jobs";
+import { user } from "@/db/schema/auth";
 import { checkOnboardingFromSession } from "@/lib/session-utils";
-import { cacheTag } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
 // Types
 export type CapabilityFilters = {
@@ -94,7 +95,9 @@ export async function getCapabilities(
   limit = 20,
   offset = 0
 ) {
-  // Build conditions array
+  "use cache";
+  cacheLife({ stale: 3600, revalidate: 3600 * 24 });
+
   const conditions = [];
 
   if (filters.categoryId) {
@@ -143,12 +146,7 @@ export async function getCapabilities(
     );
   }
 
-  // Build query with where clause
-  const baseQuery = db.select().from(capability);
-  const queryWithWhere =
-    conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
-
-  // Apply sorting and build final query
+  // Apply sorting
   const getSortOrder = () => {
     switch (sort) {
       case "progress_desc":
@@ -166,28 +164,31 @@ export async function getCapabilities(
     }
   };
 
-  // Apply pagination and execute
+  // Single query with LEFT JOIN to get capabilities and categories
+  const baseQuery = db
+    .select({
+      capability,
+      category: capabilityCategory,
+    })
+    .from(capability)
+    .leftJoin(
+      capabilityCategory,
+      eq(capability.categoryId, capabilityCategory.id)
+    );
+
+  const queryWithWhere =
+    conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
+
+  // Execute single query with pagination
   const results = await queryWithWhere
     .orderBy(getSortOrder())
     .limit(limit)
     .offset(offset);
 
-  // Get categories for each capability
-  const categories = await db
-    .select()
-    .from(capabilityCategory)
-    .where(
-      inArray(
-        capabilityCategory.id,
-        results.map((r) => r.categoryId)
-      )
-    );
-
-  const categoryMap = new Map(categories.map((c) => [c.id, c]));
-
-  return results.map((cap) => ({
-    ...cap,
-    category: categoryMap.get(cap.categoryId),
+  // Map results to match the expected format
+  return results.map((result) => ({
+    ...result.capability,
+    category: result.category || undefined,
   }));
 }
 
@@ -705,80 +706,128 @@ export interface Activity {
 }
 
 export async function getActivities(limit = 10): Promise<Activity[]> {
+
+  "use cache";
+
+  cacheLife({ stale: 3600, revalidate: 3600 * 4 });
   try {
-    const activities: Activity[] = [];
+    // Execute all queries in parallel for better performance
+    const [recentComments, recentPredictions, recentUpdates] =
+      await Promise.all([
+        // Comments with user info and reply count
+        db
+          .select({
+            id: capabilityComment.id,
+            content: capabilityComment.content,
+            upvotes: capabilityComment.upvotes,
+            createdAt: capabilityComment.createdAt,
+            userId: capabilityComment.userId,
+            capabilityName: capability.name,
+            capabilitySlug: capability.slug,
+            replyCount: sql<number>`
+            (SELECT COUNT(*) FROM ${capabilityComment} c2 
+             WHERE c2.parent_id = ${capabilityComment.id})
+          `.as("reply_count"),
+            username: user.displayUsername,
+            userUsername: user.username,
+            userName: user.name,
+          })
+          .from(capabilityComment)
+          .innerJoin(
+            capability,
+            eq(capabilityComment.capabilityId, capability.id)
+          )
+          .leftJoin(user, eq(capabilityComment.userId, user.id))
+          .where(sql`${capabilityComment.parentId} IS NULL`)
+          .orderBy(desc(capabilityComment.createdAt))
+          .limit(limit),
 
-    // Get recent capability comments with reply count as subquery
-    const recentComments = await db
-      .select({
-        id: capabilityComment.id,
-        content: capabilityComment.content,
-        upvotes: capabilityComment.upvotes,
-        createdAt: capabilityComment.createdAt,
-        userId: capabilityComment.userId,
-        capabilityId: capabilityComment.capabilityId,
-        capabilityName: capability.name,
-        capabilitySlug: capability.slug,
-        replyCount: sql<number>`
-          (SELECT COUNT(*) FROM ${capabilityComment} c2 
-           WHERE c2.parent_id = ${capabilityComment.id})
-        `.as("reply_count"),
-      })
-      .from(capabilityComment)
-      .innerJoin(capability, eq(capabilityComment.capabilityId, capability.id))
-      .where(sql`${capabilityComment.parentId} IS NULL`)
-      .orderBy(desc(capabilityComment.createdAt))
-      .limit(limit);
+        // Predictions with user info
+        db
+          .select({
+            id: capabilityPrediction.id,
+            predictedYear: capabilityPrediction.predictedYear,
+            confidence: capabilityPrediction.confidence,
+            reasoning: capabilityPrediction.reasoning,
+            createdAt: capabilityPrediction.createdAt,
+            userId: capabilityPrediction.userId,
+            capabilityName: capability.name,
+            capabilitySlug: capability.slug,
+            capabilityStatus: capability.status,
+            username: user.displayUsername,
+            userUsername: user.username,
+            userName: user.name,
+          })
+          .from(capabilityPrediction)
+          .innerJoin(
+            capability,
+            eq(capabilityPrediction.capabilityId, capability.id)
+          )
+          .leftJoin(user, eq(capabilityPrediction.userId, user.id))
+          .orderBy(desc(capabilityPrediction.createdAt))
+          .limit(limit),
 
+        // Capability updates (only with breakthrough dates)
+        db
+          .select({
+            id: capability.id,
+            name: capability.name,
+            slug: capability.slug,
+            updatedAt: capability.updatedAt,
+            recentBreakthroughDate: capability.recentBreakthroughDate,
+            status: capability.status,
+          })
+          .from(capability)
+          .where(
+            and(
+              sql`${capability.updatedAt} > NOW() - INTERVAL '7 days'`,
+              sql`${capability.recentBreakthroughDate} IS NOT NULL`
+            )
+          )
+          .orderBy(desc(capability.updatedAt))
+          .limit(limit),
+      ]);
+
+    // Combine and map all activities with raw timestamps for sorting
+    const activitiesWithTimestamp: Array<Activity & { rawTimestamp: Date }> =
+      [];
+
+    // Map comments
     for (const comment of recentComments) {
-      // Get user info (simplified - in real app you'd join with user table)
-      const username = comment.userId.slice(0, 16) || "anonymous";
+      const username =
+        comment.username ||
+        comment.userUsername ||
+        comment.userName ||
+        "anonymous";
 
-      activities.push({
+      activitiesWithTimestamp.push({
         id: `comment-${comment.id}`,
         type: "research",
         title: `New discussion on ${comment.capabilityName}`,
         description: comment.content.slice(0, 200),
         url: `/capabilities/${comment.capabilitySlug}`,
         timestamp: formatRelativeTime(comment.createdAt),
-        author: {
-          username,
-        },
+        rawTimestamp: comment.createdAt,
+        author: { username },
         upvotes: comment.upvotes,
         comments: Number(comment.replyCount || 0),
         tags: [comment.capabilityName],
       });
     }
 
-    // Get recent predictions
-    const recentPredictions = await db
-      .select({
-        id: capabilityPrediction.id,
-        predictedYear: capabilityPrediction.predictedYear,
-        confidence: capabilityPrediction.confidence,
-        reasoning: capabilityPrediction.reasoning,
-        createdAt: capabilityPrediction.createdAt,
-        userId: capabilityPrediction.userId,
-        capabilityName: capability.name,
-        capabilitySlug: capability.slug,
-        capabilityStatus: capability.status,
-      })
-      .from(capabilityPrediction)
-      .innerJoin(
-        capability,
-        eq(capabilityPrediction.capabilityId, capability.id)
-      )
-      .orderBy(desc(capabilityPrediction.createdAt))
-      .limit(limit);
-
+    // Map predictions
     for (const prediction of recentPredictions) {
-      const username = prediction.userId.slice(0, 16) || "expert";
+      const username =
+        prediction.username ||
+        prediction.userUsername ||
+        prediction.userName ||
+        "expert";
       const isBreakthrough =
         prediction.capabilityStatus === "solved" ||
         (prediction.capabilityStatus === "partial" &&
           prediction.confidence === "high");
 
-      activities.push({
+      activitiesWithTimestamp.push({
         id: `prediction-${prediction.id}`,
         type: isBreakthrough ? "breakthrough" : "research",
         title: `${username} predicted ${prediction.capabilityName} by ${prediction.predictedYear}`,
@@ -787,57 +836,42 @@ export async function getActivities(limit = 10): Promise<Activity[]> {
           `New prediction for ${prediction.capabilityName} with ${prediction.confidence} confidence`,
         url: `/capabilities/${prediction.capabilitySlug}`,
         timestamp: formatRelativeTime(prediction.createdAt),
-        author: {
-          username,
-        },
+        rawTimestamp: prediction.createdAt,
+        author: { username },
         upvotes: 0,
         comments: 0,
         tags: [prediction.capabilityName, "Prediction"],
       });
     }
 
-    // Get recent capability updates
-    const recentUpdates = await db
-      .select({
-        id: capability.id,
-        name: capability.name,
-        slug: capability.slug,
-        updatedAt: capability.updatedAt,
-        recentBreakthroughDate: capability.recentBreakthroughDate,
-        status: capability.status,
-      })
-      .from(capability)
-      .where(sql`${capability.updatedAt} > NOW() - INTERVAL '7 days'`)
-      .orderBy(desc(capability.updatedAt))
-      .limit(limit);
-
+    // Map updates
     for (const update of recentUpdates) {
-      if (update.recentBreakthroughDate) {
-        activities.push({
-          id: `update-${update.id}`,
-          type: "breakthrough",
-          title: `Breakthrough in ${update.name}`,
-          description: `Recent progress update on ${update.name} capability`,
-          url: `/capabilities/${update.slug}`,
-          timestamp: formatRelativeTime(update.updatedAt),
-          author: {
-            username: "community",
-          },
-          upvotes: 0,
-          comments: 0,
-          tags: [update.name],
-        });
-      }
+      activitiesWithTimestamp.push({
+        id: `update-${update.id}`,
+        type: "breakthrough",
+        title: `Breakthrough in ${update.name}`,
+        description: `Recent progress update on ${update.name} capability`,
+        url: `/capabilities/${update.slug}`,
+        timestamp: formatRelativeTime(update.updatedAt),
+        rawTimestamp: update.updatedAt,
+        author: { username: "community" },
+        upvotes: 0,
+        comments: 0,
+        tags: [update.name],
+      });
     }
 
-    // Sort by timestamp (most recent first)
-    // Since we're getting activities from different sources, we need to sort them
-    // Activities are already sorted by createdAt DESC from individual queries
-    // We'll keep them in the order they were added (most recent first from each query)
-    // For a more accurate sort, we'd need to store the actual Date and sort by that
-    // For now, we'll just take the first N items as they're already roughly sorted
+    // Sort by raw timestamp (most recent first) and limit
+    activitiesWithTimestamp.sort((a, b) => {
+      return b.rawTimestamp.getTime() - a.rawTimestamp.getTime();
+    });
 
-    return activities.slice(0, limit);
+    // Remove rawTimestamp and return only Activity objects
+    const activities: Activity[] = activitiesWithTimestamp
+      .slice(0, limit)
+      .map(({ rawTimestamp, ...activity }) => activity);
+
+    return activities;
   } catch (error) {
     console.error("Error fetching activities:", error);
     return [];
@@ -930,65 +964,77 @@ export interface AGIProgress {
 }
 
 export async function getAGIProgress(): Promise<AGIProgress> {
+  "use cache";
+
+  cacheLife({ stale: 3600, revalidate: 3600 * 24 });
   try {
-    // Calculate overall progress as average of all capabilities
-    const capabilitiesResult = await db
+    // Single query to get all data at once
+    const result = await db
       .select({
-        avgProgress: sql<number>`avg(${capability.progressPercentage})`,
-        maxUpdated: sql<Date>`max(${capability.updatedAt})`,
+        // Overall progress
+        overall: sql<number>`ROUND(COALESCE(AVG(${capability.progressPercentage}), 0))::int`,
+        // Most recent capability update
+        maxUpdated: sql<Date>`MAX(${capability.updatedAt})`,
+        // Unique contributors count (from comments, predictions, and tracking)
+        contributors: sql<number>`
+          (SELECT COUNT(DISTINCT user_id) FROM (
+            SELECT user_id FROM ${capabilityComment}
+            UNION
+            SELECT user_id FROM ${capabilityPrediction}
+            UNION
+            SELECT user_id FROM ${capabilityTracking}
+          ) AS all_contributors)::int
+        `,
+        // Expert forecasts count (predictions)
+        expertForecasts: sql<number>`(SELECT COUNT(*) FROM ${capabilityPrediction})::int`,
+        // Reports count (comments)
+        reports: sql<number>`(SELECT COUNT(*) FROM ${capabilityComment})::int`,
+        // Most recent user who updated (from most recent comment, prediction, or tracking)
+        lastUpdatedBy: sql<string>`
+          COALESCE(
+            (SELECT COALESCE(u.display_username, u.username, u.name) FROM ${user} u
+             WHERE u.id = (
+               SELECT user_id FROM (
+                 SELECT user_id, updated_at AS activity_time FROM ${capabilityComment}
+                 UNION ALL
+                 SELECT user_id, updated_at AS activity_time FROM ${capabilityPrediction}
+                 UNION ALL
+                 SELECT user_id, created_at AS activity_time FROM ${capabilityTracking}
+               ) AS recent_activities
+               ORDER BY activity_time DESC NULLS LAST
+               LIMIT 1
+             )
+             LIMIT 1),
+            'community'
+          )
+        `,
+        // Most recent activity timestamp
+        mostRecentActivity: sql<Date | null>`
+          NULLIF(
+            GREATEST(
+              COALESCE((SELECT MAX(updated_at) FROM ${capabilityComment}), '1970-01-01'::timestamp),
+              COALESCE((SELECT MAX(updated_at) FROM ${capabilityPrediction}), '1970-01-01'::timestamp),
+              COALESCE((SELECT MAX(created_at) FROM ${capabilityTracking}), '1970-01-01'::timestamp)
+            ),
+            '1970-01-01'::timestamp
+          )
+        `,
       })
       .from(capability);
 
-    const overall = Math.round(Number(capabilitiesResult[0]?.avgProgress || 0));
+    const data = result[0];
 
-    // Get most recent update
-    const mostRecent = capabilitiesResult[0]?.maxUpdated;
+    // Use the most recent between capability update and activity update
+    const mostRecent = data?.mostRecentActivity || data?.maxUpdated;
     const lastUpdated = mostRecent ? formatRelativeTime(mostRecent) : "unknown";
 
-    // Count contributors (unique users from comments + predictions + tracking)
-    const contributorsFromComments = await db
-      .selectDistinct({ userId: capabilityComment.userId })
-      .from(capabilityComment);
-
-    const contributorsFromPredictions = await db
-      .selectDistinct({ userId: capabilityPrediction.userId })
-      .from(capabilityPrediction);
-
-    const contributorsFromTracking = await db
-      .selectDistinct({ userId: capabilityTracking.userId })
-      .from(capabilityTracking);
-
-    const contributorSet = new Set<string>();
-    contributorsFromComments.forEach((c) => contributorSet.add(c.userId));
-    contributorsFromPredictions.forEach((c) => contributorSet.add(c.userId));
-    contributorsFromTracking.forEach((c) => contributorSet.add(c.userId));
-
-    const contributors = contributorSet.size;
-
-    // Count expert forecasts (predictions)
-    const forecastsResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(capabilityPrediction);
-
-    const expertForecasts = Number(forecastsResult[0]?.count || 0);
-
-    // Count reports (capability comments)
-    const reportsResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(capabilityComment);
-
-    const reports = Number(reportsResult[0]?.count || 0);
-
-    // Get last updated by (simplified - would need to join with user table)
-    const lastUpdatedBy = "community";
-
     return {
-      overall,
+      overall: Number(data?.overall || 0),
       lastUpdated,
-      lastUpdatedBy,
-      contributors,
-      expertForecasts,
-      reports,
+      lastUpdatedBy: data?.lastUpdatedBy || "community",
+      contributors: Number(data?.contributors || 0),
+      expertForecasts: Number(data?.expertForecasts || 0),
+      reports: Number(data?.reports || 0),
     };
   } catch (error) {
     console.error("Error fetching AGI progress:", error);

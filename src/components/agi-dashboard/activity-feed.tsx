@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowRight, Flame } from "lucide-react";
 import Link from "next/link";
 import type { Activity } from "@/actions/capabilities";
@@ -11,12 +9,9 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {
-  // Show first 10 activities
-  const displayedActivities = activities.slice(0, 10);
-
-  if (displayedActivities.length === 0) {
+  if (activities.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="h-full flex flex-col space-y-6">
         {/* Header */}
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -31,7 +26,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
         </div>
 
         {/* Empty State */}
-        <div className="rounded-lg border border-border bg-muted p-8 text-center">
+        <div className="rounded-lg border border-border bg-muted p-8 text-center flex-1">
           <p className="text-sm text-muted-foreground">
             No recent activity. Check back soon for updates!
           </p>
@@ -41,7 +36,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col space-y-6">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
@@ -56,8 +51,8 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
       </div>
 
       {/* Activity Cards */}
-      <div className="space-y-4">
-        {displayedActivities.map((activity) => (
+      <div className="space-y-4 flex-1">
+        {activities.map((activity) => (
           <ActivityCard key={activity.id} activity={activity} />
         ))}
       </div>

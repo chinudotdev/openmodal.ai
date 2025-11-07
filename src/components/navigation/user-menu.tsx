@@ -23,14 +23,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
+import type { SessionUser } from "@/contexts/session-context";
 
 interface UserMenuProps {
-  user?: {
-    id: string;
-    name: string;
-    email: string;
-    image?: string;
-  } | null;
+  user?: SessionUser | null;
   isLoading?: boolean;
 }
 
@@ -103,7 +99,7 @@ export function UserMenu({ user, isLoading }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="rounded-full">
           <Avatar className="h-8 w-8 border-2 border-[var(--gray-200)] hover:border-[var(--primary-500)] transition-colors">
-            <AvatarImage src={user.image} alt={user.name} />
+            <AvatarImage src={user?.image ?? ""} alt={user.name} />
             <AvatarFallback className="bg-[var(--primary-100)] text-[var(--primary-600)]">
               {initials}
             </AvatarFallback>

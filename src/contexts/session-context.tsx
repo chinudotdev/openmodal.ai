@@ -3,12 +3,15 @@
 import { createContext, type ReactNode, useContext } from "react";
 import { authClient } from "@/lib/auth-client";
 
-interface SessionUser {
+export interface SessionUser {
+  onboardingCompleted: boolean;
   id: string;
-  name: string;
+  createdAt: Date;
+  updatedAt: Date;
   email: string;
-  image?: string;
-  onboardingCompleted?: boolean;
+  emailVerified: boolean;
+  name: string;
+  image?: string | null | undefined;
 }
 
 interface SessionContextType {
@@ -24,17 +27,13 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 export function SessionProvider({ children }: { children: ReactNode }) {
   const { data: session, isPending } = authClient.useSession();
 
-  const user = session?.user
-    ? {
-        id: session.user.id,
-        name: session.user.name,
-        email: session.user.email,
-        image: session.user.image ?? undefined,
-        onboardingCompleted:
-          (session.user as { onboardingCompleted?: boolean })
-            .onboardingCompleted ?? false,
-      }
-    : null;
+  let user: SessionUser | null = null;
+
+  if (!session) {
+    user = null;
+  } else {
+    user = session.user;
+  }
 
   const value: SessionContextType = {
     session: user ? { user } : null,
