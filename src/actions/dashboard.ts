@@ -9,10 +9,12 @@ import {
   report,
   reportComment,
   reportVerification,
+  user,
   userBadge,
   userProfile,
   userReputation,
 } from "@/db/schema";
+import { getUserStreaks } from "./gamification";
 import { cacheLife, cacheTag } from "next/cache";
 
 /**
@@ -24,6 +26,17 @@ export async function getUserDashboard(userId: string) {
   cacheTag(`dashboard:${userId}`);
 
   try {
+    // Get user data
+    const userData = await db
+      .select()
+      .from(user)
+      .where(eq(user.id, userId))
+      .limit(1);
+
+    if (userData.length === 0) {
+      return null;
+    }
+
     // Single query with LEFT JOINs and JSON aggregation subqueries
     const result = await db
       .select({
@@ -123,8 +136,10 @@ export async function getUserDashboard(userId: string) {
     }
 
     const data = result[0];
+    const streaks = await getUserStreaks(userId);
 
     return {
+      user: userData[0],
       reputation: data.reputation || null,
       badges: (data.badges || []) as (typeof userBadge.$inferSelect)[],
       profile: data.profile || null,
@@ -140,6 +155,7 @@ export async function getUserDashboard(userId: string) {
         []) as (typeof capabilityTracking.$inferSelect & {
         capability: typeof capability.$inferSelect;
       })[],
+      streaks,
     };
   } catch (error) {
     console.error("Error getting user dashboard:", error);
@@ -184,8 +200,8 @@ export async function getUserStats(userId: string) {
         and(
           eq(reportVerification.userId, userId),
           isNull(reportVerification.deletedAt),
-          eq(reportVerification.canVerify, true),
-        ),
+          eq(reportVerification.canVerify, true)
+        )
       );
 
     // Count user comments (excluding soft-deleted)
@@ -193,7 +209,7 @@ export async function getUserStats(userId: string) {
       .select({ count: sql<number>`count(*)` })
       .from(reportComment)
       .where(
-        and(eq(reportComment.userId, userId), isNull(reportComment.deletedAt)),
+        and(eq(reportComment.userId, userId), isNull(reportComment.deletedAt))
       );
 
     return {

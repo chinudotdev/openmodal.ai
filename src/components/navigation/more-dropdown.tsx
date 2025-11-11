@@ -7,7 +7,8 @@ import {
   FileText,
   Info,
   Mail,
-  Map,
+  Map as MapIcon,
+  Trophy,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -33,8 +34,17 @@ export function MoreDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[200px]">
         <DropdownMenuItem asChild>
+          <Link
+            href="/leaderboards"
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <Trophy className="h-4 w-4" />
+            <span>Leaderboards</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <Link href="/map" className="flex items-center gap-2 cursor-pointer">
-            <Map className="h-4 w-4" />
+            <MapIcon className="h-4 w-4" />
             <span>Map View</span>
           </Link>
         </DropdownMenuItem>
