@@ -44,10 +44,6 @@ export async function DashboardNotifications({ userId }: { userId: string }) {
               <NotificationItem
                 key={notification.id}
                 notification={notification}
-                onMarkRead={() => {
-                  // Invalidate queries to refresh
-                  window.location.reload();
-                }}
               />
             ))}
           </div>

@@ -50,10 +50,7 @@ const notificationColors: Record<string, string> = {
   moderation_assigned: "text-blue-600",
 };
 
-export function NotificationItem({
-  notification,
-  onMarkRead,
-}: NotificationItemProps) {
+export function NotificationItem({ notification }: NotificationItemProps) {
   const router = useRouter();
   const Icon = notificationIcons[notification.type] || CheckCircle2;
   const colorClass =
@@ -62,7 +59,6 @@ export function NotificationItem({
   const handleClick = async () => {
     if (!notification.read) {
       await markNotificationRead(notification.id, notification.userId);
-      onMarkRead?.();
     }
     if (notification.actionUrl) {
       router.push(notification.actionUrl);
@@ -102,14 +98,6 @@ export function NotificationItem({
       )}
     </div>
   );
-
-  if (notification.actionUrl) {
-    return (
-      <Link href={notification.actionUrl} className="block">
-        {content}
-      </Link>
-    );
-  }
 
   return content;
 }

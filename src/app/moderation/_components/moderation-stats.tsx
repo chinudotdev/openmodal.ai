@@ -14,7 +14,7 @@ interface ModerationStatsProps {
 
 export function ModerationStats({ stats }: ModerationStatsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Pending</CardTitle>
@@ -77,6 +77,19 @@ export function ModerationStats({ stats }: ModerationStatsProps) {
             {stats.disputed}
           </div>
           <p className="text-xs text-muted-foreground">Community disputes</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Flagged</CardTitle>
+          <Flag className="h-4 w-4 text-orange-600" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-orange-600">
+            {stats.flagged}
+          </div>
+          <p className="text-xs text-muted-foreground">Community flagged</p>
         </CardContent>
       </Card>
     </div>
