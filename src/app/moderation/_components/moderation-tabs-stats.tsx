@@ -36,9 +36,9 @@ export async function ModerationTabsList({
       >
         <AlertTriangle className="h-4 w-4" />
         Flagged
-        {stats && stats.disputed > 0 && (
+        {stats && stats.flagged > 0 && (
           <Badge variant="destructive" className="ml-1">
-            {stats.disputed}
+            {stats.flagged}
           </Badge>
         )}
       </TabsTrigger>
@@ -58,4 +58,3 @@ export async function ModerationTabsList({
     </TabsList>
   );
 }
-

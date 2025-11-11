@@ -50,7 +50,7 @@ export function ModerationReportListClient({
   initialReports,
 }: ModerationReportListClientProps) {
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
-  const [reports] = useState(initialReports);
+  const reports = initialReports;
 
   if (reports.length === 0) {
     return (
