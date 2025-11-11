@@ -23,6 +23,10 @@ export const notificationTypeEnum = pgEnum("notification_type", [
   "verification_received", // Someone verified your report
   "dispute_received", // Someone disputed your report
   "moderation_assigned", // Assigned to moderate (for moderators)
+  "badge_earned", // Badge earned
+  "streak_milestone", // Streak milestone reached
+  "role_eligible", // Eligible for role promotion
+  "application_status", // Expert/Moderator application status update
 ]);
 
 // Type exports
@@ -36,7 +40,11 @@ export type NotificationType =
   | "capability_breakthrough"
   | "verification_received"
   | "dispute_received"
-  | "moderation_assigned";
+  | "moderation_assigned"
+  | "badge_earned"
+  | "streak_milestone"
+  | "role_eligible"
+  | "application_status";
 
 // ============================================
 // 1. NOTIFICATION TABLE
@@ -85,5 +93,5 @@ export const notificationPreference = pgTable(
   (table) => ({
     // Unique constraint on userId + notificationType
     userIdTypeUnique: unique().on(table.userId, table.notificationType),
-  }),
+  })
 );

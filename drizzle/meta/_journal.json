@@ -43,6 +43,13 @@
       "when": 1762537792374,
       "tag": "0005_majestic_virginia_dare",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1762833078686,
+      "tag": "0006_worthless_purple_man",
+      "breakpoints": true
     }
   ]
 }
