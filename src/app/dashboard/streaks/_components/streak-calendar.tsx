@@ -1,7 +1,4 @@
 "use client";
-
-import { Calendar, CalendarDays } from "lucide-react";
-
 interface StreakCalendarProps {
   year: number;
   month: number;
@@ -13,7 +10,6 @@ export function StreakCalendar({
   year,
   month,
   activityDates,
-  currentStreak,
 }: StreakCalendarProps) {
   const monthNames = [
     "January",
@@ -38,7 +34,9 @@ export function StreakCalendar({
 
   const activityDatesSet = new Set(activityDates);
 
-  const getDayStatus = (day: number): "active" | "missed" | "future" | "today" => {
+  const getDayStatus = (
+    day: number,
+  ): "active" | "missed" | "future" | "today" => {
     const date = new Date(year, month - 1, day);
     const dateStr = date.toISOString().split("T")[0];
     const isToday =
@@ -133,7 +131,9 @@ export function StreakCalendar({
       </div>
 
       <div className="pt-4 border-t">
-        <h3 className="text-sm font-medium mb-2">Tips to Maintain Your Streak:</h3>
+        <h3 className="text-sm font-medium mb-2">
+          Tips to Maintain Your Streak:
+        </h3>
         <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
           <li>Log in daily (counts as activity)</li>
           <li>Submit or verify a report</li>
@@ -144,4 +144,3 @@ export function StreakCalendar({
     </div>
   );
 }
-

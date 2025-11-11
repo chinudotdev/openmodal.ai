@@ -1,10 +1,10 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressBar } from "@/components/shared/progress-bar";
-import { CheckCircle2, XCircle, Minus } from "lucide-react";
-import { formatDistanceToNow } from "@/lib/date-utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { expertApplication } from "@/db/schema";
+import { formatDistanceToNow } from "@/lib/date-utils";
+import { CheckCircle2, Minus, XCircle } from "lucide-react";
 
 interface VotingProgressProps {
   application: typeof expertApplication.$inferSelect & {
@@ -40,12 +40,13 @@ export function VotingProgress({
     ? new Date(application.votingDeadline)
     : null;
   const timeRemaining = votingDeadline
-    ? formatDistanceToNow(votingDeadline, { addSuffix: false })
+    ? formatDistanceToNow(votingDeadline)
     : null;
 
-  const progress = voteCounts.totalModerators > 0
-    ? (voteCounts.total / voteCounts.totalModerators) * 100
-    : 0;
+  const progress =
+    voteCounts.totalModerators > 0
+      ? (voteCounts.total / voteCounts.totalModerators) * 100
+      : 0;
 
   const neededApprovals = Math.max(0, voteCounts.needed - voteCounts.approve);
 
@@ -71,7 +72,9 @@ export function VotingProgress({
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-green-500" />
             <div>
-              <p className="text-sm font-medium">{voteCounts.approve} Approve</p>
+              <p className="text-sm font-medium">
+                {voteCounts.approve} Approve
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -83,7 +86,9 @@ export function VotingProgress({
           <div className="flex items-center gap-2">
             <Minus className="h-4 w-4 text-muted-foreground" />
             <div>
-              <p className="text-sm font-medium">{voteCounts.abstain} Abstain</p>
+              <p className="text-sm font-medium">
+                {voteCounts.abstain} Abstain
+              </p>
             </div>
           </div>
         </div>
@@ -91,7 +96,8 @@ export function VotingProgress({
         {neededApprovals > 0 && (
           <div className="bg-muted p-3 rounded-lg">
             <p className="text-sm font-medium">
-              Need {neededApprovals} more approval{neededApprovals !== 1 ? "s" : ""}!
+              Need {neededApprovals} more approval
+              {neededApprovals !== 1 ? "s" : ""}!
             </p>
           </div>
         )}
@@ -105,4 +111,3 @@ export function VotingProgress({
     </Card>
   );
 }
-

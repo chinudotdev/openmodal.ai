@@ -1,13 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { formatDistanceToNow } from "@/lib/date-utils";
 import { withdrawExpertApplication } from "@/actions/expert-application";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { expertApplication } from "@/db/schema";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface ApplicationDetailsProps {
   application: typeof expertApplication.$inferSelect & {
@@ -80,7 +79,7 @@ export function ApplicationDetails({ application }: ApplicationDetailsProps) {
           <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
             <li>Your verified reports</li>
             <li>Your comment history</li>
-            <li>Your reputation: {application.voteCounts.approve} points</li>
+            <li>Approve votes so far: {application.voteCounts.approve}</li>
             <li>Report quality scores</li>
             <li>Community feedback</li>
           </ul>
@@ -101,4 +100,3 @@ export function ApplicationDetails({ application }: ApplicationDetailsProps) {
     </div>
   );
 }
-

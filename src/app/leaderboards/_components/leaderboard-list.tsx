@@ -1,11 +1,10 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Medal, Trophy, Award } from "lucide-react";
-import { LeaderboardCard } from "./leaderboard-card";
+import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
+import { LeaderboardCard } from "./leaderboard-card";
 
 interface LeaderboardEntry {
   userId: string;
@@ -44,12 +43,13 @@ export function LeaderboardList({
   const getCountLabel = (type: string) => {
     switch (type) {
       case "monthly_contributors":
-        return "reports";
+        return "reports this month";
       case "monthly_verifiers":
-        return "verifications";
+        return "verifications this month";
       case "rising_stars":
+        return "points gained in the last 30 days";
       case "all_time":
-        return "points";
+        return "points gained overall";
       default:
         return "";
     }
@@ -66,7 +66,9 @@ export function LeaderboardList({
               entry={entry}
               position={index + 1}
               type={type}
-              isCurrentUser={currentUserId ? entry.userId === currentUserId : false}
+              isCurrentUser={
+                currentUserId ? entry.userId === currentUserId : false
+              }
             />
           ))}
         </div>
@@ -78,12 +80,14 @@ export function LeaderboardList({
           <CardContent className="p-0">
             <div className="divide-y">
               {rest.map((entry) => {
-                const initials = entry.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2) || "U";
+                const initials =
+                  entry.name
+                    .split(" ")
+                    .filter(Boolean)
+                    .map((segment) => segment[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2) || "U";
 
                 return (
                   <Link
@@ -109,12 +113,16 @@ export function LeaderboardList({
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {entry.count} {getCountLabel(type)} this month
+                          {entry.count} {getCountLabel(type)}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">{entry.points.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">points</p>
+                        <p className="font-semibold">
+                          {entry.points.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          reputation points
+                        </p>
                       </div>
                     </div>
                   </Link>
@@ -127,4 +135,3 @@ export function LeaderboardList({
     </div>
   );
 }
-
