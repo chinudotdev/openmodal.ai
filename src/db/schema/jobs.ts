@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   decimal,
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -63,72 +64,79 @@ export type GrowthOutlook = "growing" | "stable" | "declining";
 // 1. JOBS TABLE
 // ============================================
 
-export const job = pgTable("job", {
-  // Identity
-  id: text("id").primaryKey(),
-  slug: text("slug").notNull().unique(),
-  title: text("title").notNull(), // "Physical Therapist"
-  industry: text("industry").notNull(), // "Healthcare"
-  category: text("category").notNull(), // "Medical & Health"
+export const job = pgTable(
+  "job",
+  {
+    // Identity
+    id: text("id").primaryKey(),
+    slug: text("slug").notNull().unique(),
+    title: text("title").notNull(), // "Physical Therapist"
+    industry: text("industry").notNull(), // "Healthcare"
+    category: text("category").notNull(), // "Medical & Health"
 
-  // Description
-  description: text("description").notNull(), // Rich text (2-3 paragraphs)
-  shortDescription: text("short_description").notNull(), // 200 chars for cards
-  keyResponsibilities: text("key_responsibilities")
-    .array()
-    .notNull()
-    .default(sql`ARRAY[]::text[]`),
+    // Description
+    description: text("description").notNull(), // Rich text (2-3 paragraphs)
+    shortDescription: text("short_description").notNull(), // 200 chars for cards
+    keyResponsibilities: text("key_responsibilities")
+      .array()
+      .notNull()
+      .default(sql`ARRAY[]::text[]`),
 
-  // Automation metrics
-  automationPercentage: integer("automation_percentage").notNull().default(0), // 0-100
-  automationStatus: automationStatusEnum("automation_status").notNull(),
+    // Automation metrics
+    automationPercentage: integer("automation_percentage").notNull().default(0), // 0-100
+    automationStatus: automationStatusEnum("automation_status").notNull(),
 
-  // Task metrics (calculated from tasks)
-  totalTasks: integer("total_tasks").notNull().default(0),
-  tasksReplaceable: integer("tasks_replaceable").notNull().default(0),
-  tasksPartial: integer("tasks_partial").notNull().default(0),
-  tasksSafe: integer("tasks_safe").notNull().default(0),
+    // Task metrics (calculated from tasks)
+    totalTasks: integer("total_tasks").notNull().default(0),
+    tasksReplaceable: integer("tasks_replaceable").notNull().default(0),
+    tasksPartial: integer("tasks_partial").notNull().default(0),
+    tasksSafe: integer("tasks_safe").notNull().default(0),
 
-  // Labor statistics
-  totalWorkersGlobal: integer("total_workers_global"), // Estimated
-  totalWorkersUsa: integer("total_workers_usa"), // From BLS
-  medianSalaryUsa: decimal("median_salary_usa", { precision: 10, scale: 2 }), // Annual in USD
-  growthOutlook: growthOutlookEnum("growth_outlook"),
-  growthRate: decimal("growth_rate", { precision: 5, scale: 2 }), // % per year
+    // Labor statistics
+    totalWorkersGlobal: integer("total_workers_global"), // Estimated
+    totalWorkersUsa: integer("total_workers_usa"), // From BLS
+    medianSalaryUsa: decimal("median_salary_usa", { precision: 10, scale: 2 }), // Annual in USD
+    growthOutlook: growthOutlookEnum("growth_outlook"),
+    growthRate: decimal("growth_rate", { precision: 5, scale: 2 }), // % per year
 
-  // BLS Integration
-  blsOccCode: text("bls_occ_code"), // Standard Occupational Classification code
-  blsLastUpdated: timestamp("bls_last_updated"),
+    // BLS Integration
+    blsOccCode: text("bls_occ_code"), // Standard Occupational Classification code
+    blsLastUpdated: timestamp("bls_last_updated"),
 
-  // Timeline
-  estimatedAutomationYear: integer("estimated_automation_year"), // When job becomes >75% automated
-  confidenceLevel: text("confidence_level").notNull().default("medium"), // high/medium/low
+    // Timeline
+    estimatedAutomationYear: integer("estimated_automation_year"), // When job becomes >75% automated
+    confidenceLevel: text("confidence_level").notNull().default("medium"), // high/medium/low
 
-  // AI Analysis
-  aiSummary: text("ai_summary"), // GPT-generated summary of automation risk
-  lastAiAnalysis: timestamp("last_ai_analysis"),
+    // AI Analysis
+    aiSummary: text("ai_summary"), // GPT-generated summary of automation risk
+    lastAiAnalysis: timestamp("last_ai_analysis"),
 
-  // SEO
-  metaDescription: text("meta_description"),
-  metaKeywords: text("meta_keywords").array(),
+    // SEO
+    metaDescription: text("meta_description"),
+    metaKeywords: text("meta_keywords").array(),
 
-  // Engagement metrics
-  viewCount: integer("view_count").notNull().default(0),
-  trackingCount: integer("tracking_count").notNull().default(0), // Users tracking this job
-  reportCount: integer("report_count").notNull().default(0), // Deployment reports
+    // Engagement metrics
+    viewCount: integer("view_count").notNull().default(0),
+    trackingCount: integer("tracking_count").notNull().default(0), // Users tracking this job
+    reportCount: integer("report_count").notNull().default(0), // Deployment reports
 
-  // Quality control
-  verified: boolean("verified").notNull().default(false), // Admin reviewed
-  dataQuality: integer("data_quality").notNull().default(0), // 0-100 score
-  lastReviewed: timestamp("last_reviewed"),
+    // Quality control
+    verified: boolean("verified").notNull().default(false), // Admin reviewed
+    dataQuality: integer("data_quality").notNull().default(0), // 0-100 score
+    lastReviewed: timestamp("last_reviewed"),
 
-  // Timestamps
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-});
+    // Timestamps
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("idx_job_title").on(table.title),
+    index("idx_job_industry").on(table.industry),
+  ]
+);
 
 // ============================================
 // 2. TASKS TABLE (Job Breakdown)
@@ -299,7 +307,7 @@ export const jobComment = pgTable("job_comment", {
   parentId: text("parent_id").references(
     // biome-ignore lint/suspicious/noExplicitAny: self-reference for threading
     (): any => jobComment.id,
-    { onDelete: "cascade" },
+    { onDelete: "cascade" }
   ),
 
   // Content

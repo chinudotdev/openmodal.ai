@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Share2 } from "lucide-react";
+import { Share2, Twitter, Linkedin, Copy } from "lucide-react";
 import { CopyLinkButton } from "./copy-link-button";
 
 export async function ReportActions({
@@ -10,12 +10,20 @@ export async function ReportActions({
 }) {
   const { reportId } = await params;
 
+  if (!reportId) {
+    return null;
+  }
+
+  const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || ""}/reports/${reportId}`;
+
   return (
     <>
       <Separator />
       <div className="space-y-3">
-        <p className="text-sm font-medium">Share your contribution:</p>
-        <div className="flex gap-2 justify-center">
+        <p className="text-sm font-medium text-center">
+          Share your contribution:
+        </p>
+        <div className="flex gap-2 justify-center flex-wrap">
           <CopyLinkButton reportId={reportId} />
           <Button
             variant="outline"
@@ -26,13 +34,11 @@ export async function ReportActions({
             <a
               href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
                 "I just submitted a report on OpenModal!",
-              )}&url=${encodeURIComponent(
-                `${process.env.NEXT_PUBLIC_APP_URL || ""}/reports/${reportId}`,
-              )}`}
+              )}&url=${encodeURIComponent(reportUrl)}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Share2 className="h-4 w-4" />
+              <Twitter className="h-4 w-4" />
               Twitter
             </a>
           </Button>
@@ -43,13 +49,11 @@ export async function ReportActions({
             className="flex items-center gap-2"
           >
             <a
-              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-                `${process.env.NEXT_PUBLIC_APP_URL || ""}/reports/${reportId}`,
-              )}`}
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(reportUrl)}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Share2 className="h-4 w-4" />
+              <Linkedin className="h-4 w-4" />
               LinkedIn
             </a>
           </Button>

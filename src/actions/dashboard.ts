@@ -3,6 +3,7 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
+  capability,
   capabilityTracking,
   jobTracking,
   report,
@@ -60,14 +61,38 @@ export async function getUserDashboard(userId: string) {
             '[]'::json
           )
         `.as("tracked_jobs"),
-        trackedCapabilities: sql<Array<typeof capabilityTracking.$inferSelect>>`
+        trackedCapabilities: sql<
+          Array<
+            typeof capabilityTracking.$inferSelect & {
+              capability: typeof capability.$inferSelect;
+            }
+          >
+        >`
           COALESCE(
-            (SELECT json_agg(ct.*)
+            (SELECT json_agg(
+              json_build_object(
+                'id', subq.id,
+                'capability_id', subq.capability_id,
+                'user_id', subq.user_id,
+                'notifications_enabled', subq.notifications_enabled,
+                'created_at', subq.created_at,
+                'capability', subq.capability_json
+              ) ORDER BY subq.created_at DESC
+            )
              FROM (
-               SELECT * FROM ${capabilityTracking}
-               WHERE user_id = ${sql`${userId}`}
+               SELECT 
+                 ct.id,
+                 ct.capability_id,
+                 ct.user_id,
+                 ct.notifications_enabled,
+                 ct.created_at,
+                 row_to_json(c.*) as capability_json
+               FROM ${capabilityTracking} ct
+               INNER JOIN ${capability} c ON ct.capability_id = c.id
+               WHERE ct.user_id = ${sql`${userId}`}
+               ORDER BY ct.created_at DESC
                LIMIT 10
-             ) ct),
+             ) subq),
             '[]'::json
           )
         `.as("tracked_capabilities"),
@@ -112,7 +137,9 @@ export async function getUserDashboard(userId: string) {
       trackedJobs: (data.trackedJobs ||
         []) as (typeof jobTracking.$inferSelect)[],
       trackedCapabilities: (data.trackedCapabilities ||
-        []) as (typeof capabilityTracking.$inferSelect)[],
+        []) as (typeof capabilityTracking.$inferSelect & {
+        capability: typeof capability.$inferSelect;
+      })[],
     };
   } catch (error) {
     console.error("Error getting user dashboard:", error);

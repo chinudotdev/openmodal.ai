@@ -1,13 +1,14 @@
 "use server";
 
-import { generateRandomString } from "better-auth/crypto";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   type NotificationType,
   notification,
   notificationPreference,
 } from "@/db/schema";
+import { generateRandomString } from "better-auth/crypto";
+import { and, desc, eq, sql } from "drizzle-orm";
+import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 
 /**
  * Create notification
@@ -19,7 +20,7 @@ export async function createNotification(
   message: string,
   actionUrl?: string,
   relatedEntityType?: string,
-  relatedEntityId?: string,
+  relatedEntityId?: string
 ) {
   try {
     // Check user preference
@@ -29,8 +30,8 @@ export async function createNotification(
       .where(
         and(
           eq(notificationPreference.userId, userId),
-          eq(notificationPreference.notificationType, type),
-        ),
+          eq(notificationPreference.notificationType, type)
+        )
       )
       .limit(1);
 
@@ -66,8 +67,11 @@ export async function createNotification(
 export async function getUserNotifications(
   userId: string,
   limit = 20,
-  offset = 0,
+  offset = 0
 ) {
+  "use cache";
+  cacheLife({ stale: 60, revalidate: 120 });
+  cacheTag(`notifications:${userId}`);
   try {
     const notifications = await db
       .select()
@@ -89,7 +93,7 @@ export async function getUserNotifications(
  */
 export async function markNotificationRead(
   notificationId: string,
-  userId: string,
+  userId: string
 ) {
   try {
     // Check if notification exists and belongs to user
@@ -99,8 +103,8 @@ export async function markNotificationRead(
       .where(
         and(
           eq(notification.id, notificationId),
-          eq(notification.userId, userId),
-        ),
+          eq(notification.userId, userId)
+        )
       )
       .limit(1);
 
@@ -116,7 +120,7 @@ export async function markNotificationRead(
         readAt: new Date(),
       })
       .where(eq(notification.id, notificationId));
-
+    revalidateTag(`notifications:${userId}`, "layout");
     return { success: true };
   } catch (error) {
     console.error("Error marking notification as read:", error);
@@ -136,9 +140,10 @@ export async function markAllNotificationsRead(userId: string) {
         readAt: new Date(),
       })
       .where(
-        and(eq(notification.userId, userId), eq(notification.read, false)),
+        and(eq(notification.userId, userId), eq(notification.read, false))
       );
 
+    revalidateTag(`notifications:${userId}`, "layout");
     return { success: true };
   } catch (error) {
     console.error("Error marking all notifications as read:", error);
@@ -158,7 +163,7 @@ export async function getUnreadCount(userId: string) {
       .select({ count: sql<number>`count(*)` })
       .from(notification)
       .where(
-        and(eq(notification.userId, userId), eq(notification.read, false)),
+        and(eq(notification.userId, userId), eq(notification.read, false))
       );
 
     return Number(result[0]?.count || 0);

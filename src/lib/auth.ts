@@ -1,11 +1,13 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { customSession, username } from "better-auth/plugins";
+import { admin, customSession, username } from "better-auth/plugins";
 import { getOnboardingStatus } from "@/actions/onboarding";
 import { db } from "@/db";
 import { authSchema } from "@/db/schema";
 import { sendEmailVerification } from "@/emails";
+
+import { ac, roles } from "@/lib/permissions";
 
 export const auth = betterAuth({
   emailVerification: {
@@ -48,6 +50,11 @@ export const auth = betterAuth({
         },
         session,
       };
+    }),
+    admin({
+      ac,
+      roles,
+      defaultRole: "observer",
     }),
     nextCookies(),
   ],

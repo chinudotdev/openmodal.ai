@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Bell, Brain } from "lucide-react";
+import { Brain } from "lucide-react";
 import Link from "next/link";
 import { MobileMenu } from "./mobile-menu";
 import { NavLinks } from "./nav-links";
 import { SearchBar } from "./search-bar";
 import { UserMenu } from "./user-menu";
+import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
 import { Suspense } from "react";
 import { Spinner } from "../ui/spinner";
 
@@ -37,14 +38,9 @@ export function Navbar() {
 
         {/* Right: Notifications + User menu */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative text-muted-foreground hover:text-foreground"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-destructive rounded-full ring-2 ring-background" />
-          </Button>
+          <Suspense fallback={<Spinner className="h-8 w-8" />}>
+            <NotificationDropdown />
+          </Suspense>
           <Suspense fallback={<Spinner className="h-8 w-8" />}>
             <UserMenu />
           </Suspense>
