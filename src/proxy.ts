@@ -12,7 +12,7 @@ export async function proxy(request: NextRequest) {
     const callbackPath = request.nextUrl.pathname;
     const queryParams = request.nextUrl.search;
     return NextResponse.redirect(
-      new URL(`/login?callbackURL=${callbackPath}${queryParams}`, request.url),
+      new URL(`/login?callbackURL=${callbackPath}${queryParams}`, request.url)
     );
   }
 
@@ -30,14 +30,21 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(
         new URL(
           `/onboarding?callbackURL=${callbackPath}${queryParams}`,
-          request.url,
-        ),
+          request.url
+        )
       );
+    }
+  }
+
+  if (pathname === "/admin") {
+    const isAdmin = session.user.role === "admin";
+    if (!isAdmin) {
+      return NextResponse.redirect(new URL("/403", request.url));
     }
   }
 
   return NextResponse.next();
 }
 export const config = {
-  matcher: ["/dashboard", "/onboarding"], // Apply middleware to specific routes
+  matcher: ["/dashboard", "/onboarding", "/admin"], // Apply middleware to specific routes
 };

@@ -47,6 +47,7 @@ export const auth = betterAuth({
         user: {
           ...user,
           onboardingCompleted: onboardingStatus.completed,
+          role: onboardingStatus.role,
         },
         session,
       };
@@ -55,6 +56,7 @@ export const auth = betterAuth({
       ac,
       roles,
       defaultRole: "observer",
+      adminRoles: ["admin"],
     }),
     nextCookies(),
   ],

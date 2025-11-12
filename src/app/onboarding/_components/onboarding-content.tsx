@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import {
-  completeOnboarding,
   getOnboardingStatus,
   getOnboardingStepData,
   saveOnboardingStep,
@@ -65,7 +64,7 @@ export function OnboardingContent() {
 
   // Update current step when status loads
   useEffect(() => {
-    if (status) {
+    if (status && !completed) {
       if (status.completed) {
         router.push("/dashboard");
         return;
@@ -77,7 +76,7 @@ export function OnboardingContent() {
       setCurrentStep(status.currentStep);
       setShowWelcome(status.currentStep === 1);
     }
-  }, [status, router]);
+  }, [status, router, completed]);
 
   // Redirect if no user (after session loads)
   useEffect(() => {
@@ -98,8 +97,8 @@ export function OnboardingContent() {
     return null;
   }
 
-  // Redirect if already completed or skipped
-  if (status.completed || status.skipped) {
+  // Redirect if already completed or skipped (but not if we're showing completion screen)
+  if ((status.completed || status.skipped) && !completed) {
     return null;
   }
 
@@ -231,33 +230,15 @@ export function OnboardingContent() {
         <StepPlatformIntent
           onNext={(data) => handleNext(4, data)}
           onBack={handleBack}
-          onFinish={async () => {
-            if (!user) {
-              toast.error("Please sign in to continue");
-              return;
-            }
-
-            setIsLoading(true);
-            try {
-              const result = await completeOnboarding(user.id);
-              if (result.success) {
-                setCompletionData({
-                  pointsAwarded: result.pointsAwarded || 50,
-                  newTier: result.newTier || "observer",
-                });
-                setCompleted(true);
-                toast.success(
-                  `Welcome! You earned ${result.pointsAwarded || 50} reputation points!`,
-                );
-              } else {
-                toast.error(result.error || "Failed to complete onboarding");
-              }
-            } catch (error) {
-              toast.error("An error occurred");
-              console.error(error);
-            } finally {
-              setIsLoading(false);
-            }
+          onFinish={(result) => {
+            setCompletionData({
+              pointsAwarded: result.pointsAwarded,
+              newTier: result.newTier,
+            });
+            setCompleted(true);
+            toast.success(
+              `Welcome! You earned ${result.pointsAwarded} reputation points!`,
+            );
           }}
           isLoading={isLoading}
           savedData={stepData?.step4}

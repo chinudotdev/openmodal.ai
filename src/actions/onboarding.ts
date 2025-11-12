@@ -8,6 +8,7 @@ import {
   onboardingResponse,
   onboardingSession,
   reputationHistory,
+  user,
   userProfile,
   userReputation,
 } from "@/db/schema";
@@ -102,7 +103,7 @@ export async function searchJobsByTitle(query: string, limit = 10) {
  */
 export async function createOrGetJob(
   jobTitle: string,
-  industry: string,
+  industry: string
 ): Promise<{ success: boolean; jobId?: string; error?: string }> {
   try {
     // Try to find existing job by title
@@ -208,7 +209,7 @@ export async function saveOnboardingStep(
     | BasicInfoInput
     | ProfessionalBackgroundInput
     | AutomationExperienceInput
-    | PlatformIntentInput,
+    | PlatformIntentInput
 ) {
   try {
     // Validate step number
@@ -257,7 +258,7 @@ export async function saveOnboardingStep(
         if (validatedData.currentJobTitle && validatedData.industry) {
           const jobResult = await createOrGetJob(
             validatedData.currentJobTitle,
-            validatedData.industry,
+            validatedData.industry
           );
           if (jobResult.success && jobResult.jobId) {
             // Store jobId in the data for later use
@@ -312,8 +313,8 @@ export async function saveOnboardingStep(
       .where(
         and(
           eq(onboardingResponse.sessionId, sessionId),
-          eq(onboardingResponse.step, step),
-        ),
+          eq(onboardingResponse.step, step)
+        )
       );
 
     // Insert new responses
@@ -366,7 +367,7 @@ export async function completeOnboarding(userId: string) {
     for (const response of responses) {
       try {
         data[response.questionKey] = JSON.parse(
-          response.responseValue || "null",
+          response.responseValue || "null"
         );
       } catch {
         data[response.questionKey] = response.responseValue;
@@ -564,7 +565,7 @@ export async function completeOnboarding(userId: string) {
  */
 export async function getOnboardingStepData(
   userId: string,
-  step: number,
+  step: number
 ): Promise<Record<string, unknown> | null> {
   try {
     // Get onboarding session
@@ -585,8 +586,8 @@ export async function getOnboardingStepData(
       .where(
         and(
           eq(onboardingResponse.sessionId, session[0].id),
-          eq(onboardingResponse.step, step),
-        ),
+          eq(onboardingResponse.step, step)
+        )
       );
 
     if (responses.length === 0) {
@@ -599,7 +600,7 @@ export async function getOnboardingStepData(
       try {
         // Try to parse as JSON first
         data[response.questionKey] = JSON.parse(
-          response.responseValue || "null",
+          response.responseValue || "null"
         );
         // If parsed as null, try as string
         if (data[response.questionKey] === null && response.responseValue) {
@@ -624,9 +625,15 @@ export async function getOnboardingStepData(
 export async function getOnboardingStatus(userId: string) {
   try {
     const session = await db
-      .select()
+      .select({
+        completed: onboardingSession.completed,
+        currentStep: onboardingSession.currentStep,
+        skipped: onboardingSession.skipped,
+        role: user.role,
+      })
       .from(onboardingSession)
       .where(eq(onboardingSession.userId, userId))
+      .leftJoin(user, eq(user.id, onboardingSession.userId))
       .limit(1);
 
     if (session.length === 0) {
@@ -637,6 +644,7 @@ export async function getOnboardingStatus(userId: string) {
       completed: session[0].completed,
       currentStep: session[0].currentStep,
       skipped: session[0].skipped,
+      role: session[0].role,
     };
   } catch (error) {
     console.error("Error getting onboarding status:", error);
