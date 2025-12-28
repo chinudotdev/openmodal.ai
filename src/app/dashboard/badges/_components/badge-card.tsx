@@ -1,11 +1,11 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { CheckCircle2, Lock } from "lucide-react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Lock, CheckCircle2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import type { userBadge } from "@/db/schema";
 import { BadgeDetailsModal } from "./badge-details-modal";
-import { useState } from "react";
 
 interface BadgeCardProps {
   badge: typeof userBadge.$inferSelect;
@@ -61,4 +61,3 @@ export function BadgeCard({ badge, isPinned }: BadgeCardProps) {
     </>
   );
 }
-

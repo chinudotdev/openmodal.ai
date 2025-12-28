@@ -1,11 +1,11 @@
 "use client";
 
 import { Brain, TrendingUp } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ProgressBar } from "@/components/shared/progress-bar";
 import Link from "next/link";
-import { type capabilityTracking, type capability } from "@/db/schema";
+import { ProgressBar } from "@/components/shared/progress-bar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { capability, capabilityTracking } from "@/db/schema";
 
 type TrackedCapability = typeof capabilityTracking.$inferSelect & {
   capability: typeof capability.$inferSelect;

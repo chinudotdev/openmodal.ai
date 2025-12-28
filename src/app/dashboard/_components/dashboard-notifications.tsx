@@ -1,9 +1,9 @@
+import { Bell } from "lucide-react";
+import Link from "next/link";
 import { getUserNotifications } from "@/actions/notifications";
 import { NotificationItem } from "@/components/notifications/notification-item";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bell } from "lucide-react";
-import Link from "next/link";
 
 export async function DashboardNotifications({ userId }: { userId: string }) {
   const notifications = await getUserNotifications(userId, 5, 0);

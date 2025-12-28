@@ -88,8 +88,10 @@ export function JobAutocomplete({ query, onSelect }: JobAutocompleteProps) {
                       <JobStatusBadge status={job.automationStatus} />
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {typeof job.industry === "string" ? job.industry : job.industry.name} • {formatWorkers(job.totalWorkersGlobal)}{" "}
-                      workers
+                      {typeof job.industry === "string"
+                        ? job.industry
+                        : job.industry.name}{" "}
+                      • {formatWorkers(job.totalWorkersGlobal)} workers
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Risk: {job.automationPercentage}%

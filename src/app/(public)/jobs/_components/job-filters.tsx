@@ -9,7 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface JobFiltersProps {
-  industries: Array<{ id: string; name: string; slug: string; icon?: string | null }>;
+  industries: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    icon?: string | null;
+  }>;
   currentFilters: {
     industry?: string;
     status?: string;

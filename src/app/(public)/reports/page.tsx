@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { ReportsFeed } from "./_components/reports-feed";
 import { Spinner } from "@/components/ui/spinner";
+import { ReportsFeed } from "./_components/reports-feed";
 
 export default async function ReportsPage() {
   return (

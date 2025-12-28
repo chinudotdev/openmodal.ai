@@ -2,7 +2,9 @@
 
 import { generateRandomString } from "better-auth/crypto";
 import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { cacheLife } from "next/cache";
 import { db } from "@/db";
+import { user } from "@/db/schema/auth";
 import {
   bottleneck,
   type CapabilityStatus,
@@ -19,9 +21,7 @@ import {
   type PredictionConfidence,
 } from "@/db/schema/capabilities";
 import { job, jobComment } from "@/db/schema/jobs";
-import { user } from "@/db/schema/auth";
 import { checkOnboardingFromSession } from "@/lib/session-utils";
-import { cacheLife, cacheTag } from "next/cache";
 
 // Types
 export type CapabilityFilters = {

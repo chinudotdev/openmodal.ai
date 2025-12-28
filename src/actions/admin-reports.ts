@@ -2,7 +2,7 @@
 
 import { and, count, desc, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "@/db";
-import { report, reportDispute, user, type ReportStatus } from "@/db/schema";
+import { type ReportStatus, report, reportDispute, user } from "@/db/schema";
 
 export async function getAllReports(
   filters?: {
@@ -11,7 +11,7 @@ export async function getAllReports(
     disputed?: boolean;
   },
   limit = 50,
-  offset = 0
+  offset = 0,
 ) {
   try {
     const conditions = [isNull(report.deletedAt)];
@@ -64,7 +64,7 @@ export async function getAllReports(
           ...r,
           user: userData[0]!,
         };
-      })
+      }),
     );
 
     return {

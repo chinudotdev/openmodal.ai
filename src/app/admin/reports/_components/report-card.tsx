@@ -1,10 +1,10 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { FileText, AlertTriangle } from "lucide-react";
+import { AlertTriangle, FileText } from "lucide-react";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface ReportCardProps {
   report: {
@@ -28,9 +28,17 @@ export function ReportCard({ report }: ReportCardProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
-        return <Badge variant="outline" className="bg-green-50">Verified</Badge>;
+        return (
+          <Badge variant="outline" className="bg-green-50">
+            Verified
+          </Badge>
+        );
       case "pending":
-        return <Badge variant="outline" className="bg-yellow-50">Pending</Badge>;
+        return (
+          <Badge variant="outline" className="bg-yellow-50">
+            Pending
+          </Badge>
+        );
       case "rejected":
         return <Badge variant="destructive">Rejected</Badge>;
       default:
@@ -72,4 +80,3 @@ export function ReportCard({ report }: ReportCardProps) {
     </Card>
   );
 }
-

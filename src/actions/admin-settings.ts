@@ -7,7 +7,7 @@ import { platformSettings } from "@/db/schema";
 export async function getPlatformSettings() {
   try {
     const settings = await db.select().from(platformSettings);
-    
+
     // Convert to object format
     const settingsObj: Record<string, unknown> = {};
     settings.forEach((setting) => {
@@ -58,4 +58,3 @@ export async function updatePlatformSetting(
     return { success: false, error: "Failed to update setting" };
   }
 }
-

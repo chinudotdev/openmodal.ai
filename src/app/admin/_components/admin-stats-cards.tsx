@@ -1,6 +1,6 @@
+import { AlertTriangle, FileText, Users } from "lucide-react";
 import type { AdminOverviewStats } from "@/actions/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, FileText, Users } from "lucide-react";
 
 interface AdminStatsCardsProps {
   stats: AdminOverviewStats;
@@ -15,15 +15,21 @@ export function AdminStatsCards({ stats }: AdminStatsCardsProps) {
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
+          <div className="text-2xl font-bold">
+            {stats.totalUsers.toLocaleString()}
+          </div>
           <p className="text-xs text-muted-foreground">Total Users</p>
           <div className="mt-4 space-y-1">
             <div className="text-sm">
-              <span className="font-medium">{stats.verifiedReports.toLocaleString()}</span>{" "}
+              <span className="font-medium">
+                {stats.verifiedReports.toLocaleString()}
+              </span>{" "}
               <span className="text-muted-foreground">Verified Reports</span>
             </div>
             <div className="text-sm">
-              <span className="font-medium">{stats.totalReports.toLocaleString()}</span>{" "}
+              <span className="font-medium">
+                {stats.totalReports.toLocaleString()}
+              </span>{" "}
               <span className="text-muted-foreground">Total Reports</span>
             </div>
           </div>
@@ -70,4 +76,3 @@ export function AdminStatsCards({ stats }: AdminStatsCardsProps) {
     </div>
   );
 }
-

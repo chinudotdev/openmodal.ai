@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BadgeCard } from "./badge-card";
 import type { userBadge } from "@/db/schema";
+import { BadgeCard } from "./badge-card";
 
 interface BadgeCollectionProps {
   badges: (typeof userBadge.$inferSelect)[];
@@ -44,7 +44,10 @@ export function BadgeCollection({ badges }: BadgeCollectionProps) {
 
   return (
     <div className="space-y-6">
-      <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as BadgeCategory)}>
+      <Tabs
+        value={selectedCategory}
+        onValueChange={(v) => setSelectedCategory(v as BadgeCategory)}
+      >
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="all">All</TabsTrigger>
           {categoryGroups.map((cat) => (
@@ -87,4 +90,3 @@ export function BadgeCollection({ badges }: BadgeCollectionProps) {
     </div>
   );
 }
-

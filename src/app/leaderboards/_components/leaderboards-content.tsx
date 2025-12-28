@@ -1,11 +1,11 @@
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import {
   getLeaderboard,
   getUserLeaderboardPosition,
 } from "@/actions/leaderboards";
-import { LeaderboardTabs } from "./leaderboard-tabs";
+import { auth } from "@/lib/auth";
 import { LeaderboardList } from "./leaderboard-list";
+import { LeaderboardTabs } from "./leaderboard-tabs";
 import { UserPositionCard } from "./user-position-card";
 
 interface LeaderboardsContentProps {

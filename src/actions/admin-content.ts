@@ -1,10 +1,19 @@
 "use server";
 
 import { generateRandomString } from "better-auth/crypto";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  or,
+  sql,
+} from "drizzle-orm";
 import { headers } from "next/headers";
-import { and, asc, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { auth } from "@/lib/auth";
 import {
   bottleneck,
   capability,
@@ -14,12 +23,12 @@ import {
 } from "@/db/schema/capabilities";
 import { industry } from "@/db/schema/industries";
 import {
+  type AutomationStatus,
   job,
-  jobCapability,
   task,
   taskCapability,
-  type AutomationStatus,
 } from "@/db/schema/jobs";
+import { auth } from "@/lib/auth";
 
 // ============================================
 // Helper Functions
@@ -64,7 +73,9 @@ async function ensureUniqueSlug(
   return uniqueSlug;
 }
 
-function calculateAutomationMetrics(tasks: Array<{ automationStatus: string; percentageOfJob: number }>) {
+function calculateAutomationMetrics(
+  tasks: Array<{ automationStatus: string; percentageOfJob: number }>,
+) {
   const replaceable = tasks
     .filter((t) => t.automationStatus === "replaceable")
     .reduce((sum, t) => sum + t.percentageOfJob, 0);
@@ -90,7 +101,8 @@ function calculateAutomationMetrics(tasks: Array<{ automationStatus: string; per
     automationPercentage,
     automationStatus,
     totalTasks: tasks.length,
-    tasksReplaceable: tasks.filter((t) => t.automationStatus === "replaceable").length,
+    tasksReplaceable: tasks.filter((t) => t.automationStatus === "replaceable")
+      .length,
     tasksPartial: tasks.filter((t) => t.automationStatus === "partial").length,
     tasksSafe: tasks.filter((t) => t.automationStatus === "safe").length,
   };
@@ -245,7 +257,8 @@ export async function createJob(input: CreateJobInput) {
   await checkAdminAccess();
 
   const jobId = generateRandomString(32);
-  const slug = input.slug || (await ensureUniqueSlug(job, generateSlug(input.title)));
+  const slug =
+    input.slug || (await ensureUniqueSlug(job, generateSlug(input.title)));
 
   await db.insert(job).values({
     id: jobId,
@@ -294,10 +307,14 @@ export async function updateJob(jobId: string, input: UpdateJobInput) {
   }
   if (input.industryId !== undefined) updateData.industryId = input.industryId;
   if (input.category !== undefined) updateData.category = input.category;
-  if (input.description !== undefined) updateData.description = input.description;
-  if (input.shortDescription !== undefined) updateData.shortDescription = input.shortDescription;
-  if (input.metaDescription !== undefined) updateData.metaDescription = input.metaDescription;
-  if (input.metaKeywords !== undefined) updateData.metaKeywords = input.metaKeywords;
+  if (input.description !== undefined)
+    updateData.description = input.description;
+  if (input.shortDescription !== undefined)
+    updateData.shortDescription = input.shortDescription;
+  if (input.metaDescription !== undefined)
+    updateData.metaDescription = input.metaDescription;
+  if (input.metaKeywords !== undefined)
+    updateData.metaKeywords = input.metaKeywords;
   if (input.verified !== undefined) updateData.verified = input.verified;
 
   await db.update(job).set(updateData).where(eq(job.id, jobId));
@@ -456,9 +473,7 @@ export async function getAdminIndustries(
           .groupBy(job.industryId)
       : [];
 
-  const jobCountMap = new Map(
-    jobCounts.map((jc) => [jc.industryId, jc.count]),
-  );
+  const jobCountMap = new Map(jobCounts.map((jc) => [jc.industryId, jc.count]));
 
   const totalResult = await db
     .select({ count: count() })
@@ -501,7 +516,8 @@ export async function createIndustry(input: CreateIndustryInput) {
   await checkAdminAccess();
 
   const industryId = generateRandomString(32);
-  const slug = input.slug || (await ensureUniqueSlug(industry, generateSlug(input.name)));
+  const slug =
+    input.slug || (await ensureUniqueSlug(industry, generateSlug(input.name)));
 
   await db.insert(industry).values({
     id: industryId,
@@ -529,7 +545,10 @@ export interface UpdateIndustryInput {
   status?: "active" | "hidden";
 }
 
-export async function updateIndustry(industryId: string, input: UpdateIndustryInput) {
+export async function updateIndustry(
+  industryId: string,
+  input: UpdateIndustryInput,
+) {
   await checkAdminAccess();
 
   const updateData: any = {};
@@ -538,10 +557,14 @@ export async function updateIndustry(industryId: string, input: UpdateIndustryIn
     updateData.slug = await ensureUniqueSlug(industry, input.slug, industryId);
   }
   if (input.icon !== undefined) updateData.icon = input.icon;
-  if (input.shortDescription !== undefined) updateData.shortDescription = input.shortDescription;
-  if (input.longDescription !== undefined) updateData.longDescription = input.longDescription;
-  if (input.parentIndustryId !== undefined) updateData.parentIndustryId = input.parentIndustryId;
-  if (input.displayOrder !== undefined) updateData.displayOrder = input.displayOrder;
+  if (input.shortDescription !== undefined)
+    updateData.shortDescription = input.shortDescription;
+  if (input.longDescription !== undefined)
+    updateData.longDescription = input.longDescription;
+  if (input.parentIndustryId !== undefined)
+    updateData.parentIndustryId = input.parentIndustryId;
+  if (input.displayOrder !== undefined)
+    updateData.displayOrder = input.displayOrder;
   if (input.status !== undefined) updateData.status = input.status;
 
   await db.update(industry).set(updateData).where(eq(industry.id, industryId));
@@ -629,7 +652,10 @@ export async function getAdminCapabilities(
       category: capabilityCategory,
     })
     .from(capability)
-    .leftJoin(capabilityCategory, eq(capability.categoryId, capabilityCategory.id));
+    .leftJoin(
+      capabilityCategory,
+      eq(capability.categoryId, capabilityCategory.id),
+    );
 
   const queryWithWhere =
     conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
@@ -677,7 +703,10 @@ export async function getAdminCapabilityById(capabilityId: string) {
       category: capabilityCategory,
     })
     .from(capability)
-    .leftJoin(capabilityCategory, eq(capability.categoryId, capabilityCategory.id))
+    .leftJoin(
+      capabilityCategory,
+      eq(capability.categoryId, capabilityCategory.id),
+    )
     .where(eq(capability.id, capabilityId))
     .limit(1);
 
@@ -697,7 +726,10 @@ export async function getAdminCapabilityById(capabilityId: string) {
       focusArea: capabilityOrganization.focusArea,
     })
     .from(capabilityOrganization)
-    .innerJoin(organization, eq(capabilityOrganization.organizationId, organization.id))
+    .innerJoin(
+      organization,
+      eq(capabilityOrganization.organizationId, organization.id),
+    )
     .where(eq(capabilityOrganization.capabilityId, capabilityId));
 
   return {
@@ -725,7 +757,9 @@ export async function createCapability(input: CreateCapabilityInput) {
   await checkAdminAccess();
 
   const capabilityId = generateRandomString(32);
-  const slug = input.slug || (await ensureUniqueSlug(capability, generateSlug(input.name)));
+  const slug =
+    input.slug ||
+    (await ensureUniqueSlug(capability, generateSlug(input.name)));
 
   await db.insert(capability).values({
     id: capabilityId,
@@ -769,31 +803,52 @@ export interface UpdateCapabilityInput {
   jobsProtectedExamples?: string[];
 }
 
-export async function updateCapability(capabilityId: string, input: UpdateCapabilityInput) {
+export async function updateCapability(
+  capabilityId: string,
+  input: UpdateCapabilityInput,
+) {
   await checkAdminAccess();
 
   const updateData: any = {};
   if (input.name !== undefined) updateData.name = input.name;
   if (input.slug !== undefined) {
-    updateData.slug = await ensureUniqueSlug(capability, input.slug, capabilityId);
+    updateData.slug = await ensureUniqueSlug(
+      capability,
+      input.slug,
+      capabilityId,
+    );
   }
   if (input.categoryId !== undefined) updateData.categoryId = input.categoryId;
-  if (input.description !== undefined) updateData.description = input.description;
-  if (input.technicalDescription !== undefined) updateData.technicalDescription = input.technicalDescription;
-  if (input.whyItMatters !== undefined) updateData.whyItMatters = input.whyItMatters;
-  if (input.progressPercentage !== undefined) updateData.progressPercentage = input.progressPercentage;
+  if (input.description !== undefined)
+    updateData.description = input.description;
+  if (input.technicalDescription !== undefined)
+    updateData.technicalDescription = input.technicalDescription;
+  if (input.whyItMatters !== undefined)
+    updateData.whyItMatters = input.whyItMatters;
+  if (input.progressPercentage !== undefined)
+    updateData.progressPercentage = input.progressPercentage;
   if (input.status !== undefined) updateData.status = input.status;
-  if (input.confidenceLevel !== undefined) updateData.confidenceLevel = input.confidenceLevel;
+  if (input.confidenceLevel !== undefined)
+    updateData.confidenceLevel = input.confidenceLevel;
   if (input.whatWorks !== undefined) updateData.whatWorks = input.whatWorks;
-  if (input.whatStruggles !== undefined) updateData.whatStruggles = input.whatStruggles;
-  if (input.whatDoesntWork !== undefined) updateData.whatDoesntWork = input.whatDoesntWork;
-  if (input.timelineEstimate !== undefined) updateData.timelineEstimate = input.timelineEstimate;
-  if (input.expertConsensus !== undefined) updateData.expertConsensus = input.expertConsensus;
+  if (input.whatStruggles !== undefined)
+    updateData.whatStruggles = input.whatStruggles;
+  if (input.whatDoesntWork !== undefined)
+    updateData.whatDoesntWork = input.whatDoesntWork;
+  if (input.timelineEstimate !== undefined)
+    updateData.timelineEstimate = input.timelineEstimate;
+  if (input.expertConsensus !== undefined)
+    updateData.expertConsensus = input.expertConsensus;
   if (input.reasoning !== undefined) updateData.reasoning = input.reasoning;
-  if (input.recentBreakthroughDate !== undefined) updateData.recentBreakthroughDate = input.recentBreakthroughDate;
-  if (input.jobsProtectedExamples !== undefined) updateData.jobsProtectedExamples = input.jobsProtectedExamples;
+  if (input.recentBreakthroughDate !== undefined)
+    updateData.recentBreakthroughDate = input.recentBreakthroughDate;
+  if (input.jobsProtectedExamples !== undefined)
+    updateData.jobsProtectedExamples = input.jobsProtectedExamples;
 
-  await db.update(capability).set(updateData).where(eq(capability.id, capabilityId));
+  await db
+    .update(capability)
+    .set(updateData)
+    .where(eq(capability.id, capabilityId));
 
   return { success: true };
 }
@@ -886,7 +941,10 @@ export async function getAdminCategories(): Promise<CategoryListResult> {
   const categories = await db
     .select()
     .from(capabilityCategory)
-    .orderBy(asc(capabilityCategory.displayOrder), asc(capabilityCategory.name));
+    .orderBy(
+      asc(capabilityCategory.displayOrder),
+      asc(capabilityCategory.name),
+    );
 
   // Get capability counts and average progress for each category
   const categoryIds = categories.map((c) => c.id);
@@ -947,7 +1005,9 @@ export async function createCategory(input: CreateCategoryInput) {
   await checkAdminAccess();
 
   const categoryId = generateRandomString(32);
-  const slug = input.slug || (await ensureUniqueSlug(capabilityCategory, generateSlug(input.name)));
+  const slug =
+    input.slug ||
+    (await ensureUniqueSlug(capabilityCategory, generateSlug(input.name)));
 
   await db.insert(capabilityCategory).values({
     id: categoryId,
@@ -969,24 +1029,38 @@ export interface UpdateCategoryInput {
   displayOrder?: number;
 }
 
-export async function updateCategory(categoryId: string, input: UpdateCategoryInput) {
+export async function updateCategory(
+  categoryId: string,
+  input: UpdateCategoryInput,
+) {
   await checkAdminAccess();
 
   const updateData: any = {};
   if (input.name !== undefined) updateData.name = input.name;
   if (input.slug !== undefined) {
-    updateData.slug = await ensureUniqueSlug(capabilityCategory, input.slug, categoryId);
+    updateData.slug = await ensureUniqueSlug(
+      capabilityCategory,
+      input.slug,
+      categoryId,
+    );
   }
   if (input.icon !== undefined) updateData.icon = input.icon;
-  if (input.description !== undefined) updateData.description = input.description;
-  if (input.displayOrder !== undefined) updateData.displayOrder = input.displayOrder;
+  if (input.description !== undefined)
+    updateData.description = input.description;
+  if (input.displayOrder !== undefined)
+    updateData.displayOrder = input.displayOrder;
 
-  await db.update(capabilityCategory).set(updateData).where(eq(capabilityCategory.id, categoryId));
+  await db
+    .update(capabilityCategory)
+    .set(updateData)
+    .where(eq(capabilityCategory.id, categoryId));
 
   return { success: true };
 }
 
-export async function reorderCategories(categoryOrders: Array<{ id: string; displayOrder: number }>) {
+export async function reorderCategories(
+  categoryOrders: Array<{ id: string; displayOrder: number }>,
+) {
   await checkAdminAccess();
 
   for (const { id, displayOrder } of categoryOrders) {
@@ -1008,14 +1082,19 @@ export async function deleteCategory(categoryId: string) {
     .from(capability)
     .where(eq(capability.categoryId, categoryId));
 
-  if (capabilitiesUsingCategory[0]?.count && capabilitiesUsingCategory[0].count > 0) {
+  if (
+    capabilitiesUsingCategory[0]?.count &&
+    capabilitiesUsingCategory[0].count > 0
+  ) {
     return {
       success: false,
       error: `Cannot delete category: ${capabilitiesUsingCategory[0].count} capability/capabilities are using it`,
     };
   }
 
-  await db.delete(capabilityCategory).where(eq(capabilityCategory.id, categoryId));
+  await db
+    .delete(capabilityCategory)
+    .where(eq(capabilityCategory.id, categoryId));
 
   return { success: true };
 }
@@ -1054,4 +1133,3 @@ export async function getAllIndustriesForSelect() {
 
   return industries;
 }
-

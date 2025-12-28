@@ -1,6 +1,6 @@
 import { getAdminJobs, type JobFilters } from "@/actions/admin-content";
-import { JobsListClient } from "./jobs-list-client";
 import type { AutomationStatus } from "@/db/schema/jobs";
+import { JobsListClient } from "./jobs-list-client";
 
 interface JobsListProps {
   searchParams?: Promise<{

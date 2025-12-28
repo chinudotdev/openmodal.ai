@@ -1,5 +1,6 @@
 import {
   boolean,
+  date,
   integer,
   jsonb,
   pgEnum,
@@ -7,7 +8,6 @@ import {
   text,
   timestamp,
   unique,
-  date,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
@@ -194,7 +194,7 @@ export const userProfile = pgTable(
   },
   (table) => ({
     userIdUnique: unique().on(table.userId),
-  })
+  }),
 );
 
 // ============================================
@@ -219,7 +219,7 @@ export const userReputation = pgTable(
   },
   (table) => ({
     userIdUnique: unique().on(table.userId),
-  })
+  }),
 );
 
 // ============================================
@@ -281,7 +281,7 @@ export const userStreak = pgTable(
   },
   (table) => ({
     userIdStreakTypeUnique: unique().on(table.userId, table.streakType),
-  })
+  }),
 );
 
 // ============================================
@@ -308,7 +308,7 @@ export const expertApplication = pgTable(
   },
   (table) => ({
     userIdUnique: unique().on(table.userId),
-  })
+  }),
 );
 
 // ============================================

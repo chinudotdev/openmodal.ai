@@ -1,5 +1,5 @@
-import { Spinner } from "@/components/ui/spinner";
 import { Suspense } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { JobTasksContent } from "../../_components/job-tasks-content";
 
 export default async function JobTasksPage({

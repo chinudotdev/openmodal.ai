@@ -1,19 +1,19 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, CheckCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { useSession } from "@/contexts/session-context";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getUserNotifications,
   markAllNotificationsRead,
 } from "@/actions/notifications";
-import { NotificationItem } from "./notification-item";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { useSession } from "@/contexts/session-context";
+import type { notification } from "@/db/schema";
 import { formatDistanceToNow } from "@/lib/date-utils";
-import { type notification } from "@/db/schema";
+import { NotificationItem } from "./notification-item";
 
 type Notification = typeof notification.$inferSelect;
 

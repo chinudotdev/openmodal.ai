@@ -1,13 +1,13 @@
-import { Button } from "@/components/ui/button";
 import { Brain } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
+import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "../ui/spinner";
 import { MobileMenu } from "./mobile-menu";
 import { NavLinks } from "./nav-links";
 import { SearchBar } from "./search-bar";
 import { UserMenu } from "./user-menu";
-import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
-import { Suspense } from "react";
-import { Spinner } from "../ui/spinner";
 
 export function Navbar() {
   return (

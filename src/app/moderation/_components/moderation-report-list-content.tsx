@@ -1,11 +1,11 @@
 import { Suspense } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
 import {
   getDisputedReports,
   getFlaggedReports,
   getPendingReports,
 } from "@/actions/moderation";
+import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { ModerationReportListClient } from "./moderation-report-list-client";
 
 interface ModerationReportListContentProps {
@@ -56,4 +56,3 @@ export function ModerationReportList({
     </Suspense>
   );
 }
-

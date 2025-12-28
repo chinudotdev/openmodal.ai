@@ -1,12 +1,14 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import { AlertTriangle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { useSession } from "@/contexts/session-context";
 import { disputeReport } from "@/actions/verifications";
 import { EvidenceLinkInput } from "@/components/reports/evidence-link-input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -20,12 +22,10 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { AlertTriangle } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+import { useSession } from "@/contexts/session-context";
 import { disputeSchema } from "@/lib/validations";
 
 interface DisputeModalProps {

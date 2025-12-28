@@ -1,10 +1,10 @@
 "use server";
 
+import { generateRandomString } from "better-auth/crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
 import { expertApplication, user, userReputation } from "@/db/schema";
-import { generateRandomString } from "better-auth/crypto";
 import { checkExpertEligibility } from "./gamification";
 import { createNotification } from "./notifications";
 
@@ -18,7 +18,7 @@ const applicationStatementSchema = z
  */
 export async function submitExpertApplication(
   userId: string,
-  statement: string
+  statement: string,
 ) {
   try {
     // Check eligibility
@@ -38,8 +38,8 @@ export async function submitExpertApplication(
       .where(
         and(
           eq(expertApplication.userId, userId),
-          eq(expertApplication.status, "pending")
-        )
+          eq(expertApplication.status, "pending"),
+        ),
       )
       .limit(1);
 
@@ -79,7 +79,7 @@ export async function submitExpertApplication(
         "moderation_assigned",
         "New Expert Application",
         `A new Expert application requires your review.`,
-        `/moderation/expert-applications/${applicationId}`
+        `/moderation/expert-applications/${applicationId}`,
       );
     }
 
@@ -89,7 +89,7 @@ export async function submitExpertApplication(
       "application_status",
       "Application Submitted",
       "Your Expert application has been submitted and is under review.",
-      `/dashboard/expert-application`
+      `/dashboard/expert-application`,
     );
 
     return { success: true, applicationId };
@@ -165,7 +165,7 @@ export async function getExpertApplicationStatus(userId: string) {
 export async function voteOnExpertApplication(
   moderatorId: string,
   applicationId: string,
-  vote: "approve" | "reject" | "abstain"
+  vote: "approve" | "reject" | "abstain",
 ) {
   try {
     // Check if moderator
@@ -186,8 +186,8 @@ export async function voteOnExpertApplication(
       .where(
         and(
           eq(expertApplication.id, applicationId),
-          eq(expertApplication.status, "pending")
-        )
+          eq(expertApplication.status, "pending"),
+        ),
       )
       .limit(1);
 
@@ -234,7 +234,7 @@ export async function voteOnExpertApplication(
         "application_status",
         "Application Approved! 🎉",
         "Congratulations! Your Expert application has been approved.",
-        `/dashboard`
+        `/dashboard`,
       );
     } else if (votes.length >= 8) {
       // If 8 moderators voted and we don't have 3 approvals, likely rejected
@@ -246,7 +246,7 @@ export async function voteOnExpertApplication(
           "application_status",
           "Application Status Update",
           "Your Expert application was not approved.",
-          `/dashboard/expert-application`
+          `/dashboard/expert-application`,
         );
       }
     }
@@ -273,7 +273,7 @@ export async function voteOnExpertApplication(
  */
 export async function withdrawExpertApplication(
   userId: string,
-  applicationId: string
+  applicationId: string,
 ) {
   try {
     const application = await db
@@ -283,8 +283,8 @@ export async function withdrawExpertApplication(
         and(
           eq(expertApplication.id, applicationId),
           eq(expertApplication.userId, userId),
-          eq(expertApplication.status, "pending")
-        )
+          eq(expertApplication.status, "pending"),
+        ),
       )
       .limit(1);
 

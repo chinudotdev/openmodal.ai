@@ -1,6 +1,6 @@
-import { getJobBySlug, incrementViewCount } from "@/actions/jobs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getJobBySlug, incrementViewCount } from "@/actions/jobs";
 import { AboutSection } from "./about-section";
 import { AtAGlance } from "./at-a-glance";
 import { AutomationReports } from "./automation-reports";

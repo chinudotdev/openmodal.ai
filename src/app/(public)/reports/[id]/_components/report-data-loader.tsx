@@ -1,8 +1,8 @@
+import { notFound } from "next/navigation";
 import { getReportById } from "@/actions/reports";
 import { getReportVerifications } from "@/actions/verifications";
 import { getUserVote } from "@/actions/votes";
 import { getSessionWithOnboarding } from "@/lib/session-utils";
-import { notFound } from "next/navigation";
 import { ReportDetailContent } from "./report-detail-content";
 
 interface ReportDataLoaderProps {

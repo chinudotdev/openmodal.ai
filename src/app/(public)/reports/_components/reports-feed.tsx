@@ -1,7 +1,3 @@
-import { getApprovedReports } from "@/actions/reports";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowDown,
   ArrowUp,
@@ -15,6 +11,10 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
+import { getApprovedReports } from "@/actions/reports";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export async function ReportsFeed() {
   const reports = await getApprovedReports(20, 0);

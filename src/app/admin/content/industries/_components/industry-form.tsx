@@ -1,18 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   createIndustry,
-  updateIndustry,
   getAdminIndustryById,
   getAllIndustriesForSelect,
+  updateIndustry,
 } from "@/actions/admin-content";
-import { FormField } from "../../_components/form-field";
-import { EmojiPicker } from "../../_components/emoji-picker";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -20,15 +25,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/spinner";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { EmojiPicker } from "../../_components/emoji-picker";
+import { FormField } from "../../_components/form-field";
 
 function generateSlug(text: string): string {
   return text

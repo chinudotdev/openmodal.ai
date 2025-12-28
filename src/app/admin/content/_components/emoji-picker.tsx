@@ -1,13 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
 
 interface EmojiPickerProps {
   value?: string;
@@ -16,11 +16,33 @@ interface EmojiPickerProps {
 }
 
 const commonEmojis = [
-  "💻", "🏥", "🏭", "💼", "🎓", "🏦", "🚗", "🍔", "🏠", "🎨",
-  "📊", "🔬", "⚙️", "🧠", "👁️", "🤝", "🎯", "📱", "🌐", "🔧",
+  "💻",
+  "🏥",
+  "🏭",
+  "💼",
+  "🎓",
+  "🏦",
+  "🚗",
+  "🍔",
+  "🏠",
+  "🎨",
+  "📊",
+  "🔬",
+  "⚙️",
+  "🧠",
+  "👁️",
+  "🤝",
+  "🎯",
+  "📱",
+  "🌐",
+  "🔧",
 ];
 
-export function EmojiPicker({ value, onChange, label = "Icon" }: EmojiPickerProps) {
+export function EmojiPicker({
+  value,
+  onChange,
+  label = "Icon",
+}: EmojiPickerProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -84,4 +106,3 @@ export function EmojiPicker({ value, onChange, label = "Icon" }: EmojiPickerProp
     </div>
   );
 }
-

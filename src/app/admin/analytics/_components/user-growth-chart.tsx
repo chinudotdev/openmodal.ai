@@ -1,16 +1,16 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  LineChart,
+  CartesianGrid,
+  Legend,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
 } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const data = [
   { date: "Nov 1", total: 2200, new: 15 },
@@ -53,10 +53,10 @@ export function UserGrowthChart() {
           </LineChart>
         </ResponsiveContainer>
         <div className="mt-4 text-sm text-muted-foreground">
-          Current: 2,420 total | +220 this month | Growth rate: +10% month-over-month
+          Current: 2,420 total | +220 this month | Growth rate: +10%
+          month-over-month
         </div>
       </CardContent>
     </Card>
   );
 }
-

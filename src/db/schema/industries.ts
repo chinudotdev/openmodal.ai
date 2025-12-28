@@ -1,4 +1,11 @@
-import { pgEnum, pgTable, text, integer, timestamp, index } from "drizzle-orm/pg-core";
+import {
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 // ============================================
 // ENUMS
@@ -44,4 +51,3 @@ export const industry = pgTable(
     index("idx_industry_status").on(table.status),
   ],
 );
-

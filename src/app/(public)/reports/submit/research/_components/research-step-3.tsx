@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type { FormApi } from "@tanstack/react-form";
+import { useEffect, useState } from "react";
 import { EvidenceLinkInput } from "@/components/reports/evidence-link-input";
 import {
   Field,
@@ -9,10 +9,10 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import type { ResearchReportInput } from "@/lib/validations";
 
 interface ResearchStep3Props {

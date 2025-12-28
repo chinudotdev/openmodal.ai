@@ -1,24 +1,24 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
+import Link from "next/link";
+import {
+  getUnreadCount,
+  getUserNotifications,
+  markAllNotificationsRead,
+} from "@/actions/notifications";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useSession } from "@/contexts/session-context";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  getUserNotifications,
-  getUnreadCount,
-  markAllNotificationsRead,
-} from "@/actions/notifications";
-import { NotificationItem } from "./notification-item";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
+import { useSession } from "@/contexts/session-context";
+import { NotificationItem } from "./notification-item";
 
 export function NotificationDropdown() {
   const { user } = useSession();

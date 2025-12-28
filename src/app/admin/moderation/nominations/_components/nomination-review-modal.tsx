@@ -1,20 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
+import type { NominationWithDetails } from "@/actions/admin-moderation";
+import { reviewNomination } from "@/actions/admin-moderation";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { reviewNomination } from "@/actions/admin-moderation";
-import { toast } from "sonner";
-import type { NominationWithDetails } from "@/actions/admin-moderation";
+import { Textarea } from "@/components/ui/textarea";
 
 interface NominationReviewModalProps {
   nomination: NominationWithDetails;
@@ -34,7 +34,9 @@ export function NominationReviewModal({
       return reviewNomination(nomination.id, decision, notes || null);
     },
     onSuccess: () => {
-      toast.success(`Nomination ${decision === "approve" ? "approved" : "rejected"}`);
+      toast.success(
+        `Nomination ${decision === "approve" ? "approved" : "rejected"}`,
+      );
       queryClient.invalidateQueries({ queryKey: ["moderator-nominations"] });
       queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
       onClose();
@@ -80,8 +82,12 @@ export function NominationReviewModal({
               <p>
                 • {nomination.candidateStats.verificationsCount} verifications
               </p>
-              <p>• {nomination.candidateStats.reportsCount} reports submitted</p>
-              <p>• {nomination.candidateStats.reputationPoints} reputation points</p>
+              <p>
+                • {nomination.candidateStats.reportsCount} reports submitted
+              </p>
+              <p>
+                • {nomination.candidateStats.reputationPoints} reputation points
+              </p>
               <p>• {nomination.candidateStats.strikesCount} strikes</p>
             </div>
           </div>
@@ -133,4 +139,3 @@ export function NominationReviewModal({
     </Dialog>
   );
 }
-

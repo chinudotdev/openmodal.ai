@@ -1,8 +1,8 @@
 "use server";
 
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { submitExpertApplication } from "@/actions/expert-application";
+import { auth } from "@/lib/auth";
 
 export async function submitExpertApplicationAction(statement: string) {
   const session = await auth.api.getSession({
@@ -15,4 +15,3 @@ export async function submitExpertApplicationAction(statement: string) {
 
   return submitExpertApplication(session.user.id, statement);
 }
-

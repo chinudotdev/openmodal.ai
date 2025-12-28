@@ -1,6 +1,6 @@
+import { BookOpen } from "lucide-react";
 import type { Metadata } from "next";
 import { ComingSoon } from "@/components/coming-soon";
-import { BookOpen } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "API Documentation - OpenModal",
@@ -16,4 +16,3 @@ export default function ApiDocsPage() {
     />
   );
 }
-

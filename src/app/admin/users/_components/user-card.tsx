@@ -1,13 +1,13 @@
 "use client";
 
+import { AlertTriangle, CheckCircle, User } from "lucide-react";
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { UserDetailModal } from "./user-detail-modal";
-import { BanUserModal } from "./ban-user-modal";
-import { AlertTriangle, User, CheckCircle } from "lucide-react";
 import type { UserListResult } from "@/actions/admin-users";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { BanUserModal } from "./ban-user-modal";
+import { UserDetailModal } from "./user-detail-modal";
 
 interface UserCardProps {
   user: UserListResult["users"][0];
@@ -48,12 +48,16 @@ export function UserCard({ user }: UserCardProps) {
                   </Badge>
                 )}
                 {user.role && (
-                  <Badge variant={getRoleBadgeColor(user.role)}>{user.role}</Badge>
+                  <Badge variant={getRoleBadgeColor(user.role)}>
+                    {user.role}
+                  </Badge>
                 )}
               </div>
               <p className="text-sm text-muted-foreground mb-2">{user.email}</p>
               {user.username && (
-                <p className="text-xs text-muted-foreground mb-2">@{user.username}</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  @{user.username}
+                </p>
               )}
               <div className="flex gap-4 text-sm text-muted-foreground">
                 <span>ID: {user.id.slice(0, 12)}...</span>
@@ -66,7 +70,9 @@ export function UserCard({ user }: UserCardProps) {
               </div>
               {user.reputation && (
                 <div className="mt-2 text-sm">
-                  <span className="font-medium">{user.reputation.reputationPoints}</span>{" "}
+                  <span className="font-medium">
+                    {user.reputation.reputationPoints}
+                  </span>{" "}
                   <span className="text-muted-foreground">points</span> •{" "}
                   <span className="text-muted-foreground">
                     {user.stats.reportsCount} reports
@@ -78,7 +84,10 @@ export function UserCard({ user }: UserCardProps) {
                   {user.stats.strikesCount > 0 && (
                     <>
                       {" "}
-                      • <span className="text-destructive">{user.stats.strikesCount} strikes</span>
+                      •{" "}
+                      <span className="text-destructive">
+                        {user.stats.strikesCount} strikes
+                      </span>
                     </>
                   )}
                 </div>
@@ -90,15 +99,27 @@ export function UserCard({ user }: UserCardProps) {
               )}
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowDetailModal(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDetailModal(true)}
+              >
                 View Details
               </Button>
               {user.banned ? (
-                <Button variant="outline" size="sm" onClick={() => setShowBanModal(true)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowBanModal(true)}
+                >
                   Unban
                 </Button>
               ) : (
-                <Button variant="destructive" size="sm" onClick={() => setShowBanModal(true)}>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowBanModal(true)}
+                >
                   Ban User
                 </Button>
               )}
@@ -108,7 +129,10 @@ export function UserCard({ user }: UserCardProps) {
       </Card>
 
       {showDetailModal && (
-        <UserDetailModal userId={user.id} onClose={() => setShowDetailModal(false)} />
+        <UserDetailModal
+          userId={user.id}
+          onClose={() => setShowDetailModal(false)}
+        />
       )}
       {showBanModal && (
         <BanUserModal
@@ -120,4 +144,3 @@ export function UserCard({ user }: UserCardProps) {
     </>
   );
 }
-

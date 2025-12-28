@@ -1,16 +1,18 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAdminIndustries, deleteIndustry, type IndustryFilters } from "@/actions/admin-content";
-import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import {
+  deleteIndustry,
+  getAdminIndustries,
+  type IndustryFilters,
+} from "@/actions/admin-content";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { StatusBadge } from "../../_components/status-badge";
-import { toast } from "sonner";
-import Link from "next/link";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -18,6 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
+import { StatusBadge } from "../../_components/status-badge";
 
 export function IndustriesList() {
   const [filters, setFilters] = useState<IndustryFilters>({});
@@ -97,7 +101,8 @@ export function IndustriesList() {
           onValueChange={(value) => {
             setFilters((prev) => ({
               ...prev,
-              status: value === "all" ? undefined : (value as "active" | "hidden"),
+              status:
+                value === "all" ? undefined : (value as "active" | "hidden"),
             }));
             setPage(0);
           }}
@@ -134,7 +139,9 @@ export function IndustriesList() {
                         {industry.icon && (
                           <span className="text-2xl">{industry.icon}</span>
                         )}
-                        <h3 className="text-lg font-semibold">{industry.name}</h3>
+                        <h3 className="text-lg font-semibold">
+                          {industry.name}
+                        </h3>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {industry.shortDescription || "No description"}
@@ -160,7 +167,9 @@ export function IndustriesList() {
                     </p>
                     <div className="flex items-center gap-2">
                       <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/admin/content/industries/${industry.id}/edit`}>
+                        <Link
+                          href={`/admin/content/industries/${industry.id}/edit`}
+                        >
                           <Pencil className="h-4 w-4 mr-1" />
                           Edit
                         </Link>
@@ -207,4 +216,3 @@ export function IndustriesList() {
     </div>
   );
 }
-

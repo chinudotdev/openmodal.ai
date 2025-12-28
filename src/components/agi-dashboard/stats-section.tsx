@@ -1,5 +1,5 @@
-import type { Stats } from "@/actions/capabilities";
 import { BarChart3 } from "lucide-react";
+import type { Stats } from "@/actions/capabilities";
 import { StatCard } from "./stats-card";
 
 interface StatsSectionProps {

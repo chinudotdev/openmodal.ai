@@ -22,9 +22,6 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   };
 
   return (
-    <Badge className={cn(variants[status], className)}>
-      {labels[status]}
-    </Badge>
+    <Badge className={cn(variants[status], className)}>{labels[status]}</Badge>
   );
 }
-

@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { ArrowLeft, ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import type { TaskInput } from "@/actions/admin-content";
 import { updateJobTasks } from "@/actions/admin-content";
-import { FormField } from "../../_components/form-field";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -13,21 +17,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
-import Link from "next/link";
-import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
-import type { TaskInput } from "@/actions/admin-content";
+import { Textarea } from "@/components/ui/textarea";
+import { FormField } from "../../_components/form-field";
 
 interface TaskFormData extends TaskInput {
   id?: string;
   expanded?: boolean;
 }
 
-type JobData = Awaited<ReturnType<typeof import("@/actions/admin-content").getAdminJobById>>;
-type Capabilities = Awaited<ReturnType<typeof import("@/actions/admin-content").getAllCapabilitiesForSelect>>;
+type JobData = Awaited<
+  ReturnType<typeof import("@/actions/admin-content").getAdminJobById>
+>;
+type Capabilities = Awaited<
+  ReturnType<
+    typeof import("@/actions/admin-content").getAllCapabilitiesForSelect
+  >
+>;
 
 interface JobFormStep2Props {
   jobId: string;
@@ -35,7 +41,11 @@ interface JobFormStep2Props {
   initialCapabilities: Capabilities;
 }
 
-export function JobFormStep2({ jobId, initialJobData, initialCapabilities }: JobFormStep2Props) {
+export function JobFormStep2({
+  jobId,
+  initialJobData,
+  initialCapabilities,
+}: JobFormStep2Props) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tasks, setTasks] = useState<TaskFormData[]>([]);
@@ -73,7 +83,10 @@ export function JobFormStep2({ jobId, initialJobData, initialCapabilities }: Job
     }
   }, [initialJobData]);
 
-  const totalPercentage = tasks.reduce((sum, t) => sum + (t.percentageOfJob || 0), 0);
+  const totalPercentage = tasks.reduce(
+    (sum, t) => sum + (t.percentageOfJob || 0),
+    0,
+  );
   const isValid = Math.abs(totalPercentage - 100) < 0.01 && tasks.length > 0;
 
   const addTask = () => {
@@ -101,13 +114,18 @@ export function JobFormStep2({ jobId, initialJobData, initialCapabilities }: Job
 
   const toggleTask = (index: number) => {
     const newTasks = [...tasks];
-    newTasks[index] = { ...newTasks[index], expanded: !newTasks[index].expanded };
+    newTasks[index] = {
+      ...newTasks[index],
+      expanded: !newTasks[index].expanded,
+    };
     setTasks(newTasks);
   };
 
   const handleSubmit = async () => {
     if (!isValid) {
-      toast.error(`Tasks must sum to 100%. Current sum: ${totalPercentage.toFixed(1)}%`);
+      toast.error(
+        `Tasks must sum to 100%. Current sum: ${totalPercentage.toFixed(1)}%`,
+      );
       return;
     }
 
@@ -136,7 +154,9 @@ export function JobFormStep2({ jobId, initialJobData, initialCapabilities }: Job
         toast.error(result.error || "Failed to save tasks");
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to save tasks");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save tasks",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -172,16 +192,15 @@ export function JobFormStep2({ jobId, initialJobData, initialCapabilities }: Job
 
       <Card>
         <CardHeader>
-          <CardTitle>
-            Job: {jobData.title}
-          </CardTitle>
+          <CardTitle>Job: {jobData.title}</CardTitle>
           <p className="text-sm text-muted-foreground">
             Define what this job entails on a day-to-day basis
           </p>
           <div className="mt-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">
-                Current total: {totalPercentage.toFixed(1)}% of job defined (need 100%)
+                Current total: {totalPercentage.toFixed(1)}% of job defined
+                (need 100%)
               </span>
               {!isValid && (
                 <span className="text-sm text-destructive">
@@ -212,9 +231,7 @@ export function JobFormStep2({ jobId, initialJobData, initialCapabilities }: Job
             <Card key={index} className="border-2">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">
-                    Task #{index + 1}
-                  </CardTitle>
+                  <CardTitle className="text-base">Task #{index + 1}</CardTitle>
                   <div className="flex items-center gap-2">
                     <Button
                       type="button"
@@ -267,17 +284,23 @@ export function JobFormStep2({ jobId, initialJobData, initialCapabilities }: Job
                     <FormField label="Automation Status" required>
                       <Select
                         value={task.automationStatus}
-                        onValueChange={(value: "safe" | "partial" | "replaceable") =>
-                          updateTask(index, { automationStatus: value })
-                        }
+                        onValueChange={(
+                          value: "safe" | "partial" | "replaceable",
+                        ) => updateTask(index, { automationStatus: value })}
                       >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="safe">Safe - Not automatable</SelectItem>
-                          <SelectItem value="partial">Partial - Partially automatable</SelectItem>
-                          <SelectItem value="replaceable">Replaceable - Fully automatable</SelectItem>
+                          <SelectItem value="safe">
+                            Safe - Not automatable
+                          </SelectItem>
+                          <SelectItem value="partial">
+                            Partial - Partially automatable
+                          </SelectItem>
+                          <SelectItem value="replaceable">
+                            Replaceable - Fully automatable
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </FormField>
@@ -286,7 +309,12 @@ export function JobFormStep2({ jobId, initialJobData, initialCapabilities }: Job
                       <Select
                         value={task.difficultyToAutomate}
                         onValueChange={(
-                          value: "trivial" | "easy" | "moderate" | "hard" | "very_hard",
+                          value:
+                            | "trivial"
+                            | "easy"
+                            | "moderate"
+                            | "hard"
+                            | "very_hard",
                         ) => updateTask(index, { difficultyToAutomate: value })}
                       >
                         <SelectTrigger>
@@ -340,7 +368,8 @@ export function JobFormStep2({ jobId, initialJobData, initialCapabilities }: Job
                         value={task.timeSpentHoursPerWeek || ""}
                         onChange={(e) =>
                           updateTask(index, {
-                            timeSpentHoursPerWeek: parseFloat(e.target.value) || undefined,
+                            timeSpentHoursPerWeek:
+                              parseFloat(e.target.value) || undefined,
                           })
                         }
                         placeholder="e.g., 4.8"
@@ -429,7 +458,10 @@ export function JobFormStep2({ jobId, initialJobData, initialCapabilities }: Job
               >
                 Save Draft
               </Button>
-              <Button onClick={handleSubmit} disabled={isSubmitting || !isValid}>
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting || !isValid}
+              >
                 {isSubmitting ? "Saving..." : "Next: Review & Publish →"}
               </Button>
             </div>
@@ -439,4 +471,3 @@ export function JobFormStep2({ jobId, initialJobData, initialCapabilities }: Job
     </div>
   );
 }
-

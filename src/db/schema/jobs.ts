@@ -138,7 +138,7 @@ export const job = pgTable(
   (table) => [
     index("idx_job_title").on(table.title),
     index("idx_job_industry").on(table.industryId),
-  ]
+  ],
 );
 
 // ============================================
@@ -310,7 +310,7 @@ export const jobComment = pgTable("job_comment", {
   parentId: text("parent_id").references(
     // biome-ignore lint/suspicious/noExplicitAny: self-reference for threading
     (): any => jobComment.id,
-    { onDelete: "cascade" }
+    { onDelete: "cascade" },
   ),
 
   // Content

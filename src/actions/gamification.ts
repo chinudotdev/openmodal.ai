@@ -1,6 +1,8 @@
 "use server";
 
+import { generateRandomString } from "better-auth/crypto";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db";
 import {
   activityLog,
@@ -11,8 +13,6 @@ import {
   userReputation,
   userStreak,
 } from "@/db/schema";
-import { cacheLife, cacheTag } from "next/cache";
-import { generateRandomString } from "better-auth/crypto";
 
 /**
  * Record user activity for streak tracking
@@ -26,7 +26,7 @@ export async function recordActivity(
     | "comment_created"
     | "upvote_given",
   relatedEntityType?: string,
-  relatedEntityId?: string
+  relatedEntityId?: string,
 ) {
   try {
     const today = new Date();
@@ -41,8 +41,8 @@ export async function recordActivity(
         and(
           eq(activityLog.userId, userId),
           eq(activityLog.activityType, activityType),
-          sql`${activityLog.activityDate} = ${todayStr}::date`
-        )
+          sql`${activityLog.activityDate} = ${todayStr}::date`,
+        ),
       )
       .limit(1);
 
@@ -87,8 +87,8 @@ async function updateActivityStreak(userId: string) {
       .where(
         and(
           eq(userStreak.userId, userId),
-          eq(userStreak.streakType, "activity")
-        )
+          eq(userStreak.streakType, "activity"),
+        ),
       )
       .limit(1);
 
@@ -102,8 +102,8 @@ async function updateActivityStreak(userId: string) {
       .where(
         and(
           eq(activityLog.userId, userId),
-          sql`${activityLog.activityDate} = ${yesterdayStr}::date`
-        )
+          sql`${activityLog.activityDate} = ${yesterdayStr}::date`,
+        ),
       )
       .limit(1);
 
@@ -162,7 +162,7 @@ async function checkStreakMilestones(userId: string, streak: number) {
         "7-Day Streak",
         "Maintained a 7-day activity streak!",
         "🔥",
-        "engagement"
+        "engagement",
       );
     }
     // 30-day streak milestone
@@ -173,7 +173,7 @@ async function checkStreakMilestones(userId: string, streak: number) {
         "Dedicated",
         "Maintained a 30-day activity streak!",
         "⭐",
-        "engagement"
+        "engagement",
       );
     }
   } catch (error) {
@@ -201,7 +201,7 @@ export async function getUserStreaks(userId: string) {
         longestStreak: 0,
       },
       verificationStreak: streaks.find(
-        (s) => s.streakType === "verification"
+        (s) => s.streakType === "verification",
       ) || {
         currentStreak: 0,
         longestStreak: 0,
@@ -222,7 +222,7 @@ export async function getUserStreaks(userId: string) {
 export async function getStreakCalendar(
   userId: string,
   year: number,
-  month: number
+  month: number,
 ) {
   "use cache";
   cacheLife({ stale: 300, revalidate: 3600 });
@@ -241,8 +241,8 @@ export async function getStreakCalendar(
         and(
           eq(activityLog.userId, userId),
           gte(activityLog.activityDate, startDateStr),
-          lte(activityLog.activityDate, endDateStr)
-        )
+          lte(activityLog.activityDate, endDateStr),
+        ),
       );
 
     return activities.map((a) => a.activityDate);
@@ -270,7 +270,7 @@ export async function checkExpertEligibility(userId: string) {
 
     const accountAge = Math.floor(
       (Date.now() - new Date(userData[0].createdAt).getTime()) /
-        (1000 * 60 * 60 * 24)
+        (1000 * 60 * 60 * 24),
     );
 
     // Get verified reports count
@@ -281,8 +281,8 @@ export async function checkExpertEligibility(userId: string) {
         and(
           eq(report.userId, userId),
           eq(report.status, "approved"),
-          sql`${report.deletedAt} IS NULL`
-        )
+          sql`${report.deletedAt} IS NULL`,
+        ),
       );
 
     const verifiedCount = Number(verifiedReports[0]?.count || 0);
@@ -331,7 +331,7 @@ export async function awardBadge(
   badgeName: string,
   badgeDescription: string,
   badgeIcon?: string,
-  badgeCategory?: string
+  badgeCategory?: string,
 ) {
   try {
     // Check if user already has this badge
@@ -339,7 +339,7 @@ export async function awardBadge(
       .select()
       .from(userBadge)
       .where(
-        and(eq(userBadge.userId, userId), eq(userBadge.badgeType, badgeType))
+        and(eq(userBadge.userId, userId), eq(userBadge.badgeType, badgeType)),
       )
       .limit(1);
 
@@ -507,8 +507,8 @@ export async function getRecentActivity(userId: string, limit = 10) {
       .where(
         and(
           eq(reportVerification.userId, userId),
-          sql`${reportVerification.deletedAt} IS NULL`
-        )
+          sql`${reportVerification.deletedAt} IS NULL`,
+        ),
       )
       .orderBy(sql`${reportVerification.createdAt} DESC`)
       .limit(limit);
@@ -528,7 +528,7 @@ export async function getRecentActivity(userId: string, limit = 10) {
     ]
       .sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )
       .slice(0, limit);
 

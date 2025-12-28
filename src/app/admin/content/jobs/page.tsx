@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { JobsList } from "./_components/jobs-list";
 import { Spinner } from "@/components/ui/spinner";
+import { JobsList } from "./_components/jobs-list";
 
 export default function JobsPage({
   searchParams,

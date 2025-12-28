@@ -1,9 +1,9 @@
 "use server";
 
 import { and, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db";
 import { report, reportVerification, user, userReputation } from "@/db/schema";
-import { cacheLife, cacheTag } from "next/cache";
 
 type LeaderboardType =
   | "monthly_contributors"
@@ -31,7 +31,7 @@ interface QueryResult {
  */
 export async function getLeaderboard(
   type: LeaderboardType,
-  _userId?: string
+  _userId?: string,
 ): Promise<LeaderboardEntry[]> {
   "use cache";
   cacheLife({ stale: 300, revalidate: 3600 });
@@ -57,8 +57,8 @@ export async function getLeaderboard(
             and(
               eq(report.status, "approved"),
               isNull(report.deletedAt),
-              gte(report.publishedAt, startOfMonth)
-            )
+              gte(report.publishedAt, startOfMonth),
+            ),
           )
           .groupBy(report.userId)
           .orderBy(desc(sql`COUNT(*)`))
@@ -77,8 +77,8 @@ export async function getLeaderboard(
             and(
               eq(reportVerification.canVerify, true),
               isNull(reportVerification.deletedAt),
-              gte(reportVerification.createdAt, startOfMonth)
-            )
+              gte(reportVerification.createdAt, startOfMonth),
+            ),
           )
           .groupBy(reportVerification.userId)
           .orderBy(desc(sql`COUNT(*)`))
@@ -94,7 +94,7 @@ export async function getLeaderboard(
           .select({
             userId: userReputation.userId,
             count: sql<number>`${userReputation.reputationPoints}::int`.as(
-              "count"
+              "count",
             ),
           })
           .from(userReputation)
@@ -109,7 +109,7 @@ export async function getLeaderboard(
           .select({
             userId: userReputation.userId,
             count: sql<number>`${userReputation.reputationPoints}::int`.as(
-              "count"
+              "count",
             ),
           })
           .from(userReputation)
@@ -144,7 +144,7 @@ export async function getLeaderboard(
 
     const usersMap = new Map(usersData.map((u) => [u.id, u]));
     const reputationMap = new Map(
-      reputationData.map((r) => [r.userId, r.reputationPoints])
+      reputationData.map((r) => [r.userId, r.reputationPoints]),
     );
 
     const leaderboard: LeaderboardEntry[] = results.map(
@@ -161,7 +161,7 @@ export async function getLeaderboard(
           count: Number(result.count),
           rank: index + 1,
         };
-      }
+      },
     );
 
     return leaderboard;
@@ -176,16 +176,15 @@ export async function getLeaderboard(
  */
 export async function getUserLeaderboardPosition(
   type: LeaderboardType,
-  userId: string | undefined
+  userId: string | undefined,
 ): Promise<{ rank: number; total: number; context?: string } | null> {
   "use cache";
   cacheLife({ stale: 300, revalidate: 3600 });
   cacheTag(`leaderboard-position:${type}:${userId}`);
-  
+
   if (!userId) {
     return null;
   }
-
 
   try {
     const leaderboard = await getLeaderboard(type, userId);

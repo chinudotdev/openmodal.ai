@@ -1,8 +1,8 @@
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { checkExpertEligibility } from "@/actions/gamification";
 import { getExpertApplicationStatus } from "@/actions/expert-application";
+import { checkExpertEligibility } from "@/actions/gamification";
+import { auth } from "@/lib/auth";
 import { ExpertApplicationForm } from "./expert-application-form";
 
 export async function ApplyExpertContent() {
@@ -33,4 +33,3 @@ export async function ApplyExpertContent() {
     </div>
   );
 }
-

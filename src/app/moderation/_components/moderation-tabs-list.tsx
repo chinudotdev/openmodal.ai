@@ -1,7 +1,7 @@
+import { AlertTriangle, Flag, Shield } from "lucide-react";
 import { getModerationStats } from "@/actions/moderation";
 import { Badge } from "@/components/ui/badge";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Flag, Shield } from "lucide-react";
 import { ModerationTabsListClient } from "./moderation-tabs-list-client";
 
 export async function ModerationTabsList() {
@@ -9,4 +9,3 @@ export async function ModerationTabsList() {
 
   return <ModerationTabsListClient stats={stats} />;
 }
-

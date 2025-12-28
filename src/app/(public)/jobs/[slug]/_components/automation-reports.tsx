@@ -1,7 +1,3 @@
-import type { getJobBySlug } from "@/actions/jobs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertTriangle,
   ArrowRight,
@@ -9,6 +5,10 @@ import {
   Package,
   ThumbsUp,
 } from "lucide-react";
+import type { getJobBySlug } from "@/actions/jobs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Job = Awaited<ReturnType<typeof getJobBySlug>>;
 

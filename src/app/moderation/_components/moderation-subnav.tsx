@@ -1,6 +1,6 @@
+import { AlertTriangle, Flag, Shield } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Flag, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ModerationSubnavProps {
@@ -72,4 +72,3 @@ export function ModerationSubnav({ stats, activeTab }: ModerationSubnavProps) {
     </nav>
   );
 }
-

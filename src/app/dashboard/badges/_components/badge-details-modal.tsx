@@ -1,5 +1,10 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Pin, Share2, X } from "lucide-react";
+import { toast } from "sonner";
+import { pinBadge, unpinBadge } from "@/actions/gamification";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,12 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Pin, Share2, X } from "lucide-react";
 import type { userBadge } from "@/db/schema";
-import { pinBadge, unpinBadge } from "@/actions/gamification";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 interface BadgeDetailsModalProps {
   badge: typeof userBadge.$inferSelect;
@@ -96,7 +96,9 @@ export function BadgeDetailsModal({
           {badge.rarity && (
             <div className="text-sm">
               <span className="text-muted-foreground">Rarity: </span>
-              <span className="font-medium">{badge.rarity} of users have this badge</span>
+              <span className="font-medium">
+                {badge.rarity} of users have this badge
+              </span>
             </div>
           )}
 
@@ -121,4 +123,3 @@ export function BadgeDetailsModal({
     </Dialog>
   );
 }
-

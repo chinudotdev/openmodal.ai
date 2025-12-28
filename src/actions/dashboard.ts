@@ -1,6 +1,7 @@
 "use server";
 
 import { and, eq, isNull, sql } from "drizzle-orm";
+import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db";
 import {
   capability,
@@ -15,7 +16,6 @@ import {
   userReputation,
 } from "@/db/schema";
 import { getUserStreaks } from "./gamification";
-import { cacheLife, cacheTag } from "next/cache";
 
 /**
  * Get user dashboard data
@@ -200,8 +200,8 @@ export async function getUserStats(userId: string) {
         and(
           eq(reportVerification.userId, userId),
           isNull(reportVerification.deletedAt),
-          eq(reportVerification.canVerify, true)
-        )
+          eq(reportVerification.canVerify, true),
+        ),
       );
 
     // Count user comments (excluding soft-deleted)
@@ -209,7 +209,7 @@ export async function getUserStats(userId: string) {
       .select({ count: sql<number>`count(*)` })
       .from(reportComment)
       .where(
-        and(eq(reportComment.userId, userId), isNull(reportComment.deletedAt))
+        and(eq(reportComment.userId, userId), isNull(reportComment.deletedAt)),
       );
 
     return {

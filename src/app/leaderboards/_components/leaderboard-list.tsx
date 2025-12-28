@@ -1,9 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
 import { LeaderboardCard } from "./leaderboard-card";
 
 interface LeaderboardEntry {

@@ -1,16 +1,16 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { getUserDashboard } from "@/actions/dashboard";
 import { Card, CardContent } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { DashboardNotifications } from "./dashboard-notifications";
 import { DashboardOverview } from "./dashboard-overview";
 import { DashboardStats } from "./dashboard-stats";
-import { UserReportsList } from "./user-reports-list";
-import { DashboardNotifications } from "./dashboard-notifications";
-import { TrackedCapabilities } from "./tracked-capabilities";
 import { PersonalizedFeed } from "./personalized-feed";
 import { RecentActivity } from "./recent-activity";
 import { RoleProgressionCard } from "./role-progression-card";
+import { TrackedCapabilities } from "./tracked-capabilities";
+import { UserReportsList } from "./user-reports-list";
 
 export async function DashboardContent() {
   const session = await auth.api.getSession({

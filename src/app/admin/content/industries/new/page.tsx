@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { IndustryForm } from "../_components/industry-form";
 import { Spinner } from "@/components/ui/spinner";
+import { IndustryForm } from "../_components/industry-form";
 
 export default function NewIndustryPage() {
   return (

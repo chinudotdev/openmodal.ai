@@ -1,6 +1,6 @@
+import { notFound } from "next/navigation";
 import { getAdminJobById } from "@/actions/admin-content";
 import { JobReview } from "./job-review";
-import { notFound } from "next/navigation";
 
 export async function JobReviewContent({
   params,

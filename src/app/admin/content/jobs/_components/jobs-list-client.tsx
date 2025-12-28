@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import type { JobListResult } from "@/actions/admin-content";
 import { deleteJob } from "@/actions/admin-content";
-import { JobCard } from "./job-card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,13 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
-import Link from "next/link";
-import { Plus } from "lucide-react";
 import type { AutomationStatus } from "@/db/schema/jobs";
-import type { JobListResult } from "@/actions/admin-content";
+import { JobCard } from "./job-card";
 
 interface JobsListClientProps {
   initialData: JobListResult;
@@ -63,7 +63,7 @@ export function JobsListClient({
 
   const updateSearchParams = (updates: Record<string, string | undefined>) => {
     const params = new URLSearchParams(searchParams.toString());
-    
+
     Object.entries(updates).forEach(([key, value]) => {
       if (value && value !== "all" && value !== "") {
         params.set(key, value);
@@ -159,15 +159,11 @@ export function JobsListClient({
 
       <Tabs value={statusTab} onValueChange={handleStatusTabChange}>
         <TabsList>
-          <TabsTrigger value="all">
-            All ({allJobs.length})
-          </TabsTrigger>
+          <TabsTrigger value="all">All ({allJobs.length})</TabsTrigger>
           <TabsTrigger value="published">
             Published ({publishedJobs.length})
           </TabsTrigger>
-          <TabsTrigger value="draft">
-            Draft ({draftJobs.length})
-          </TabsTrigger>
+          <TabsTrigger value="draft">Draft ({draftJobs.length})</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -212,4 +208,3 @@ export function JobsListClient({
     </div>
   );
 }
-

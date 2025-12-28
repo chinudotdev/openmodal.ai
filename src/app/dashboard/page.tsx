@@ -1,5 +1,5 @@
-import { Spinner } from "@/components/ui/spinner";
 import { Suspense } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { DashboardContent } from "./_components/dashboard-content";
 
 export default function DashboardPage() {

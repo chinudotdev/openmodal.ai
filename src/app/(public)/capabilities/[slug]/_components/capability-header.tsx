@@ -1,9 +1,9 @@
+import { Building2, Share2, Users } from "lucide-react";
 import type { getCapabilityBySlug } from "@/actions/capabilities";
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from "@/lib/date-utils";
-import { Building2, Share2, Users } from "lucide-react";
 import { ShareButton } from "./share-button";
 import { TrackButton } from "./track-button";
 

@@ -1,9 +1,9 @@
-import { AutomationRiskBadge } from "../../_components/automation-risk-badge";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { AutomationRiskBadge } from "../../_components/automation-risk-badge";
 
 type JobData = Awaited<
   ReturnType<typeof import("@/actions/admin-content").getAdminJobById>

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { type JobsContentProps, JobsContent } from "./_components";
+import { JobsContent, type JobsContentProps } from "./_components";
 
 export default async function JobsListPage({ searchParams }: JobsContentProps) {
   return (

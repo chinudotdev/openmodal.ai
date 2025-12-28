@@ -93,5 +93,5 @@ export const notificationPreference = pgTable(
   (table) => ({
     // Unique constraint on userId + notificationType
     userIdTypeUnique: unique().on(table.userId, table.notificationType),
-  })
+  }),
 );

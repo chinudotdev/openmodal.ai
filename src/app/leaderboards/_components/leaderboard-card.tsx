@@ -1,10 +1,10 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Award, Medal, Trophy } from "lucide-react";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Medal, Trophy, Award } from "lucide-react";
-import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface LeaderboardEntry {
   userId: string;
@@ -66,12 +66,13 @@ export function LeaderboardCard({
     }
   };
 
-  const initials = entry.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2) || "U";
+  const initials =
+    entry.name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "U";
 
   return (
     <Card
@@ -80,9 +81,7 @@ export function LeaderboardCard({
       } ${position === 1 ? "border-yellow-500" : ""}`}
     >
       {position <= 3 && (
-        <div className="absolute top-2 right-2">
-          {getMedalIcon(position)}
-        </div>
+        <div className="absolute top-2 right-2">{getMedalIcon(position)}</div>
       )}
       <CardContent className="p-6">
         <Link
@@ -116,4 +115,3 @@ export function LeaderboardCard({
     </Card>
   );
 }
-

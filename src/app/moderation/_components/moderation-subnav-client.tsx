@@ -16,9 +16,9 @@ interface ModerationSubnavClientProps {
 
 export function ModerationSubnavClient({ stats }: ModerationSubnavClientProps) {
   const pathname = usePathname();
-  
+
   let activeTab: "pending" | "flagged" | "disputed" = "pending";
-  
+
   if (pathname.includes("/moderation/flagged")) {
     activeTab = "flagged";
   } else if (pathname.includes("/moderation/disputed")) {
@@ -29,4 +29,3 @@ export function ModerationSubnavClient({ stats }: ModerationSubnavClientProps) {
 
   return <ModerationSubnav stats={stats} activeTab={activeTab} />;
 }
-

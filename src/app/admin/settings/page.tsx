@@ -1,10 +1,10 @@
 import { Suspense } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { EmailSettings } from "./_components/email-settings";
 import { GamificationSettings } from "./_components/gamification-settings";
 import { GeneralSettings } from "./_components/general-settings";
 import { ModerationSettings } from "./_components/moderation-settings";
 import { RoleRequirements } from "./_components/role-requirements";
-import { Spinner } from "@/components/ui/spinner";
 
 export default function SettingsPage() {
   return (

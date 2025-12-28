@@ -1,11 +1,11 @@
 "use client";
 
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "sonner";
 
 export function ModerationSettings() {
   const handleSave = () => {
@@ -37,11 +37,15 @@ export function ModerationSettings() {
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <Checkbox id="auto-flag-duplicates" defaultChecked />
-              <Label htmlFor="auto-flag-duplicates">Auto-flag duplicate reports</Label>
+              <Label htmlFor="auto-flag-duplicates">
+                Auto-flag duplicate reports
+              </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="auto-flag-broken-links" defaultChecked />
-              <Label htmlFor="auto-flag-broken-links">Auto-flag reports with broken links</Label>
+              <Label htmlFor="auto-flag-broken-links">
+                Auto-flag reports with broken links
+              </Label>
             </div>
           </div>
         </div>
@@ -51,4 +55,3 @@ export function ModerationSettings() {
     </Card>
   );
 }
-

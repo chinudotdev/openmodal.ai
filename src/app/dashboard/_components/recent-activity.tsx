@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getRecentActivity } from "@/actions/gamification";
-import { formatDistanceToNow } from "@/lib/date-utils";
 import { CheckCircle, FileText, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { getRecentActivity } from "@/actions/gamification";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDistanceToNow } from "@/lib/date-utils";
 
 interface RecentActivityProps {
   userId: string;

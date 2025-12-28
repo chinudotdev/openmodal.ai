@@ -1,13 +1,12 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { getModerationStats } from "@/actions/moderation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { Suspense } from "react";
-import { ModerationTabs } from "./moderation-tabs";
-
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { ModerationStats } from "./moderation-stats";
+import { ModerationTabs } from "./moderation-tabs";
 
 interface ModerationQueueProps {
   activeTab: "pending" | "flagged" | "disputed";

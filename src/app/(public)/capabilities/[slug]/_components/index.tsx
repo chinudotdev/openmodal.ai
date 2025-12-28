@@ -1,6 +1,6 @@
-import { getCapabilityBySlug } from "@/actions/capabilities";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getCapabilityBySlug } from "@/actions/capabilities";
 import { BottleneckCards } from "./bottleneck-cards";
 import { CapabilityDescription } from "./capability-description";
 import { CapabilityHeader } from "./capability-header";

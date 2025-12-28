@@ -1,12 +1,12 @@
 import { Suspense } from "react";
-import { JobFormStep1 } from "../_components/job-form-step1";
-import { QueryProvider } from "@/components/query-provider";
 import { getAdminIndustries } from "@/actions/admin-content";
+import { QueryProvider } from "@/components/query-provider";
 import { Spinner } from "@/components/ui/spinner";
+import { JobFormStep1 } from "../_components/job-form-step1";
 
 async function NewJobContent() {
   const industriesData = await getAdminIndustries({}, 100, 0);
-  
+
   return <JobFormStep1 initialIndustriesData={industriesData} />;
 }
 

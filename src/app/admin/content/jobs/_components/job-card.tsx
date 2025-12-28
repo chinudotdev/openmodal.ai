@@ -1,10 +1,10 @@
-import { AutomationRiskBadge } from "../../_components/automation-risk-badge";
-import { StatusBadge } from "../../_components/status-badge";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from "@/lib/date-utils";
-import Link from "next/link";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { AutomationRiskBadge } from "../../_components/automation-risk-badge";
+import { StatusBadge } from "../../_components/status-badge";
 import { JobCardDeleteButton } from "./job-card-delete-button";
 
 interface JobCardProps {
@@ -46,7 +46,9 @@ export function JobCard({ job, onDelete }: JobCardProps) {
                 )}
               </div>
               <p className="text-sm text-muted-foreground">
-                {job.industry.icon && <span className="mr-1">{job.industry.icon}</span>}
+                {job.industry.icon && (
+                  <span className="mr-1">{job.industry.icon}</span>
+                )}
                 {job.industry.name} • {job.category}
               </p>
             </div>

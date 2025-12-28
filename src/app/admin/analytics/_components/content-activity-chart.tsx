@@ -1,16 +1,16 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  BarChart,
   CartesianGrid,
-  Tooltip,
   Legend,
   ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const data = [
   { date: "Nov 1", reports: 45, verifications: 38, comments: 12 },
@@ -42,10 +42,10 @@ export function ContentActivityChart() {
           </BarChart>
         </ResponsiveContainer>
         <div className="mt-4 text-sm text-muted-foreground">
-          This month: 234 reports submitted • 189 verifications completed (81% rate) • 567 comments posted
+          This month: 234 reports submitted • 189 verifications completed (81%
+          rate) • 567 comments posted
         </div>
       </CardContent>
     </Card>
   );
 }
-

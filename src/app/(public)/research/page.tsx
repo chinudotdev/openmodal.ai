@@ -1,10 +1,11 @@
+import { FileText } from "lucide-react";
 import type { Metadata } from "next";
 import { ComingSoon } from "@/components/coming-soon";
-import { FileText } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Research - OpenModal",
-  description: "Explore research papers and publications related to AI capabilities.",
+  description:
+    "Explore research papers and publications related to AI capabilities.",
 };
 
 export default function ResearchPage() {
@@ -16,4 +17,3 @@ export default function ResearchPage() {
     />
   );
 }
-

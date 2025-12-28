@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import {
   Award,
   BarChart3,
@@ -16,13 +15,14 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatDistanceToNow } from "@/lib/date-utils";
 import { CommentSectionWrapper } from "./comment-section-wrapper";
-import { ReportVoteButtons } from "./report-vote-buttons";
 import { ReportVerificationActions } from "./report-verification-actions";
+import { ReportVoteButtons } from "./report-vote-buttons";
 import { VerificationsList } from "./verifications-list";
 
 export type ReportDetail = NonNullable<

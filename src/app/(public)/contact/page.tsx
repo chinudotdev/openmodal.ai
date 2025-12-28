@@ -1,6 +1,6 @@
+import { Mail } from "lucide-react";
 import type { Metadata } from "next";
 import { ComingSoon } from "@/components/coming-soon";
-import { Mail } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Contact - OpenModal",
@@ -16,4 +16,3 @@ export default function ContactPage() {
     />
   );
 }
-

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { Spinner } from "@/components/ui/spinner";
 import { NotificationCenter } from "@/components/notifications/notification-center";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function NotificationsPage() {
   return (

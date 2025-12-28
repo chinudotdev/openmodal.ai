@@ -1,20 +1,20 @@
 "use client";
 
 import {
-  CheckCircle2,
-  MessageSquare,
   Award,
-  TrendingUp,
-  Flag,
-  ShieldCheck,
+  CheckCircle2,
   FileText,
+  Flag,
+  MessageSquare,
+  ShieldCheck,
+  TrendingUp,
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { formatDistanceToNow } from "@/lib/date-utils";
-import { type notification } from "@/db/schema";
-import { markNotificationRead } from "@/actions/notifications";
 import { useRouter } from "next/navigation";
+import { markNotificationRead } from "@/actions/notifications";
+import type { notification } from "@/db/schema";
+import { formatDistanceToNow } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 
 type NotificationItem = typeof notification.$inferSelect;

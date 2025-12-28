@@ -1,6 +1,6 @@
+import { Map as MapIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { ComingSoon } from "@/components/coming-soon";
-import { Map as MapIcon } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Map View - OpenModal",
@@ -16,4 +16,3 @@ export default function MapPage() {
     />
   );
 }
-

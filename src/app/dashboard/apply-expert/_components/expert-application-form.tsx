@@ -1,20 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
-import { submitExpertApplicationAction } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { submitExpertApplicationAction } from "./actions";
 
 interface ExpertApplicationFormProps {
   eligibility: {
@@ -28,7 +28,9 @@ interface ExpertApplicationFormProps {
   };
 }
 
-export function ExpertApplicationForm({ eligibility }: ExpertApplicationFormProps) {
+export function ExpertApplicationForm({
+  eligibility,
+}: ExpertApplicationFormProps) {
   const router = useRouter();
   const [statement, setStatement] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,7 +95,8 @@ export function ExpertApplicationForm({ eligibility }: ExpertApplicationFormProp
               <XCircle className="h-4 w-4 text-muted-foreground" />
             )}
             <span className="text-sm">
-              {requirements.verifiedReports.current}/{requirements.verifiedReports.required} verified reports submitted
+              {requirements.verifiedReports.current}/
+              {requirements.verifiedReports.required} verified reports submitted
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -103,7 +106,9 @@ export function ExpertApplicationForm({ eligibility }: ExpertApplicationFormProp
               <XCircle className="h-4 w-4 text-muted-foreground" />
             )}
             <span className="text-sm">
-              {requirements.reputationPoints.current}/{requirements.reputationPoints.required} reputation points (need {requirements.reputationPoints.required})
+              {requirements.reputationPoints.current}/
+              {requirements.reputationPoints.required} reputation points (need{" "}
+              {requirements.reputationPoints.required})
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -113,7 +118,8 @@ export function ExpertApplicationForm({ eligibility }: ExpertApplicationFormProp
               <XCircle className="h-4 w-4 text-muted-foreground" />
             )}
             <span className="text-sm">
-              Account age: {requirements.accountAge.current}/{requirements.accountAge.required} days
+              Account age: {requirements.accountAge.current}/
+              {requirements.accountAge.required} days
             </span>
           </div>
         </CardContent>
@@ -170,7 +176,11 @@ export function ExpertApplicationForm({ eligibility }: ExpertApplicationFormProp
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isSubmitting || statement.length < 150 || statement.length > 500}
+                  disabled={
+                    isSubmitting ||
+                    statement.length < 150 ||
+                    statement.length > 500
+                  }
                 >
                   {isSubmitting ? "Submitting..." : "Submit Application"}
                 </Button>
@@ -182,7 +192,8 @@ export function ExpertApplicationForm({ eligibility }: ExpertApplicationFormProp
         <Card>
           <CardContent className="p-6 text-center">
             <p className="text-muted-foreground">
-              You don't meet all the requirements yet. Keep contributing to become eligible!
+              You don't meet all the requirements yet. Keep contributing to
+              become eligible!
             </p>
           </CardContent>
         </Card>
@@ -190,4 +201,3 @@ export function ExpertApplicationForm({ eligibility }: ExpertApplicationFormProp
     </div>
   );
 }
-

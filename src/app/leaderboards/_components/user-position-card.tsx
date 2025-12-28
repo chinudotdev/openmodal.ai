@@ -49,13 +49,10 @@ export function UserPositionCard({ position, type }: UserPositionCardProps) {
         </div>
         {position.context && (
           <div className="pt-2 border-t">
-            <p className="text-sm text-muted-foreground">
-              {position.context}
-            </p>
+            <p className="text-sm text-muted-foreground">{position.context}</p>
           </div>
         )}
       </CardContent>
     </Card>
   );
 }
-

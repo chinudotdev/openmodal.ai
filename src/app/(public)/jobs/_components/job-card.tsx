@@ -79,7 +79,10 @@ export function JobCard({ job }: JobCardProps) {
             <JobStatusBadge status={job.automationStatus} />
           </div>
           <p className="text-sm text-muted-foreground">
-            {typeof job.industry === "string" ? job.industry : job.industry.name} | {job.category}
+            {typeof job.industry === "string"
+              ? job.industry
+              : job.industry.name}{" "}
+            | {job.category}
           </p>
         </CardHeader>
 

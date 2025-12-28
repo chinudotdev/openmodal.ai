@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Award, Reply, Share2, Flag } from "lucide-react";
+import { ArrowDown, ArrowUp, Award, Flag, Reply, Share2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createReportComment } from "@/actions/comments";

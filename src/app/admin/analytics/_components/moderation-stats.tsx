@@ -26,7 +26,9 @@ export function ModerationStats() {
           <div>
             <p className="text-sm font-medium">Users banned</p>
             <p className="text-2xl font-bold">5</p>
-            <p className="text-xs text-muted-foreground">3 temporary, 2 permanent</p>
+            <p className="text-xs text-muted-foreground">
+              3 temporary, 2 permanent
+            </p>
           </div>
         </div>
         <div className="pt-4 border-t">
@@ -41,4 +43,3 @@ export function ModerationStats() {
     </Card>
   );
 }
-

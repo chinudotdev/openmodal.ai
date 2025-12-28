@@ -1,7 +1,7 @@
 "use client";
 
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type LeaderboardType =
   | "monthly_contributors"
@@ -36,4 +36,3 @@ export function LeaderboardTabs({ currentType }: LeaderboardTabsProps) {
     </Tabs>
   );
 }
-

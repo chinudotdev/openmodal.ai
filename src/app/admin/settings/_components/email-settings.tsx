@@ -1,11 +1,11 @@
 "use client";
 
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "sonner";
 
 export function EmailSettings() {
   const handleSave = () => {
@@ -23,7 +23,9 @@ export function EmailSettings() {
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <Checkbox id="alert-nominations" defaultChecked />
-              <Label htmlFor="alert-nominations">New Moderator nomination</Label>
+              <Label htmlFor="alert-nominations">
+                New Moderator nomination
+              </Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="alert-appeals" defaultChecked />
@@ -51,4 +53,3 @@ export function EmailSettings() {
     </Card>
   );
 }
-

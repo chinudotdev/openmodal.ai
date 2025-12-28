@@ -1,6 +1,6 @@
+import { BarChart3 } from "lucide-react";
 import { getCapabilities } from "@/actions/capabilities";
 import { CapabilityList } from "@/components/agi-dashboard/capability-list";
-import { BarChart3 } from "lucide-react";
 
 export async function CapabilityListContent() {
   const capabilities = await getCapabilities({}, "progress_desc", 5, 0);

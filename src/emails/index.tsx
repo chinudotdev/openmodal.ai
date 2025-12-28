@@ -1,9 +1,9 @@
 import { sendEmail } from "@/lib/email";
-import EmailVerification from "./email-verification";
-import ReportVerifiedEmail from "./report-verified";
 import CommentReplyEmail from "./comment-reply";
-import ReputationMilestoneEmail from "./reputation-milestone";
+import EmailVerification from "./email-verification";
 import ReportStatusEmail from "./report-status";
+import ReportVerifiedEmail from "./report-verified";
+import ReputationMilestoneEmail from "./reputation-milestone";
 
 export const sendEmailVerification = async ({
   to,

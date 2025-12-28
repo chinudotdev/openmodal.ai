@@ -1,6 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
-import { CapabilitiesContent } from "./_components";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,6 +7,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CapabilitiesContent } from "./_components";
 
 interface PageProps {
   searchParams: Promise<{

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { BarrierReportForm } from "./_components/barrier-report-form";
 import { Spinner } from "@/components/ui/spinner";
+import { BarrierReportForm } from "./_components/barrier-report-form";
 
 export default function BarrierReportPage() {
   return (

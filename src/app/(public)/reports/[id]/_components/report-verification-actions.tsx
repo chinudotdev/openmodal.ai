@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { CheckCircle2, Flag } from "lucide-react";
+import { useState } from "react";
+import { DisputeModal } from "@/components/reports/dispute-modal";
+import { VerificationModal } from "@/components/reports/verification-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { VerificationModal } from "@/components/reports/verification-modal";
-import { DisputeModal } from "@/components/reports/dispute-modal";
 
 interface ReportVerificationActionsProps {
   reportId: string;

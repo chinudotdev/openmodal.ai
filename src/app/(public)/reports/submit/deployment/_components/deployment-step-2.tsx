@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import type { FormApi } from "@tanstack/react-form";
+import { useEffect } from "react";
 import {
   Field,
   FieldError,
@@ -9,8 +9,8 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type { DeploymentReportInput } from "@/lib/validations";
 
 interface DeploymentStep2Props {

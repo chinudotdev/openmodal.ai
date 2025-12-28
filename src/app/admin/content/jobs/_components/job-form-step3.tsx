@@ -1,20 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { updateJob } from "@/actions/admin-content";
-import { AutomationRiskBadge } from "../../_components/automation-risk-badge";
-import { FormField } from "../../_components/form-field";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+import { AutomationRiskBadge } from "../../_components/automation-risk-badge";
+import { FormField } from "../../_components/form-field";
 
 type JobData = Awaited<
   ReturnType<typeof import("@/actions/admin-content").getAdminJobById>

@@ -3,17 +3,17 @@
 import { and, count, desc, eq, isNull } from "drizzle-orm";
 import { headers } from "next/headers";
 import { db } from "@/db";
-import { auth } from "@/lib/auth";
 import {
   moderatorNomination,
   moderatorStrike,
-  reportDispute,
-  user,
-  userReputation,
   report,
+  reportDispute,
   reportVerification,
   type StrikeStatus,
+  user,
+  userReputation,
 } from "@/db/schema";
+import { auth } from "@/lib/auth";
 
 export interface NominationWithDetails {
   id: string;
@@ -44,7 +44,7 @@ export interface NominationWithDetails {
 }
 
 export async function getModeratorNominations(
-  status?: "pending" | "approved" | "rejected"
+  status?: "pending" | "approved" | "rejected",
 ) {
   try {
     const statusFilter = status ?? "pending";
@@ -77,14 +77,14 @@ export async function getModeratorNominations(
             .where(
               and(
                 eq(reportVerification.userId, nom.candidateId),
-                isNull(reportVerification.deletedAt)
-              )
+                isNull(reportVerification.deletedAt),
+              ),
             ),
           db
             .select({ count: count() })
             .from(report)
             .where(
-              and(eq(report.userId, nom.candidateId), isNull(report.deletedAt))
+              and(eq(report.userId, nom.candidateId), isNull(report.deletedAt)),
             ),
           db
             .select({ count: count() })
@@ -104,7 +104,7 @@ export async function getModeratorNominations(
             strikesCount: strikesCount[0]?.count ?? 0,
           },
         };
-      })
+      }),
     );
 
     return nominationsWithDetails;
@@ -117,7 +117,7 @@ export async function getModeratorNominations(
 export async function reviewNomination(
   nominationId: string,
   decision: "approve" | "reject",
-  notes: string | null
+  notes: string | null,
 ) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -178,7 +178,7 @@ export async function getModeratorStrikes(filters?: {
       conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
 
     const strikes = await queryWithWhere.orderBy(
-      desc(moderatorStrike.issuedAt)
+      desc(moderatorStrike.issuedAt),
     );
 
     const strikesWithDetails = await Promise.all(
@@ -197,7 +197,7 @@ export async function getModeratorStrikes(filters?: {
           moderator: moderator[0]!,
           issuedByUser: issuedBy[0]!,
         };
-      })
+      }),
     );
 
     return strikesWithDetails;
@@ -210,7 +210,7 @@ export async function getModeratorStrikes(filters?: {
 export async function reviewStrikeAppeal(
   strikeId: string,
   decision: "uphold" | "overturn" | "reduce",
-  notes: string | null
+  notes: string | null,
 ) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -257,7 +257,7 @@ export async function reviewStrikeAppeal(
 
 export async function getDisputes(status?: string) {
   try {
-    let query = db
+    const query = db
       .select()
       .from(reportDispute)
       .where(isNull(reportDispute.deletedAt));
@@ -280,7 +280,7 @@ export async function getDisputes(status?: string) {
           user: userData[0]!,
           report: reportData[0]!,
         };
-      })
+      }),
     );
 
     return disputesWithDetails;

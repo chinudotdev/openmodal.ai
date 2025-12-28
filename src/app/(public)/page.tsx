@@ -1,12 +1,12 @@
-import { QuickAccess } from "@/components/agi-dashboard/quick-access";
+import { Brain } from "lucide-react";
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { QuickAccess } from "@/components/agi-dashboard/quick-access";
+import { Spinner } from "@/components/ui/spinner";
 import { ActivityFeedContent } from "./_components/activity-feed-content";
 import { CapabilityListContent } from "./_components/capability-list-content";
 import { HeroSectionContent } from "./_components/hero-section-content";
 import { StatsSectionContent } from "./_components/stats-section-content";
-import { Brain } from "lucide-react";
-import { Suspense } from "react";
-import { Spinner } from "@/components/ui/spinner";
 
 export const metadata: Metadata = {
   title: "OpenModal - AGI Progress Tracker & AI Capabilities Dashboard",

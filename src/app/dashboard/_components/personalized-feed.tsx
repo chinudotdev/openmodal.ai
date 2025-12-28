@@ -1,9 +1,3 @@
-import { getPersonalizedReports } from "@/actions/reports";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { db } from "@/db";
-import { userProfile } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import {
   ArrowUp,
@@ -16,6 +10,12 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
+import { getPersonalizedReports } from "@/actions/reports";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { db } from "@/db";
+import { userProfile } from "@/db/schema";
 
 const formatType = (type?: string) => {
   switch (type) {

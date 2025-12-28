@@ -1,10 +1,10 @@
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getUserStreaks, getStreakCalendar } from "@/actions/gamification";
+import { getStreakCalendar, getUserStreaks } from "@/actions/gamification";
+import { Card, CardContent } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
 import { StreakCalendar } from "./streak-calendar";
 import { StreakStats } from "./streak-stats";
-import { Card, CardContent } from "@/components/ui/card";
 
 export async function StreaksContent() {
   const session = await auth.api.getSession({
@@ -54,4 +54,3 @@ export async function StreaksContent() {
     </div>
   );
 }
-

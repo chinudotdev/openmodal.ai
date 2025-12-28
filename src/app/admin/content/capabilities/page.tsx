@@ -12,11 +12,11 @@ export default function CapabilitiesPage() {
       <Card>
         <CardContent className="p-6">
           <p className="text-muted-foreground">
-            Capabilities management interface coming soon. This will allow you to add, edit, and update capability progress.
+            Capabilities management interface coming soon. This will allow you
+            to add, edit, and update capability progress.
           </p>
         </CardContent>
       </Card>
     </div>
   );
 }
-

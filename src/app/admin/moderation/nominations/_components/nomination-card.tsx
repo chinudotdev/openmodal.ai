@@ -1,11 +1,11 @@
 "use client";
 
+import { CheckCircle, User } from "lucide-react";
+import { useState } from "react";
 import type { NominationWithDetails } from "@/actions/admin-moderation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, User } from "lucide-react";
-import { useState } from "react";
 import { NominationReviewModal } from "./nomination-review-modal";
 
 interface NominationCardProps {

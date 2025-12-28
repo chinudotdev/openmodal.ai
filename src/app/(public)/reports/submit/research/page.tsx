@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { ResearchReportForm } from "./_components/research-report-form";
 import { Spinner } from "@/components/ui/spinner";
+import { ResearchReportForm } from "./_components/research-report-form";
 
 export default function ResearchReportPage() {
   return (

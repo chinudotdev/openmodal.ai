@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { BookOpen, Briefcase, FolderTree, Building2 } from "lucide-react";
+import { BookOpen, Briefcase, Building2, FolderTree } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ContentPage() {
   return (
@@ -43,7 +43,9 @@ export default function ContentPage() {
               Manage AI capabilities and progress tracking
             </p>
             <Button asChild>
-              <Link href="/admin/content/capabilities">Manage Capabilities</Link>
+              <Link href="/admin/content/capabilities">
+                Manage Capabilities
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -85,4 +87,3 @@ export default function ContentPage() {
     </div>
   );
 }
-

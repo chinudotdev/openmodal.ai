@@ -1,5 +1,5 @@
-import { Spinner } from "@/components/ui/spinner";
 import { Suspense } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { OnboardingContent } from "./_components/onboarding-content";
 
 export default function OnboardingPage() {

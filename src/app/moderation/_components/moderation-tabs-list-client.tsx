@@ -1,7 +1,6 @@
-
+import { AlertTriangle, Flag, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Flag, Shield } from "lucide-react";
 
 interface ModerationTabsListClientProps {
   stats: {
@@ -14,7 +13,9 @@ interface ModerationTabsListClientProps {
   } | null;
 }
 
-export function ModerationTabsListClient({ stats }: ModerationTabsListClientProps) {
+export function ModerationTabsListClient({
+  stats,
+}: ModerationTabsListClientProps) {
   return (
     <TabsList className="grid w-full grid-cols-3">
       <TabsTrigger value="pending" className="flex items-center gap-2">
@@ -47,4 +48,3 @@ export function ModerationTabsListClient({ stats }: ModerationTabsListClientProp
     </TabsList>
   );
 }
-

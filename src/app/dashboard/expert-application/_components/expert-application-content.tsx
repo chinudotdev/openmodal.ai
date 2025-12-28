@@ -1,9 +1,9 @@
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getExpertApplicationStatus } from "@/actions/expert-application";
-import { VotingProgress } from "./voting-progress";
+import { auth } from "@/lib/auth";
 import { ApplicationDetails } from "./application-details";
+import { VotingProgress } from "./voting-progress";
 
 export async function ExpertApplicationContent() {
   const session = await auth.api.getSession({
@@ -41,4 +41,3 @@ export async function ExpertApplicationContent() {
     </div>
   );
 }
-

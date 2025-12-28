@@ -1,15 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { formatDistanceToNow } from "@/lib/date-utils";
+import { Eye, FlaskConical, Rocket, Shield } from "lucide-react";
 import Link from "next/link";
-import { Eye, Rocket, Shield, FlaskConical } from "lucide-react";
-import { ModerationReportDetail } from "./moderation-report-detail";
-
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import type { report } from "@/db/schema";
+import { formatDistanceToNow } from "@/lib/date-utils";
+import { ModerationReportDetail } from "./moderation-report-detail";
 
 interface ModerationReportListClientProps {
   type: "pending" | "flagged" | "disputed";

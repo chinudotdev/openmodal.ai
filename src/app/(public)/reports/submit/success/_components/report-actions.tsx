@@ -1,6 +1,6 @@
+import { Copy, Linkedin, Share2, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Share2, Twitter, Linkedin, Copy } from "lucide-react";
 import { CopyLinkButton } from "./copy-link-button";
 
 export async function ReportActions({

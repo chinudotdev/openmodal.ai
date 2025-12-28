@@ -1,11 +1,10 @@
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-
 import type { getJobBySlug } from "@/actions/jobs";
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react";
 
 type Job = Awaited<ReturnType<typeof getJobBySlug>>;
 

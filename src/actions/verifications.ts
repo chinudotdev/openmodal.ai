@@ -2,6 +2,7 @@
 
 import { generateRandomString } from "better-auth/crypto";
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { cacheLife } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import {
@@ -9,14 +10,13 @@ import {
   reportDispute,
   reportVerification,
   reputationHistory,
-  userReputation,
   user,
   userBadge,
   userProfile,
+  userReputation,
 } from "@/db/schema";
 import { checkOnboardingFromSession } from "@/lib/session-utils";
 import { disputeSchema, verificationSchema } from "@/lib/validations";
-import { cacheLife } from "next/cache";
 
 /**
  * Verify report

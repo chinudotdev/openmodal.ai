@@ -1,5 +1,5 @@
-import { Spinner } from "@/components/ui/spinner";
 import { Suspense } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { AdminOverview } from "./_components/admin-overview";
 
 export default async function AdminPage() {

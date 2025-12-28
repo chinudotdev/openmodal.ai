@@ -1,8 +1,8 @@
 "use server";
 
+import { sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { db } from "@/db";
-import { sql } from "drizzle-orm";
 
 export interface AdminOverviewStats {
   totalUsers: number;

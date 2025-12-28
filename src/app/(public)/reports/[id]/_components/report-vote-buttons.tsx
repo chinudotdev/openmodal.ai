@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { voteReport } from "@/actions/votes";
+import { Button } from "@/components/ui/button";
 import { useSession } from "@/contexts/session-context";
 
 interface ReportVoteButtonsProps {

@@ -1,10 +1,24 @@
 "use server";
 
+import { generateRandomString } from "better-auth/crypto";
+import {
+  and,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNull,
+  or,
+  type SQL,
+  sql,
+} from "drizzle-orm";
+import { cacheLife } from "next/cache";
+import { z } from "zod";
 import { db } from "@/db";
 import {
+  type ReportStatus,
   report,
   reportEvidence,
-  type ReportStatus,
   user,
   userBadge,
   userProfile,
@@ -22,20 +36,6 @@ import {
   type ResearchReportInput,
   researchReportSchema,
 } from "@/lib/validations";
-import { generateRandomString } from "better-auth/crypto";
-import {
-  and,
-  desc,
-  eq,
-  ilike,
-  inArray,
-  isNull,
-  or,
-  sql,
-  type SQL,
-} from "drizzle-orm";
-import { cacheLife } from "next/cache";
-import { z } from "zod";
 
 /**
  * Helper: Create or get job by title

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { getAllUsers, type UserFilters } from "@/actions/admin-users";
-import { UserCard } from "./user-card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+import { UserCard } from "./user-card";
 
 export function UserList() {
   const [filters, setFilters] = useState<UserFilters>({});
@@ -31,7 +31,10 @@ export function UserList() {
   };
 
   const handleRoleFilter = (role: string) => {
-    setFilters((prev) => ({ ...prev, role: role === "all" ? undefined : role }));
+    setFilters((prev) => ({
+      ...prev,
+      role: role === "all" ? undefined : role,
+    }));
     setPage(0);
   };
 
@@ -124,4 +127,3 @@ export function UserList() {
     </div>
   );
 }
-

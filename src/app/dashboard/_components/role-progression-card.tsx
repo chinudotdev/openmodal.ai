@@ -1,16 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, XCircle, Info } from "lucide-react";
-import { checkExpertEligibility } from "@/actions/gamification";
-import { auth } from "@/lib/auth";
+import { CheckCircle2, Info, XCircle } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
+import { checkExpertEligibility } from "@/actions/gamification";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { auth } from "@/lib/auth";
 
 interface RoleProgressionCardProps {
   userId: string;
@@ -44,7 +44,10 @@ export async function RoleProgressionCard({
   };
 
   const nextRole = currentTier === "contributor" ? "Expert" : "Expert";
-  const allMet = requirements.verifiedReports.met && requirements.reputationPoints.met && requirements.accountAge.met;
+  const allMet =
+    requirements.verifiedReports.met &&
+    requirements.reputationPoints.met &&
+    requirements.accountAge.met;
 
   return (
     <Card>
@@ -60,7 +63,8 @@ export async function RoleProgressionCard({
               <XCircle className="h-4 w-4 text-muted-foreground" />
             )}
             <span className="text-sm">
-              {requirements.verifiedReports.current}/{requirements.verifiedReports.required} Verified reports
+              {requirements.verifiedReports.current}/
+              {requirements.verifiedReports.required} Verified reports
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -70,7 +74,8 @@ export async function RoleProgressionCard({
               <XCircle className="h-4 w-4 text-muted-foreground" />
             )}
             <span className="text-sm">
-              {requirements.reputationPoints.current}/{requirements.reputationPoints.required} Reputation points
+              {requirements.reputationPoints.current}/
+              {requirements.reputationPoints.required} Reputation points
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -80,7 +85,8 @@ export async function RoleProgressionCard({
               <XCircle className="h-4 w-4 text-muted-foreground" />
             )}
             <span className="text-sm">
-              Account age: {requirements.accountAge.current}/{requirements.accountAge.required} days
+              Account age: {requirements.accountAge.current}/
+              {requirements.accountAge.required} days
             </span>
             <TooltipProvider>
               <Tooltip>
@@ -110,7 +116,9 @@ export async function RoleProgressionCard({
           <div className="pt-2 border-t">
             {!requirements.accountAge.met && (
               <p className="text-sm text-muted-foreground">
-                {requirements.accountAge.required - requirements.accountAge.current} more days until you can apply!
+                {requirements.accountAge.required -
+                  requirements.accountAge.current}{" "}
+                more days until you can apply!
               </p>
             )}
             {requirements.accountAge.met && (
@@ -130,4 +138,3 @@ export async function RoleProgressionCard({
     </Card>
   );
 }
-

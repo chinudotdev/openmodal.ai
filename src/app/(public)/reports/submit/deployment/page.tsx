@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { DeploymentReportForm } from "./_components/deployment-report-form";
 import { Spinner } from "@/components/ui/spinner";
+import { DeploymentReportForm } from "./_components/deployment-report-form";
 
 export default function DeploymentReportPage() {
   return (

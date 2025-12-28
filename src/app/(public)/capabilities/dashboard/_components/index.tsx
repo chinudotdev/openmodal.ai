@@ -1,11 +1,10 @@
-import { CategoryBreakdown } from "./category-breakdown";
-import { CriticalGaps } from "./critical-gaps";
-import { OverallProgress } from "./overall-progress";
-
 import {
   getCapabilities,
   getCapabilityCategories,
 } from "@/actions/capabilities";
+import { CategoryBreakdown } from "./category-breakdown";
+import { CriticalGaps } from "./critical-gaps";
+import { OverallProgress } from "./overall-progress";
 
 export const DashboardComponent = async () => {
   const [allCapabilities, categories] = await Promise.all([

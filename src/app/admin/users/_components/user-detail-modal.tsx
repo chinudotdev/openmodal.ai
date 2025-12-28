@@ -1,16 +1,18 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { changeUserRole, getUserDetails } from "@/actions/admin-users";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -18,9 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getUserDetails, changeUserRole } from "@/actions/admin-users";
 import { Spinner } from "@/components/ui/spinner";
-import { toast } from "sonner";
 
 interface UserDetailModalProps {
   userId: string;
@@ -94,12 +94,16 @@ export function UserDetailModal({ userId, onClose }: UserDetailModalProps) {
               {user.username && (
                 <div>
                   <p className="text-sm font-medium">Username</p>
-                  <p className="text-sm text-muted-foreground">@{user.username}</p>
+                  <p className="text-sm text-muted-foreground">
+                    @{user.username}
+                  </p>
                 </div>
               )}
               <div>
                 <p className="text-sm font-medium">User ID</p>
-                <p className="text-sm text-muted-foreground font-mono">{user.id}</p>
+                <p className="text-sm text-muted-foreground font-mono">
+                  {user.id}
+                </p>
               </div>
               <div>
                 <p className="text-sm font-medium">Status</p>
@@ -138,10 +142,7 @@ export function UserDetailModal({ userId, onClose }: UserDetailModalProps) {
                 <Badge>{user.role || "observer"}</Badge>
               </div>
               <div className="flex gap-2">
-                <Select
-                  value={selectedRole}
-                  onValueChange={setSelectedRole}
-                >
+                <Select value={selectedRole} onValueChange={setSelectedRole}>
                   <SelectTrigger className="w-[200px]">
                     <SelectValue placeholder="Change to..." />
                   </SelectTrigger>
@@ -183,11 +184,15 @@ export function UserDetailModal({ userId, onClose }: UserDetailModalProps) {
                 </div>
                 <div>
                   <p className="text-sm font-medium">Tier</p>
-                  <p className="text-sm text-muted-foreground">{reputation.tier}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {reputation.tier}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Reports Submitted</p>
-                  <p className="text-sm text-muted-foreground">{stats.reportsCount}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {stats.reportsCount}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Verifications Completed</p>
@@ -198,7 +203,9 @@ export function UserDetailModal({ userId, onClose }: UserDetailModalProps) {
                 {stats.strikesCount > 0 && (
                   <div>
                     <p className="text-sm font-medium">Strikes</p>
-                    <p className="text-sm text-destructive">{stats.strikesCount}</p>
+                    <p className="text-sm text-destructive">
+                      {stats.strikesCount}
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -213,7 +220,9 @@ export function UserDetailModal({ userId, onClose }: UserDetailModalProps) {
               <CardContent className="space-y-2">
                 <div>
                   <p className="text-sm font-medium">Ban Reason</p>
-                  <p className="text-sm text-muted-foreground">{user.banReason}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {user.banReason}
+                  </p>
                 </div>
                 {user.banExpires && (
                   <div>
@@ -231,4 +240,3 @@ export function UserDetailModal({ userId, onClose }: UserDetailModalProps) {
     </Dialog>
   );
 }
-

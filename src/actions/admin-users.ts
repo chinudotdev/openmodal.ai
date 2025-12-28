@@ -3,12 +3,12 @@
 import { and, count, desc, eq, ilike, isNull, or } from "drizzle-orm";
 import { db } from "@/db";
 import {
+  moderatorStrike,
+  report,
+  reportVerification,
   user,
   userProfile,
   userReputation,
-  report,
-  reportVerification,
-  moderatorStrike,
 } from "@/db/schema";
 
 export interface UserFilters {
@@ -45,7 +45,7 @@ export interface UserListResult {
 export async function getAllUsers(
   filters: UserFilters = {},
   limit = 50,
-  offset = 0
+  offset = 0,
 ): Promise<UserListResult> {
   try {
     const baseQuery = db
@@ -70,8 +70,8 @@ export async function getAllUsers(
         or(
           ilike(user.name, `%${filters.search}%`),
           ilike(user.email, `%${filters.search}%`),
-          ilike(user.username, `%${filters.search}%`)
-        )
+          ilike(user.username, `%${filters.search}%`),
+        ),
       );
     }
 
@@ -121,8 +121,8 @@ export async function getAllUsers(
               .where(
                 and(
                   eq(reportVerification.userId, u.id),
-                  isNull(reportVerification.deletedAt)
-                )
+                  isNull(reportVerification.deletedAt),
+                ),
               ),
             db
               .select({ count: count() })
@@ -145,7 +145,7 @@ export async function getAllUsers(
             strikesCount: strikesCount[0]?.count ?? 0,
           },
         };
-      })
+      }),
     );
 
     return {
@@ -189,8 +189,8 @@ export async function getUserDetails(userId: string) {
         .where(
           and(
             eq(reportVerification.userId, userId),
-            isNull(reportVerification.deletedAt)
-          )
+            isNull(reportVerification.deletedAt),
+          ),
         ),
       db
         .select({ count: count() })
@@ -234,7 +234,7 @@ export async function banUser(
     duration: number | null; // null for permanent
     reason: string;
     notifyUser?: boolean;
-  }
+  },
 ) {
   try {
     const banExpires = banData.duration

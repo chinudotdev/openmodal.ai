@@ -1,23 +1,23 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
+import type { UserListResult } from "@/actions/admin-users";
+import { banUser, unbanUser } from "@/actions/admin-users";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { banUser, unbanUser } from "@/actions/admin-users";
-import { toast } from "sonner";
-import type { UserListResult } from "@/actions/admin-users";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 
 interface BanUserModalProps {
   user: UserListResult["users"][0];
@@ -33,8 +33,11 @@ export function BanUserModal({ user, onClose, isBanned }: BanUserModalProps) {
   const [notifyUser, setNotifyUser] = useState(true);
 
   const banMutation = useMutation({
-    mutationFn: (data: { duration: number | null; reason: string; notifyUser: boolean }) =>
-      banUser(user.id, data),
+    mutationFn: (data: {
+      duration: number | null;
+      reason: string;
+      notifyUser: boolean;
+    }) => banUser(user.id, data),
     onSuccess: () => {
       toast.success(isBanned ? "User unbanned" : "User banned");
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
@@ -122,7 +125,11 @@ export function BanUserModal({ user, onClose, isBanned }: BanUserModalProps) {
               <div className="space-y-4">
                 <div>
                   <Label>Ban Duration</Label>
-                  <RadioGroup value={banDuration} onValueChange={setBanDuration} className="mt-2">
+                  <RadioGroup
+                    value={banDuration}
+                    onValueChange={setBanDuration}
+                    className="mt-2"
+                  >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="1" id="24h" />
                       <Label htmlFor="24h">24 hours</Label>
@@ -173,7 +180,9 @@ export function BanUserModal({ user, onClose, isBanned }: BanUserModalProps) {
                   <Checkbox
                     id="notify"
                     checked={notifyUser}
-                    onCheckedChange={(checked) => setNotifyUser(checked === true)}
+                    onCheckedChange={(checked) =>
+                      setNotifyUser(checked === true)
+                    }
                   />
                   <Label htmlFor="notify">Notify user via email</Label>
                 </div>
@@ -202,4 +211,3 @@ export function BanUserModal({ user, onClose, isBanned }: BanUserModalProps) {
     </Dialog>
   );
 }
-

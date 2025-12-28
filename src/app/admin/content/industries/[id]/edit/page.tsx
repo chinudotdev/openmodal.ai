@@ -1,5 +1,5 @@
-import { Spinner } from "@/components/ui/spinner";
 import { Suspense } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { IndustriesPage } from "../../_components/industries-page";
 
 export default async function EditIndustryPage({

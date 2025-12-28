@@ -1,15 +1,15 @@
+import { CheckCircle2 } from "lucide-react";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { getUserReputation } from "@/actions/dashboard";
+import { getReportById } from "@/actions/reports";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2 } from "lucide-react";
-import { Suspense } from "react";
+import { auth } from "@/lib/auth";
 import { ReportActions } from "./_components/report-actions";
 import { ReportActionsFallback } from "./_components/report-actions-fallback";
 import { ReportNextSteps } from "./_components/report-next-steps";
-import { getReportById } from "@/actions/reports";
-import { getUserReputation } from "@/actions/dashboard";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 export default async function SubmissionSuccessPage({
   searchParams,

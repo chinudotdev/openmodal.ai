@@ -1,8 +1,8 @@
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getUserDashboard } from "@/actions/dashboard";
 import { getPinnedBadges } from "@/actions/gamification";
+import { auth } from "@/lib/auth";
 import { BadgeCollection } from "./badge-collection";
 import { PinnedBadgesSection } from "./pinned-badges-section";
 
@@ -48,4 +48,3 @@ export async function BadgesContent() {
     </div>
   );
 }
-

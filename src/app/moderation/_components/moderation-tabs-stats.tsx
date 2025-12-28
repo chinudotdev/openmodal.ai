@@ -1,7 +1,7 @@
+import { AlertTriangle, Flag, Shield } from "lucide-react";
 import { getModerationStats } from "@/actions/moderation";
 import { Badge } from "@/components/ui/badge";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Flag, Shield } from "lucide-react";
 
 interface ModerationTabsListProps {
   activeTab: "pending" | "flagged" | "disputed";

@@ -1,10 +1,10 @@
 "use client";
 
+import { CheckCircle2, Minus, XCircle } from "lucide-react";
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { expertApplication } from "@/db/schema";
 import { formatDistanceToNow } from "@/lib/date-utils";
-import { CheckCircle2, Minus, XCircle } from "lucide-react";
 
 interface VotingProgressProps {
   application: typeof expertApplication.$inferSelect & {

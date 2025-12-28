@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { IndustriesList } from "./_components/industries-list";
 import { Spinner } from "@/components/ui/spinner";
+import { IndustriesList } from "./_components/industries-list";
 
 export default function IndustriesPage() {
   return (

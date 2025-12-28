@@ -1,11 +1,11 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { BadgeCard } from "./badge-card";
-import type { userBadge } from "@/db/schema";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { userBadge } from "@/db/schema";
+import { BadgeCard } from "./badge-card";
 
 interface PinnedBadgesSectionProps {
   pinnedBadges: (typeof userBadge.$inferSelect)[];
@@ -25,9 +25,7 @@ export function PinnedBadgesSection({
     <Card className="mb-6">
       <CardHeader>
         <CardTitle>Pinned Badges (Show on profile)</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Drag to reorder • Max 5
-        </p>
+        <p className="text-sm text-muted-foreground">Drag to reorder • Max 5</p>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-3">
@@ -61,4 +59,3 @@ export function PinnedBadgesSection({
     </Card>
   );
 }
-

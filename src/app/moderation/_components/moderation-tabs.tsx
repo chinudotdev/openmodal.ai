@@ -1,5 +1,5 @@
-import { ModerationSubnav } from "./moderation-subnav";
 import { ModerationReportList } from "./moderation-report-list-content";
+import { ModerationSubnav } from "./moderation-subnav";
 
 interface ModerationTabsProps {
   stats: {
