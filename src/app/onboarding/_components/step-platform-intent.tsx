@@ -23,7 +23,7 @@ import {
 interface StepPlatformIntentProps {
   onNext: (data: PlatformIntentInput) => void;
   onBack: () => void;
-  onFinish: () => void;
+  onFinish: (result: { pointsAwarded: number; newTier: string }) => void;
   isLoading: boolean;
   savedData?: Record<string, unknown> | null;
 }
@@ -75,10 +75,10 @@ export function StepPlatformIntent({
         // Complete onboarding
         const completeResult = await completeOnboarding(user.id);
         if (completeResult.success) {
-          toast.success(
-            `You earned ${completeResult.pointsAwarded} reputation points!`,
-          );
-          onFinish();
+          onFinish({
+            pointsAwarded: completeResult.pointsAwarded || 50,
+            newTier: completeResult.newTier || "observer",
+          });
         } else {
           toast.error(completeResult.error || "Failed to complete onboarding");
         }

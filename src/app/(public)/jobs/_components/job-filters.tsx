@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface JobFiltersProps {
-  industries: string[];
+  industries: Array<{ id: string; name: string; slug: string; icon?: string | null }>;
   currentFilters: {
     industry?: string;
     status?: string;
@@ -130,20 +130,21 @@ export function JobFilters({ industries, currentFilters }: JobFiltersProps) {
               All
             </Label>
           </div>
-          {industries.map((industry) => (
-            <div key={industry} className="flex items-center space-x-2">
+          {industries.map((ind) => (
+            <div key={ind.id} className="flex items-center space-x-2">
               <Checkbox
-                id={`industry-${industry}`}
-                checked={currentFilters.industry === industry}
+                id={`industry-${ind.id}`}
+                checked={currentFilters.industry === ind.id}
                 onCheckedChange={(checked) =>
-                  updateFilter("industry", checked ? industry : null)
+                  updateFilter("industry", checked ? ind.id : null)
                 }
               />
               <Label
-                htmlFor={`industry-${industry}`}
+                htmlFor={`industry-${ind.id}`}
                 className="font-normal cursor-pointer"
               >
-                {industry}
+                {ind.icon && <span className="mr-1">{ind.icon}</span>}
+                {ind.name}
               </Label>
             </div>
           ))}

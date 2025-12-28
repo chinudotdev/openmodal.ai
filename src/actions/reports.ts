@@ -11,6 +11,7 @@ import {
   userReputation,
 } from "@/db/schema";
 import { capability, capabilityCategory } from "@/db/schema/capabilities";
+import { industry } from "@/db/schema/industries";
 import { job } from "@/db/schema/jobs";
 import { checkOnboardingFromSession } from "@/lib/session-utils";
 import {
@@ -41,8 +42,44 @@ import { z } from "zod";
  */
 async function createOrGetJob(
   jobTitle: string,
-  industry?: string,
+  industryName?: string,
 ): Promise<string> {
+  // Find or create industry
+  let industryRecord = await db
+    .select()
+    .from(industry)
+    .where(eq(industry.name, industryName || "Unknown"))
+    .limit(1);
+
+  if (industryRecord.length === 0) {
+    // Create new industry
+    const industryId = `industry_${generateRandomString(16)}`;
+    const industrySlug = (industryName || "unknown")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/(^_|_$)/g, "");
+
+    await db.insert(industry).values({
+      id: industryId,
+      slug: industrySlug,
+      name: industryName || "Unknown",
+      displayOrder: 0,
+      status: "active",
+    });
+
+    industryRecord = await db
+      .select()
+      .from(industry)
+      .where(eq(industry.id, industryId))
+      .limit(1);
+  }
+
+  if (industryRecord.length === 0) {
+    throw new Error("Failed to create industry");
+  }
+
+  const industryId = industryRecord[0].id;
+
   // Try to find existing job by title
   const existing = await db
     .select()
@@ -65,8 +102,8 @@ async function createOrGetJob(
     id: jobId,
     slug,
     title: jobTitle,
-    industry: industry || "Unknown",
-    category: industry || "Unknown",
+    industryId,
+    category: industryName || "Unknown",
     description: `Job: ${jobTitle}`,
     shortDescription: jobTitle,
     keyResponsibilities: [],
@@ -765,8 +802,9 @@ export async function getPersonalizedReports(
         // Match reports with same industry
         const industryCondition = sql`EXISTS (
           SELECT 1 FROM ${job} j
+          INNER JOIN industry i ON j.industry_id = i.id
           WHERE j.id = ${report.jobId}
-          AND j.industry ILIKE ${industryPattern}
+          AND i.name ILIKE ${industryPattern}
         )`;
         jobConditions.push(industryCondition);
       }

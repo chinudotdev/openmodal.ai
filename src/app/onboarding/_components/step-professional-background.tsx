@@ -43,7 +43,7 @@ interface StepProfessionalBackgroundProps {
 interface JobOption {
   id: string;
   title: string;
-  industry: string;
+  industry: string; // This is the industry name string from the API
 }
 
 export function StepProfessionalBackground({

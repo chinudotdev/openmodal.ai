@@ -88,7 +88,7 @@ export function JobAutocomplete({ query, onSelect }: JobAutocompleteProps) {
                       <JobStatusBadge status={job.automationStatus} />
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {job.industry} • {formatWorkers(job.totalWorkersGlobal)}{" "}
+                      {typeof job.industry === "string" ? job.industry : job.industry.name} • {formatWorkers(job.totalWorkersGlobal)}{" "}
                       workers
                     </p>
                     <p className="text-xs text-muted-foreground">

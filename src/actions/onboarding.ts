@@ -8,9 +8,11 @@ import {
   onboardingResponse,
   onboardingSession,
   reputationHistory,
+  user,
   userProfile,
   userReputation,
 } from "@/db/schema";
+import { industry } from "@/db/schema/industries";
 import { job } from "@/db/schema/jobs";
 import { auth } from "@/lib/auth";
 import {
@@ -33,9 +35,10 @@ export async function getAllJobsForDropdown() {
       .select({
         id: job.id,
         title: job.title,
-        industry: job.industry,
+        industry: industry.name,
       })
       .from(job)
+      .innerJoin(industry, eq(job.industryId, industry.id))
       .orderBy(asc(job.title));
 
     return { success: true, jobs };
@@ -51,14 +54,19 @@ export async function getAllJobsForDropdown() {
 export async function getAllIndustries() {
   try {
     const industries = await db
-      .selectDistinct({ industry: job.industry })
-      .from(job)
-      .where(sql`${job.industry} IS NOT NULL`)
-      .orderBy(asc(job.industry));
+      .selectDistinct({
+        id: industry.id,
+        name: industry.name,
+        slug: industry.slug,
+        icon: industry.icon,
+      })
+      .from(industry)
+      .innerJoin(job, eq(job.industryId, industry.id))
+      .orderBy(asc(industry.name));
 
     return {
       success: true,
-      industries: industries.map((i) => i.industry).filter(Boolean),
+      industries: industries.map((i) => i.name),
     };
   } catch (error) {
     console.error("Error getting industries:", error);
@@ -83,9 +91,10 @@ export async function searchJobsByTitle(query: string, limit = 10) {
       .select({
         id: job.id,
         title: job.title,
-        industry: job.industry,
+        industry: industry.name,
       })
       .from(job)
+      .innerJoin(industry, eq(job.industryId, industry.id))
       .where(ilike(job.title, `%${query}%`))
       .limit(limit)
       .orderBy(asc(job.title));
@@ -102,9 +111,45 @@ export async function searchJobsByTitle(query: string, limit = 10) {
  */
 export async function createOrGetJob(
   jobTitle: string,
-  industry: string,
+  industryName: string
 ): Promise<{ success: boolean; jobId?: string; error?: string }> {
   try {
+    // Find or create industry
+    let industryRecord = await db
+      .select()
+      .from(industry)
+      .where(eq(industry.name, industryName || "Unknown"))
+      .limit(1);
+
+    if (industryRecord.length === 0) {
+      // Create new industry
+      const industryId = `industry_${generateRandomString(16)}`;
+      const industrySlug = (industryName || "unknown")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/(^_|_$)/g, "");
+
+      await db.insert(industry).values({
+        id: industryId,
+        slug: industrySlug,
+        name: industryName || "Unknown",
+        displayOrder: 0,
+        status: "active",
+      });
+
+      industryRecord = await db
+        .select()
+        .from(industry)
+        .where(eq(industry.id, industryId))
+        .limit(1);
+    }
+
+    if (industryRecord.length === 0) {
+      return { success: false, error: "Failed to create industry" };
+    }
+
+    const industryId = industryRecord[0].id;
+
     // Try to find existing job by title
     const existing = await db
       .select()
@@ -141,8 +186,8 @@ export async function createOrGetJob(
       id: jobId,
       slug: uniqueSlug,
       title: jobTitle,
-      industry: industry || "Unknown",
-      category: industry || "Unknown",
+      industryId,
+      category: industryName || "Unknown",
       description: `Job: ${jobTitle}`,
       shortDescription: jobTitle,
       keyResponsibilities: [],
@@ -208,7 +253,7 @@ export async function saveOnboardingStep(
     | BasicInfoInput
     | ProfessionalBackgroundInput
     | AutomationExperienceInput
-    | PlatformIntentInput,
+    | PlatformIntentInput
 ) {
   try {
     // Validate step number
@@ -257,7 +302,7 @@ export async function saveOnboardingStep(
         if (validatedData.currentJobTitle && validatedData.industry) {
           const jobResult = await createOrGetJob(
             validatedData.currentJobTitle,
-            validatedData.industry,
+            validatedData.industry
           );
           if (jobResult.success && jobResult.jobId) {
             // Store jobId in the data for later use
@@ -312,8 +357,8 @@ export async function saveOnboardingStep(
       .where(
         and(
           eq(onboardingResponse.sessionId, sessionId),
-          eq(onboardingResponse.step, step),
-        ),
+          eq(onboardingResponse.step, step)
+        )
       );
 
     // Insert new responses
@@ -366,7 +411,7 @@ export async function completeOnboarding(userId: string) {
     for (const response of responses) {
       try {
         data[response.questionKey] = JSON.parse(
-          response.responseValue || "null",
+          response.responseValue || "null"
         );
       } catch {
         data[response.questionKey] = response.responseValue;
@@ -564,7 +609,7 @@ export async function completeOnboarding(userId: string) {
  */
 export async function getOnboardingStepData(
   userId: string,
-  step: number,
+  step: number
 ): Promise<Record<string, unknown> | null> {
   try {
     // Get onboarding session
@@ -585,8 +630,8 @@ export async function getOnboardingStepData(
       .where(
         and(
           eq(onboardingResponse.sessionId, session[0].id),
-          eq(onboardingResponse.step, step),
-        ),
+          eq(onboardingResponse.step, step)
+        )
       );
 
     if (responses.length === 0) {
@@ -599,7 +644,7 @@ export async function getOnboardingStepData(
       try {
         // Try to parse as JSON first
         data[response.questionKey] = JSON.parse(
-          response.responseValue || "null",
+          response.responseValue || "null"
         );
         // If parsed as null, try as string
         if (data[response.questionKey] === null && response.responseValue) {
@@ -624,9 +669,15 @@ export async function getOnboardingStepData(
 export async function getOnboardingStatus(userId: string) {
   try {
     const session = await db
-      .select()
+      .select({
+        completed: onboardingSession.completed,
+        currentStep: onboardingSession.currentStep,
+        skipped: onboardingSession.skipped,
+        role: user.role,
+      })
       .from(onboardingSession)
       .where(eq(onboardingSession.userId, userId))
+      .leftJoin(user, eq(user.id, onboardingSession.userId))
       .limit(1);
 
     if (session.length === 0) {
@@ -637,6 +688,7 @@ export async function getOnboardingStatus(userId: string) {
       completed: session[0].completed,
       currentStep: session[0].currentStep,
       skipped: session[0].skipped,
+      role: session[0].role,
     };
   } catch (error) {
     console.error("Error getting onboarding status:", error);

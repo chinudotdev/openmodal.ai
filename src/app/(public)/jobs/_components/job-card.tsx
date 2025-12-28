@@ -20,7 +20,7 @@ interface JobCardProps {
     id: string;
     slug: string;
     title: string;
-    industry: string;
+    industry: { name: string; icon?: string | null } | string;
     category: string;
     shortDescription: string;
     automationPercentage: number;
@@ -79,7 +79,7 @@ export function JobCard({ job }: JobCardProps) {
             <JobStatusBadge status={job.automationStatus} />
           </div>
           <p className="text-sm text-muted-foreground">
-            {job.industry} | {job.category}
+            {typeof job.industry === "string" ? job.industry : job.industry.name} | {job.category}
           </p>
         </CardHeader>
 

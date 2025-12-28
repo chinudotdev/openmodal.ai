@@ -50,6 +50,20 @@
       "when": 1762833078686,
       "tag": "0006_worthless_purple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1762874087760,
+      "tag": "0007_nasty_dark_phoenix",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1762926847898,
+      "tag": "0008_previous_prism",
+      "breakpoints": true
     }
   ]
 }

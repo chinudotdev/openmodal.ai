@@ -38,7 +38,7 @@ export function JobHeader({ job }: JobHeaderProps) {
           </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span>
-              {job.industry} | {job.category}
+              {job.industry?.name || "Unknown"} | {job.category}
             </span>
             <span>•</span>
             <span>
