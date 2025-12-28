@@ -12,6 +12,7 @@ import {
   userProfile,
   userReputation,
 } from "@/db/schema";
+import { industry } from "@/db/schema/industries";
 import { job } from "@/db/schema/jobs";
 import { auth } from "@/lib/auth";
 import {
@@ -34,9 +35,10 @@ export async function getAllJobsForDropdown() {
       .select({
         id: job.id,
         title: job.title,
-        industry: job.industry,
+        industry: industry.name,
       })
       .from(job)
+      .innerJoin(industry, eq(job.industryId, industry.id))
       .orderBy(asc(job.title));
 
     return { success: true, jobs };
@@ -52,14 +54,19 @@ export async function getAllJobsForDropdown() {
 export async function getAllIndustries() {
   try {
     const industries = await db
-      .selectDistinct({ industry: job.industry })
-      .from(job)
-      .where(sql`${job.industry} IS NOT NULL`)
-      .orderBy(asc(job.industry));
+      .selectDistinct({
+        id: industry.id,
+        name: industry.name,
+        slug: industry.slug,
+        icon: industry.icon,
+      })
+      .from(industry)
+      .innerJoin(job, eq(job.industryId, industry.id))
+      .orderBy(asc(industry.name));
 
     return {
       success: true,
-      industries: industries.map((i) => i.industry).filter(Boolean),
+      industries: industries.map((i) => i.name),
     };
   } catch (error) {
     console.error("Error getting industries:", error);
@@ -84,9 +91,10 @@ export async function searchJobsByTitle(query: string, limit = 10) {
       .select({
         id: job.id,
         title: job.title,
-        industry: job.industry,
+        industry: industry.name,
       })
       .from(job)
+      .innerJoin(industry, eq(job.industryId, industry.id))
       .where(ilike(job.title, `%${query}%`))
       .limit(limit)
       .orderBy(asc(job.title));
@@ -103,9 +111,45 @@ export async function searchJobsByTitle(query: string, limit = 10) {
  */
 export async function createOrGetJob(
   jobTitle: string,
-  industry: string
+  industryName: string
 ): Promise<{ success: boolean; jobId?: string; error?: string }> {
   try {
+    // Find or create industry
+    let industryRecord = await db
+      .select()
+      .from(industry)
+      .where(eq(industry.name, industryName || "Unknown"))
+      .limit(1);
+
+    if (industryRecord.length === 0) {
+      // Create new industry
+      const industryId = `industry_${generateRandomString(16)}`;
+      const industrySlug = (industryName || "unknown")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/(^_|_$)/g, "");
+
+      await db.insert(industry).values({
+        id: industryId,
+        slug: industrySlug,
+        name: industryName || "Unknown",
+        displayOrder: 0,
+        status: "active",
+      });
+
+      industryRecord = await db
+        .select()
+        .from(industry)
+        .where(eq(industry.id, industryId))
+        .limit(1);
+    }
+
+    if (industryRecord.length === 0) {
+      return { success: false, error: "Failed to create industry" };
+    }
+
+    const industryId = industryRecord[0].id;
+
     // Try to find existing job by title
     const existing = await db
       .select()
@@ -142,8 +186,8 @@ export async function createOrGetJob(
       id: jobId,
       slug: uniqueSlug,
       title: jobTitle,
-      industry: industry || "Unknown",
-      category: industry || "Unknown",
+      industryId,
+      category: industryName || "Unknown",
       description: `Job: ${jobTitle}`,
       shortDescription: jobTitle,
       keyResponsibilities: [],

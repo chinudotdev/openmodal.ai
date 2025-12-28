@@ -2,7 +2,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Suspense } from "react";
 import { AdminOverview } from "./_components/admin-overview";
 
-export default function AdminPage() {
+export default async function AdminPage() {
   return (
     <div className="space-y-6">
       <div>

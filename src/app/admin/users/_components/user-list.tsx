@@ -31,14 +31,14 @@ export function UserList() {
   };
 
   const handleRoleFilter = (role: string) => {
-    setFilters((prev) => ({ ...prev, role: role || undefined }));
+    setFilters((prev) => ({ ...prev, role: role === "all" ? undefined : role }));
     setPage(0);
   };
 
   const handleStatusFilter = (status: string) => {
     setFilters((prev) => ({
       ...prev,
-      status: (status as "active" | "banned") || undefined,
+      status: status === "all" ? undefined : (status as "active" | "banned"),
     }));
     setPage(0);
   };
@@ -68,7 +68,7 @@ export function UserList() {
             <SelectValue placeholder="All Roles" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Roles</SelectItem>
+            <SelectItem value="all">All Roles</SelectItem>
             <SelectItem value="observer">Observer</SelectItem>
             <SelectItem value="contributor">Contributor</SelectItem>
             <SelectItem value="trusted">Trusted</SelectItem>
@@ -82,7 +82,7 @@ export function UserList() {
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="banned">Banned</SelectItem>
           </SelectContent>

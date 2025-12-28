@@ -1,7 +1,8 @@
-import { ilike, or } from "drizzle-orm";
+import { eq, ilike, or } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { capability } from "@/db/schema/capabilities";
+import { industry } from "@/db/schema/industries";
 import { job } from "@/db/schema/jobs";
 
 export interface SearchResult {
@@ -14,9 +15,8 @@ export interface SearchResult {
 
 export async function GET(request: NextRequest) {
   try {
-    // Access searchParams in a way that prevents prerendering
-    const url = new URL(request.url);
-    const query = url.searchParams.get("q");
+    // Access searchParams using Next.js API (automatically makes route dynamic)
+    const query = request.nextUrl.searchParams.get("q");
 
     // Validate query
     if (!query || query.trim().length < 2) {
@@ -72,11 +72,12 @@ export async function GET(request: NextRequest) {
           shortDescription: job.shortDescription,
         })
         .from(job)
+        .innerJoin(industry, eq(job.industryId, industry.id))
         .where(
           or(
             ilike(job.title, searchPattern),
             ilike(job.shortDescription, searchPattern),
-            ilike(job.industry, searchPattern),
+            ilike(industry.name, searchPattern),
             ilike(job.category, searchPattern),
           ),
         )

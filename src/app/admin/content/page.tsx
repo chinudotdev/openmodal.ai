@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Briefcase, FolderTree, Tags } from "lucide-react";
+import { BookOpen, Briefcase, FolderTree, Building2 } from "lucide-react";
 import Link from "next/link";
 
 export default function ContentPage() {
@@ -9,7 +9,7 @@ export default function ContentPage() {
       <div>
         <h1 className="text-3xl font-bold">Content Management</h1>
         <p className="text-muted-foreground mt-1">
-          Manage jobs, capabilities, categories, and tags
+          Manage jobs, industries, capabilities, and categories
         </p>
       </div>
 
@@ -68,16 +68,16 @@ export default function ContentPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Tags className="h-5 w-5" />
-              Tags
+              <Building2 className="h-5 w-5" />
+              Industries
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Manage content tags
+              Manage industry categories and classifications
             </p>
             <Button asChild variant="outline">
-              <Link href="/admin/content/tags">Manage Tags</Link>
+              <Link href="/admin/content/industries">Manage Industries</Link>
             </Button>
           </CardContent>
         </Card>

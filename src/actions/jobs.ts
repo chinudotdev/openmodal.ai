@@ -4,6 +4,7 @@ import { generateRandomString } from "better-auth/crypto";
 import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { capability } from "@/db/schema/capabilities";
+import { industry } from "@/db/schema/industries";
 import {
   type AutomationStatus,
   job,
@@ -20,7 +21,7 @@ import { cacheLife, cacheTag } from "next/cache";
 
 // Types
 export type JobFilters = {
-  industry?: string;
+  industryId?: string;
   status?: AutomationStatus;
   riskMin?: number;
   riskMax?: number;
@@ -81,6 +82,7 @@ export async function compareJobs(
         growthRate: job.growthRate,
       })
       .from(job)
+      .innerJoin(industry, eq(job.industryId, industry.id))
       .where(inArray(job.slug, jobSlugs));
 
     // Return jobs in the order of the slugs provided, with proper type conversions
@@ -113,13 +115,21 @@ export async function getJobBySlug(slug: string) {
   "use cache";
   cacheLife({ stale: 300, revalidate: 3600 * 2 });
 
-  const result = await db.select().from(job).where(eq(job.slug, slug)).limit(1);
+  const result = await db
+    .select({
+      job,
+      industry,
+    })
+    .from(job)
+    .innerJoin(industry, eq(job.industryId, industry.id))
+    .where(eq(job.slug, slug))
+    .limit(1);
 
   if (result.length === 0) {
     return null;
   }
 
-  const jobData = result[0];
+  const jobData = { ...result[0].job, industry: result[0].industry };
 
   // Run independent queries in parallel
   const [tasks, jobCaps, geographicData, related] = await Promise.all([
@@ -228,8 +238,8 @@ export async function getJobs(
 
   const conditions = [];
 
-  if (filters.industry) {
-    conditions.push(eq(job.industry, filters.industry));
+  if (filters.industryId) {
+    conditions.push(eq(job.industryId, filters.industryId));
   }
 
   if (filters.status) {
@@ -257,14 +267,20 @@ export async function getJobs(
       or(
         ilike(job.title, `%${filters.search}%`),
         ilike(job.shortDescription, `%${filters.search}%`),
-        ilike(job.industry, `%${filters.search}%`),
+        ilike(industry.name, `%${filters.search}%`),
         ilike(job.category, `%${filters.search}%`),
       ),
     );
   }
 
-  // Build query with where clause
-  const baseQuery = db.select().from(job);
+  // Build query with where clause and join industry
+  const baseQuery = db
+    .select({
+      job,
+      industry,
+    })
+    .from(job)
+    .innerJoin(industry, eq(job.industryId, industry.id));
   const queryWithWhere =
     conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
 
@@ -294,7 +310,11 @@ export async function getJobs(
     .limit(limit)
     .offset(offset);
 
-  return results;
+  // Map results to include industry relationship
+  return results.map((r) => ({
+    ...r.job,
+    industry: r.industry,
+  }));
 }
 
 // Get job categories/industries
@@ -302,11 +322,17 @@ export async function getJobCategories() {
   "use cache";
   cacheLife({ stale: 600, revalidate: 3600 * 5 });
   const results = await db
-    .selectDistinct({ industry: job.industry })
-    .from(job)
-    .orderBy(asc(job.industry));
+    .selectDistinct({
+      id: industry.id,
+      name: industry.name,
+      slug: industry.slug,
+      icon: industry.icon,
+    })
+    .from(industry)
+    .innerJoin(job, eq(job.industryId, industry.id))
+    .orderBy(asc(industry.name));
 
-  return results.map((r) => r.industry).filter(Boolean);
+  return results;
 }
 
 // Track job
@@ -623,21 +649,30 @@ export async function searchJobs(query: string, limit = 10) {
       id: job.id,
       slug: job.slug,
       title: job.title,
-      industry: job.industry,
+      industry: industry,
       automationPercentage: job.automationPercentage,
       automationStatus: job.automationStatus,
       totalWorkersGlobal: job.totalWorkersGlobal,
     })
     .from(job)
+    .innerJoin(industry, eq(job.industryId, industry.id))
     .where(
       or(
         ilike(job.title, `%${query}%`),
         ilike(job.shortDescription, `%${query}%`),
-        ilike(job.industry, `%${query}%`),
+        ilike(industry.name, `%${query}%`),
       ),
     )
     .orderBy(asc(job.title))
     .limit(limit);
 
-  return results;
+  return results.map((r) => ({
+    id: r.id,
+    slug: r.slug,
+    title: r.title,
+    industry: r.industry.name,
+    automationPercentage: r.automationPercentage,
+    automationStatus: r.automationStatus,
+    totalWorkersGlobal: r.totalWorkersGlobal,
+  }));
 }

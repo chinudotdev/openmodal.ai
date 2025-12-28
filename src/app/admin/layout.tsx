@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { AdminSidebar } from "./_components/admin-sidebar";
 
 export default async function AdminLayout({
@@ -8,7 +9,9 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-background">
       <div className="flex">
-        <AdminSidebar />
+        <Suspense fallback={<div className="w-64" />}>
+          <AdminSidebar />
+        </Suspense>
         <main className="flex-1 ml-64">
           <div className="container mx-auto px-4 py-8">{children}</div>
         </main>

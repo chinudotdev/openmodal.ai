@@ -36,7 +36,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  if (pathname === "/admin") {
+  if (pathname.includes("/admin")) {
     const isAdmin = session.user.role === "admin";
     if (!isAdmin) {
       return NextResponse.redirect(new URL("/403", request.url));

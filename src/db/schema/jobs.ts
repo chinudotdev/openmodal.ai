@@ -10,6 +10,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import { capability } from "./capabilities"; // Import from your existing schema
+import { industry } from "./industries";
 
 // ============================================
 // ENUMS
@@ -71,7 +72,9 @@ export const job = pgTable(
     id: text("id").primaryKey(),
     slug: text("slug").notNull().unique(),
     title: text("title").notNull(), // "Physical Therapist"
-    industry: text("industry").notNull(), // "Healthcare"
+    industryId: text("industry_id")
+      .notNull()
+      .references(() => industry.id, { onDelete: "restrict" }),
     category: text("category").notNull(), // "Medical & Health"
 
     // Description
@@ -134,7 +137,7 @@ export const job = pgTable(
   },
   (table) => [
     index("idx_job_title").on(table.title),
-    index("idx_job_industry").on(table.industry),
+    index("idx_job_industry").on(table.industryId),
   ]
 );
 

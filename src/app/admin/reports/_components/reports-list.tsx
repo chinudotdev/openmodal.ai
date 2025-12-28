@@ -37,7 +37,7 @@ export function ReportsList() {
           onValueChange={(value) =>
             setFilters((prev) => ({
               ...prev,
-              status: (value || undefined) as ReportStatus | undefined,
+              status: value === "all" ? undefined : (value as ReportStatus),
             }))
           }
         >
@@ -45,7 +45,7 @@ export function ReportsList() {
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="approved">Approved</SelectItem>
@@ -65,7 +65,7 @@ export function ReportsList() {
             <SelectValue placeholder="All Reports" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Reports</SelectItem>
+            <SelectItem value="all">All Reports</SelectItem>
             <SelectItem value="disputed">Disputed Only</SelectItem>
           </SelectContent>
         </Select>

@@ -32,7 +32,7 @@ export async function JobsContent({ searchParams }: JobsContentProps) {
   const params = await searchParams;
 
   const filters = {
-    industry: params.industry,
+    industryId: params.industry, // Now using industryId
     status: params.status as any,
     riskMin: params.riskMin ? parseInt(params.riskMin, 10) : undefined,
     riskMax: params.riskMax ? parseInt(params.riskMax, 10) : undefined,

@@ -1,5 +1,5 @@
-import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import { Suspense } from "react";
 import { AnalyticsDashboard } from "./_components/analytics-dashboard";
 
 export default function AnalyticsPage() {
@@ -23,4 +23,3 @@ export default function AnalyticsPage() {
     </div>
   );
 }
-
