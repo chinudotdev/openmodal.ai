@@ -104,9 +104,7 @@ export async function verifyReport(
           reputationPoints: userReputation.reputationPoints,
         })
         .from(userReputation)
-        .where(
-          sql`${userReputation.userId} IN (${userId}, ${reportData[0].userId})`,
-        );
+        .where(inArray(userReputation.userId, [userId, reportData[0].userId]));
 
       const verifierRep = reputations.find((r) => r.userId === userId);
       const authorRep = reputations.find(

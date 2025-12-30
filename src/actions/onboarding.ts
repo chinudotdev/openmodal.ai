@@ -688,7 +688,7 @@ export async function skipOnboarding(userId: string) {
       await db.insert(onboardingSession).values({
         id: sessionId,
         userId,
-        currentStep: 4,
+        currentStep: 2,
         completed: false,
         skipped: true,
       });

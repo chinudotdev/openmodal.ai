@@ -20,7 +20,7 @@ import { commentSchema, commentUpdateSchema } from "@/lib/validations";
  */
 export async function createReportComment(
   userId: string,
-  commentData: z.infer<typeof commentSchema>,
+  commentData: z.infer<typeof commentSchema>
 ) {
   try {
     // Check onboarding completion from session
@@ -61,7 +61,7 @@ export async function createReportComment(
       SET 
         comment_count = comment_count + 1,
         updated_at = NOW()
-      WHERE id = ${validated.reportId}
+      WHERE id = (SELECT report_id FROM comment_insert)
     `);
 
     return { success: true, commentId };
@@ -121,8 +121,8 @@ export async function getReportComments(reportId: string) {
       .where(
         and(
           eq(reportComment.reportId, reportId),
-          isNull(reportComment.deletedAt),
-        ),
+          isNull(reportComment.deletedAt)
+        )
       )
       .orderBy(desc(reportComment.upvotes), desc(reportComment.createdAt));
 
@@ -174,7 +174,7 @@ export async function getReportComments(reportId: string) {
 export async function updateComment(
   commentId: string,
   userId: string,
-  commentData: z.infer<typeof commentUpdateSchema>,
+  commentData: z.infer<typeof commentUpdateSchema>
 ) {
   try {
     // Check onboarding completion from session
@@ -200,8 +200,8 @@ export async function updateComment(
         and(
           eq(reportComment.id, commentId),
           eq(reportComment.userId, userId),
-          isNull(reportComment.deletedAt),
-        ),
+          isNull(reportComment.deletedAt)
+        )
       )
       .limit(1);
 
@@ -256,8 +256,8 @@ export async function softDeleteComment(commentId: string, userId: string) {
         and(
           eq(reportComment.id, commentId),
           eq(reportComment.userId, userId),
-          isNull(reportComment.deletedAt),
-        ),
+          isNull(reportComment.deletedAt)
+        )
       )
       .limit(1);
 
@@ -311,7 +311,7 @@ export async function restoreComment(commentId: string, userId: string) {
       .select()
       .from(reportComment)
       .where(
-        and(eq(reportComment.id, commentId), eq(reportComment.userId, userId)),
+        and(eq(reportComment.id, commentId), eq(reportComment.userId, userId))
       )
       .limit(1);
 

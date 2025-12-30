@@ -23,6 +23,43 @@ interface DeploymentReportFormProps {
   draftId?: string;
 }
 
+/**
+ * Validates step 3 data for deployment reports
+ * Returns validation result with error message if invalid
+ */
+function validateStep3(step3: DeploymentReportInput["step3"] | undefined): {
+  isValid: boolean;
+  error?: string;
+} {
+  if (!step3) {
+    return { isValid: false, error: "Step 3 data is missing" };
+  }
+
+  if (!step3.description || step3.description.length < 500) {
+    return {
+      isValid: false,
+      error: "Description must be at least 500 characters",
+    };
+  }
+
+  if (
+    !step3.evidenceLinks ||
+    !Array.isArray(step3.evidenceLinks) ||
+    step3.evidenceLinks.length === 0
+  ) {
+    return {
+      isValid: false,
+      error: "At least one evidence link is required",
+    };
+  }
+
+  if (!step3.source) {
+    return { isValid: false, error: "Please select a source" };
+  }
+
+  return { isValid: true };
+}
+
 export function DeploymentReportForm({ draftId }: DeploymentReportFormProps) {
   const { user } = useSession();
   const router = useRouter();
@@ -61,36 +98,13 @@ export function DeploymentReportForm({ draftId }: DeploymentReportFormProps) {
         const completeStep3 =
           formData.step3 || currentFormValues.step3 || value.step3;
 
-        if (!completeStep3) {
+        // Validate step 3 using shared validation helper
+        const step3Validation = validateStep3(completeStep3);
+        if (!step3Validation.isValid) {
           toast.error(
-            "Step 3 data is missing. Please go back and complete step 3.",
+            step3Validation.error ||
+              "Step 3 data is missing. Please go back and complete step 3.",
           );
-          setIsSubmitting(false);
-          return;
-        }
-
-        // Ensure step3 has all required fields
-        if (
-          !completeStep3.description ||
-          completeStep3.description.length < 500
-        ) {
-          toast.error("Description must be at least 500 characters");
-          setIsSubmitting(false);
-          return;
-        }
-
-        if (
-          !completeStep3.evidenceLinks ||
-          !Array.isArray(completeStep3.evidenceLinks) ||
-          completeStep3.evidenceLinks.length === 0
-        ) {
-          toast.error("At least one evidence link is required");
-          setIsSubmitting(false);
-          return;
-        }
-
-        if (!completeStep3.source) {
-          toast.error("Please select a source");
           setIsSubmitting(false);
           return;
         }
@@ -241,60 +255,43 @@ export function DeploymentReportForm({ draftId }: DeploymentReportFormProps) {
     if (currentStep === 3) {
       const step3Data = currentFormValues.step3 || formData.step3;
 
-      if (!step3Data) {
-        toast.error("Please complete all fields in step 3");
-        return false;
-      }
-
-      let hasErrors = false;
-
-      if (!step3Data.description || step3Data.description.length < 500) {
-        form.setFieldMeta("step3.description" as any, (prev: any) => ({
-          ...prev,
-          isTouched: true,
-          isValid: false,
-          errors: ["Description must be at least 500 characters"],
-        }));
-        hasErrors = true;
-      }
-
-      if (
-        !step3Data.evidenceLinks ||
-        !Array.isArray(step3Data.evidenceLinks) ||
-        step3Data.evidenceLinks.length === 0
-      ) {
-        form.setFieldMeta("step3.evidenceLinks" as any, (prev: any) => ({
-          ...prev,
-          isTouched: true,
-          isValid: false,
-          errors: ["At least one evidence link is required"],
-        }));
-        hasErrors = true;
-      }
-
-      if (!step3Data.source) {
-        form.setFieldMeta("step3.source" as any, (prev: any) => ({
-          ...prev,
-          isTouched: true,
-          isValid: false,
-          errors: ["Please select a source"],
-        }));
-        hasErrors = true;
-      }
-
-      if (hasErrors) {
-        // Show specific error messages
-        if (!step3Data.description || step3Data.description.length < 500) {
-          toast.error("Description must be at least 500 characters");
-        } else if (
-          !step3Data.evidenceLinks ||
+      // Use shared validation helper
+      const step3Validation = validateStep3(step3Data);
+      if (!step3Validation.isValid) {
+        // Set field meta for form validation
+        if (!step3Data?.description || step3Data.description.length < 500) {
+          form.setFieldMeta("step3.description" as any, (prev: any) => ({
+            ...prev,
+            isTouched: true,
+            isValid: false,
+            errors: ["Description must be at least 500 characters"],
+          }));
+        }
+        if (
+          !step3Data?.evidenceLinks ||
           !Array.isArray(step3Data.evidenceLinks) ||
           step3Data.evidenceLinks.length === 0
         ) {
-          toast.error("At least one evidence link is required");
-        } else if (!step3Data.source) {
-          toast.error("Please select a source");
+          form.setFieldMeta("step3.evidenceLinks" as any, (prev: any) => ({
+            ...prev,
+            isTouched: true,
+            isValid: false,
+            errors: ["At least one evidence link is required"],
+          }));
         }
+        if (!step3Data?.source) {
+          form.setFieldMeta("step3.source" as any, (prev: any) => ({
+            ...prev,
+            isTouched: true,
+            isValid: false,
+            errors: ["Please select a source"],
+          }));
+        }
+
+        // Show toast error
+        toast.error(
+          step3Validation.error || "Please complete all fields in step 3",
+        );
         return false;
       }
 

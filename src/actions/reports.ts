@@ -259,13 +259,6 @@ export async function submitReport(
 
     const status: ReportStatus = validatedData.isDraft ? "draft" : "pending";
 
-    // Delete existing evidence if updating
-    if (isUpdate) {
-      await db
-        .delete(reportEvidence)
-        .where(eq(reportEvidence.reportId, finalReportId));
-    }
-
     const reportValues = {
       id: finalReportId,
       userId,
@@ -320,45 +313,57 @@ export async function submitReport(
       updatedAt: new Date(),
     };
 
-    if (isUpdate) {
-      await db
-        .update(report)
-        .set(reportValues)
-        .where(eq(report.id, finalReportId));
-    } else {
-      await db.insert(report).values(reportValues);
-    }
+    // Wrap draft update operations in transaction to ensure atomicity
+    // If report update fails, evidence deletion is rolled back
+    await db.transaction(async (tx) => {
+      // Delete existing evidence if updating
+      if (isUpdate) {
+        await tx
+          .delete(reportEvidence)
+          .where(eq(reportEvidence.reportId, finalReportId));
+      }
 
-    // Save evidence
-    if (
-      validatedData.step3.evidenceLinks &&
-      validatedData.step3.evidenceLinks.length > 0
-    ) {
-      const evidence = validatedData.step3.evidenceLinks.map((url) => ({
-        id: generateRandomString(32),
-        reportId: finalReportId,
-        type: "link",
-        url,
-        description: null,
-      }));
+      // Update or insert report
+      if (isUpdate) {
+        await tx
+          .update(report)
+          .set(reportValues)
+          .where(eq(report.id, finalReportId));
+      } else {
+        await tx.insert(report).values(reportValues);
+      }
 
-      await db.insert(reportEvidence).values(evidence);
-    }
+      // Save evidence
+      if (
+        validatedData.step3.evidenceLinks &&
+        validatedData.step3.evidenceLinks.length > 0
+      ) {
+        const evidence = validatedData.step3.evidenceLinks.map((url) => ({
+          id: generateRandomString(32),
+          reportId: finalReportId,
+          type: "link",
+          url,
+          description: null,
+        }));
 
-    if (
-      validatedData.step3.fileUrls &&
-      validatedData.step3.fileUrls.length > 0
-    ) {
-      const fileEvidence = validatedData.step3.fileUrls.map((fileUrl) => ({
-        id: generateRandomString(32),
-        reportId: finalReportId,
-        type: "photo",
-        fileUrl,
-        description: null,
-      }));
+        await tx.insert(reportEvidence).values(evidence);
+      }
 
-      await db.insert(reportEvidence).values(fileEvidence);
-    }
+      if (
+        validatedData.step3.fileUrls &&
+        validatedData.step3.fileUrls.length > 0
+      ) {
+        const fileEvidence = validatedData.step3.fileUrls.map((fileUrl) => ({
+          id: generateRandomString(32),
+          reportId: finalReportId,
+          type: "photo",
+          fileUrl,
+          description: null,
+        }));
+
+        await tx.insert(reportEvidence).values(fileEvidence);
+      }
+    });
 
     return { success: true, reportId: finalReportId };
   } catch (error) {

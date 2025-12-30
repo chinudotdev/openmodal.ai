@@ -5,7 +5,13 @@ import { MyReportsContent } from "./_components/my-reports-content";
 export default function MyReportsPage() {
   return (
     <div className="min-h-screen bg-background">
-      <Suspense fallback={<Spinner className="h-8 w-8" />}>
+      <Suspense
+        fallback={
+          <div className="flex min-h-screen items-center justify-center">
+            <Spinner className="h-8 w-8" />
+          </div>
+        }
+      >
         <MyReportsContent />
       </Suspense>
     </div>

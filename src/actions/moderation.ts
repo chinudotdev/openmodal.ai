@@ -337,12 +337,12 @@ export async function getModerationStats() {
     const result = stats[0];
 
     return {
-      pending: Number(result?.pending || 0),
-      approved: Number(result?.approved || 0),
-      rejected: Number(result?.rejected || 0),
-      changesRequested: Number(result?.changesRequested || 0),
-      disputed: Number(result?.disputed || 0),
-      flagged: Number(result?.flagged || 0),
+      pending: result?.pending || 0,
+      approved: result?.approved || 0,
+      rejected: result?.rejected || 0,
+      changesRequested: result?.changesRequested || 0,
+      disputed: result?.disputed || 0,
+      flagged: result?.flagged || 0,
     };
   } catch (error) {
     console.error("Error getting moderation stats:", error);

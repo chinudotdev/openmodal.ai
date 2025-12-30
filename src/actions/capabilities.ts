@@ -563,65 +563,63 @@ export async function voteComment(
     };
   }
 
-  // Optimized: Get current state and handle vote in single transaction
-  // First, get current state
-  const currentState = await db
-    .select({
-      existingVoteId: capabilityCommentVote.id,
-      existingVoteType: capabilityCommentVote.voteType,
-      currentUpvotes: capabilityComment.upvotes,
-    })
+  // Check if comment exists first
+  const commentExists = await db
+    .select({ id: capabilityComment.id })
     .from(capabilityComment)
-    .leftJoin(
-      capabilityCommentVote,
-      and(
-        eq(capabilityCommentVote.commentId, capabilityComment.id),
-        eq(capabilityCommentVote.userId, userId),
-      ),
-    )
     .where(eq(capabilityComment.id, commentId))
     .limit(1);
 
-  if (currentState.length === 0) {
+  if (commentExists.length === 0) {
     return { success: false, error: "Comment not found" };
   }
 
-  const state = currentState[0];
-  let delta = 0;
+  // Optimized: Single atomic query to handle vote upsert/delete and update counts
+  const voteId = generateRandomString(32);
 
-  if (state.existingVoteId) {
-    if (state.existingVoteType === voteType) {
-      // Remove vote
-      await db
-        .delete(capabilityCommentVote)
-        .where(eq(capabilityCommentVote.id, state.existingVoteId));
-      delta = voteType === "up" ? -1 : 0;
-    } else {
-      // Change vote
-      await db
-        .update(capabilityCommentVote)
-        .set({ voteType })
-        .where(eq(capabilityCommentVote.id, state.existingVoteId));
-      delta = voteType === "up" ? 2 : -2;
-    }
-  } else {
-    // Create new vote
-    await db.insert(capabilityCommentVote).values({
-      id: generateRandomString(32),
-      commentId,
-      userId,
-      voteType,
-    });
-    delta = voteType === "up" ? 1 : 0;
-  }
-
-  // Update upvotes in single query
-  await db
-    .update(capabilityComment)
-    .set({
-      upvotes: sql`GREATEST(0, ${capabilityComment.upvotes} + ${delta})`,
-    })
-    .where(eq(capabilityComment.id, commentId));
+  await db.execute(sql`
+    WITH existing_vote AS (
+      SELECT id, vote_type
+      FROM ${capabilityCommentVote}
+      WHERE comment_id = ${commentId} AND user_id = ${userId}
+      LIMIT 1
+    ),
+    vote_deletion AS (
+      -- Delete vote if same type exists (toggle off)
+      DELETE FROM ${capabilityCommentVote}
+      WHERE id IN (SELECT id FROM existing_vote WHERE vote_type = ${voteType})
+      RETURNING comment_id
+    ),
+    vote_upsert AS (
+      -- Upsert vote only if no existing vote with same type (new vote or changing type)
+      INSERT INTO ${capabilityCommentVote} (id, comment_id, user_id, vote_type)
+      SELECT 
+        COALESCE(
+          (SELECT id FROM existing_vote WHERE vote_type != ${voteType} LIMIT 1),
+          ${voteId}
+        ),
+        ${commentId},
+        ${userId},
+        ${voteType}
+      WHERE NOT EXISTS (
+        SELECT 1 FROM existing_vote WHERE vote_type = ${voteType}
+      )
+      ON CONFLICT (comment_id, user_id) DO UPDATE
+      SET vote_type = EXCLUDED.vote_type
+      RETURNING comment_id
+    ),
+    vote_counts AS (
+      SELECT 
+        COUNT(*) FILTER (WHERE vote_type = 'up')::int as upvotes
+      FROM ${capabilityCommentVote}
+      WHERE comment_id = ${commentId}
+    )
+    UPDATE ${capabilityComment}
+    SET 
+      upvotes = GREATEST(0, (SELECT upvotes FROM vote_counts)),
+      updated_at = NOW()
+    WHERE id = ${commentId}
+  `);
 
   return { success: true };
 }
