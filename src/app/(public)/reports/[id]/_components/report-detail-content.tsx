@@ -140,7 +140,6 @@ export function ReportDetailContent({
   const authorHandle =
     ensureHandle(report.author?.displayUsername) ||
     ensureHandle(report.author?.username) ||
-    ensureHandle(report.userId) ||
     "@unknown";
 
   const authorTier = report.authorReputation?.tier

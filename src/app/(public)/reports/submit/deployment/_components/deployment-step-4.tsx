@@ -35,6 +35,19 @@ export function DeploymentStep4({
     });
     return () => subscription();
   }, [form]);
+
+  // Sync form state with formData when component mounts or formData changes
+  useEffect(() => {
+    if (formData.step1) {
+      form.setFieldValue("step1", formData.step1);
+    }
+    if (formData.step2) {
+      form.setFieldValue("step2", formData.step2);
+    }
+    if (formData.step3) {
+      form.setFieldValue("step3", formData.step3);
+    }
+  }, [form, formData.step1, formData.step2, formData.step3]);
   const formatDate = (date?: Date) => {
     if (!date) return "Not specified";
     return new Date(date).toLocaleDateString("en-US", {
@@ -320,6 +333,16 @@ export function DeploymentStep4({
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          // Ensure form state has all step data before submitting
+          if (formData.step1) {
+            form.setFieldValue("step1", formData.step1);
+          }
+          if (formData.step2) {
+            form.setFieldValue("step2", formData.step2);
+          }
+          if (formData.step3) {
+            form.setFieldValue("step3", formData.step3);
+          }
           form.handleSubmit();
         }}
       >

@@ -4,6 +4,7 @@ import { generateRandomString } from "better-auth/crypto";
 import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db";
+import { user, userBadge, userProfile, userReputation } from "@/db/schema";
 import { capability } from "@/db/schema/capabilities";
 import { industry } from "@/db/schema/industries";
 import {
@@ -434,46 +435,88 @@ export async function incrementViewCount(jobId: string) {
 
 // Get comments
 export async function getJobComments(jobId: string, parentId?: string) {
-  const conditions = [eq(jobComment.jobId, jobId)];
-
-  if (parentId) {
-    conditions.push(eq(jobComment.parentId, parentId));
-  } else {
-    conditions.push(sql`${jobComment.parentId} IS NULL`);
-  }
-
-  const comments = await db
-    .select()
+  // Fetch all comments for the job to build tree structure with user info
+  const rows = await db
+    .select({
+      comment: jobComment,
+      author: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        displayUsername: user.displayUsername,
+        image: user.image,
+      },
+      profile: {
+        displayName: userProfile.displayName,
+        industry: userProfile.industry,
+        location: userProfile.location,
+        country: userProfile.country,
+        stateProvince: userProfile.stateProvince,
+        city: userProfile.city,
+      },
+      reputation: {
+        reputationPoints: userReputation.reputationPoints,
+        tier: userReputation.tier,
+      },
+      badges: sql<Array<typeof userBadge.$inferSelect>>`
+        COALESCE(
+          (SELECT json_agg(b.* ORDER BY b.earned_at DESC)
+           FROM ${userBadge} b
+           WHERE b.user_id = ${jobComment.userId}),
+          '[]'::json
+        )
+      `.as("badges"),
+    })
     .from(jobComment)
-    .where(and(...conditions))
+    .leftJoin(user, eq(jobComment.userId, user.id))
+    .leftJoin(userProfile, eq(userProfile.userId, user.id))
+    .leftJoin(userReputation, eq(userReputation.userId, user.id))
+    .where(eq(jobComment.jobId, jobId))
     .orderBy(desc(jobComment.upvotes), desc(jobComment.createdAt));
 
-  // Get replies for each comment
-  const commentIds = comments.map((c) => c.id);
-  const replies =
-    commentIds.length > 0
-      ? await db
-          .select()
-          .from(jobComment)
-          .where(inArray(jobComment.parentId, commentIds))
-          .orderBy(desc(jobComment.upvotes), desc(jobComment.createdAt))
-      : [];
+  type CommentWithMeta = (typeof rows)[number]["comment"] & {
+    author: (typeof rows)[number]["author"] | null;
+    profile: (typeof rows)[number]["profile"] | null;
+    reputation: (typeof rows)[number]["reputation"] | null;
+    badges: (typeof rows)[number]["badges"];
+    replies: CommentWithMeta[];
+  };
 
-  // Group replies by parent
-  const repliesMap = new Map<string, typeof replies>();
-  for (const reply of replies) {
-    if (reply.parentId) {
-      if (!repliesMap.has(reply.parentId)) {
-        repliesMap.set(reply.parentId, []);
+  const items: CommentWithMeta[] = rows.map((row) => ({
+    ...row.comment,
+    author: row.author || null,
+    profile: row.profile || null,
+    reputation: row.reputation || null,
+    badges: row.badges || [],
+    replies: [],
+  }));
+
+  // Build reply tree structure
+  const commentMap = new Map<string, CommentWithMeta>();
+  const rootComments: CommentWithMeta[] = [];
+
+  for (const item of items) {
+    commentMap.set(item.id, item);
+  }
+
+  for (const item of items) {
+    if (item.parentId) {
+      const parent = commentMap.get(item.parentId);
+      if (parent) {
+        parent.replies.push(item);
       }
-      repliesMap.get(reply.parentId)!.push(reply);
+    } else {
+      rootComments.push(item);
     }
   }
 
-  return comments.map((comment) => ({
-    ...comment,
-    replies: repliesMap.get(comment.id) || [],
-  }));
+  // If parentId is provided, return only that comment's replies
+  if (parentId) {
+    const parentComment = commentMap.get(parentId);
+    return parentComment ? parentComment.replies : [];
+  }
+
+  return rootComments;
 }
 
 // Create comment
@@ -570,41 +613,43 @@ export async function getRelatedJobs(jobId: string) {
 
 // Get job tasks
 export async function getJobTasks(jobId: string) {
+  // Optimized: Single query with JSON aggregation for task capabilities
   const tasks = await db
-    .select()
+    .select({
+      task,
+      capabilities: sql<
+        Array<{
+          taskId: string;
+          capabilityId: string;
+          importance: string;
+          notes: string | null;
+          capability: typeof capability.$inferSelect;
+        }>
+      >`
+        COALESCE(
+          (SELECT json_agg(
+            json_build_object(
+              'taskId', tc.task_id,
+              'capabilityId', tc.capability_id,
+              'importance', tc.importance,
+              'notes', tc.notes,
+              'capability', row_to_json(c.*)
+            )
+           )
+           FROM ${taskCapability} tc
+           INNER JOIN ${capability} c ON tc.capability_id = c.id
+           WHERE tc.task_id = ${task.id}),
+          '[]'::json
+        )
+      `.as("capabilities"),
+    })
     .from(task)
     .where(eq(task.jobId, jobId))
     .orderBy(asc(task.percentageOfJob));
 
-  // Get task capabilities
-  const taskIds = tasks.map((t) => t.id);
-  const taskCaps =
-    taskIds.length > 0
-      ? await db
-          .select({
-            taskId: taskCapability.taskId,
-            capabilityId: taskCapability.capabilityId,
-            importance: taskCapability.importance,
-            notes: taskCapability.notes,
-            capability: capability,
-          })
-          .from(taskCapability)
-          .innerJoin(capability, eq(taskCapability.capabilityId, capability.id))
-          .where(inArray(taskCapability.taskId, taskIds))
-      : [];
-
-  // Group capabilities by task
-  const capabilitiesByTask = new Map<string, typeof taskCaps>();
-  for (const tc of taskCaps) {
-    if (!capabilitiesByTask.has(tc.taskId)) {
-      capabilitiesByTask.set(tc.taskId, []);
-    }
-    capabilitiesByTask.get(tc.taskId)!.push(tc);
-  }
-
-  return tasks.map((t) => ({
-    ...t,
-    capabilities: capabilitiesByTask.get(t.id) || [],
+  return tasks.map((item) => ({
+    ...item.task,
+    capabilities: item.capabilities || [],
   }));
 }
 

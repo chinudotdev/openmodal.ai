@@ -1,6 +1,6 @@
 "use server";
 
-import { and, count, desc, eq, ilike, isNull, or } from "drizzle-orm";
+import { and, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   moderatorStrike,
@@ -48,21 +48,6 @@ export async function getAllUsers(
   offset = 0,
 ): Promise<UserListResult> {
   try {
-    const baseQuery = db
-      .select({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-        banned: user.banned,
-        banReason: user.banReason,
-        banExpires: user.banExpires,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      })
-      .from(user);
-
     const conditions = [];
 
     if (filters.search) {
@@ -85,71 +70,82 @@ export async function getAllUsers(
       conditions.push(or(eq(user.banned, false), isNull(user.banned)));
     }
 
+    // Optimized: Single query with LEFT JOINs and aggregations for all user data
+    const baseQuery = db
+      .select({
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          username: user.username,
+          role: user.role,
+          banned: user.banned,
+          banReason: user.banReason,
+          banExpires: user.banExpires,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
+        reputation: {
+          reputationPoints: userReputation.reputationPoints,
+          tier: userReputation.tier,
+        },
+        stats: {
+          reportsCount: sql<number>`
+            COALESCE(
+              (SELECT COUNT(*) FROM ${report}
+               WHERE user_id = ${user.id} AND deleted_at IS NULL),
+              0
+            )
+          `.as("reports_count"),
+          verificationsCount: sql<number>`
+            COALESCE(
+              (SELECT COUNT(*) FROM ${reportVerification}
+               WHERE user_id = ${user.id}
+                 AND deleted_at IS NULL
+                 AND can_verify = true),
+              0
+            )
+          `.as("verifications_count"),
+          strikesCount: sql<number>`
+            COALESCE(
+              (SELECT COUNT(*) FROM ${moderatorStrike}
+               WHERE moderator_id = ${user.id}),
+              0
+            )
+          `.as("strikes_count"),
+        },
+        total: sql<number>`COUNT(*) OVER()`.as("total"),
+      })
+      .from(user)
+      .leftJoin(userReputation, eq(userReputation.userId, user.id));
+
     const queryWithWhere =
       conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
 
-    const users = await queryWithWhere
+    const usersWithData = await queryWithWhere
       .orderBy(desc(user.createdAt))
       .limit(limit)
       .offset(offset);
 
-    // Get total count
-    const totalResult = await db
-      .select({ count: count() })
-      .from(user)
-      .where(conditions.length > 0 ? and(...conditions) : undefined);
-
-    const total = totalResult[0]?.count ?? 0;
-
-    // Fetch additional data for each user
-    const usersWithData = await Promise.all(
-      users.map(async (u) => {
-        const [reputation, reportsCount, verificationsCount, strikesCount] =
-          await Promise.all([
-            db
-              .select()
-              .from(userReputation)
-              .where(eq(userReputation.userId, u.id))
-              .limit(1),
-            db
-              .select({ count: count() })
-              .from(report)
-              .where(and(eq(report.userId, u.id), isNull(report.deletedAt))),
-            db
-              .select({ count: count() })
-              .from(reportVerification)
-              .where(
-                and(
-                  eq(reportVerification.userId, u.id),
-                  isNull(reportVerification.deletedAt),
-                ),
-              ),
-            db
-              .select({ count: count() })
-              .from(moderatorStrike)
-              .where(eq(moderatorStrike.moderatorId, u.id)),
-          ]);
-
-        return {
-          ...u,
-          banned: u.banned ?? false,
-          reputation: reputation[0]
-            ? {
-                reputationPoints: reputation[0].reputationPoints,
-                tier: reputation[0].tier,
-              }
-            : null,
-          stats: {
-            reportsCount: reportsCount[0]?.count ?? 0,
-            verificationsCount: verificationsCount[0]?.count ?? 0,
-            strikesCount: strikesCount[0]?.count ?? 0,
-          },
-        };
-      }),
-    );
+    const total =
+      usersWithData.length > 0 ? Number(usersWithData[0]?.total || 0) : 0;
 
     return {
-      users: usersWithData,
+      users: usersWithData.map((u) => ({
+        ...u.user,
+        banned: u.user.banned ?? false,
+        reputation: u.reputation
+          ? {
+              reputationPoints: u.reputation.reputationPoints,
+              tier: u.reputation.tier,
+            }
+          : null,
+        stats: {
+          reportsCount: Number(u.stats.reportsCount || 0),
+          verificationsCount: Number(u.stats.verificationsCount || 0),
+          strikesCount: Number(u.stats.strikesCount || 0),
+        },
+      })),
       total,
     };
   } catch (error) {
@@ -160,56 +156,58 @@ export async function getAllUsers(
 
 export async function getUserDetails(userId: string) {
   try {
-    const [
-      userData,
-      reputation,
-      profile,
-      reportsCount,
-      verificationsCount,
-      strikesCount,
-    ] = await Promise.all([
-      db.select().from(user).where(eq(user.id, userId)).limit(1),
-      db
-        .select()
-        .from(userReputation)
-        .where(eq(userReputation.userId, userId))
-        .limit(1),
-      db
-        .select()
-        .from(userProfile)
-        .where(eq(userProfile.userId, userId))
-        .limit(1),
-      db
-        .select({ count: count() })
-        .from(report)
-        .where(and(eq(report.userId, userId), isNull(report.deletedAt))),
-      db
-        .select({ count: count() })
-        .from(reportVerification)
-        .where(
-          and(
-            eq(reportVerification.userId, userId),
-            isNull(reportVerification.deletedAt),
-          ),
-        ),
-      db
-        .select({ count: count() })
-        .from(moderatorStrike)
-        .where(eq(moderatorStrike.moderatorId, userId)),
-    ]);
+    // Optimized: Single query with LEFT JOINs and subqueries for all data
+    const result = await db
+      .select({
+        user,
+        reputation: userReputation,
+        profile: userProfile,
+        stats: {
+          reportsCount: sql<number>`
+            COALESCE(
+              (SELECT COUNT(*) FROM ${report}
+               WHERE user_id = ${user.id} AND deleted_at IS NULL),
+              0
+            )
+          `.as("reports_count"),
+          verificationsCount: sql<number>`
+            COALESCE(
+              (SELECT COUNT(*) FROM ${reportVerification}
+               WHERE user_id = ${user.id}
+                 AND deleted_at IS NULL
+                 AND can_verify = true),
+              0
+            )
+          `.as("verifications_count"),
+          strikesCount: sql<number>`
+            COALESCE(
+              (SELECT COUNT(*) FROM ${moderatorStrike}
+               WHERE moderator_id = ${user.id}),
+              0
+            )
+          `.as("strikes_count"),
+        },
+      })
+      .from(user)
+      .leftJoin(userReputation, eq(userReputation.userId, user.id))
+      .leftJoin(userProfile, eq(userProfile.userId, user.id))
+      .where(eq(user.id, userId))
+      .limit(1);
 
-    if (userData.length === 0) {
+    if (result.length === 0) {
       return null;
     }
 
+    const data = result[0];
+
     return {
-      user: userData[0],
-      reputation: reputation[0] ?? null,
-      profile: profile[0] ?? null,
+      user: data.user,
+      reputation: data.reputation ?? null,
+      profile: data.profile ?? null,
       stats: {
-        reportsCount: reportsCount[0]?.count ?? 0,
-        verificationsCount: verificationsCount[0]?.count ?? 0,
-        strikesCount: strikesCount[0]?.count ?? 0,
+        reportsCount: Number(data.stats.reportsCount || 0),
+        verificationsCount: Number(data.stats.verificationsCount || 0),
+        strikesCount: Number(data.stats.strikesCount || 0),
       },
     };
   } catch (error) {

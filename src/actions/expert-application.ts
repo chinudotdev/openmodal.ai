@@ -4,7 +4,7 @@ import { generateRandomString } from "better-auth/crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
-import { expertApplication, user, userReputation } from "@/db/schema";
+import { expertApplication, user } from "@/db/schema";
 import { checkExpertEligibility } from "./gamification";
 import { createNotification } from "./notifications";
 
@@ -110,18 +110,27 @@ export async function submitExpertApplication(
  */
 export async function getExpertApplicationStatus(userId: string) {
   try {
-    const application = await db
-      .select()
+    // Optimized: Get application and moderator count in single query
+    const applicationWithModCount = await db
+      .select({
+        application: expertApplication,
+        totalModerators: sql<number>`
+          (SELECT COUNT(*)::int FROM ${user} WHERE role = 'moderator')
+        `.as("total_moderators"),
+      })
       .from(expertApplication)
       .where(eq(expertApplication.userId, userId))
       .orderBy(sql`${expertApplication.createdAt} DESC`)
       .limit(1);
 
-    if (application.length === 0) {
+    if (applicationWithModCount.length === 0) {
       return null;
     }
 
-    const app = application[0];
+    const app = applicationWithModCount[0].application;
+    const totalModerators = Number(
+      applicationWithModCount[0].totalModerators || 0,
+    );
     const votes =
       (app.votes as Array<{
         moderatorId: string;
@@ -132,14 +141,6 @@ export async function getExpertApplicationStatus(userId: string) {
     const approveCount = votes.filter((v) => v.vote === "approve").length;
     const rejectCount = votes.filter((v) => v.vote === "reject").length;
     const abstainCount = votes.filter((v) => v.vote === "abstain").length;
-
-    // Get moderator count
-    const moderatorCount = await db
-      .select({ count: sql<number>`COUNT(*)::int` })
-      .from(user)
-      .where(eq(user.role, "moderator"));
-
-    const totalModerators = Number(moderatorCount[0]?.count || 0);
 
     return {
       ...app,
@@ -168,34 +169,31 @@ export async function voteOnExpertApplication(
   vote: "approve" | "reject" | "abstain",
 ) {
   try {
-    // Check if moderator
-    const moderator = await db
-      .select()
+    // Optimized: Check moderator and get application in single query
+    const moderatorAndApplication = await db
+      .select({
+        moderator: user,
+        application: expertApplication,
+      })
       .from(user)
-      .where(and(eq(user.id, moderatorId), eq(user.role, "moderator")))
-      .limit(1);
-
-    if (moderator.length === 0) {
-      return { success: false, error: "Only moderators can vote" };
-    }
-
-    // Get application
-    const application = await db
-      .select()
-      .from(expertApplication)
-      .where(
+      .innerJoin(
+        expertApplication,
         and(
           eq(expertApplication.id, applicationId),
           eq(expertApplication.status, "pending"),
         ),
       )
+      .where(and(eq(user.id, moderatorId), eq(user.role, "moderator")))
       .limit(1);
 
-    if (application.length === 0) {
-      return { success: false, error: "Application not found" };
+    if (moderatorAndApplication.length === 0) {
+      return {
+        success: false,
+        error: "Only moderators can vote or application not found",
+      };
     }
 
-    const app = application[0];
+    const app = moderatorAndApplication[0].application;
     const votes =
       (app.votes as Array<{
         moderatorId: string;

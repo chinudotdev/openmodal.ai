@@ -80,6 +80,17 @@ export function StepBasicInfo({
     }
   }, []);
 
+  // Check username availability when component loads with saved data
+  useEffect(() => {
+    if (savedData?.username) {
+      const savedUsername = savedData.username as string;
+      if (savedUsername.length >= 3) {
+        // Check username availability for saved data
+        checkUsername(savedUsername);
+      }
+    }
+  }, [savedData?.username, checkUsername]);
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -420,21 +431,40 @@ export function StepBasicInfo({
                 selector={(formState) => [
                   formState.canSubmit,
                   formState.isSubmitting,
+                  formState.values.username,
                 ]}
               >
-                {([canSubmit, isSubmitting]) => (
-                  <Button
-                    type="submit"
-                    disabled={!canSubmit || isLoading}
-                    className="ml-auto"
-                  >
-                    {isSubmitting || isLoading ? (
-                      <Spinner className="h-4 w-4" />
-                    ) : (
-                      "Next"
-                    )}
-                  </Button>
-                )}
+                {([canSubmit, isSubmitting, username]) => {
+                  // Check if username matches saved username (already belongs to user)
+                  const isSavedUsername =
+                    savedData?.username &&
+                    username === (savedData.username as string);
+
+                  // Disable if form is invalid, username is not available (unless it's the saved username), or username is too short
+                  const isUsernameValid =
+                    typeof username === "string" &&
+                    username.length >= 3 &&
+                    (isSavedUsername || usernameStatus.available === true) &&
+                    !usernameStatus.checking;
+                  const isDisabled =
+                    !canSubmit ||
+                    isLoading ||
+                    !isUsernameValid ||
+                    usernameStatus.checking;
+                  return (
+                    <Button
+                      type="submit"
+                      disabled={isDisabled}
+                      className="ml-auto"
+                    >
+                      {isSubmitting || isLoading ? (
+                        <Spinner className="h-4 w-4" />
+                      ) : (
+                        "Next"
+                      )}
+                    </Button>
+                  );
+                }}
               </form.Subscribe>
             </div>
           </FieldGroup>

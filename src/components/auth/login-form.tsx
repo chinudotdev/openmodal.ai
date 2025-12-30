@@ -40,7 +40,7 @@ export function LoginForm({
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
-  const callbackURL = searchParams.get("callbackURL") || "/contribute";
+  const callbackURL = searchParams.get("callbackURL") || "/dashboard";
 
   const form = useForm({
     defaultValues: {

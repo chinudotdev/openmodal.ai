@@ -23,36 +23,43 @@ export async function createNotification(
   relatedEntityId?: string,
 ) {
   try {
-    // Check user preference
-    const preference = await db
-      .select()
-      .from(notificationPreference)
-      .where(
-        and(
-          eq(notificationPreference.userId, userId),
-          eq(notificationPreference.notificationType, type),
-        ),
+    // Optimized: Single query with conditional INSERT using subquery check
+    const notificationId = generateRandomString(32);
+
+    await db.execute(sql`
+      INSERT INTO ${notification} (
+        id, user_id, type, title, message, action_url,
+        related_entity_type, related_entity_id, read
       )
+      SELECT 
+        ${notificationId},
+        ${userId},
+        ${type},
+        ${title},
+        ${message},
+        ${actionUrl || null},
+        ${relatedEntityType || null},
+        ${relatedEntityId || null},
+        false
+      WHERE NOT EXISTS (
+        SELECT 1 FROM ${notificationPreference}
+        WHERE user_id = ${userId}
+          AND notification_type = ${type}
+          AND enabled = false
+      )
+      RETURNING id
+    `);
+
+    // Check if notification was created (if preference was disabled, no row returned)
+    const created = await db
+      .select({ id: notification.id })
+      .from(notification)
+      .where(eq(notification.id, notificationId))
       .limit(1);
 
-    // If preference exists and is disabled, don't create notification
-    if (preference.length > 0 && !preference[0].enabled) {
+    if (created.length === 0) {
       return { success: false, error: "Notification type disabled by user" };
     }
-
-    // Create notification
-    const notificationId = generateRandomString(32);
-    await db.insert(notification).values({
-      id: notificationId,
-      userId,
-      type,
-      title,
-      message,
-      actionUrl: actionUrl || null,
-      relatedEntityType: relatedEntityType || null,
-      relatedEntityId: relatedEntityId || null,
-      read: false,
-    });
 
     return { success: true, notificationId };
   } catch (error) {

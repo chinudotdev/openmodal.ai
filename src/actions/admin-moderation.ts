@@ -1,6 +1,6 @@
 "use server";
 
-import { and, count, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { db } from "@/db";
 import {
@@ -54,60 +54,92 @@ export async function getModeratorNominations(
       .where(eq(moderatorNomination.status, statusFilter))
       .orderBy(desc(moderatorNomination.submittedAt));
 
-    const nominationsWithDetails = await Promise.all(
-      nominations.map(async (nom) => {
-        const [
-          candidate,
-          nominator,
-          reputation,
-          verificationsCount,
-          reportsCount,
-          strikesCount,
-        ] = await Promise.all([
-          db.select().from(user).where(eq(user.id, nom.candidateId)).limit(1),
-          db.select().from(user).where(eq(user.id, nom.nominatedBy)).limit(1),
-          db
-            .select()
-            .from(userReputation)
-            .where(eq(userReputation.userId, nom.candidateId))
-            .limit(1),
-          db
-            .select({ count: count() })
-            .from(reportVerification)
-            .where(
-              and(
-                eq(reportVerification.userId, nom.candidateId),
-                isNull(reportVerification.deletedAt),
-              ),
-            ),
-          db
-            .select({ count: count() })
-            .from(report)
-            .where(
-              and(eq(report.userId, nom.candidateId), isNull(report.deletedAt)),
-            ),
-          db
-            .select({ count: count() })
-            .from(moderatorStrike)
-            .where(eq(moderatorStrike.moderatorId, nom.candidateId)),
-        ]);
+    if (nominations.length === 0) {
+      return [];
+    }
 
-        return {
-          ...nom,
-          candidate: candidate[0]!,
-          nominator: nominator[0]!,
-          candidateStats: {
-            verificationsCount: verificationsCount[0]?.count ?? 0,
-            reportsCount: reportsCount[0]?.count ?? 0,
-            reputationPoints: reputation[0]?.reputationPoints ?? 0,
-            tier: reputation[0]?.tier ?? "observer",
-            strikesCount: strikesCount[0]?.count ?? 0,
-          },
-        };
-      }),
+    // Optimized: Get all related data in parallel queries instead of per-nomination
+    const candidateIds = [...new Set(nominations.map((n) => n.candidateId))];
+    const nominatorIds = [...new Set(nominations.map((n) => n.nominatedBy))];
+    const allUserIds = [...new Set([...candidateIds, ...nominatorIds])];
+
+    const [
+      allUsers,
+      allReputations,
+      allVerificationCounts,
+      allReportCounts,
+      allStrikeCounts,
+    ] = await Promise.all([
+      db.select().from(user).where(inArray(user.id, allUserIds)),
+      db
+        .select()
+        .from(userReputation)
+        .where(inArray(userReputation.userId, candidateIds)),
+      db
+        .select({
+          userId: reportVerification.userId,
+          count: sql<number>`COUNT(*)::int`.as("count"),
+        })
+        .from(reportVerification)
+        .where(
+          and(
+            inArray(reportVerification.userId, candidateIds),
+            isNull(reportVerification.deletedAt),
+          ),
+        )
+        .groupBy(reportVerification.userId),
+      db
+        .select({
+          userId: report.userId,
+          count: sql<number>`COUNT(*)::int`.as("count"),
+        })
+        .from(report)
+        .where(
+          and(inArray(report.userId, candidateIds), isNull(report.deletedAt)),
+        )
+        .groupBy(report.userId),
+      db
+        .select({
+          moderatorId: moderatorStrike.moderatorId,
+          count: sql<number>`COUNT(*)::int`.as("count"),
+        })
+        .from(moderatorStrike)
+        .where(inArray(moderatorStrike.moderatorId, candidateIds))
+        .groupBy(moderatorStrike.moderatorId),
+    ]);
+
+    const usersMap = new Map(allUsers.map((u) => [u.id, u]));
+    const reputationMap = new Map(allReputations.map((r) => [r.userId, r]));
+    const verificationCountMap = new Map(
+      allVerificationCounts.map((v) => [v.userId, v.count]),
+    );
+    const reportCountMap = new Map(
+      allReportCounts.map((r) => [r.userId, r.count]),
+    );
+    const strikeCountMap = new Map(
+      allStrikeCounts.map((s) => [s.moderatorId, s.count]),
     );
 
-    return nominationsWithDetails;
+    return nominations.map((nom) => {
+      const candidate = usersMap.get(nom.candidateId);
+      const nominator = usersMap.get(nom.nominatedBy);
+      const reputation = reputationMap.get(nom.candidateId);
+
+      return {
+        ...nom,
+        candidate: candidate!,
+        nominator: nominator!,
+        candidateStats: {
+          verificationsCount: Number(
+            verificationCountMap.get(nom.candidateId) || 0,
+          ),
+          reportsCount: Number(reportCountMap.get(nom.candidateId) || 0),
+          reputationPoints: reputation?.reputationPoints ?? 0,
+          tier: reputation?.tier ?? "observer",
+          strikesCount: Number(strikeCountMap.get(nom.candidateId) || 0),
+        },
+      };
+    });
   } catch (error) {
     console.error("Error getting moderator nominations:", error);
     return [];
@@ -181,26 +213,26 @@ export async function getModeratorStrikes(filters?: {
       desc(moderatorStrike.issuedAt),
     );
 
-    const strikesWithDetails = await Promise.all(
-      strikes.map(async (strike) => {
-        const [moderator, issuedBy] = await Promise.all([
-          db
-            .select()
-            .from(user)
-            .where(eq(user.id, strike.moderatorId))
-            .limit(1),
-          db.select().from(user).where(eq(user.id, strike.issuedBy)).limit(1),
-        ]);
+    // Optimized: Get all user data in single query
+    const userIds = [
+      ...new Set([
+        ...strikes.map((s) => s.moderatorId),
+        ...strikes.map((s) => s.issuedBy),
+      ]),
+    ];
 
-        return {
-          ...strike,
-          moderator: moderator[0]!,
-          issuedByUser: issuedBy[0]!,
-        };
-      }),
-    );
+    const allUsers =
+      userIds.length > 0
+        ? await db.select().from(user).where(inArray(user.id, userIds))
+        : [];
 
-    return strikesWithDetails;
+    const usersMap = new Map(allUsers.map((u) => [u.id, u]));
+
+    return strikes.map((strike) => ({
+      ...strike,
+      moderator: usersMap.get(strike.moderatorId)!,
+      issuedByUser: usersMap.get(strike.issuedBy)!,
+    }));
   } catch (error) {
     console.error("Error getting moderator strikes:", error);
     return [];
@@ -210,7 +242,6 @@ export async function getModeratorStrikes(filters?: {
 export async function reviewStrikeAppeal(
   strikeId: string,
   decision: "uphold" | "overturn" | "reduce",
-  notes: string | null,
 ) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -255,35 +286,26 @@ export async function reviewStrikeAppeal(
   }
 }
 
-export async function getDisputes(status?: string) {
+export async function getDisputes() {
   try {
-    const query = db
-      .select()
+    // Optimized: Single query with JOINs for user and report data
+    const disputesWithDetails = await db
+      .select({
+        dispute: reportDispute,
+        user,
+        report,
+      })
       .from(reportDispute)
-      .where(isNull(reportDispute.deletedAt));
+      .leftJoin(user, eq(reportDispute.userId, user.id))
+      .leftJoin(report, eq(reportDispute.reportId, report.id))
+      .where(isNull(reportDispute.deletedAt))
+      .orderBy(desc(reportDispute.createdAt));
 
-    const disputes = await query.orderBy(desc(reportDispute.createdAt));
-
-    const disputesWithDetails = await Promise.all(
-      disputes.map(async (dispute) => {
-        const [userData, reportData] = await Promise.all([
-          db.select().from(user).where(eq(user.id, dispute.userId)).limit(1),
-          db
-            .select()
-            .from(report)
-            .where(eq(report.id, dispute.reportId))
-            .limit(1),
-        ]);
-
-        return {
-          ...dispute,
-          user: userData[0]!,
-          report: reportData[0]!,
-        };
-      }),
-    );
-
-    return disputesWithDetails;
+    return disputesWithDetails.map((item) => ({
+      ...item.dispute,
+      user: item.user!,
+      report: item.report!,
+    }));
   } catch (error) {
     console.error("Error getting disputes:", error);
     return [];

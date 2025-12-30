@@ -1,7 +1,7 @@
 "use server";
 
 import { generateRandomString } from "better-auth/crypto";
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { cacheLife } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
@@ -41,29 +41,32 @@ export async function verifyReport(
     // Validate input
     const validated = verificationSchema.parse(verificationData);
 
-    // Check if report exists
-    const reportData = await db
-      .select()
+    // Optimized: Check report and existing verification in single query
+    const reportAndExisting = await db
+      .select({
+        report,
+        existingVerification: reportVerification,
+      })
       .from(report)
-      .where(and(eq(report.id, validated.reportId), isNull(report.deletedAt)))
-      .limit(1);
-
-    if (reportData.length === 0) {
-      return { success: false, error: "Report not found" };
-    }
-
-    // Check if user already verified/disputed this report
-    const existing = await db
-      .select()
-      .from(reportVerification)
-      .where(
+      .leftJoin(
+        reportVerification,
         and(
-          eq(reportVerification.reportId, validated.reportId),
+          eq(reportVerification.reportId, report.id),
           eq(reportVerification.userId, userId),
           isNull(reportVerification.deletedAt),
         ),
       )
+      .where(and(eq(report.id, validated.reportId), isNull(report.deletedAt)))
       .limit(1);
+
+    if (reportAndExisting.length === 0) {
+      return { success: false, error: "Report not found" };
+    }
+
+    const reportData = [reportAndExisting[0].report];
+    const existing = reportAndExisting[0].existingVerification
+      ? [reportAndExisting[0].existingVerification]
+      : [];
 
     if (existing.length > 0) {
       return {
@@ -94,15 +97,23 @@ export async function verifyReport(
         })
         .where(eq(report.id, validated.reportId));
 
-      // Award points: +10 to verifier, +20 to author
-      // Award to verifier
-      const verifierReputation = await db
-        .select()
+      // Optimized: Get both reputations in single query, then update
+      const reputations = await db
+        .select({
+          userId: userReputation.userId,
+          reputationPoints: userReputation.reputationPoints,
+        })
         .from(userReputation)
-        .where(eq(userReputation.userId, userId))
-        .limit(1);
+        .where(
+          sql`${userReputation.userId} IN (${userId}, ${reportData[0].userId})`,
+        );
 
-      const verifierPoints = verifierReputation[0]?.reputationPoints || 0;
+      const verifierRep = reputations.find((r) => r.userId === userId);
+      const authorRep = reputations.find(
+        (r) => r.userId === reportData[0].userId,
+      );
+
+      const verifierPoints = verifierRep?.reputationPoints || 0;
       const verifierNewPoints = verifierPoints + 10;
       const verifierTier =
         verifierNewPoints < 200
@@ -113,41 +124,7 @@ export async function verifyReport(
               ? "trusted"
               : "expert";
 
-      if (verifierReputation.length === 0) {
-        await db.insert(userReputation).values({
-          id: generateRandomString(32),
-          userId,
-          reputationPoints: verifierNewPoints,
-          tier: verifierTier,
-        });
-      } else {
-        await db
-          .update(userReputation)
-          .set({
-            reputationPoints: verifierNewPoints,
-            tier: verifierTier,
-            updatedAt: new Date(),
-          })
-          .where(eq(userReputation.userId, userId));
-      }
-
-      await db.insert(reputationHistory).values({
-        id: generateRandomString(32),
-        userId,
-        pointsChange: 10,
-        reason: "verification",
-        relatedEntityType: "verification",
-        relatedEntityId: verificationId,
-      });
-
-      // Award to author
-      const authorReputation = await db
-        .select()
-        .from(userReputation)
-        .where(eq(userReputation.userId, reportData[0].userId))
-        .limit(1);
-
-      const authorPoints = authorReputation[0]?.reputationPoints || 0;
+      const authorPoints = authorRep?.reputationPoints || 0;
       const authorNewPoints = authorPoints + 20;
       const authorTier =
         authorNewPoints < 200
@@ -158,32 +135,55 @@ export async function verifyReport(
               ? "trusted"
               : "expert";
 
-      if (authorReputation.length === 0) {
-        await db.insert(userReputation).values({
+      // Update both reputations in parallel
+      await Promise.all([
+        verifierRep
+          ? db
+              .update(userReputation)
+              .set({
+                reputationPoints: verifierNewPoints,
+                tier: verifierTier,
+                updatedAt: new Date(),
+              })
+              .where(eq(userReputation.userId, userId))
+          : db.insert(userReputation).values({
+              id: generateRandomString(32),
+              userId,
+              reputationPoints: verifierNewPoints,
+              tier: verifierTier,
+            }),
+        authorRep
+          ? db
+              .update(userReputation)
+              .set({
+                reputationPoints: authorNewPoints,
+                tier: authorTier,
+                updatedAt: new Date(),
+              })
+              .where(eq(userReputation.userId, reportData[0].userId))
+          : db.insert(userReputation).values({
+              id: generateRandomString(32),
+              userId: reportData[0].userId,
+              reputationPoints: authorNewPoints,
+              tier: authorTier,
+            }),
+        db.insert(reputationHistory).values({
+          id: generateRandomString(32),
+          userId,
+          pointsChange: 10,
+          reason: "verification",
+          relatedEntityType: "verification",
+          relatedEntityId: verificationId,
+        }),
+        db.insert(reputationHistory).values({
           id: generateRandomString(32),
           userId: reportData[0].userId,
-          reputationPoints: authorNewPoints,
-          tier: authorTier,
-        });
-      } else {
-        await db
-          .update(userReputation)
-          .set({
-            reputationPoints: authorNewPoints,
-            tier: authorTier,
-            updatedAt: new Date(),
-          })
-          .where(eq(userReputation.userId, reportData[0].userId));
-      }
-
-      await db.insert(reputationHistory).values({
-        id: generateRandomString(32),
-        userId: reportData[0].userId,
-        pointsChange: 20,
-        reason: "report_verified",
-        relatedEntityType: "verification",
-        relatedEntityId: verificationId,
-      });
+          pointsChange: 20,
+          reason: "report_verified",
+          relatedEntityType: "verification",
+          relatedEntityId: verificationId,
+        }),
+      ]);
     }
 
     return { success: true, verificationId };
@@ -424,6 +424,7 @@ export async function getReportVerifications(reportId: string) {
   "use cache";
   cacheLife({ stale: 900, revalidate: 3600 * 1 });
   try {
+    // Optimized: Single query with JSON aggregation for badges
     const verifications = await db
       .select({
         verification: reportVerification,
@@ -446,6 +447,14 @@ export async function getReportVerifications(reportId: string) {
           reputationPoints: userReputation.reputationPoints,
           tier: userReputation.tier,
         },
+        badges: sql<Array<typeof userBadge.$inferSelect>>`
+          COALESCE(
+            (SELECT json_agg(b.* ORDER BY b.earned_at DESC)
+             FROM ${userBadge} b
+             WHERE b.user_id = ${reportVerification.userId}),
+            '[]'::json
+          )
+        `.as("badges"),
       })
       .from(reportVerification)
       .leftJoin(user, eq(reportVerification.userId, user.id))
@@ -459,38 +468,12 @@ export async function getReportVerifications(reportId: string) {
       )
       .orderBy(desc(reportVerification.createdAt));
 
-    const verifierIds = Array.from(
-      new Set(
-        verifications
-          .map((entry) => entry.verification.userId)
-          .filter((id): id is string => Boolean(id)),
-      ),
-    );
-
-    const badges = verifierIds.length
-      ? await db
-          .select()
-          .from(userBadge)
-          .where(inArray(userBadge.userId, verifierIds))
-      : [];
-
-    const badgeMap = new Map<string, typeof badges>();
-    for (const badge of badges) {
-      if (!badgeMap.has(badge.userId)) {
-        badgeMap.set(badge.userId, []);
-      }
-      const userBadges = badgeMap.get(badge.userId);
-      if (userBadges) {
-        userBadges.push(badge);
-      }
-    }
-
     return verifications.map((entry) => ({
       ...entry.verification,
       user: entry.user || null,
       profile: entry.profile || null,
       reputation: entry.reputation || null,
-      badges: badgeMap.get(entry.verification.userId) || [],
+      badges: entry.badges || [],
     }));
   } catch (error) {
     console.error("Error getting report verifications:", error);

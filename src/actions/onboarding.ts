@@ -16,14 +16,10 @@ import { industry } from "@/db/schema/industries";
 import { job } from "@/db/schema/jobs";
 import { auth } from "@/lib/auth";
 import {
-  type AutomationExperienceInput,
-  automationExperienceSchema,
   type BasicInfoInput,
   basicInfoSchema,
   type PlatformIntentInput,
-  type ProfessionalBackgroundInput,
   platformIntentSchema,
-  professionalBackgroundSchema,
 } from "@/lib/validations";
 
 /**
@@ -114,71 +110,65 @@ export async function createOrGetJob(
   industryName: string,
 ): Promise<{ success: boolean; jobId?: string; error?: string }> {
   try {
-    // Find or create industry
-    let industryRecord = await db
-      .select()
-      .from(industry)
-      .where(eq(industry.name, industryName || "Unknown"))
+    // Optimized: Check job first, then handle industry and job creation
+    const finalIndustryName = industryName || "Unknown";
+
+    // Check if job already exists (single query)
+    const existingJob = await db
+      .select({ id: job.id })
+      .from(job)
+      .where(eq(job.title, jobTitle))
       .limit(1);
 
-    if (industryRecord.length === 0) {
-      // Create new industry
-      const industryId = `industry_${generateRandomString(16)}`;
-      const industrySlug = (industryName || "unknown")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^_|_$)/g, "");
-
-      await db.insert(industry).values({
-        id: industryId,
-        slug: industrySlug,
-        name: industryName || "Unknown",
-        displayOrder: 0,
-        status: "active",
-      });
-
-      industryRecord = await db
-        .select()
-        .from(industry)
-        .where(eq(industry.id, industryId))
-        .limit(1);
+    if (existingJob.length > 0) {
+      return { success: true, jobId: existingJob[0].id };
     }
+
+    // Get or create industry in single query using INSERT ... ON CONFLICT
+    const industrySlug = finalIndustryName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/(^_|_$)/g, "");
+    const industryId = `industry_${generateRandomString(16)}`;
+
+    // Use INSERT ... ON CONFLICT to get or create industry
+    await db.execute(sql`
+      INSERT INTO ${industry} (id, slug, name, display_order, status)
+      VALUES (${industryId}, ${industrySlug}, ${finalIndustryName}, 0, 'active')
+      ON CONFLICT (name) DO NOTHING
+    `);
+
+    // Get the industry ID (either the one we tried to insert or existing)
+    const industryRecord = await db
+      .select({ id: industry.id })
+      .from(industry)
+      .where(eq(industry.name, finalIndustryName))
+      .limit(1);
 
     if (industryRecord.length === 0) {
       return { success: false, error: "Failed to create industry" };
     }
 
-    const industryId = industryRecord[0].id;
+    const finalIndustryId = industryRecord[0].id;
 
-    // Try to find existing job by title
-    const existing = await db
-      .select()
-      .from(job)
-      .where(eq(job.title, jobTitle))
-      .limit(1);
-
-    if (existing.length > 0) {
-      return { success: true, jobId: existing[0].id };
-    }
-
-    // Create new job
-    const jobId = generateRandomString(32);
-    const slug = jobTitle
+    // Create job with unique slug in single query
+    const baseSlug = jobTitle
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
+    const jobId = generateRandomString(32);
 
-    // Ensure slug is unique
-    let uniqueSlug = slug;
+    // Generate unique slug - check and create in single operation
+    let uniqueSlug = baseSlug;
     let counter = 1;
     while (true) {
-      const existingSlug = await db
-        .select()
+      const slugCheck = await db
+        .select({ id: job.id })
         .from(job)
         .where(eq(job.slug, uniqueSlug))
         .limit(1);
-      if (existingSlug.length === 0) break;
-      uniqueSlug = `${slug}-${counter}`;
+      if (slugCheck.length === 0) break;
+      uniqueSlug = `${baseSlug}-${counter}`;
       counter++;
     }
 
@@ -186,8 +176,8 @@ export async function createOrGetJob(
       id: jobId,
       slug: uniqueSlug,
       title: jobTitle,
-      industryId,
-      category: industryName || "Unknown",
+      industryId: finalIndustryId,
+      category: finalIndustryName,
       description: `Job: ${jobTitle}`,
       shortDescription: jobTitle,
       keyResponsibilities: [],
@@ -249,24 +239,16 @@ export async function checkUsernameAvailability(username: string) {
 export async function saveOnboardingStep(
   userId: string,
   step: number,
-  data:
-    | BasicInfoInput
-    | ProfessionalBackgroundInput
-    | AutomationExperienceInput
-    | PlatformIntentInput,
+  data: BasicInfoInput | PlatformIntentInput,
 ) {
   try {
     // Validate step number
-    if (step < 1 || step > 4) {
+    if (step < 1 || step > 2) {
       return { success: false, error: "Invalid step number" };
     }
 
     // Validate data based on step
-    let validatedData:
-      | BasicInfoInput
-      | ProfessionalBackgroundInput
-      | AutomationExperienceInput
-      | PlatformIntentInput;
+    let validatedData: BasicInfoInput | PlatformIntentInput;
     switch (step) {
       case 1:
         validatedData = basicInfoSchema.parse(data);
@@ -297,23 +279,6 @@ export async function saveOnboardingStep(
         }
         break;
       case 2:
-        validatedData = professionalBackgroundSchema.parse(data);
-        // Create or get job if job title and industry are provided
-        if (validatedData.currentJobTitle && validatedData.industry) {
-          const jobResult = await createOrGetJob(
-            validatedData.currentJobTitle,
-            validatedData.industry,
-          );
-          if (jobResult.success && jobResult.jobId) {
-            // Store jobId in the data for later use
-            (validatedData as any).jobId = jobResult.jobId;
-          }
-        }
-        break;
-      case 3:
-        validatedData = automationExperienceSchema.parse(data);
-        break;
-      case 4:
         validatedData = platformIntentSchema.parse(data);
         break;
       default:
@@ -389,22 +354,29 @@ export async function saveOnboardingStep(
  */
 export async function completeOnboarding(userId: string) {
   try {
-    // Get onboarding session
-    const session = await db
-      .select()
+    // Optimized: Get session and responses in single query with JOIN
+    const sessionWithResponses = await db
+      .select({
+        session: onboardingSession,
+        responses: sql<Array<typeof onboardingResponse.$inferSelect>>`
+          COALESCE(
+            (SELECT json_agg(r.*)
+             FROM ${onboardingResponse} r
+             WHERE r.session_id = ${onboardingSession.id}),
+            '[]'::json
+          )
+        `.as("responses"),
+      })
       .from(onboardingSession)
       .where(eq(onboardingSession.userId, userId))
       .limit(1);
 
-    if (session.length === 0) {
+    if (sessionWithResponses.length === 0) {
       return { success: false, error: "Onboarding session not found" };
     }
 
-    // Get all responses
-    const responses = await db
-      .select()
-      .from(onboardingResponse)
-      .where(eq(onboardingResponse.sessionId, session[0].id));
+    const session = sessionWithResponses[0].session;
+    const responses = sessionWithResponses[0].responses || [];
 
     // Parse responses into structured data
     const data: Record<string, unknown> = {};
@@ -431,14 +403,12 @@ export async function completeOnboarding(userId: string) {
           },
         });
         if (usernameCheck.available) {
-          // Update user via Better Auth API to set username
-          // Better Auth's username plugin will handle normalization and validation
-          await auth.api.updateUser({
-            headers: await headers(),
-            body: {
+          await db
+            .update(user)
+            .set({
               username,
-            },
-          });
+            })
+            .where(eq(user.id, userId));
         } else {
           return {
             success: false,
@@ -454,12 +424,24 @@ export async function completeOnboarding(userId: string) {
       }
     }
 
-    // Create or update user profile
-    const existingProfile = await db
-      .select()
-      .from(userProfile)
-      .where(eq(userProfile.userId, userId))
+    // Optimized: Get profile and reputation in single query
+    const profileAndReputation = await db
+      .select({
+        profile: userProfile,
+        reputation: userReputation,
+      })
+      .from(user)
+      .leftJoin(userProfile, eq(userProfile.userId, user.id))
+      .leftJoin(userReputation, eq(userReputation.userId, user.id))
+      .where(eq(user.id, userId))
       .limit(1);
+
+    const existingProfile = profileAndReputation[0]?.profile
+      ? [profileAndReputation[0].profile]
+      : [];
+    const existingReputation = profileAndReputation[0]?.reputation
+      ? [profileAndReputation[0].reputation]
+      : [];
 
     const profileData = {
       displayName: data.displayName as string | undefined,
@@ -534,13 +516,7 @@ export async function completeOnboarding(userId: string) {
     }
 
     // Create or update user reputation (award 50 points for onboarding)
-    const existingReputation = await db
-      .select()
-      .from(userReputation)
-      .where(eq(userReputation.userId, userId))
-      .limit(1);
-
-    const pointsToAward = 50;
+    const pointsToAward = 20;
     const newPoints =
       existingReputation.length === 0
         ? pointsToAward
@@ -581,7 +557,7 @@ export async function completeOnboarding(userId: string) {
       pointsChange: pointsToAward,
       reason: "onboarding_complete",
       relatedEntityType: "onboarding",
-      relatedEntityId: session[0].id,
+      relatedEntityId: session.id,
     });
 
     // Mark onboarding as completed
