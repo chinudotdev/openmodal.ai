@@ -36,65 +36,39 @@ export async function voteReport(
     // Validate input
     const validated = reportVoteSchema.parse(voteData);
 
-    // Check if user already voted
-    const existing = await db
-      .select()
-      .from(reportVote)
-      .where(
-        and(
-          eq(reportVote.reportId, validated.reportId),
-          eq(reportVote.userId, userId),
-        ),
+    // Optimized: Single query to handle vote upsert and update counts
+    const voteId = generateRandomString(32);
+
+    await db.execute(sql`
+      WITH vote_upsert AS (
+        INSERT INTO ${reportVote} (id, report_id, user_id, vote_type)
+        SELECT 
+          COALESCE(
+            (SELECT id FROM ${reportVote}
+             WHERE report_id = ${validated.reportId} AND user_id = ${userId} LIMIT 1),
+            ${voteId}
+          ),
+          ${validated.reportId},
+          ${userId},
+          ${validated.voteType}
+        ON CONFLICT (report_id, user_id) DO UPDATE
+        SET vote_type = EXCLUDED.vote_type
+        RETURNING report_id
+      ),
+      vote_counts AS (
+        SELECT 
+          COUNT(*) FILTER (WHERE vote_type = 'up')::int as upvotes,
+          COUNT(*) FILTER (WHERE vote_type = 'down')::int as downvotes
+        FROM ${reportVote}
+        WHERE report_id = ${validated.reportId}
       )
-      .limit(1);
-
-    if (existing.length > 0) {
-      // Update existing vote
-      await db
-        .update(reportVote)
-        .set({
-          voteType: validated.voteType,
-        })
-        .where(eq(reportVote.id, existing[0].id));
-    } else {
-      // Create new vote
-      await db.insert(reportVote).values({
-        id: generateRandomString(32),
-        reportId: validated.reportId,
-        userId,
-        voteType: validated.voteType,
-      });
-    }
-
-    // Update report vote counts
-    const upvotes = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(reportVote)
-      .where(
-        and(
-          eq(reportVote.reportId, validated.reportId),
-          eq(reportVote.voteType, "up"),
-        ),
-      );
-
-    const downvotes = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(reportVote)
-      .where(
-        and(
-          eq(reportVote.reportId, validated.reportId),
-          eq(reportVote.voteType, "down"),
-        ),
-      );
-
-    await db
-      .update(report)
-      .set({
-        upvotes: Number(upvotes[0]?.count || 0),
-        downvotes: Number(downvotes[0]?.count || 0),
-        updatedAt: new Date(),
-      })
-      .where(eq(report.id, validated.reportId));
+      UPDATE ${report}
+      SET 
+        upvotes = (SELECT upvotes FROM vote_counts),
+        downvotes = (SELECT downvotes FROM vote_counts),
+        updated_at = NOW()
+      WHERE id = ${validated.reportId}
+    `);
 
     return { success: true };
   } catch (error) {
@@ -132,65 +106,39 @@ export async function voteComment(
     // Validate input
     const validated = commentVoteSchema.parse(voteData);
 
-    // Check if user already voted
-    const existing = await db
-      .select()
-      .from(reportCommentVote)
-      .where(
-        and(
-          eq(reportCommentVote.commentId, validated.commentId),
-          eq(reportCommentVote.userId, userId),
-        ),
+    // Optimized: Single query to handle vote upsert and update counts
+    const voteId = generateRandomString(32);
+
+    await db.execute(sql`
+      WITH vote_upsert AS (
+        INSERT INTO ${reportCommentVote} (id, comment_id, user_id, vote_type)
+        SELECT 
+          COALESCE(
+            (SELECT id FROM ${reportCommentVote}
+             WHERE comment_id = ${validated.commentId} AND user_id = ${userId} LIMIT 1),
+            ${voteId}
+          ),
+          ${validated.commentId},
+          ${userId},
+          ${validated.voteType}
+        ON CONFLICT (comment_id, user_id) DO UPDATE
+        SET vote_type = EXCLUDED.vote_type
+        RETURNING comment_id
+      ),
+      vote_counts AS (
+        SELECT 
+          COUNT(*) FILTER (WHERE vote_type = 'up')::int as upvotes,
+          COUNT(*) FILTER (WHERE vote_type = 'down')::int as downvotes
+        FROM ${reportCommentVote}
+        WHERE comment_id = ${validated.commentId}
       )
-      .limit(1);
-
-    if (existing.length > 0) {
-      // Update existing vote
-      await db
-        .update(reportCommentVote)
-        .set({
-          voteType: validated.voteType,
-        })
-        .where(eq(reportCommentVote.id, existing[0].id));
-    } else {
-      // Create new vote
-      await db.insert(reportCommentVote).values({
-        id: generateRandomString(32),
-        commentId: validated.commentId,
-        userId,
-        voteType: validated.voteType,
-      });
-    }
-
-    // Update comment vote counts
-    const upvotes = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(reportCommentVote)
-      .where(
-        and(
-          eq(reportCommentVote.commentId, validated.commentId),
-          eq(reportCommentVote.voteType, "up"),
-        ),
-      );
-
-    const downvotes = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(reportCommentVote)
-      .where(
-        and(
-          eq(reportCommentVote.commentId, validated.commentId),
-          eq(reportCommentVote.voteType, "down"),
-        ),
-      );
-
-    await db
-      .update(reportComment)
-      .set({
-        upvotes: Number(upvotes[0]?.count || 0),
-        downvotes: Number(downvotes[0]?.count || 0),
-        updatedAt: new Date(),
-      })
-      .where(eq(reportComment.id, validated.commentId));
+      UPDATE ${reportComment}
+      SET 
+        upvotes = (SELECT upvotes FROM vote_counts),
+        downvotes = (SELECT downvotes FROM vote_counts),
+        updated_at = NOW()
+      WHERE id = ${validated.commentId}
+    `);
 
     return { success: true };
   } catch (error) {

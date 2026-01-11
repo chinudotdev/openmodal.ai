@@ -65,7 +65,7 @@ export function StepPlatformIntent({
       setIsSubmitting(true);
       try {
         // Save step
-        const saveResult = await saveOnboardingStep(user.id, 4, value);
+        const saveResult = await saveOnboardingStep(user.id, 2, value);
         if (!saveResult.success) {
           toast.error(saveResult.error || "Failed to save step");
           setIsSubmitting(false);
@@ -76,7 +76,7 @@ export function StepPlatformIntent({
         const completeResult = await completeOnboarding(user.id);
         if (completeResult.success) {
           onFinish({
-            pointsAwarded: completeResult.pointsAwarded || 50,
+            pointsAwarded: completeResult.pointsAwarded || 20,
             newTier: completeResult.newTier || "observer",
           });
         } else {
@@ -206,21 +206,29 @@ export function StepPlatformIntent({
                 selector={(formState) => [
                   formState.canSubmit,
                   formState.isSubmitting,
+                  formState.values.platformIntents,
                 ]}
               >
-                {([canSubmit, isSubmitting]) => (
-                  <Button
-                    type="submit"
-                    disabled={!canSubmit || isLoading}
-                    className="ml-auto"
-                  >
-                    {isSubmitting || isLoading ? (
-                      <Spinner className="h-4 w-4" />
-                    ) : (
-                      "Finish"
-                    )}
-                  </Button>
-                )}
+                {([canSubmit, isSubmitting, platformIntents]) => {
+                  // Disable if form is invalid or no intents selected
+                  const hasIntents =
+                    Array.isArray(platformIntents) &&
+                    platformIntents.length > 0;
+                  const isDisabled = !canSubmit || isLoading || !hasIntents;
+                  return (
+                    <Button
+                      type="submit"
+                      disabled={isDisabled}
+                      className="ml-auto"
+                    >
+                      {isSubmitting || isLoading ? (
+                        <Spinner className="h-4 w-4" />
+                      ) : (
+                        "Finish"
+                      )}
+                    </Button>
+                  );
+                }}
               </form.Subscribe>
             </div>
           </FieldGroup>

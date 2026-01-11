@@ -8,16 +8,13 @@ import {
   getOnboardingStatus,
   getOnboardingStepData,
   saveOnboardingStep,
-  skipOnboarding,
 } from "@/actions/onboarding";
 import { Spinner } from "@/components/ui/spinner";
 import { useSession } from "@/contexts/session-context";
 import { OnboardingCompletion } from "./onboarding-completion";
 import { OnboardingWelcome } from "./onboarding-welcome";
-import { StepAutomationExperience } from "./step-automation-experience";
 import { StepBasicInfo } from "./step-basic-info";
 import { StepPlatformIntent } from "./step-platform-intent";
-import { StepProfessionalBackground } from "./step-professional-background";
 
 export function OnboardingContent() {
   const router = useRouter();
@@ -42,13 +39,11 @@ export function OnboardingContent() {
       if (!user?.id) {
         throw new Error("User ID is required");
       }
-      const [step1, step2, step3, step4] = await Promise.all([
+      const [step1, step2] = await Promise.all([
         getOnboardingStepData(user.id, 1),
         getOnboardingStepData(user.id, 2),
-        getOnboardingStepData(user.id, 3),
-        getOnboardingStepData(user.id, 4),
       ]);
-      return { step1, step2, step3, step4 };
+      return { step1, step2 };
     },
     enabled: !!user?.id,
   });
@@ -117,7 +112,7 @@ export function OnboardingContent() {
         return;
       }
 
-      if (step < 4) {
+      if (step < 2) {
         setCurrentStep(step + 1);
       }
     } catch (error) {
@@ -134,32 +129,10 @@ export function OnboardingContent() {
     }
   };
 
-  const handleSkip = async () => {
-    if (!user) {
-      toast.error("Please sign in to continue");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const result = await skipOnboarding(user.id);
-      if (result.success) {
-        router.push("/dashboard");
-      } else {
-        toast.error("Failed to skip onboarding");
-      }
-    } catch (error) {
-      toast.error("An error occurred");
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   if (completed) {
     return (
       <OnboardingCompletion
-        pointsAwarded={completionData?.pointsAwarded || 50}
+        pointsAwarded={completionData?.pointsAwarded || 20}
         tier={completionData?.newTier || "observer"}
       />
     );
@@ -181,22 +154,12 @@ export function OnboardingContent() {
       {/* Progress indicator */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium">Step {currentStep} of 4</span>
-          {currentStep < 4 && (
-            <button
-              type="button"
-              onClick={handleSkip}
-              className="text-sm text-muted-foreground hover:text-foreground"
-              disabled={isLoading}
-            >
-              Skip
-            </button>
-          )}
+          <span className="text-sm font-medium">Step {currentStep} of 2</span>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div
             className="h-full bg-primary transition-all duration-300"
-            style={{ width: `${(currentStep / 4) * 100}%` }}
+            style={{ width: `${(currentStep / 2) * 100}%` }}
           />
         </div>
       </div>
@@ -211,24 +174,8 @@ export function OnboardingContent() {
         />
       )}
       {currentStep === 2 && (
-        <StepProfessionalBackground
-          onNext={(data) => handleNext(2, data)}
-          onBack={handleBack}
-          isLoading={isLoading}
-          savedData={stepData?.step2}
-        />
-      )}
-      {currentStep === 3 && (
-        <StepAutomationExperience
-          onNext={(data) => handleNext(3, data)}
-          onBack={handleBack}
-          isLoading={isLoading}
-          savedData={stepData?.step3}
-        />
-      )}
-      {currentStep === 4 && (
         <StepPlatformIntent
-          onNext={(data) => handleNext(4, data)}
+          onNext={(data) => handleNext(2, data)}
           onBack={handleBack}
           onFinish={(result) => {
             setCompletionData({
@@ -241,7 +188,7 @@ export function OnboardingContent() {
             );
           }}
           isLoading={isLoading}
-          savedData={stepData?.step4}
+          savedData={stepData?.step2}
         />
       )}
     </div>

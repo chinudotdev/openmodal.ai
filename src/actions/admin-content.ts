@@ -165,10 +165,12 @@ export async function getAdminJobs(
     );
   }
 
+  // Optimized: Get total count using window function in single query
   const baseQuery = db
     .select({
       job,
       industry,
+      total: sql<number>`COUNT(*) OVER()`.as("total"),
     })
     .from(job)
     .innerJoin(industry, eq(job.industryId, industry.id));
@@ -181,11 +183,7 @@ export async function getAdminJobs(
     .limit(limit)
     .offset(offset);
 
-  const totalResult = await db
-    .select({ count: count() })
-    .from(job)
-    .innerJoin(industry, eq(job.industryId, industry.id))
-    .where(conditions.length > 0 ? and(...conditions) : undefined);
+  const total = results.length > 0 ? Number(results[0]?.total || 0) : 0;
 
   return {
     jobs: results.map((r) => ({
@@ -207,17 +205,26 @@ export async function getAdminJobs(
       createdAt: r.job.createdAt,
       updatedAt: r.job.updatedAt,
     })),
-    total: totalResult[0]?.count ?? 0,
+    total,
   };
 }
 
 export async function getAdminJobById(jobId: string) {
   await checkAdminAccess();
 
+  // Optimized: Single query with JSON aggregation for tasks
   const result = await db
     .select({
       job,
       industry,
+      tasks: sql<Array<typeof task.$inferSelect>>`
+        COALESCE(
+          (SELECT json_agg(t.* ORDER BY t.percentage_of_job)
+           FROM ${task} t
+           WHERE t.job_id = ${job.id}),
+          '[]'::json
+        )
+      `.as("tasks"),
     })
     .from(job)
     .innerJoin(industry, eq(job.industryId, industry.id))
@@ -228,17 +235,10 @@ export async function getAdminJobById(jobId: string) {
     return null;
   }
 
-  const jobData = result[0].job;
-  const tasks = await db
-    .select()
-    .from(task)
-    .where(eq(task.jobId, jobId))
-    .orderBy(asc(task.percentageOfJob));
-
   return {
-    ...jobData,
+    ...result[0].job,
     industry: result[0].industry,
-    tasks,
+    tasks: result[0].tasks || [],
   };
 }
 
@@ -454,38 +454,29 @@ export async function getAdminIndustries(
   const queryWithWhere =
     conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
 
-  const results = await queryWithWhere
+  // Optimized: Single query with LEFT JOIN and GROUP BY for job counts
+  const results = await db
+    .select({
+      industry,
+      jobCount: sql<number>`COUNT(${job.id})::int`.as("job_count"),
+      total: sql<number>`COUNT(*) OVER()`.as("total"),
+    })
+    .from(industry)
+    .leftJoin(job, eq(job.industryId, industry.id))
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .groupBy(industry.id)
     .orderBy(asc(industry.displayOrder), asc(industry.name))
     .limit(limit)
     .offset(offset);
 
-  // Get job counts for each industry
-  const industryIds = results.map((r) => r.id);
-  const jobCounts =
-    industryIds.length > 0
-      ? await db
-          .select({
-            industryId: job.industryId,
-            count: sql<number>`COUNT(*)::int`,
-          })
-          .from(job)
-          .where(inArray(job.industryId, industryIds))
-          .groupBy(job.industryId)
-      : [];
-
-  const jobCountMap = new Map(jobCounts.map((jc) => [jc.industryId, jc.count]));
-
-  const totalResult = await db
-    .select({ count: count() })
-    .from(industry)
-    .where(conditions.length > 0 ? and(...conditions) : undefined);
+  const total = results.length > 0 ? Number(results[0]?.total || 0) : 0;
 
   return {
     industries: results.map((r) => ({
-      ...r,
-      jobCount: jobCountMap.get(r.id) || 0,
+      ...r.industry,
+      jobCount: Number(r.jobCount || 0),
     })),
-    total: totalResult[0]?.count ?? 0,
+    total,
   };
 }
 
@@ -697,10 +688,38 @@ export async function getAdminCapabilities(
 export async function getAdminCapabilityById(capabilityId: string) {
   await checkAdminAccess();
 
+  // Optimized: Single query with JSON aggregation for bottlenecks and organizations
   const result = await db
     .select({
       capability,
       category: capabilityCategory,
+      bottlenecks: sql<Array<typeof bottleneck.$inferSelect>>`
+        COALESCE(
+          (SELECT json_agg(b.* ORDER BY b.severity DESC)
+           FROM ${bottleneck} b
+           WHERE b.capability_id = ${capability.id}),
+          '[]'::json
+        )
+      `.as("bottlenecks"),
+      organizations: sql<
+        Array<{
+          organization: typeof organization.$inferSelect;
+          focusArea: string | null;
+        }>
+      >`
+        COALESCE(
+          (SELECT json_agg(
+            json_build_object(
+              'organization', row_to_json(o.*),
+              'focusArea', co.focus_area
+            )
+           )
+           FROM ${capabilityOrganization} co
+           INNER JOIN ${organization} o ON co.organization_id = o.id
+           WHERE co.capability_id = ${capability.id}),
+          '[]'::json
+        )
+      `.as("organizations"),
     })
     .from(capability)
     .leftJoin(
@@ -714,31 +733,15 @@ export async function getAdminCapabilityById(capabilityId: string) {
     return null;
   }
 
-  const capabilityData = result[0].capability;
-  const bottlenecks = await db
-    .select()
-    .from(bottleneck)
-    .where(eq(bottleneck.capabilityId, capabilityId));
-
-  const organizations = await db
-    .select({
-      organization,
-      focusArea: capabilityOrganization.focusArea,
-    })
-    .from(capabilityOrganization)
-    .innerJoin(
-      organization,
-      eq(capabilityOrganization.organizationId, organization.id),
-    )
-    .where(eq(capabilityOrganization.capabilityId, capabilityId));
+  const data = result[0];
 
   return {
-    ...capabilityData,
-    category: result[0].category,
-    bottlenecks,
-    organizations: organizations.map((o) => ({
-      ...o.organization,
-      focusArea: o.focusArea,
+    ...data.capability,
+    category: data.category || undefined,
+    bottlenecks: data.bottlenecks || [],
+    organizations: (data.organizations || []).map((org) => ({
+      ...org.organization,
+      focusArea: org.focusArea,
     })),
   };
 }
@@ -938,45 +941,31 @@ export interface CategoryListResult {
 export async function getAdminCategories(): Promise<CategoryListResult> {
   await checkAdminAccess();
 
+  // Optimized: Single query with LEFT JOIN and GROUP BY for stats
   const categories = await db
-    .select()
+    .select({
+      category: capabilityCategory,
+      capabilityCount: sql<number>`COUNT(${capability.id})::int`.as(
+        "capability_count",
+      ),
+      avgProgress: sql<number>`
+        COALESCE(ROUND(AVG(${capability.progressPercentage})), 0)::int
+      `.as("avg_progress"),
+    })
     .from(capabilityCategory)
+    .leftJoin(capability, eq(capability.categoryId, capabilityCategory.id))
+    .groupBy(capabilityCategory.id)
     .orderBy(
       asc(capabilityCategory.displayOrder),
       asc(capabilityCategory.name),
     );
 
-  // Get capability counts and average progress for each category
-  const categoryIds = categories.map((c) => c.id);
-  const capabilityStats =
-    categoryIds.length > 0
-      ? await db
-          .select({
-            categoryId: capability.categoryId,
-            count: sql<number>`COUNT(*)::int`,
-            avgProgress: sql<number>`ROUND(AVG(${capability.progressPercentage}))::int`,
-          })
-          .from(capability)
-          .where(inArray(capability.categoryId, categoryIds))
-          .groupBy(capability.categoryId)
-      : [];
-
-  const statsMap = new Map(
-    capabilityStats.map((s) => [
-      s.categoryId,
-      { count: s.count, avgProgress: s.avgProgress },
-    ]),
-  );
-
   return {
-    categories: categories.map((c) => {
-      const stats = statsMap.get(c.id);
-      return {
-        ...c,
-        capabilityCount: stats?.count || 0,
-        avgProgress: stats?.avgProgress || 0,
-      };
-    }),
+    categories: categories.map((c) => ({
+      ...c.category,
+      capabilityCount: Number(c.capabilityCount || 0),
+      avgProgress: Number(c.avgProgress || 0),
+    })),
     total: categories.length,
   };
 }

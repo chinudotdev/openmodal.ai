@@ -54,8 +54,11 @@ export function DeploymentStep3({
           name="step3.description"
           // biome-ignore lint/correctness/noChildrenProp: TanStack Form requires children prop
           children={(field: any) => {
+            // Show error if touched OR if field has errors (validation was attempted)
             const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+              (field.state.meta.isTouched ||
+                field.state.meta.errors?.length > 0) &&
+              !field.state.meta.isValid;
             const value = field.state.value || "";
             return (
               <Field data-invalid={isInvalid}>
@@ -97,8 +100,11 @@ export function DeploymentStep3({
           name="step3.evidenceLinks"
           // biome-ignore lint/correctness/noChildrenProp: TanStack Form requires children prop
           children={(field: any) => {
+            // Show error if touched OR if field has errors (validation was attempted)
             const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+              (field.state.meta.isTouched ||
+                field.state.meta.errors?.length > 0) &&
+              !field.state.meta.isValid;
             return (
               <EvidenceLinkInput
                 value={field.state.value || []}
@@ -115,8 +121,11 @@ export function DeploymentStep3({
           name="step3.source"
           // biome-ignore lint/correctness/noChildrenProp: TanStack Form requires children prop
           children={(field: any) => {
+            // Show error if touched OR if field has errors (validation was attempted)
             const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+              (field.state.meta.isTouched ||
+                field.state.meta.errors?.length > 0) &&
+              !field.state.meta.isValid;
             const sourceValue = field.state.value;
             return (
               <Field data-invalid={isInvalid}>

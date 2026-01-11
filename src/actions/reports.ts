@@ -1,17 +1,7 @@
 "use server";
 
 import { generateRandomString } from "better-auth/crypto";
-import {
-  and,
-  desc,
-  eq,
-  ilike,
-  inArray,
-  isNull,
-  or,
-  type SQL,
-  sql,
-} from "drizzle-orm";
+import { and, desc, eq, ilike, isNull, or, type SQL, sql } from "drizzle-orm";
 import { cacheLife } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
@@ -181,6 +171,7 @@ async function createOrGetCapability(
 export async function submitReport(
   userId: string,
   reportData: DeploymentReportInput | BarrierReportInput | ResearchReportInput,
+  reportId?: string, // Optional: if provided, update existing draft instead of creating new
 ) {
   try {
     // Check onboarding completion from session
@@ -239,12 +230,37 @@ export async function submitReport(
       }
     }
 
-    // Create report
-    const reportId = generateRandomString(32);
+    // Check if updating existing draft
+    const isUpdate = !!reportId;
+    const finalReportId = reportId || generateRandomString(32);
+
+    if (isUpdate && reportId) {
+      // Verify the report exists, belongs to user, and is a draft
+      const existing = await db
+        .select()
+        .from(report)
+        .where(
+          and(
+            eq(report.id, reportId),
+            eq(report.userId, userId),
+            eq(report.isDraft, true),
+            isNull(report.deletedAt),
+          ),
+        )
+        .limit(1);
+
+      if (existing.length === 0) {
+        return {
+          success: false,
+          error: "Draft not found or you don't have permission to edit it",
+        };
+      }
+    }
+
     const status: ReportStatus = validatedData.isDraft ? "draft" : "pending";
 
-    await db.insert(report).values({
-      id: reportId,
+    const reportValues = {
+      id: finalReportId,
       userId,
       type: validatedData.type,
       status,
@@ -294,40 +310,62 @@ export async function submitReport(
           : null,
       description: validatedData.step3.description,
       publishedAt: null, // Only published when approved by moderator
+      updatedAt: new Date(),
+    };
+
+    // Wrap draft update operations in transaction to ensure atomicity
+    // If report update fails, evidence deletion is rolled back
+    await db.transaction(async (tx) => {
+      // Delete existing evidence if updating
+      if (isUpdate) {
+        await tx
+          .delete(reportEvidence)
+          .where(eq(reportEvidence.reportId, finalReportId));
+      }
+
+      // Update or insert report
+      if (isUpdate) {
+        await tx
+          .update(report)
+          .set(reportValues)
+          .where(eq(report.id, finalReportId));
+      } else {
+        await tx.insert(report).values(reportValues);
+      }
+
+      // Save evidence
+      if (
+        validatedData.step3.evidenceLinks &&
+        validatedData.step3.evidenceLinks.length > 0
+      ) {
+        const evidence = validatedData.step3.evidenceLinks.map((url) => ({
+          id: generateRandomString(32),
+          reportId: finalReportId,
+          type: "link",
+          url,
+          description: null,
+        }));
+
+        await tx.insert(reportEvidence).values(evidence);
+      }
+
+      if (
+        validatedData.step3.fileUrls &&
+        validatedData.step3.fileUrls.length > 0
+      ) {
+        const fileEvidence = validatedData.step3.fileUrls.map((fileUrl) => ({
+          id: generateRandomString(32),
+          reportId: finalReportId,
+          type: "photo",
+          fileUrl,
+          description: null,
+        }));
+
+        await tx.insert(reportEvidence).values(fileEvidence);
+      }
     });
 
-    // Save evidence
-    if (
-      validatedData.step3.evidenceLinks &&
-      validatedData.step3.evidenceLinks.length > 0
-    ) {
-      const evidence = validatedData.step3.evidenceLinks.map((url) => ({
-        id: generateRandomString(32),
-        reportId,
-        type: "link",
-        url,
-        description: null,
-      }));
-
-      await db.insert(reportEvidence).values(evidence);
-    }
-
-    if (
-      validatedData.step3.fileUrls &&
-      validatedData.step3.fileUrls.length > 0
-    ) {
-      const fileEvidence = validatedData.step3.fileUrls.map((fileUrl) => ({
-        id: generateRandomString(32),
-        reportId,
-        type: "photo",
-        fileUrl,
-        description: null,
-      }));
-
-      await db.insert(reportEvidence).values(fileEvidence);
-    }
-
-    return { success: true, reportId };
+    return { success: true, reportId: finalReportId };
   } catch (error) {
     console.error("Error submitting report:", error);
     if (error instanceof z.ZodError) {
@@ -460,6 +498,179 @@ export async function getUserReports(userId: string, includeDrafts = true) {
 }
 
 /**
+ * Get draft report for editing
+ * Converts flat database structure to nested form structure
+ */
+export async function getDraftForEditing(
+  reportId: string,
+  userId: string,
+): Promise<
+  | {
+      success: true;
+      data: DeploymentReportInput | BarrierReportInput | ResearchReportInput;
+    }
+  | { success: false; error: string }
+> {
+  try {
+    // Get the report and verify ownership
+    const draftReport = await db
+      .select()
+      .from(report)
+      .where(
+        and(
+          eq(report.id, reportId),
+          eq(report.userId, userId),
+          eq(report.isDraft, true),
+          isNull(report.deletedAt),
+        ),
+      )
+      .limit(1);
+
+    if (draftReport.length === 0) {
+      return {
+        success: false,
+        error: "Draft not found or you don't have permission",
+      };
+    }
+
+    const r = draftReport[0];
+
+    // Get evidence links
+    const evidence = await db
+      .select()
+      .from(reportEvidence)
+      .where(eq(reportEvidence.reportId, reportId));
+
+    const evidenceLinks = evidence
+      .filter(
+        (e): e is typeof e & { url: string } => e.type === "link" && !!e.url,
+      )
+      .map((e) => e.url);
+    const fileUrls = evidence
+      .filter(
+        (e): e is typeof e & { fileUrl: string } =>
+          e.type === "photo" && !!e.fileUrl,
+      )
+      .map((e) => e.fileUrl);
+
+    // Convert to form structure based on report type
+    if (r.type === "deployment") {
+      const formData: DeploymentReportInput = {
+        type: "deployment",
+        isDraft: true,
+        step1: {
+          jobId: r.jobId || undefined,
+          jobTitle: r.jobTitle || "",
+          technology: r.technology,
+          company: r.company || undefined,
+          country: r.country || "",
+          stateProvince: r.stateProvince || undefined,
+          city: r.city || undefined,
+          location: r.location || undefined,
+        },
+        step2: {
+          deploymentStatus:
+            (r.deploymentStatus as
+              | "fully_deployed"
+              | "pilot"
+              | "announced"
+              | "failed") || "pilot",
+          deploymentDate: r.deploymentDate || undefined,
+          workersAffected: r.workersAffected || undefined,
+          impactType:
+            (r.impactType as
+              | "completely_replaced"
+              | "partially_replaced"
+              | "augmented"
+              | "no_job_loss") || "no_job_loss",
+          automationPercentage: r.automationPercentage || 0,
+          performanceComparison:
+            (r.performanceComparison as
+              | "better_than_humans"
+              | "about_same"
+              | "worse_improving"
+              | "worse_not_improving") || "about_same",
+        },
+        step3: {
+          description: r.description || "",
+          evidenceLinks: evidenceLinks.length > 0 ? evidenceLinks : [""],
+          fileUrls: fileUrls.length > 0 ? fileUrls : undefined,
+          source: "other", // Default since source field doesn't exist in DB schema
+          sourceOther: undefined,
+        },
+      };
+      return { success: true, data: formData };
+    }
+
+    if (r.type === "barrier") {
+      // Note: barrier step2 fields may not be in DB schema yet, using defaults
+      const formData: BarrierReportInput = {
+        type: "barrier",
+        isDraft: true,
+        step1: {
+          jobId: r.jobId || undefined,
+          jobTitle: r.jobTitle || "",
+          capabilityId: r.capabilityId || undefined,
+          technology: r.technology,
+          company: r.company || undefined,
+          country: r.country || "",
+          stateProvince: r.stateProvince || undefined,
+          city: r.city || undefined,
+          location: r.location || undefined,
+        },
+        step2: {
+          barrierType: "other", // Default since field may not exist in schema
+          barrierDescription: "", // Default since field may not exist in schema
+          estimatedSolveDate: undefined,
+          organizationsWorkingOnIt: undefined,
+        },
+        step3: {
+          description: r.description || "",
+          evidenceLinks: evidenceLinks.length > 0 ? evidenceLinks : [""],
+          fileUrls: fileUrls.length > 0 ? fileUrls : undefined,
+          source: "other", // Default since field may not exist in schema
+          sourceOther: undefined,
+        },
+      };
+      return { success: true, data: formData };
+    }
+
+    // Research report
+    // Note: research step2 fields may not be in DB schema yet, using defaults
+    const formData: ResearchReportInput = {
+      type: "research",
+      isDraft: true,
+      step1: {
+        capabilityId: r.capabilityId || undefined,
+        capabilityName: "", // Default since field may not exist in schema
+        technology: r.technology,
+        organization: r.company || undefined,
+        country: r.country || undefined,
+        stateProvince: r.stateProvince || undefined,
+        city: r.city || undefined,
+      },
+      step2: {
+        researchType: "other", // Default since field may not exist in schema
+        impactDescription: "", // Default since field may not exist in schema
+        publicationDate: undefined,
+        potentialJobsAffected: undefined,
+      },
+      step3: {
+        description: r.description || "",
+        evidenceLinks: evidenceLinks.length > 0 ? evidenceLinks : [""],
+        fileUrls: fileUrls.length > 0 ? fileUrls : undefined,
+        source: "other", // Default since field may not exist in schema
+        sourceOther: undefined,
+      },
+    };
+    return { success: true, data: formData };
+  } catch (error) {
+    console.error("Error getting draft for editing:", error);
+    return { success: false, error: "Failed to load draft" };
+  }
+}
+
+/**
  * Get user's drafts
  */
 export async function getUserDrafts(userId: string) {
@@ -490,7 +701,7 @@ export async function getReportById(reportId: string) {
   "use cache";
   cacheLife({ stale: 1800, revalidate: 3600 * 2 });
   try {
-    // Single query with LEFT JOINs for report, user, profile, and reputation
+    // Single query with LEFT JOINs and JSON aggregation for evidence and badges
     const result = await db
       .select({
         report,
@@ -503,6 +714,22 @@ export async function getReportById(reportId: string) {
         },
         authorProfile: userProfile,
         authorReputation: userReputation,
+        evidence: sql<Array<typeof reportEvidence.$inferSelect>>`
+          COALESCE(
+            (SELECT json_agg(e.* ORDER BY e.created_at)
+             FROM ${reportEvidence} e
+             WHERE e.report_id = ${report.id}),
+            '[]'::json
+          )
+        `.as("evidence"),
+        authorBadges: sql<Array<typeof userBadge.$inferSelect>>`
+          COALESCE(
+            (SELECT json_agg(b.* ORDER BY b.earned_at DESC)
+             FROM ${userBadge} b
+             WHERE b.user_id = ${report.userId}),
+            '[]'::json
+          )
+        `.as("author_badges"),
       })
       .from(report)
       .leftJoin(user, eq(report.userId, user.id))
@@ -516,26 +743,14 @@ export async function getReportById(reportId: string) {
     }
 
     const reportData = result[0];
-    const userId = reportData.report.userId;
-
-    // Fetch one-to-many relationships (evidence, badges) in parallel
-    const [evidence, authorBadges] = await Promise.all([
-      db
-        .select()
-        .from(reportEvidence)
-        .where(eq(reportEvidence.reportId, reportId)),
-      userId
-        ? db.select().from(userBadge).where(eq(userBadge.userId, userId))
-        : Promise.resolve([]),
-    ]);
 
     return {
       ...reportData.report,
-      evidence,
+      evidence: reportData.evidence || [],
       author: reportData.author || null,
       authorProfile: reportData.authorProfile || null,
       authorReputation: reportData.authorReputation || null,
-      authorBadges,
+      authorBadges: reportData.authorBadges || [],
     };
   } catch (error) {
     console.error("Error getting report:", error);
@@ -716,9 +931,32 @@ export async function getApprovedReports(limit = 20, offset = 0) {
   "use cache";
   cacheLife({ stale: 900, revalidate: 3600 * 2 });
   try {
+    // Single query with JSON aggregation for evidence and author info
     const reports = await db
-      .select()
+      .select({
+        report,
+        author: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          displayUsername: user.displayUsername,
+          image: user.image,
+        },
+        authorProfile: userProfile,
+        authorReputation: userReputation,
+        evidence: sql<Array<typeof reportEvidence.$inferSelect>>`
+          COALESCE(
+            (SELECT json_agg(e.* ORDER BY e.created_at)
+             FROM ${reportEvidence} e
+             WHERE e.report_id = ${report.id}),
+            '[]'::json
+          )
+        `.as("evidence"),
+      })
       .from(report)
+      .leftJoin(user, eq(report.userId, user.id))
+      .leftJoin(userProfile, eq(userProfile.userId, user.id))
+      .leftJoin(userReputation, eq(userReputation.userId, user.id))
       .where(
         and(
           eq(report.status, "approved"),
@@ -730,31 +968,12 @@ export async function getApprovedReports(limit = 20, offset = 0) {
       .limit(limit)
       .offset(offset);
 
-    // Get all evidence for all reports in a single query
-    const reportIds = reports.map((r) => r.id);
-    const allEvidence =
-      reportIds.length > 0
-        ? await db
-            .select()
-            .from(reportEvidence)
-            .where(inArray(reportEvidence.reportId, reportIds))
-        : [];
-
-    // Group evidence by reportId
-    const evidenceMap = new Map<string, typeof allEvidence>();
-    for (const evidence of allEvidence) {
-      const existing = evidenceMap.get(evidence.reportId);
-      if (existing) {
-        existing.push(evidence);
-      } else {
-        evidenceMap.set(evidence.reportId, [evidence]);
-      }
-    }
-
-    // Map reports with their evidence
     return reports.map((r) => ({
-      ...r,
-      evidence: evidenceMap.get(r.id) || [],
+      ...r.report,
+      author: r.author || null,
+      authorProfile: r.authorProfile || null,
+      authorReputation: r.authorReputation || null,
+      evidence: r.evidence || [],
     }));
   } catch (error) {
     console.error("Error getting approved reports:", error);
@@ -816,38 +1035,42 @@ export async function getPersonalizedReports(
       }
     }
 
+    // Single query with JSON aggregation for evidence and author info
     const reports = await db
-      .select()
+      .select({
+        report,
+        author: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          displayUsername: user.displayUsername,
+          image: user.image,
+        },
+        authorProfile: userProfile,
+        authorReputation: userReputation,
+        evidence: sql<Array<typeof reportEvidence.$inferSelect>>`
+          COALESCE(
+            (SELECT json_agg(e.* ORDER BY e.created_at)
+             FROM ${reportEvidence} e
+             WHERE e.report_id = ${report.id}),
+            '[]'::json
+          )
+        `.as("evidence"),
+      })
       .from(report)
+      .leftJoin(user, eq(report.userId, user.id))
+      .leftJoin(userProfile, eq(userProfile.userId, user.id))
+      .leftJoin(userReputation, eq(userReputation.userId, user.id))
       .where(and(...conditions))
       .orderBy(desc(report.upvotes), desc(report.createdAt))
       .limit(limit);
 
-    // Get all evidence for all reports in a single query
-    const reportIds = reports.map((r) => r.id);
-    const allEvidence =
-      reportIds.length > 0
-        ? await db
-            .select()
-            .from(reportEvidence)
-            .where(inArray(reportEvidence.reportId, reportIds))
-        : [];
-
-    // Group evidence by reportId
-    const evidenceMap = new Map<string, typeof allEvidence>();
-    for (const evidence of allEvidence) {
-      const existing = evidenceMap.get(evidence.reportId);
-      if (existing) {
-        existing.push(evidence);
-      } else {
-        evidenceMap.set(evidence.reportId, [evidence]);
-      }
-    }
-
-    // Map reports with their evidence
     return reports.map((r) => ({
-      ...r,
-      evidence: evidenceMap.get(r.id) || [],
+      ...r.report,
+      author: r.author || null,
+      authorProfile: r.authorProfile || null,
+      authorReputation: r.authorReputation || null,
+      evidence: r.evidence || [],
     }));
   } catch (error) {
     console.error("Error getting personalized reports:", error);

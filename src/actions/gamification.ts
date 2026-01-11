@@ -79,10 +79,21 @@ async function updateActivityStreak(userId: string) {
     today.setHours(0, 0, 0, 0);
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
+    const todayStr = today.toISOString().split("T")[0];
+    const yesterdayStr = yesterday.toISOString().split("T")[0];
 
-    // Get user's current streak
-    const streakData = await db
-      .select()
+    // Optimized: Single query to get streak and check yesterday activity
+    const streakAndActivity = await db
+      .select({
+        streak: userStreak,
+        hadYesterdayActivity: sql<boolean>`
+          EXISTS (
+            SELECT 1 FROM ${activityLog}
+            WHERE user_id = ${userId}
+              AND activity_date = ${yesterdayStr}::date
+          )
+        `.as("had_yesterday_activity"),
+      })
       .from(userStreak)
       .where(
         and(
@@ -92,23 +103,12 @@ async function updateActivityStreak(userId: string) {
       )
       .limit(1);
 
-    const currentStreak = streakData[0];
-
-    // Check if user was active yesterday
-    const yesterdayStr = yesterday.toISOString().split("T")[0];
-    const yesterdayActivity = await db
-      .select()
-      .from(activityLog)
-      .where(
-        and(
-          eq(activityLog.userId, userId),
-          sql`${activityLog.activityDate} = ${yesterdayStr}::date`,
-        ),
-      )
-      .limit(1);
+    const currentStreak = streakAndActivity[0]?.streak;
+    const hadYesterdayActivity =
+      streakAndActivity[0]?.hadYesterdayActivity || false;
 
     let newStreak = 1;
-    if (yesterdayActivity.length > 0 && currentStreak) {
+    if (hadYesterdayActivity && currentStreak) {
       // Continue streak
       newStreak = currentStreak.currentStreak + 1;
     }
@@ -117,7 +117,6 @@ async function updateActivityStreak(userId: string) {
       ? Math.max(currentStreak.longestStreak, newStreak)
       : newStreak;
 
-    const todayStr = today.toISOString().split("T")[0];
     if (currentStreak) {
       await db
         .update(userStreak)
@@ -257,44 +256,42 @@ export async function getStreakCalendar(
  */
 export async function checkExpertEligibility(userId: string) {
   try {
-    // Get user account age
-    const userData = await db
-      .select()
+    // Optimized: Single query with JOINs and subqueries for all eligibility data
+    const eligibilityData = await db
+      .select({
+        userCreatedAt: user.createdAt,
+        verifiedReportsCount: sql<number>`
+          COALESCE(
+            (SELECT COUNT(*) FROM ${report}
+             WHERE user_id = ${userId}
+               AND status = 'approved'
+               AND deleted_at IS NULL),
+            0
+          )
+        `.as("verified_reports_count"),
+        reputationPoints: sql<number>`
+          COALESCE(
+            (SELECT reputation_points FROM ${userReputation}
+             WHERE user_id = ${userId} LIMIT 1),
+            0
+          )
+        `.as("reputation_points"),
+      })
       .from(user)
       .where(eq(user.id, userId))
       .limit(1);
 
-    if (userData.length === 0) {
+    if (eligibilityData.length === 0) {
       return { eligible: false, reason: "User not found" };
     }
 
+    const data = eligibilityData[0];
     const accountAge = Math.floor(
-      (Date.now() - new Date(userData[0].createdAt).getTime()) /
+      (Date.now() - new Date(data.userCreatedAt).getTime()) /
         (1000 * 60 * 60 * 24),
     );
-
-    // Get verified reports count
-    const verifiedReports = await db
-      .select({ count: sql<number>`COUNT(*)` })
-      .from(report)
-      .where(
-        and(
-          eq(report.userId, userId),
-          eq(report.status, "approved"),
-          sql`${report.deletedAt} IS NULL`,
-        ),
-      );
-
-    const verifiedCount = Number(verifiedReports[0]?.count || 0);
-
-    // Get reputation points
-    const reputation = await db
-      .select()
-      .from(userReputation)
-      .where(eq(userReputation.userId, userId))
-      .limit(1);
-
-    const points = reputation[0]?.reputationPoints || 0;
+    const verifiedCount = Number(data.verifiedReportsCount || 0);
+    const points = Number(data.reputationPoints || 0);
 
     // Check requirements: 15 verified reports + 100 points + 30 days
     const requirements = {
@@ -334,31 +331,33 @@ export async function awardBadge(
   badgeCategory?: string,
 ) {
   try {
-    // Check if user already has this badge
-    const existing = await db
-      .select()
-      .from(userBadge)
-      .where(
-        and(eq(userBadge.userId, userId), eq(userBadge.badgeType, badgeType)),
+    // Optimized: Single query to check existing badge and calculate rarity
+    const badgeCheck = await db
+      .select({
+        existingBadgeId: userBadge.id,
+        totalUsers: sql<number>`COUNT(DISTINCT ${user.id})`.as("total_users"),
+        badgeHolders: sql<number>`
+          COUNT(DISTINCT CASE 
+            WHEN ${userBadge.badgeType} = ${badgeType} 
+            THEN ${userBadge.userId} 
+            ELSE NULL 
+          END)
+        `.as("badge_holders"),
+      })
+      .from(user)
+      .leftJoin(
+        userBadge,
+        and(eq(userBadge.userId, user.id), eq(userBadge.badgeType, badgeType)),
       )
+      .where(eq(user.id, userId))
       .limit(1);
 
-    if (existing.length > 0) {
+    if (badgeCheck[0]?.existingBadgeId) {
       return { success: true, alreadyEarned: true };
     }
 
-    // Calculate rarity (percentage of users who have this badge)
-    const totalUsers = await db
-      .select({ count: sql<number>`COUNT(DISTINCT ${user.id})` })
-      .from(user);
-
-    const badgeHolders = await db
-      .select({ count: sql<number>`COUNT(DISTINCT ${userBadge.userId})` })
-      .from(userBadge)
-      .where(eq(userBadge.badgeType, badgeType));
-
-    const totalUsersCount = Number(totalUsers[0]?.count || 1);
-    const badgeHoldersCount = Number(badgeHolders[0]?.count || 0);
+    const totalUsersCount = Number(badgeCheck[0]?.totalUsers || 1);
+    const badgeHoldersCount = Number(badgeCheck[0]?.badgeHolders || 0);
     const rarity =
       totalUsersCount > 0
         ? Math.round((badgeHoldersCount / totalUsersCount) * 100)
@@ -479,60 +478,48 @@ export async function getRecentActivity(userId: string, limit = 10) {
   cacheTag(`recent-activity:${userId}`);
 
   try {
-    // Get recent reports
-    const recentReports = await db
-      .select({
-        id: report.id,
-        type: report.type,
-        jobTitle: report.jobTitle,
-        status: report.status,
-        createdAt: report.createdAt,
-        activityType: sql<string>`'report_submitted'`,
-      })
-      .from(report)
-      .where(and(eq(report.userId, userId), sql`${report.deletedAt} IS NULL`))
-      .orderBy(sql`${report.createdAt} DESC`)
-      .limit(limit);
+    // Optimized: Single query using UNION ALL to get reports and verifications
+    const activities = await db.execute(sql`
+      SELECT 
+        id,
+        type,
+        job_title as "jobTitle",
+        status,
+        created_at as "createdAt",
+        'report_submitted' as "activityType",
+        id as "entityId",
+        'report' as "entityType"
+      FROM ${report}
+      WHERE user_id = ${userId} AND deleted_at IS NULL
+      
+      UNION ALL
+      
+      SELECT 
+        id,
+        NULL as type,
+        NULL as job_title,
+        NULL as status,
+        created_at as "createdAt",
+        'verification_completed' as "activityType",
+        report_id as "entityId",
+        'verification' as "entityType"
+      FROM ${reportVerification}
+      WHERE user_id = ${userId} AND deleted_at IS NULL
+      
+      ORDER BY "createdAt" DESC
+      LIMIT ${limit}
+    `);
 
-    // Get recent verifications
-    const recentVerifications = await db
-      .select({
-        id: reportVerification.id,
-        reportId: reportVerification.reportId,
-        canVerify: reportVerification.canVerify,
-        createdAt: reportVerification.createdAt,
-        activityType: sql<string>`'verification_completed'`,
-      })
-      .from(reportVerification)
-      .where(
-        and(
-          eq(reportVerification.userId, userId),
-          sql`${reportVerification.deletedAt} IS NULL`,
-        ),
-      )
-      .orderBy(sql`${reportVerification.createdAt} DESC`)
-      .limit(limit);
-
-    // Combine and sort by date
-    const activities = [
-      ...recentReports.map((r) => ({
-        ...r,
-        entityId: r.id,
-        entityType: "report",
-      })),
-      ...recentVerifications.map((v) => ({
-        ...v,
-        entityId: v.reportId,
-        entityType: "verification",
-      })),
-    ]
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )
-      .slice(0, limit);
-
-    return activities;
+    return activities.rows.map((row: any) => ({
+      id: row.id,
+      type: row.type,
+      jobTitle: row.jobTitle,
+      status: row.status,
+      createdAt: row.createdAt,
+      activityType: row.activityType,
+      entityId: row.entityId,
+      entityType: row.entityType,
+    }));
   } catch (error) {
     console.error("Error getting recent activity:", error);
     return [];

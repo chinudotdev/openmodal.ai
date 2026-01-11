@@ -121,43 +121,48 @@ export async function getLeaderboard(
 
     const results = (await query) as QueryResult[];
 
-    // Get user details and reputation points
-    const userIds = results.map((r: QueryResult) => r.userId);
-    if (userIds.length === 0) {
+    if (results.length === 0) {
       return [];
     }
 
-    const usersData = await db
+    // Optimized: Get user details and reputation in single query with JOINs
+    const userIds = results.map((r: QueryResult) => r.userId);
+    const usersWithReputation = await db
       .select({
         id: user.id,
         name: user.name,
         image: user.image,
         role: user.role,
+        reputationPoints: sql<number>`
+          COALESCE(${userReputation.reputationPoints}, 0)
+        `.as("reputation_points"),
       })
       .from(user)
+      .leftJoin(userReputation, eq(userReputation.userId, user.id))
       .where(inArray(user.id, userIds));
 
-    const reputationData = await db
-      .select()
-      .from(userReputation)
-      .where(inArray(userReputation.userId, userIds));
-
-    const usersMap = new Map(usersData.map((u) => [u.id, u]));
-    const reputationMap = new Map(
-      reputationData.map((r) => [r.userId, r.reputationPoints]),
+    const usersMap = new Map(
+      usersWithReputation.map((u) => [
+        u.id,
+        {
+          name: u.name,
+          image: u.image,
+          role: u.role,
+          points: Number(u.reputationPoints || 0),
+        },
+      ]),
     );
 
     const leaderboard: LeaderboardEntry[] = results.map(
       (result: QueryResult, index: number) => {
         const userData = usersMap.get(result.userId);
-        const points = reputationMap.get(result.userId) || 0;
 
         return {
           userId: result.userId,
           name: userData?.name || "Unknown",
           image: userData?.image || null,
           role: userData?.role || null,
-          points,
+          points: userData?.points || 0,
           count: Number(result.count),
           rank: index + 1,
         };

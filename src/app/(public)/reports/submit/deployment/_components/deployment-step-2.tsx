@@ -49,8 +49,11 @@ export function DeploymentStep2({
           name="step2.deploymentStatus"
           // biome-ignore lint/correctness/noChildrenProp: TanStack Form requires children prop
           children={(field: any) => {
+            // Show error if touched OR if field has errors (validation was attempted)
             const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+              (field.state.meta.isTouched ||
+                field.state.meta.errors?.length > 0) &&
+              !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel>
@@ -163,8 +166,11 @@ export function DeploymentStep2({
           name="step2.impactType"
           // biome-ignore lint/correctness/noChildrenProp: TanStack Form requires children prop
           children={(field: any) => {
+            // Show error if touched OR if field has errors (validation was attempted)
             const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+              (field.state.meta.isTouched ||
+                field.state.meta.errors?.length > 0) &&
+              !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel>
@@ -223,8 +229,11 @@ export function DeploymentStep2({
           name="step2.automationPercentage"
           // biome-ignore lint/correctness/noChildrenProp: TanStack Form requires children prop
           children={(field: any) => {
+            // Show error if touched OR if field has errors (validation was attempted)
             const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+              (field.state.meta.isTouched ||
+                field.state.meta.errors?.length > 0) &&
+              !field.state.meta.isValid;
             const value = field.state.value ?? 0;
             return (
               <Field data-invalid={isInvalid}>

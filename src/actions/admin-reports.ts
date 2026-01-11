@@ -1,6 +1,6 @@
 "use server";
 
-import { and, count, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { type ReportStatus, report, reportDispute, user } from "@/db/schema";
 
@@ -36,39 +36,39 @@ export async function getAllReports(
       conditions.push(inArray(report.id, disputedIds));
     }
 
-    const baseQuery = db.select().from(report);
-    const queryWithWhere = baseQuery.where(and(...conditions));
+    // Optimized: Single query with JOIN for user data and window function for total
+    const baseQuery = db
+      .select({
+        report,
+        user,
+        total: sql<number>`COUNT(*) OVER()`.as("total"),
+      })
+      .from(report)
+      .leftJoin(user, eq(report.userId, user.id));
+
+    const queryWithWhere =
+      conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
 
     const reports = await queryWithWhere
       .orderBy(desc(report.createdAt))
       .limit(limit)
       .offset(offset);
 
-    const totalResult = await db
-      .select({ count: count() })
-      .from(report)
-      .where(and(...conditions));
-
-    const total = totalResult[0]?.count ?? 0;
-
-    // Get user data for each report
-    const reportsWithUsers = await Promise.all(
-      reports.map(async (r) => {
-        const userData = await db
-          .select()
-          .from(user)
-          .where(eq(user.id, r.userId))
-          .limit(1);
-
-        return {
-          ...r,
-          user: userData[0]!,
-        };
-      }),
-    );
+    const total = reports.length > 0 ? Number(reports[0]?.total || 0) : 0;
 
     return {
-      reports: reportsWithUsers,
+      reports: reports.map((r) => ({
+        ...r.report,
+        user: r.user
+          ? {
+              name: r.user.name || "Unknown",
+              email: r.user.email || "",
+            }
+          : {
+              name: "Unknown",
+              email: "",
+            },
+      })),
       total,
     };
   } catch (error) {

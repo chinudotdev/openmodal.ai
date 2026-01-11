@@ -1,6 +1,6 @@
 "use client";
 
-import { Brain, Gift, Users, Zap } from "lucide-react";
+import { Brain, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -63,18 +63,6 @@ export function OnboardingWelcome({ onStart }: OnboardingWelcomeProps) {
               </p>
             </div>
           </div>
-
-          <div className="flex items-start gap-4">
-            <div className="bg-primary/10 p-2 rounded-lg">
-              <Gift className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-semibold">Earn 50 reputation points!</h3>
-              <p className="text-sm text-muted-foreground">
-                Start your journey with bonus points
-              </p>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
@@ -85,7 +73,7 @@ export function OnboardingWelcome({ onStart }: OnboardingWelcomeProps) {
       </div>
 
       <div className="text-center text-sm text-muted-foreground">
-        Progress: ●○○○ Step 1 of 4
+        Progress: ●○ Step 1 of 2
       </div>
     </div>
   );

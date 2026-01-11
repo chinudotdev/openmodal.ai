@@ -19,12 +19,14 @@ interface DeploymentStep1Props {
   form: FormApi<Partial<DeploymentReportInput>>;
   onNext: () => void;
   onUpdate: (data: DeploymentReportInput["step1"]) => void;
+  validationAttempted?: boolean;
 }
 
 export function DeploymentStep1({
   form,
   onNext,
   onUpdate,
+  validationAttempted = false,
 }: DeploymentStep1Props) {
   const [countryValue, setCountryValue] = useState<string | undefined>();
 
@@ -51,8 +53,16 @@ export function DeploymentStep1({
           name="step1.jobTitle"
           // biome-ignore lint/correctness/noChildrenProp: TanStack Form requires children prop
           children={(field: any) => {
+            // Show error if touched OR if validation was attempted and field is empty
+            const isEmpty =
+              !field.state.value || field.state.value.trim() === "";
             const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+              (field.state.meta.isTouched ||
+                (validationAttempted && isEmpty)) &&
+              (!field.state.meta.isValid || isEmpty);
+            const errorMessage = isEmpty
+              ? "Job title is required"
+              : field.state.meta.errors?.[0];
             return (
               <JobAutocompleteInput
                 value={field.state.value || ""}
@@ -64,7 +74,7 @@ export function DeploymentStep1({
                 }}
                 label="What job or task is being automated?"
                 required
-                error={isInvalid ? field.state.meta.errors?.[0] : undefined}
+                error={isInvalid ? errorMessage : undefined}
               />
             );
           }}
@@ -74,8 +84,16 @@ export function DeploymentStep1({
           name="step1.technology"
           // biome-ignore lint/correctness/noChildrenProp: TanStack Form requires children prop
           children={(field: any) => {
+            // Show error if touched OR if validation was attempted and field is empty
+            const isEmpty =
+              !field.state.value || field.state.value.trim() === "";
             const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+              (field.state.meta.isTouched ||
+                (validationAttempted && isEmpty)) &&
+              (!field.state.meta.isValid || isEmpty);
+            const errorMessage = isEmpty
+              ? "Technology is required"
+              : field.state.meta.errors?.[0];
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>
@@ -91,7 +109,13 @@ export function DeploymentStep1({
                   placeholder="e.g., ChatGPT (GPT-4), Claude, Gemini"
                   aria-invalid={isInvalid}
                 />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && (
+                  <FieldError
+                    errors={
+                      errorMessage ? [errorMessage] : field.state.meta.errors
+                    }
+                  />
+                )}
               </Field>
             );
           }}
@@ -123,8 +147,15 @@ export function DeploymentStep1({
           name="step1.country"
           // biome-ignore lint/correctness/noChildrenProp: TanStack Form requires children prop
           children={(field: any) => {
+            // Show error if touched OR if validation was attempted and field is empty
+            const isEmpty = !field.state.value;
             const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
+              (field.state.meta.isTouched ||
+                (validationAttempted && isEmpty)) &&
+              (!field.state.meta.isValid || isEmpty);
+            const errorMessage = isEmpty
+              ? "Country is required"
+              : field.state.meta.errors?.[0];
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>
@@ -139,7 +170,13 @@ export function DeploymentStep1({
                   }}
                   placeholder="Select country"
                 />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && (
+                  <FieldError
+                    errors={
+                      errorMessage ? [errorMessage] : field.state.meta.errors
+                    }
+                  />
+                )}
               </Field>
             );
           }}

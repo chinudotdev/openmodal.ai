@@ -1,7 +1,7 @@
 "use server";
 
 import { generateRandomString } from "better-auth/crypto";
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
 import {
@@ -20,7 +20,7 @@ import { commentSchema, commentUpdateSchema } from "@/lib/validations";
  */
 export async function createReportComment(
   userId: string,
-  commentData: z.infer<typeof commentSchema>,
+  commentData: z.infer<typeof commentSchema>
 ) {
   try {
     // Check onboarding completion from session
@@ -38,34 +38,31 @@ export async function createReportComment(
     // Validate input
     const validated = commentSchema.parse(commentData);
 
-    // Create comment
+    // Optimized: Single query to create comment and update report count
     const commentId = generateRandomString(32);
-    await db.insert(reportComment).values({
-      id: commentId,
-      reportId: validated.reportId,
-      userId,
-      parentId: validated.parentId || null,
-      content: validated.content,
-      upvotes: 0,
-      downvotes: 0,
-    });
 
-    // Update report comment count
-    const reportData = await db
-      .select()
-      .from(report)
-      .where(eq(report.id, validated.reportId))
-      .limit(1);
-
-    if (reportData.length > 0) {
-      await db
-        .update(report)
-        .set({
-          commentCount: reportData[0].commentCount + 1,
-          updatedAt: new Date(),
-        })
-        .where(eq(report.id, validated.reportId));
-    }
+    await db.execute(sql`
+      WITH comment_insert AS (
+        INSERT INTO ${reportComment} (
+          id, report_id, user_id, parent_id, content, upvotes, downvotes
+        )
+        VALUES (
+          ${commentId},
+          ${validated.reportId},
+          ${userId},
+          ${validated.parentId || null},
+          ${validated.content},
+          0,
+          0
+        )
+        RETURNING report_id
+      )
+      UPDATE ${report}
+      SET 
+        comment_count = comment_count + 1,
+        updated_at = NOW()
+      WHERE id = (SELECT report_id FROM comment_insert)
+    `);
 
     return { success: true, commentId };
   } catch (error) {
@@ -85,6 +82,7 @@ export async function createReportComment(
  */
 export async function getReportComments(reportId: string) {
   try {
+    // Optimized: Single query with JSON aggregation for badges
     const rows = await db
       .select({
         comment: reportComment,
@@ -107,6 +105,14 @@ export async function getReportComments(reportId: string) {
           reputationPoints: userReputation.reputationPoints,
           tier: userReputation.tier,
         },
+        badges: sql<Array<typeof userBadge.$inferSelect>>`
+          COALESCE(
+            (SELECT json_agg(b.* ORDER BY b.earned_at DESC)
+             FROM ${userBadge} b
+             WHERE b.user_id = ${reportComment.userId}),
+            '[]'::json
+          )
+        `.as("badges"),
       })
       .from(reportComment)
       .leftJoin(user, eq(reportComment.userId, user.id))
@@ -115,42 +121,16 @@ export async function getReportComments(reportId: string) {
       .where(
         and(
           eq(reportComment.reportId, reportId),
-          isNull(reportComment.deletedAt),
-        ),
+          isNull(reportComment.deletedAt)
+        )
       )
       .orderBy(desc(reportComment.upvotes), desc(reportComment.createdAt));
-
-    const userIds = Array.from(
-      new Set(
-        rows
-          .map((row) => row.comment.userId)
-          .filter((id): id is string => Boolean(id)),
-      ),
-    );
-
-    const badges = userIds.length
-      ? await db
-          .select()
-          .from(userBadge)
-          .where(inArray(userBadge.userId, userIds))
-      : [];
-
-    const badgeMap = new Map<string, typeof badges>();
-    for (const badge of badges) {
-      if (!badgeMap.has(badge.userId)) {
-        badgeMap.set(badge.userId, []);
-      }
-      const userBadges = badgeMap.get(badge.userId);
-      if (userBadges) {
-        userBadges.push(badge);
-      }
-    }
 
     type CommentWithMeta = (typeof rows)[number]["comment"] & {
       author: (typeof rows)[number]["author"] | null;
       profile: (typeof rows)[number]["profile"] | null;
       reputation: (typeof rows)[number]["reputation"] | null;
-      badges: typeof badges;
+      badges: (typeof rows)[number]["badges"];
       replies: CommentWithMeta[];
     };
 
@@ -159,7 +139,7 @@ export async function getReportComments(reportId: string) {
       author: row.author || null,
       profile: row.profile || null,
       reputation: row.reputation || null,
-      badges: badgeMap.get(row.comment.userId) || [],
+      badges: row.badges || [],
       replies: [],
     }));
 
@@ -194,7 +174,7 @@ export async function getReportComments(reportId: string) {
 export async function updateComment(
   commentId: string,
   userId: string,
-  commentData: z.infer<typeof commentUpdateSchema>,
+  commentData: z.infer<typeof commentUpdateSchema>
 ) {
   try {
     // Check onboarding completion from session
@@ -220,8 +200,8 @@ export async function updateComment(
         and(
           eq(reportComment.id, commentId),
           eq(reportComment.userId, userId),
-          isNull(reportComment.deletedAt),
-        ),
+          isNull(reportComment.deletedAt)
+        )
       )
       .limit(1);
 
@@ -276,8 +256,8 @@ export async function softDeleteComment(commentId: string, userId: string) {
         and(
           eq(reportComment.id, commentId),
           eq(reportComment.userId, userId),
-          isNull(reportComment.deletedAt),
-        ),
+          isNull(reportComment.deletedAt)
+        )
       )
       .limit(1);
 
@@ -285,31 +265,22 @@ export async function softDeleteComment(commentId: string, userId: string) {
       return { success: false, error: "Comment not found" };
     }
 
-    // Soft delete
-    await db
-      .update(reportComment)
-      .set({
-        deletedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(reportComment.id, commentId));
-
-    // Update report comment count
-    const reportData = await db
-      .select()
-      .from(report)
-      .where(eq(report.id, existing[0].reportId))
-      .limit(1);
-
-    if (reportData.length > 0) {
-      await db
-        .update(report)
-        .set({
-          commentCount: Math.max(0, reportData[0].commentCount - 1),
-          updatedAt: new Date(),
-        })
-        .where(eq(report.id, existing[0].reportId));
-    }
+    // Optimized: Single query to soft delete comment and update report count
+    await db.execute(sql`
+      WITH comment_delete AS (
+        UPDATE ${reportComment}
+        SET deleted_at = NOW(), updated_at = NOW()
+        WHERE id = ${commentId}
+          AND user_id = ${userId}
+          AND deleted_at IS NULL
+        RETURNING report_id
+      )
+      UPDATE ${report}
+      SET 
+        comment_count = GREATEST(0, comment_count - 1),
+        updated_at = NOW()
+      WHERE id = (SELECT report_id FROM comment_delete)
+    `);
 
     return { success: true };
   } catch (error) {
@@ -340,7 +311,7 @@ export async function restoreComment(commentId: string, userId: string) {
       .select()
       .from(reportComment)
       .where(
-        and(eq(reportComment.id, commentId), eq(reportComment.userId, userId)),
+        and(eq(reportComment.id, commentId), eq(reportComment.userId, userId))
       )
       .limit(1);
 
@@ -348,31 +319,21 @@ export async function restoreComment(commentId: string, userId: string) {
       return { success: false, error: "Comment not found" };
     }
 
-    // Restore
-    await db
-      .update(reportComment)
-      .set({
-        deletedAt: null,
-        updatedAt: new Date(),
-      })
-      .where(eq(reportComment.id, commentId));
-
-    // Update report comment count
-    const reportData = await db
-      .select()
-      .from(report)
-      .where(eq(report.id, existing[0].reportId))
-      .limit(1);
-
-    if (reportData.length > 0) {
-      await db
-        .update(report)
-        .set({
-          commentCount: reportData[0].commentCount + 1,
-          updatedAt: new Date(),
-        })
-        .where(eq(report.id, existing[0].reportId));
-    }
+    // Optimized: Single query to restore comment and update report count
+    await db.execute(sql`
+      WITH comment_restore AS (
+        UPDATE ${reportComment}
+        SET deleted_at = NULL, updated_at = NOW()
+        WHERE id = ${commentId}
+          AND user_id = ${userId}
+        RETURNING report_id
+      )
+      UPDATE ${report}
+      SET 
+        comment_count = comment_count + 1,
+        updated_at = NOW()
+      WHERE id = (SELECT report_id FROM comment_restore)
+    `);
 
     return { success: true };
   } catch (error) {

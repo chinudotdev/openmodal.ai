@@ -299,66 +299,50 @@ export async function getFlaggedReports(limit = 20, offset = 0) {
  */
 export async function getModerationStats() {
   try {
-    const pending = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(report)
-      .where(and(eq(report.status, "pending"), isNull(report.deletedAt)));
+    // Optimized: Single query with conditional aggregations for all stats
+    const stats = await db
+      .select({
+        pending: sql<number>`
+          COUNT(*) FILTER (WHERE status = 'pending' AND deleted_at IS NULL)::int
+        `.as("pending"),
+        approved: sql<number>`
+          COUNT(*) FILTER (WHERE status = 'approved' AND deleted_at IS NULL)::int
+        `.as("approved"),
+        rejected: sql<number>`
+          COUNT(*) FILTER (WHERE status = 'rejected' AND deleted_at IS NULL)::int
+        `.as("rejected"),
+        changesRequested: sql<number>`
+          COUNT(*) FILTER (WHERE status = 'changes_requested' AND deleted_at IS NULL)::int
+        `.as("changes_requested"),
+        disputed: sql<number>`
+          COUNT(*) FILTER (
+            WHERE deleted_at IS NULL
+              AND EXISTS (
+                SELECT 1 FROM ${reportDispute}
+                WHERE report_id = ${report.id}
+                  AND deleted_at IS NULL
+              )
+          )::int
+        `.as("disputed"),
+        flagged: sql<number>`
+          COUNT(*) FILTER (
+            WHERE deleted_at IS NULL
+              AND downvotes > upvotes
+              AND downvotes > 3
+          )::int
+        `.as("flagged"),
+      })
+      .from(report);
 
-    const approved = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(report)
-      .where(and(eq(report.status, "approved"), isNull(report.deletedAt)));
-
-    const rejected = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(report)
-      .where(and(eq(report.status, "rejected"), isNull(report.deletedAt)));
-
-    const changesRequested = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(report)
-      .where(
-        and(eq(report.status, "changes_requested"), isNull(report.deletedAt)),
-      );
-
-    const disputed = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(report)
-      .where(
-        and(
-          exists(
-            db
-              .select()
-              .from(reportDispute)
-              .where(
-                and(
-                  eq(reportDispute.reportId, report.id),
-                  isNull(reportDispute.deletedAt),
-                ),
-              ),
-          ),
-          isNull(report.deletedAt),
-        ),
-      );
-
-    const flagged = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(report)
-      .where(
-        and(
-          sql`${report.downvotes} > ${report.upvotes}`,
-          sql`${report.downvotes} > 3`,
-          isNull(report.deletedAt),
-        ),
-      );
+    const result = stats[0];
 
     return {
-      pending: Number(pending[0]?.count || 0),
-      approved: Number(approved[0]?.count || 0),
-      rejected: Number(rejected[0]?.count || 0),
-      changesRequested: Number(changesRequested[0]?.count || 0),
-      disputed: Number(disputed[0]?.count || 0),
-      flagged: Number(flagged[0]?.count || 0),
+      pending: result?.pending || 0,
+      approved: result?.approved || 0,
+      rejected: result?.rejected || 0,
+      changesRequested: result?.changesRequested || 0,
+      disputed: result?.disputed || 0,
+      flagged: result?.flagged || 0,
     };
   } catch (error) {
     console.error("Error getting moderation stats:", error);

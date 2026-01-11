@@ -1,9 +1,10 @@
 "use server";
 
 import { generateRandomString } from "better-auth/crypto";
-import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { cacheLife } from "next/cache";
 import { db } from "@/db";
+import { userBadge, userProfile, userReputation } from "@/db/schema";
 import { user } from "@/db/schema/auth";
 import {
   bottleneck,
@@ -343,9 +344,9 @@ export async function submitPrediction(
     };
   }
 
-  // Check if prediction exists
+  // Optimized: Single query to check existing, then UPSERT and update median
   const existing = await db
-    .select()
+    .select({ id: capabilityPrediction.id })
     .from(capabilityPrediction)
     .where(
       and(
@@ -356,41 +357,61 @@ export async function submitPrediction(
     .limit(1);
 
   if (existing.length > 0) {
-    // Update existing
-    await db
-      .update(capabilityPrediction)
-      .set({
-        ...prediction,
-        updatedAt: new Date(),
-      })
-      .where(eq(capabilityPrediction.id, existing[0].id));
+    // Update existing and recalculate median in single query
+    await db.execute(sql`
+      WITH updated_prediction AS (
+        UPDATE ${capabilityPrediction}
+        SET 
+          predicted_year = ${prediction.predictedYear},
+          predicted_year_end = ${prediction.predictedYearEnd ?? null},
+          confidence = ${prediction.confidence},
+          reasoning = ${prediction.reasoning ?? null},
+          background = ${prediction.background},
+          updated_at = NOW()
+        WHERE id = ${existing[0].id}
+        RETURNING capability_id
+      ),
+      median_calc AS (
+        SELECT 
+          PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY predicted_year) as median
+        FROM ${capabilityPrediction}
+        WHERE capability_id = ${capabilityId}
+      )
+      UPDATE ${capability}
+      SET community_prediction_median = ROUND(COALESCE((SELECT median FROM median_calc), 0))
+      WHERE id = ${capabilityId}
+    `);
   } else {
-    // Create new
-    await db.insert(capabilityPrediction).values({
-      id: generateRandomString(32),
-      capabilityId,
-      userId,
-      ...prediction,
-    });
-  }
-
-  // Recalculate community median using SQL
-  const result = await db
-    .select({
-      median: sql<number>`
-        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY ${capabilityPrediction.predictedYear})
-      `,
-    })
-    .from(capabilityPrediction)
-    .where(eq(capabilityPrediction.capabilityId, capabilityId));
-
-  if (result.length > 0 && result[0].median !== null) {
-    await db
-      .update(capability)
-      .set({
-        communityPredictionMedian: Math.round(result[0].median),
-      })
-      .where(eq(capability.id, capabilityId));
+    // Insert new and recalculate median in single query
+    const predictionId = generateRandomString(32);
+    await db.execute(sql`
+      WITH inserted_prediction AS (
+        INSERT INTO ${capabilityPrediction} (
+          id, capability_id, user_id, predicted_year, predicted_year_end,
+          confidence, reasoning, background
+        )
+        VALUES (
+          ${predictionId},
+          ${capabilityId},
+          ${userId},
+          ${prediction.predictedYear},
+          ${prediction.predictedYearEnd ?? null},
+          ${prediction.confidence},
+          ${prediction.reasoning ?? null},
+          ${prediction.background}
+        )
+        RETURNING capability_id
+      ),
+      median_calc AS (
+        SELECT 
+          PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY predicted_year) as median
+        FROM ${capabilityPrediction}
+        WHERE capability_id = ${capabilityId}
+      )
+      UPDATE ${capability}
+      SET community_prediction_median = ROUND(COALESCE((SELECT median FROM median_calc), 0))
+      WHERE id = ${capabilityId}
+    `);
   }
 
   return { success: true };
@@ -542,144 +563,154 @@ export async function voteComment(
     };
   }
 
-  // Check if vote exists
-  const existing = await db
-    .select()
-    .from(capabilityCommentVote)
-    .where(
-      and(
-        eq(capabilityCommentVote.commentId, commentId),
-        eq(capabilityCommentVote.userId, userId),
-      ),
-    )
+  // Check if comment exists first
+  const commentExists = await db
+    .select({ id: capabilityComment.id })
+    .from(capabilityComment)
+    .where(eq(capabilityComment.id, commentId))
     .limit(1);
 
-  if (existing.length > 0) {
-    if (existing[0].voteType === voteType) {
-      // Remove vote
-      await db
-        .delete(capabilityCommentVote)
-        .where(eq(capabilityCommentVote.id, existing[0].id));
-
-      // Update upvotes
-      const current = await db
-        .select({ upvotes: capabilityComment.upvotes })
-        .from(capabilityComment)
-        .where(eq(capabilityComment.id, commentId))
-        .limit(1);
-
-      if (current.length > 0) {
-        const delta = voteType === "up" ? -1 : 0;
-        const newUpvotes = Math.max(0, current[0].upvotes + delta);
-        await db
-          .update(capabilityComment)
-          .set({ upvotes: newUpvotes })
-          .where(eq(capabilityComment.id, commentId));
-      }
-    } else {
-      // Change vote
-      await db
-        .update(capabilityCommentVote)
-        .set({ voteType })
-        .where(eq(capabilityCommentVote.id, existing[0].id));
-
-      // Update upvotes
-      const current = await db
-        .select({ upvotes: capabilityComment.upvotes })
-        .from(capabilityComment)
-        .where(eq(capabilityComment.id, commentId))
-        .limit(1);
-
-      if (current.length > 0) {
-        const delta = voteType === "up" ? 2 : -2;
-        const newUpvotes = Math.max(0, current[0].upvotes + delta);
-        await db
-          .update(capabilityComment)
-          .set({ upvotes: newUpvotes })
-          .where(eq(capabilityComment.id, commentId));
-      }
-    }
-  } else {
-    // Create new vote
-    await db.insert(capabilityCommentVote).values({
-      id: generateRandomString(32),
-      commentId,
-      userId,
-      voteType,
-    });
-
-    // Update upvotes
-    const current = await db
-      .select({ upvotes: capabilityComment.upvotes })
-      .from(capabilityComment)
-      .where(eq(capabilityComment.id, commentId))
-      .limit(1);
-
-    if (current.length > 0) {
-      const delta = voteType === "up" ? 1 : 0;
-      await db
-        .update(capabilityComment)
-        .set({ upvotes: current[0].upvotes + delta })
-        .where(eq(capabilityComment.id, commentId));
-    }
+  if (commentExists.length === 0) {
+    return { success: false, error: "Comment not found" };
   }
+
+  // Optimized: Single atomic query to handle vote upsert/delete and update counts
+  const voteId = generateRandomString(32);
+
+  await db.execute(sql`
+    WITH existing_vote AS (
+      SELECT id, vote_type
+      FROM ${capabilityCommentVote}
+      WHERE comment_id = ${commentId} AND user_id = ${userId}
+      LIMIT 1
+    ),
+    vote_deletion AS (
+      -- Delete vote if same type exists (toggle off)
+      DELETE FROM ${capabilityCommentVote}
+      WHERE id IN (SELECT id FROM existing_vote WHERE vote_type = ${voteType})
+      RETURNING comment_id
+    ),
+    vote_upsert AS (
+      -- Upsert vote only if no existing vote with same type (new vote or changing type)
+      INSERT INTO ${capabilityCommentVote} (id, comment_id, user_id, vote_type)
+      SELECT 
+        COALESCE(
+          (SELECT id FROM existing_vote WHERE vote_type != ${voteType} LIMIT 1),
+          ${voteId}
+        ),
+        ${commentId},
+        ${userId},
+        ${voteType}
+      WHERE NOT EXISTS (
+        SELECT 1 FROM existing_vote WHERE vote_type = ${voteType}
+      )
+      ON CONFLICT (comment_id, user_id) DO UPDATE
+      SET vote_type = EXCLUDED.vote_type
+      RETURNING comment_id
+    ),
+    vote_counts AS (
+      SELECT 
+        COUNT(*) FILTER (WHERE vote_type = 'up')::int as upvotes
+      FROM ${capabilityCommentVote}
+      WHERE comment_id = ${commentId}
+    )
+    UPDATE ${capabilityComment}
+    SET 
+      upvotes = GREATEST(0, (SELECT upvotes FROM vote_counts)),
+      updated_at = NOW()
+    WHERE id = ${commentId}
+  `);
 
   return { success: true };
 }
 
 // Get comments
 export async function getComments(capabilityId: string, parentId?: string) {
-  const conditions = [eq(capabilityComment.capabilityId, capabilityId)];
-
-  if (parentId) {
-    conditions.push(eq(capabilityComment.parentId, parentId));
-  } else {
-    conditions.push(sql`${capabilityComment.parentId} IS NULL`);
-  }
-
-  const comments = await db
-    .select()
+  // Fetch all comments for the capability to build tree structure with user info
+  const rows = await db
+    .select({
+      comment: capabilityComment,
+      author: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        displayUsername: user.displayUsername,
+        image: user.image,
+      },
+      profile: {
+        displayName: userProfile.displayName,
+        industry: userProfile.industry,
+        location: userProfile.location,
+        country: userProfile.country,
+        stateProvince: userProfile.stateProvince,
+        city: userProfile.city,
+      },
+      reputation: {
+        reputationPoints: userReputation.reputationPoints,
+        tier: userReputation.tier,
+      },
+      badges: sql<Array<typeof userBadge.$inferSelect>>`
+        COALESCE(
+          (SELECT json_agg(b.* ORDER BY b.earned_at DESC)
+           FROM ${userBadge} b
+           WHERE b.user_id = ${capabilityComment.userId}),
+          '[]'::json
+        )
+      `.as("badges"),
+    })
     .from(capabilityComment)
-    .where(and(...conditions))
+    .leftJoin(user, eq(capabilityComment.userId, user.id))
+    .leftJoin(userProfile, eq(userProfile.userId, user.id))
+    .leftJoin(userReputation, eq(userReputation.userId, user.id))
+    .where(eq(capabilityComment.capabilityId, capabilityId))
     .orderBy(
       desc(capabilityComment.upvotes),
       desc(capabilityComment.createdAt),
     );
 
-  // Get user info for each comment
-  const userIds = [...new Set(comments.map((c) => c.userId))];
-  // Note: In a real app, you'd join with user table to get user info
-  // For now, we'll just return the comments
+  type CommentWithMeta = (typeof rows)[number]["comment"] & {
+    author: (typeof rows)[number]["author"] | null;
+    profile: (typeof rows)[number]["profile"] | null;
+    reputation: (typeof rows)[number]["reputation"] | null;
+    badges: (typeof rows)[number]["badges"];
+    replies: CommentWithMeta[];
+  };
 
-  // Get replies for each comment
-  const commentIds = comments.map((c) => c.id);
-  const replies =
-    commentIds.length > 0
-      ? await db
-          .select()
-          .from(capabilityComment)
-          .where(inArray(capabilityComment.parentId, commentIds))
-          .orderBy(
-            desc(capabilityComment.upvotes),
-            desc(capabilityComment.createdAt),
-          )
-      : [];
+  const items: CommentWithMeta[] = rows.map((row) => ({
+    ...row.comment,
+    author: row.author || null,
+    profile: row.profile || null,
+    reputation: row.reputation || null,
+    badges: row.badges || [],
+    replies: [],
+  }));
 
-  // Group replies by parent
-  const repliesMap = new Map<string, typeof replies>();
-  for (const reply of replies) {
-    if (reply.parentId) {
-      if (!repliesMap.has(reply.parentId)) {
-        repliesMap.set(reply.parentId, []);
+  // Build reply tree structure
+  const commentMap = new Map<string, CommentWithMeta>();
+  const rootComments: CommentWithMeta[] = [];
+
+  for (const item of items) {
+    commentMap.set(item.id, item);
+  }
+
+  for (const item of items) {
+    if (item.parentId) {
+      const parent = commentMap.get(item.parentId);
+      if (parent) {
+        parent.replies.push(item);
       }
-      repliesMap.get(reply.parentId)!.push(reply);
+    } else {
+      rootComments.push(item);
     }
   }
 
-  return comments.map((comment) => ({
-    ...comment,
-    replies: repliesMap.get(comment.id) || [],
-  }));
+  // If parentId is provided, return only that comment's replies
+  if (parentId) {
+    const parentComment = commentMap.get(parentId);
+    return parentComment ? parentComment.replies : [];
+  }
+
+  return rootComments;
 }
 
 // Increment view count

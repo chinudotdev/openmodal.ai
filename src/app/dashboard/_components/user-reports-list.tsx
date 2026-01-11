@@ -29,12 +29,17 @@ export function UserReportsList({ reports }: UserReportsListProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Your Reports</CardTitle>
-        <Button asChild size="sm">
-          <Link href="/reports/submit">
-            <Plus className="h-4 w-4 mr-2" />
-            Submit New Report
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link href="/my-reports">View All Reports</Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link href="/reports/submit">
+              <Plus className="h-4 w-4 mr-2" />
+              Submit New Report
+            </Link>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {reports.length === 0 ? (

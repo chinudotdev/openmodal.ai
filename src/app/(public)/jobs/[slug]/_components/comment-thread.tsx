@@ -1,10 +1,12 @@
 "use client";
 
-import { ArrowUp, MessageSquare, Reply } from "lucide-react";
+import { ArrowUp, Award, MessageSquare, Reply } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createJobComment, voteJobComment } from "@/actions/jobs";
 import { OnboardingModal } from "@/components/onboarding-modal";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSession } from "@/contexts/session-context";
@@ -16,6 +18,30 @@ interface CommentThreadProps {
   comment: any;
   jobId: string;
   onCommentAdded: () => void;
+}
+
+const tierLabels: Record<string, string> = {
+  observer: "Observer",
+  contributor: "Contributor",
+  trusted: "Trusted",
+  expert: "Expert",
+};
+
+function ensureHandle(value?: string | null) {
+  if (!value) return null;
+  return value.startsWith("@") ? value : `@${value}`;
+}
+
+function getInitials(value: string) {
+  const clean = value.replace(/@/g, "").trim();
+  if (!clean) return "??";
+  const parts = clean.split(/\s+/);
+  const initials = parts
+    .map((part) => part.charAt(0).toUpperCase())
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("");
+  return initials || clean.slice(0, 2).toUpperCase();
 }
 
 export function CommentThread({
@@ -33,6 +59,21 @@ export function CommentThread({
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
   const [upvotes, setUpvotes] = useState(comment.upvotes || 0);
+
+  const authorHandle =
+    ensureHandle(comment.author?.displayUsername) ||
+    ensureHandle(comment.author?.username) ||
+    ensureHandle(comment.userId) ||
+    "@anonymous";
+  const authorDisplayName = comment.profile?.displayName || authorHandle;
+  const timeAgo = comment.createdAt
+    ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })
+    : "";
+  const badges = comment.badges ?? [];
+  const tier = comment.reputation?.tier
+    ? (tierLabels[comment.reputation.tier] ?? comment.reputation.tier)
+    : undefined;
+  const reputationPoints = comment.reputation?.reputationPoints ?? null;
 
   const handleVote = async () => {
     // Check onboarding before voting
@@ -123,21 +164,46 @@ export function CommentThread({
       <div className="space-y-3">
         <Card>
           <CardContent className="pt-6">
-            <div className="space-y-3">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="mb-2 flex items-center gap-2 text-sm">
-                    <span className="font-medium text-foreground">
-                      {comment.userId}
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                <Avatar className="h-10 w-10">
+                  {comment.author?.image ? (
+                    <AvatarImage
+                      src={comment.author.image}
+                      alt={authorDisplayName}
+                    />
+                  ) : null}
+                  <AvatarFallback>
+                    {getInitials(authorDisplayName)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-2">
+                  <div className="flex flex-wrap items-center gap-2 text-sm">
+                    <span className="font-semibold text-foreground">
+                      {authorDisplayName}
                     </span>
-                    <span className="text-muted-foreground">•</span>
                     <span className="text-muted-foreground">
-                      {formatDistanceToNow(comment.createdAt, {
-                        addSuffix: true,
-                      })}
+                      {authorHandle}
+                    </span>
+                    {tier && (
+                      <Badge variant="outline" className="gap-1">
+                        <Award className="h-3 w-3" />
+                        {tier}
+                        {reputationPoints != null
+                          ? ` (${reputationPoints})`
+                          : ""}
+                      </Badge>
+                    )}
+                    {badges.slice(0, 2).map((badge: any) => (
+                      <Badge key={badge.id} variant="secondary">
+                        {badge.badgeName}
+                      </Badge>
+                    ))}
+                    <span className="text-xs text-muted-foreground">
+                      {timeAgo}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  <p className="text-sm leading-6 text-muted-foreground whitespace-pre-line">
                     {comment.content}
                   </p>
                 </div>

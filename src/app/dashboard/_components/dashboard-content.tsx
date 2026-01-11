@@ -1,6 +1,9 @@
+import { Home } from "lucide-react";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUserDashboard } from "@/actions/dashboard";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
 import { DashboardNotifications } from "./dashboard-notifications";
@@ -25,7 +28,15 @@ export async function DashboardContent() {
 
   if (!data) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 space-y-4">
+        <div className="flex items-center justify-start">
+          <Button variant="outline" asChild>
+            <Link href="/" className="flex items-center gap-2">
+              <Home className="h-4 w-4" />
+              Home
+            </Link>
+          </Button>
+        </div>
         <Card>
           <CardContent className="p-6">
             <p className="text-muted-foreground">
@@ -39,6 +50,14 @@ export async function DashboardContent() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="flex items-center justify-start">
+        <Button variant="outline" asChild>
+          <Link href="/" className="flex items-center gap-2">
+            <Home className="h-4 w-4" />
+            Home
+          </Link>
+        </Button>
+      </div>
       <DashboardOverview
         user={data.user}
         reputation={data.reputation}
