@@ -61,9 +61,7 @@ export function ModerationReportDetail({
 
   const approveMutation = useMutation({
     mutationFn: () => {
-      if (!user?.id)
-        return Promise.resolve({ success: false, error: "Not authenticated" });
-      return approveReportAction(user.id, {
+      return approveReportAction({
         reportId,
         moderationNotes: moderationNotes || undefined,
       });
@@ -85,9 +83,7 @@ export function ModerationReportDetail({
 
   const rejectMutation = useMutation({
     mutationFn: () => {
-      if (!user?.id)
-        return Promise.resolve({ success: false, error: "Not authenticated" });
-      return rejectReport(user.id, {
+      return rejectReport({
         reportId,
         moderationReason,
         moderationNotes: moderationNotes || undefined,
@@ -108,9 +104,7 @@ export function ModerationReportDetail({
 
   const requestChangesMutation = useMutation({
     mutationFn: () => {
-      if (!user?.id)
-        return Promise.resolve({ success: false, error: "Not authenticated" });
-      return requestReportChanges(user.id, {
+      return requestReportChanges({
         reportId,
         moderationNotes,
       });

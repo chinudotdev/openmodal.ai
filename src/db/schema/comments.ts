@@ -51,6 +51,9 @@ export const reportCommentVote = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     voteType: commentVoteTypeEnum("vote_type").notNull(),
+    // Soft delete
+    deletedAt: timestamp("deleted_at"),
+    // Timestamps
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({

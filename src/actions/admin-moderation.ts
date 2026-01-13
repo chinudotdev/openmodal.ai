@@ -1,7 +1,5 @@
 "use server";
 
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
-import { headers } from "next/headers";
 import { db } from "@/db";
 import {
   moderatorNomination,
@@ -13,7 +11,8 @@ import {
   user,
   userReputation,
 } from "@/db/schema";
-import { auth } from "@/lib/auth";
+import { verifyAdminPermission } from "@/lib/moderation-auth";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 export interface NominationWithDetails {
   id: string;
@@ -152,12 +151,12 @@ export async function reviewNomination(
   notes: string | null,
 ) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (!session) {
-      return { success: false, error: "Not authenticated" };
+    // Validate admin permissions
+    const authResult = await verifyAdminPermission();
+    if (!authResult.authorized) {
+      return { success: false, error: authResult.error || "Unauthorized" };
     }
-
-    const adminId = session.user.id;
+    const adminId = authResult.userId!;
 
     await db
       .update(moderatorNomination)
@@ -244,12 +243,12 @@ export async function reviewStrikeAppeal(
   decision: "uphold" | "overturn" | "reduce",
 ) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (!session) {
-      return { success: false, error: "Not authenticated" };
+    // Validate admin permissions
+    const authResult = await verifyAdminPermission();
+    if (!authResult.authorized) {
+      return { success: false, error: authResult.error || "Unauthorized" };
     }
-
-    const adminId = session.user.id;
+    const adminId = authResult.userId!;
 
     if (decision === "overturn") {
       await db

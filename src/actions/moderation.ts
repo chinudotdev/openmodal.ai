@@ -1,8 +1,6 @@
 "use server";
 
-import { generateRandomString } from "better-auth/crypto";
-import { and, desc, eq, exists, inArray, isNull, sql } from "drizzle-orm";
-import { z } from "zod";
+import { logModerationAction } from "@/actions/moderation-audit";
 import { db } from "@/db";
 import {
   report,
@@ -10,11 +8,15 @@ import {
   reputationHistory,
   userReputation,
 } from "@/db/schema";
+import { verifyModerationPermission } from "@/lib/moderation-auth";
 import {
   approveReportSchema,
   rejectReportSchema,
   requestChangesSchema,
 } from "@/lib/validations";
+import { generateRandomString } from "better-auth/crypto";
+import { and, desc, eq, exists, isNull, sql } from "drizzle-orm";
+import { z } from "zod";
 
 /**
  * Get pending reports
@@ -40,10 +42,16 @@ export async function getPendingReports(limit = 20, offset = 0) {
  * Approve report
  */
 export async function approveReportAction(
-  moderatorId: string,
   approvalData: z.infer<typeof approveReportSchema>,
 ) {
   try {
+    // Validate permissions and get authenticated user ID
+    const authResult = await verifyModerationPermission();
+    if (!authResult.authorized) {
+      return { success: false, error: authResult.error || "Unauthorized" };
+    }
+    const moderatorId = authResult.userId!;
+
     // Validate input
     const validated = approveReportSchema.parse(approvalData);
 
@@ -123,6 +131,19 @@ export async function approveReportAction(
       relatedEntityId: validated.reportId,
     });
 
+    // Log audit trail
+    await logModerationAction({
+      moderatorId,
+      action: "approve",
+      targetType: "report",
+      targetId: validated.reportId,
+      notes: validated.moderationNotes,
+      metadata: {
+        reportType: reportData[0].type,
+        pointsAwarded: pointsToAward,
+      },
+    });
+
     return { success: true, pointsAwarded: pointsToAward };
   } catch (error) {
     console.error("Error approving report:", error);
@@ -140,10 +161,16 @@ export async function approveReportAction(
  * Reject report
  */
 export async function rejectReport(
-  moderatorId: string,
   rejectionData: z.infer<typeof rejectReportSchema>,
 ) {
   try {
+    // Validate permissions and get authenticated user ID
+    const authResult = await verifyModerationPermission();
+    if (!authResult.authorized) {
+      return { success: false, error: authResult.error || "Unauthorized" };
+    }
+    const moderatorId = authResult.userId!;
+
     // Validate input
     const validated = rejectReportSchema.parse(rejectionData);
 
@@ -171,6 +198,19 @@ export async function rejectReport(
       })
       .where(eq(report.id, validated.reportId));
 
+    // Log audit trail
+    await logModerationAction({
+      moderatorId,
+      action: "reject",
+      targetType: "report",
+      targetId: validated.reportId,
+      reason: validated.moderationReason,
+      notes: validated.moderationNotes,
+      metadata: {
+        reportType: reportData[0].type,
+      },
+    });
+
     return { success: true };
   } catch (error) {
     console.error("Error rejecting report:", error);
@@ -188,10 +228,16 @@ export async function rejectReport(
  * Request changes to report
  */
 export async function requestReportChanges(
-  moderatorId: string,
   changesData: z.infer<typeof requestChangesSchema>,
 ) {
   try {
+    // Validate permissions and get authenticated user ID
+    const authResult = await verifyModerationPermission();
+    if (!authResult.authorized) {
+      return { success: false, error: authResult.error || "Unauthorized" };
+    }
+    const moderatorId = authResult.userId!;
+
     // Validate input
     const validated = requestChangesSchema.parse(changesData);
 
@@ -217,6 +263,18 @@ export async function requestReportChanges(
         updatedAt: new Date(),
       })
       .where(eq(report.id, validated.reportId));
+
+    // Log audit trail
+    await logModerationAction({
+      moderatorId,
+      action: "request_changes",
+      targetType: "report",
+      targetId: validated.reportId,
+      notes: validated.moderationNotes,
+      metadata: {
+        reportType: reportData[0].type,
+      },
+    });
 
     return { success: true };
   } catch (error) {

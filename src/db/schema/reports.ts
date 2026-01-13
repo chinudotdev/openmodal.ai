@@ -176,6 +176,9 @@ export const reportEvidence = pgTable("report_evidence", {
   fileSize: integer("file_size"), // Size in bytes
   mimeType: text("mime_type"), // MIME type for files
   description: text("description"), // Optional description
+  // Soft delete
+  deletedAt: timestamp("deleted_at"),
+  // Timestamps
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -194,6 +197,9 @@ export const reportVote = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     voteType: text("vote_type").notNull(), // "up" or "down"
+    // Soft delete
+    deletedAt: timestamp("deleted_at"),
+    // Timestamps
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({
