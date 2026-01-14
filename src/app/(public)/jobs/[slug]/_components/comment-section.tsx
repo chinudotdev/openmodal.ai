@@ -32,11 +32,11 @@ export function CommentSection({ jobId }: CommentSectionProps) {
   }, [loadComments]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Discussion</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-2xl font-semibold">Discussion</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 px-0">
         <CommentForm jobId={jobId} onCommentAdded={loadComments} />
 
         {isLoading ? (

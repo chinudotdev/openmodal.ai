@@ -162,8 +162,8 @@ export function CommentThread({
   return (
     <>
       <div className="space-y-3">
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="shadow-none border-0 bg-transparent rounded-none">
+          <CardContent className="pt-6 px-0">
             <div className="space-y-4">
               <div className="flex items-start gap-4">
                 <Avatar className="h-10 w-10">

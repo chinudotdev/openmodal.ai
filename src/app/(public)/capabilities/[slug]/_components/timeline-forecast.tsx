@@ -14,11 +14,11 @@ interface TimelineForecastProps {
 
 export function TimelineForecast({ capability }: TimelineForecastProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Timeline Forecast</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-2xl font-semibold">Timeline Forecast</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 px-0">
         {/* Expert Consensus */}
         {capability.expertConsensus && (
           <div>

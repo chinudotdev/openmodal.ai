@@ -57,8 +57,8 @@ export function JobHeader({ job }: JobHeaderProps) {
       </div>
 
       {/* Automation Risk Meter */}
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+        <CardContent className="pt-0 pb-6 px-0">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-muted-foreground">

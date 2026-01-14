@@ -12,7 +12,6 @@ import { JobFilters } from "./job-filters";
 import { JobGrid } from "./job-grid";
 import { JobHero } from "./job-hero";
 import { JobSort } from "./job-sort";
-import { JobStatsBar } from "./job-stats-bar";
 
 export interface JobsContentProps {
   searchParams: Promise<{
@@ -51,17 +50,6 @@ export async function JobsContent({ searchParams }: JobsContentProps) {
     getJobCategories(),
   ]);
 
-  const totalJobs = jobs.length;
-  const avgRisk =
-    jobs.length > 0
-      ? jobs.reduce((sum, job) => sum + job.automationPercentage, 0) /
-        jobs.length
-      : 0;
-  const protectedWorkers = jobs.reduce(
-    (sum, job) => sum + (job.totalWorkersGlobal || 0),
-    0,
-  );
-
   return (
     <>
       <div className="border-b border-border bg-muted/40">
@@ -84,17 +72,6 @@ export async function JobsContent({ searchParams }: JobsContentProps) {
       <div className="border-b border-border bg-background">
         <div className="container mx-auto px-4 py-12">
           <JobHero initialSearch={params.search} />
-        </div>
-      </div>
-
-      {/* Quick Stats Bar */}
-      <div className="border-b border-border bg-muted/20">
-        <div className="container mx-auto px-4 py-6">
-          <JobStatsBar
-            totalJobs={totalJobs}
-            avgRisk={avgRisk}
-            protectedWorkers={protectedWorkers}
-          />
         </div>
       </div>
 

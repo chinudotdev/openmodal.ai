@@ -117,7 +117,7 @@ export function JobFilters({ industries, currentFilters }: JobFiltersProps) {
       </form>
 
       {/* Industry Filter */}
-      <Card>
+      <Card className="shadow-none border-0 bg-transparent rounded-none">
         <CardHeader>
           <CardTitle className="text-base">Industry</CardTitle>
         </CardHeader>
@@ -157,7 +157,7 @@ export function JobFilters({ industries, currentFilters }: JobFiltersProps) {
       </Card>
 
       {/* Status Filter */}
-      <Card>
+      <Card className="shadow-none border-0 bg-transparent rounded-none">
         <CardHeader>
           <CardTitle className="text-base">Status</CardTitle>
         </CardHeader>
@@ -188,7 +188,7 @@ export function JobFilters({ industries, currentFilters }: JobFiltersProps) {
       </Card>
 
       {/* Risk % Filter */}
-      <Card>
+      <Card className="shadow-none border-0 bg-transparent rounded-none">
         <CardHeader>
           <CardTitle className="text-base">Automation Risk %</CardTitle>
         </CardHeader>
@@ -229,7 +229,7 @@ export function JobFilters({ industries, currentFilters }: JobFiltersProps) {
       </Card>
 
       {/* Salary Filter */}
-      <Card>
+      <Card className="shadow-none border-0 bg-transparent rounded-none">
         <CardHeader>
           <CardTitle className="text-base">Salary (USD)</CardTitle>
         </CardHeader>

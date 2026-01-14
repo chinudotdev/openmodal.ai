@@ -18,11 +18,11 @@ const formatYear = (year: number | null) => {
 
 export function AtAGlance({ job }: AtAGlanceProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>At a Glance</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-lg font-semibold">At a Glance</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-0">
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">Automation Status:</p>
           <JobStatusBadge status={job.automationStatus} />

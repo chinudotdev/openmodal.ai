@@ -32,7 +32,7 @@ export function CategoryBreakdown({ categories }: CategoryBreakdownProps) {
             );
 
             return (
-              <Card key={category.id}>
+              <Card key={category.id} className="shadow-none border-0 bg-transparent rounded-none">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl">{category.name}</CardTitle>

@@ -14,7 +14,7 @@ export function CriticalGaps({ gaps }: CriticalGapsProps) {
   }
 
   return (
-    <Card>
+    <Card className="shadow-none border-0 bg-transparent rounded-none">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-destructive" />

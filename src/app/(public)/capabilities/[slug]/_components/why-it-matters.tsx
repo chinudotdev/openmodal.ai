@@ -11,11 +11,11 @@ interface WhyItMattersProps {
 
 export function WhyItMatters({ capability }: WhyItMattersProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Why It Matters</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-2xl font-semibold">Why It Matters</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-0">
         <p className="text-muted-foreground whitespace-pre-line">
           {capability.whyItMatters}
         </p>

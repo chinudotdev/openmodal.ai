@@ -7,7 +7,7 @@ interface OverallProgressProps {
 
 export function OverallProgress({ progress }: OverallProgressProps) {
   return (
-    <Card>
+    <Card className="shadow-none border-0 bg-transparent rounded-none">
       <CardHeader>
         <CardTitle className="text-2xl">Overall AGI Progress</CardTitle>
       </CardHeader>

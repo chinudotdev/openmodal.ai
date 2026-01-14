@@ -10,14 +10,14 @@ interface ContributeSectionProps {
 
 export function ContributeSection({ jobId, slug }: ContributeSectionProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Contribute</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-lg font-semibold">Contribute</CardTitle>
         <p className="text-sm text-muted-foreground">
           Help improve this analysis:
         </p>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-2 px-0">
         <Button
           variant="outline"
           className="w-full justify-start gap-2"

@@ -21,14 +21,14 @@ export function CareerGuidance({ job }: CareerGuidanceProps) {
     .slice(0, 3);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Career Guidance</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-2xl font-semibold">Career Guidance</CardTitle>
         <p className="text-sm text-muted-foreground">
           This job is relatively safe, but here's how to stay ahead:
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 px-0">
         <div>
           <h3 className="font-semibold text-foreground mb-3">
             Skills to Develop:

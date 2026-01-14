@@ -74,28 +74,6 @@ export function JobHero({ initialSearch = "" }: JobHeroProps) {
           </div>
         )}
       </form>
-
-      <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
-        <span>Popular:</span>
-        {["Software Developer", "Accountant", "Plumber", "Data Analyst"].map(
-          (job) => (
-            <button
-              key={job}
-              onClick={() => {
-                setSearch(job);
-                const form = document.querySelector("form");
-                if (form) {
-                  form.requestSubmit();
-                }
-              }}
-              type="button"
-              className="hover:text-foreground transition-colors"
-            >
-              {job}
-            </button>
-          ),
-        )}
-      </div>
     </div>
   );
 }

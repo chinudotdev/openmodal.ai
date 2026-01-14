@@ -60,7 +60,7 @@ export function CapabilityFilters({
       </form>
 
       {/* Category Filter */}
-      <Card>
+      <Card className="shadow-none border-0 bg-transparent rounded-none">
         <CardHeader>
           <CardTitle className="text-base">Category</CardTitle>
         </CardHeader>
@@ -99,7 +99,7 @@ export function CapabilityFilters({
       </Card>
 
       {/* Status Filter */}
-      <Card>
+      <Card className="shadow-none border-0 bg-transparent rounded-none">
         <CardHeader>
           <CardTitle className="text-base">Status</CardTitle>
         </CardHeader>
@@ -125,7 +125,7 @@ export function CapabilityFilters({
       </Card>
 
       {/* Timeline Filter */}
-      <Card>
+      <Card className="shadow-none border-0 bg-transparent rounded-none">
         <CardHeader>
           <CardTitle className="text-base">Timeline</CardTitle>
         </CardHeader>

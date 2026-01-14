@@ -31,8 +31,8 @@ export async function JobContent({ slug }: { slug: string }) {
   return (
     <>
       {/* Breadcrumb */}
-      <div className="border-b border-border bg-muted/40">
-        <div className="container mx-auto px-4 py-3 text-sm">
+      <div className="border-b border-border bg-background">
+        <div className="container mx-auto px-4 py-3 text-sm max-w-5xl">
           <nav className="flex items-center gap-2 text-muted-foreground">
             <Link href="/" className="hover:text-foreground">
               Home
@@ -49,23 +49,23 @@ export async function JobContent({ slug }: { slug: string }) {
 
       {/* Header */}
       <div className="border-b border-border bg-background">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-8 max-w-5xl">
           <JobHeader job={job} />
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="border-b border-border bg-muted/20">
-        <div className="container mx-auto px-4 py-6">
+      <div className="border-b border-border bg-background">
+        <div className="container mx-auto px-4 py-6 max-w-5xl">
           <QuickStatsGrid job={job} />
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-8">
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
+        <div className="grid grid-cols-1 lg:grid-cols-[70%_30%] gap-12">
           {/* Main Content */}
-          <div className="space-y-8">
+          <div className="space-y-12">
             <AboutSection job={job} />
             <TaskBreakdown job={job} />
             <RequiredCapabilities job={job} />
@@ -77,7 +77,7 @@ export async function JobContent({ slug }: { slug: string }) {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             <QuickActions jobId={job.id} slug={job.slug} />
             <AtAGlance job={job} />
             <RelatedJobs job={job} />

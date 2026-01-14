@@ -12,11 +12,11 @@ interface QuickActionsProps {
 
 export function QuickActions({ jobId, slug }: QuickActionsProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Quick Actions</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-2 px-0">
         <TrackButton jobId={jobId} />
         <ShareButton slug={slug} />
         <Button variant="outline" className="w-full gap-2" asChild>

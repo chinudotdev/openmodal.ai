@@ -18,11 +18,11 @@ export function CapabilityDescription({
   const [showTechnical, setShowTechnical] = useState(false);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>What Is This?</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-2xl font-semibold">What Is This?</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-0">
         <p className="text-muted-foreground">{capability.description}</p>
         <Button
           variant="ghost"

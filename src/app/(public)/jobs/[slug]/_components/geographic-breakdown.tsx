@@ -39,11 +39,11 @@ export function GeographicBreakdown({ job }: GeographicBreakdownProps) {
 
   if (geographicData.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Geographic Breakdown</CardTitle>
+      <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+        <CardHeader className="px-0 pb-4">
+          <CardTitle className="text-2xl font-semibold">Geographic Breakdown</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-0">
           <p className="text-sm text-muted-foreground">
             Geographic data not available for this job.
           </p>
@@ -53,14 +53,14 @@ export function GeographicBreakdown({ job }: GeographicBreakdownProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Geographic Breakdown</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-2xl font-semibold">Geographic Breakdown</CardTitle>
         <p className="text-sm text-muted-foreground">
           Worker distribution and automation risk by region
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-0">
         <div className="space-y-4">
           <div className="text-sm text-muted-foreground">
             <p>Click a region to see:</p>

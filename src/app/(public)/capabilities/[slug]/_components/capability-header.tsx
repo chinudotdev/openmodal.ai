@@ -43,8 +43,8 @@ export function CapabilityHeader({ capability }: CapabilityHeaderProps) {
       </div>
 
       {/* Progress and Status */}
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+        <CardContent className="pt-0 pb-6 px-0">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-muted-foreground">
@@ -77,8 +77,8 @@ export function CapabilityHeader({ capability }: CapabilityHeaderProps) {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+          <CardContent className="pt-0 px-0">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                 <Users className="h-5 w-5 text-primary" />
@@ -92,8 +92,8 @@ export function CapabilityHeader({ capability }: CapabilityHeaderProps) {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+          <CardContent className="pt-0 px-0">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                 <Building2 className="h-5 w-5 text-primary" />
@@ -107,8 +107,8 @@ export function CapabilityHeader({ capability }: CapabilityHeaderProps) {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+          <CardContent className="pt-0 px-0">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                 <Share2 className="h-5 w-5 text-primary" />

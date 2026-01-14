@@ -33,14 +33,14 @@ export function TaskBreakdown({ job }: TaskBreakdownProps) {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Task Breakdown</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-2xl font-semibold">Task Breakdown</CardTitle>
         <p className="text-sm text-muted-foreground">
           This job consists of {tasks.length} major tasks:
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 px-0">
         {tasks.map((task) => (
           <TaskCard key={task.id} task={task} />
         ))}

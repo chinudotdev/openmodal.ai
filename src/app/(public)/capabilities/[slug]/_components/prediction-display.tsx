@@ -33,7 +33,7 @@ export function PredictionDisplay({ capability }: PredictionDisplayProps) {
   const isAligned = !isMoreOptimistic && !isMorePessimistic;
 
   return (
-    <Card>
+    <Card className="shadow-none border-0 bg-transparent rounded-none">
       <CardContent className="pt-6">
         <div className="space-y-4">
           <div>

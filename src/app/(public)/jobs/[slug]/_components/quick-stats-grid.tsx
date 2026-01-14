@@ -44,8 +44,8 @@ export function QuickStatsGrid({ job }: QuickStatsGridProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+        <CardContent className="pt-0 px-0">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <Users className="h-5 w-5 text-primary" />
@@ -59,8 +59,8 @@ export function QuickStatsGrid({ job }: QuickStatsGridProps) {
           </div>
         </CardContent>
       </Card>
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+        <CardContent className="pt-0 px-0">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <DollarSign className="h-5 w-5 text-primary" />
@@ -76,8 +76,8 @@ export function QuickStatsGrid({ job }: QuickStatsGridProps) {
           </div>
         </CardContent>
       </Card>
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+        <CardContent className="pt-0 px-0">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <TrendingUp className="h-5 w-5 text-primary" />
@@ -91,8 +91,8 @@ export function QuickStatsGrid({ job }: QuickStatsGridProps) {
           </div>
         </CardContent>
       </Card>
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+        <CardContent className="pt-0 px-0">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <Calendar className="h-5 w-5 text-primary" />

@@ -10,11 +10,11 @@ interface CommunityStatsProps {
 
 export function CommunityStats({ job }: CommunityStatsProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Community Stats</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-lg font-semibold">Community Stats</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 px-0">
         <div className="flex items-center gap-3">
           <Eye className="h-4 w-4 text-muted-foreground" />
           <div className="flex-1">

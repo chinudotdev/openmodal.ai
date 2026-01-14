@@ -12,11 +12,11 @@ interface CurrentStateProps {
 
 export function CurrentState({ capability }: CurrentStateProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Current State</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-2xl font-semibold">Current State</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 px-0">
         {/* What Works */}
         {capability.whatWorks.length > 0 && (
           <div>

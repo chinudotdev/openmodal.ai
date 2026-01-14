@@ -26,14 +26,14 @@ export function RelatedJobs({ job }: RelatedJobsProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Related Jobs</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-lg font-semibold">Related Jobs</CardTitle>
         <p className="text-sm text-muted-foreground">
           Similar roles to consider:
         </p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-0">
         {relatedJobs.slice(0, 4).map((relatedJob) => (
           <div key={relatedJob.id} className="space-y-2">
             <div className="flex items-center justify-between">

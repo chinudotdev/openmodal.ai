@@ -62,7 +62,7 @@ export function TaskCard({ task }: TaskCardProps) {
   };
 
   return (
-    <Card>
+    <Card className="shadow-none border-0 bg-muted/30 rounded-lg">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">

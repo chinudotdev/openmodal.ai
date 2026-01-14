@@ -7,7 +7,6 @@ import {
   Building2,
   Cpu,
   FileText,
-  Home,
   Info,
   Mail,
   Map as MapIcon,
@@ -31,7 +30,7 @@ export function MobileMenu() {
   const pathname = usePathname();
 
   const mainLinks = [
-    { href: "/", label: "AGI Status", icon: Home },
+    { href: "/capabilities", label: "Capabilities", icon: Brain },
     { href: "/jobs", label: "Jobs", icon: Briefcase },
     { href: "/technologies", label: "Technologies", icon: Cpu },
     { href: "/reports", label: "Reports", icon: MapPin },
@@ -77,7 +76,7 @@ export function MobileMenu() {
           <nav className="flex flex-col gap-1 px-3">
             {mainLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = pathname === link.href;
+              const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
               return (
                 <Link
                   key={link.href}

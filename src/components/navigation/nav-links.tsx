@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { MoreDropdown } from "./more-dropdown";
 
 const navLinks = [
-  { href: "/", label: "AGI" },
+  { href: "/capabilities", label: "Capabilities" },
   { href: "/jobs", label: "Jobs" },
   { href: "/technologies", label: "Technologies" },
   { href: "/reports", label: "Reports" },
@@ -18,7 +18,7 @@ export function NavLinks() {
   return (
     <nav className="flex items-center gap-1">
       {navLinks.map((link) => {
-        const isActive = pathname === link.href;
+        const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
         return (
           <Link
             key={link.href}

@@ -55,7 +55,7 @@ export function JobAutocomplete({ query, onSelect }: JobAutocompleteProps) {
   };
 
   return (
-    <Card className="max-h-96 overflow-y-auto">
+    <Card className="max-h-96 overflow-y-auto shadow-none border-0 bg-transparent rounded-none">
       <CardContent className="p-0">
         {isLoading ? (
           <div className="p-4 space-y-3">

@@ -29,14 +29,14 @@ export function AutomationTimeline({ job }: AutomationTimelineProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Automation Timeline</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-2xl font-semibold">Automation Timeline</CardTitle>
         <p className="text-sm text-muted-foreground">
           Based on capability progress and expert consensus:
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 px-0">
         <div className="space-y-4">
           {years.map((year) => {
             const percentage = getProjectedPercentage(year);

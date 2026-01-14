@@ -33,7 +33,7 @@ export function PredictionForm({ capability }: PredictionFormProps) {
   const [predictedYear, setPredictedYear] = useState("");
   const [predictedYearEnd, setPredictedYearEnd] = useState("");
   const [confidence, setConfidence] = useState<"low" | "medium" | "high">(
-    "medium",
+    "medium"
   );
   const [reasoning, setReasoning] = useState("");
   const [background, setBackground] = useState<
@@ -77,7 +77,7 @@ export function PredictionForm({ capability }: PredictionFormProps) {
   const currentYear = new Date().getFullYear();
 
   return (
-    <Card>
+    <Card className="shadow-none border-0 bg-transparent rounded-none">
       <CardHeader>
         <CardTitle>Submit Your Prediction</CardTitle>
       </CardHeader>

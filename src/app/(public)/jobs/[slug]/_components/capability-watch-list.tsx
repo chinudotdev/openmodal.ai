@@ -20,14 +20,14 @@ export function CapabilityWatchList({ job }: CapabilityWatchListProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Capability Watch List</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-lg font-semibold">Capability Watch List</CardTitle>
         <p className="text-sm text-muted-foreground">
           Track these to monitor automation risk:
         </p>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-0">
         {blockingCapabilities.slice(0, 3).map((cap) => (
           <div key={cap.id} className="space-y-2">
             <div className="flex items-center justify-between">

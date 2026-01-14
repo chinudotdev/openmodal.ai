@@ -41,22 +41,22 @@ export function RequiredCapabilities({ job }: RequiredCapabilitiesProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Required AI Capabilities</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-2xl font-semibold">Required AI Capabilities</CardTitle>
         <p className="text-sm text-muted-foreground">
           This job requires {capabilities.length} AI capabilities to be fully
           automated. Here's the current status:
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 px-0">
         {blockingCapabilities.length > 0 && (
           <div className="space-y-4">
             <h3 className="font-semibold text-foreground">
               Blocking Automation (Critical Gaps):
             </h3>
             {blockingCapabilities.map((cap) => (
-              <Card key={cap.id} className="border-l-4 border-l-red-500">
+              <Card key={cap.id} className="border-l-4 border-l-red-500 shadow-none border-t-0 border-r-0 border-b-0 bg-muted/30 rounded-lg">
                 <CardContent className="pt-6">
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
@@ -112,7 +112,7 @@ export function RequiredCapabilities({ job }: RequiredCapabilitiesProps) {
               Mostly Solved (Not blocking):
             </h3>
             {nonBlockingCapabilities.map((cap) => (
-              <Card key={cap.id} className="border-l-4 border-l-green-500">
+              <Card key={cap.id} className="border-l-4 border-l-green-500 shadow-none border-t-0 border-r-0 border-b-0 bg-muted/30 rounded-lg">
                 <CardContent className="pt-6">
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">

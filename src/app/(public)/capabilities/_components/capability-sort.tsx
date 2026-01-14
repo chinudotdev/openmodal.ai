@@ -29,7 +29,7 @@ export function CapabilitySort({ currentSort }: CapabilitySortProps) {
   };
 
   return (
-    <Card>
+    <Card className="shadow-none border-0 bg-transparent rounded-none">
       <CardHeader>
         <CardTitle className="text-base">Sort By</CardTitle>
       </CardHeader>

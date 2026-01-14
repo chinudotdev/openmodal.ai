@@ -66,11 +66,11 @@ export function BottleneckCards({ bottlenecks }: BottleneckCardsProps) {
   ];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Key Bottlenecks</CardTitle>
+    <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+      <CardHeader className="px-0 pb-4">
+        <CardTitle className="text-2xl font-semibold">Key Bottlenecks</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-0">
         {severities.map((severity) => {
           const items = grouped[severity];
           if (!items || items.length === 0) return null;
@@ -89,7 +89,7 @@ export function BottleneckCards({ bottlenecks }: BottleneckCardsProps) {
               {items.map((bottleneck) => (
                 <Card
                   key={bottleneck.id}
-                  className={cn("border-2", config.className)}
+                  className={cn("border-0 shadow-none rounded-lg bg-muted/30", config.className)}
                 >
                   <CardContent className="pt-6">
                     <div className="space-y-3">

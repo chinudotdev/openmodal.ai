@@ -72,7 +72,7 @@ export function JobCard({ job }: JobCardProps) {
 
   return (
     <Link href={`/jobs/${job.slug}`}>
-      <Card className="h-full transition-all duration-300 hover:border-primary/50 hover:shadow-md">
+      <Card className="h-full border-muted shadow-none bg-transparent hover:bg-muted hover:border-primary/20 transition-all duration-300 rounded-lg">
         <CardHeader>
           <div className="flex items-start justify-between">
             <CardTitle className="text-lg">{job.title}</CardTitle>
