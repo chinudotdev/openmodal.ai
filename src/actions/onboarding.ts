@@ -12,8 +12,7 @@ import {
   userProfile,
   userReputation,
 } from "@/db/schema";
-import { industry } from "@/db/schema/industries";
-import { job } from "@/db/schema/jobs";
+import { job, type JobCategory } from "@/db/schema/jobs";
 import { auth } from "@/lib/auth";
 import {
   type BasicInfoInput,
@@ -30,14 +29,21 @@ export async function getAllJobsForDropdown() {
     const jobs = await db
       .select({
         id: job.id,
-        title: job.title,
-        industry: industry.name,
+        name: job.name,
+        category: job.category,
       })
       .from(job)
-      .innerJoin(industry, eq(job.industryId, industry.id))
-      .orderBy(asc(job.title));
+      .orderBy(asc(job.name));
 
-    return { success: true, jobs };
+    // Map to expected format (using name as title for backwards compatibility)
+    return {
+      success: true,
+      jobs: jobs.map((j) => ({
+        id: j.id,
+        title: j.name,
+        industry: j.category,
+      })),
+    };
   } catch (error) {
     console.error("Error getting jobs:", error);
     return { success: false, jobs: [], error: "Failed to get jobs" };
@@ -45,24 +51,28 @@ export async function getAllJobsForDropdown() {
 }
 
 /**
- * Get all unique industries for dropdown
+ * Get all unique industries/categories for dropdown
+ * Now returns job categories since industry table was removed
  */
 export async function getAllIndustries() {
   try {
-    const industries = await db
-      .selectDistinct({
-        id: industry.id,
-        name: industry.name,
-        slug: industry.slug,
-        icon: industry.icon,
-      })
-      .from(industry)
-      .innerJoin(job, eq(job.industryId, industry.id))
-      .orderBy(asc(industry.name));
+    // Return the predefined job categories
+    const categories: JobCategory[] = [
+      "healthcare",
+      "technology",
+      "trades",
+      "service",
+      "creative",
+      "finance",
+      "education",
+      "legal",
+      "manufacturing",
+      "other",
+    ];
 
     return {
       success: true,
-      industries: industries.map((i) => i.name),
+      industries: categories,
     };
   } catch (error) {
     console.error("Error getting industries:", error);
@@ -75,7 +85,7 @@ export async function getAllIndustries() {
 }
 
 /**
- * Search jobs by title
+ * Search jobs by name
  */
 export async function searchJobsByTitle(query: string, limit = 10) {
   try {
@@ -86,16 +96,23 @@ export async function searchJobsByTitle(query: string, limit = 10) {
     const jobs = await db
       .select({
         id: job.id,
-        title: job.title,
-        industry: industry.name,
+        name: job.name,
+        category: job.category,
       })
       .from(job)
-      .innerJoin(industry, eq(job.industryId, industry.id))
-      .where(ilike(job.title, `%${query}%`))
+      .where(ilike(job.name, `%${query}%`))
       .limit(limit)
-      .orderBy(asc(job.title));
+      .orderBy(asc(job.name));
 
-    return { success: true, jobs };
+    // Map to expected format for backwards compatibility
+    return {
+      success: true,
+      jobs: jobs.map((j) => ({
+        id: j.id,
+        title: j.name,
+        industry: j.category,
+      })),
+    };
   } catch (error) {
     console.error("Error searching jobs:", error);
     return { success: false, jobs: [], error: "Failed to search jobs" };
@@ -103,55 +120,44 @@ export async function searchJobsByTitle(query: string, limit = 10) {
 }
 
 /**
- * Create or get job by title and industry
+ * Create or get job by name and category
  */
 export async function createOrGetJob(
   jobTitle: string,
   industryName: string,
 ): Promise<{ success: boolean; jobId?: string; error?: string }> {
   try {
-    // Optimized: Check job first, then handle industry and job creation
-    const finalIndustryName = industryName || "Unknown";
+    // Map industry name to valid category or default to "other"
+    const validCategories: JobCategory[] = [
+      "healthcare",
+      "technology",
+      "trades",
+      "service",
+      "creative",
+      "finance",
+      "education",
+      "legal",
+      "manufacturing",
+      "other",
+    ];
+    const category: JobCategory = validCategories.includes(
+      industryName?.toLowerCase() as JobCategory,
+    )
+      ? (industryName.toLowerCase() as JobCategory)
+      : "other";
 
     // Check if job already exists (single query)
     const existingJob = await db
       .select({ id: job.id })
       .from(job)
-      .where(eq(job.title, jobTitle))
+      .where(eq(job.name, jobTitle))
       .limit(1);
 
     if (existingJob.length > 0) {
       return { success: true, jobId: existingJob[0].id };
     }
 
-    // Get or create industry in single query using INSERT ... ON CONFLICT
-    const industrySlug = finalIndustryName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "_")
-      .replace(/(^_|_$)/g, "");
-    const industryId = `industry_${generateRandomString(16)}`;
-
-    // Use INSERT ... ON CONFLICT to get or create industry
-    await db.execute(sql`
-      INSERT INTO ${industry} (id, slug, name, display_order, status)
-      VALUES (${industryId}, ${industrySlug}, ${finalIndustryName}, 0, 'active')
-      ON CONFLICT (name) DO NOTHING
-    `);
-
-    // Get the industry ID (either the one we tried to insert or existing)
-    const industryRecord = await db
-      .select({ id: industry.id })
-      .from(industry)
-      .where(eq(industry.name, finalIndustryName))
-      .limit(1);
-
-    if (industryRecord.length === 0) {
-      return { success: false, error: "Failed to create industry" };
-    }
-
-    const finalIndustryId = industryRecord[0].id;
-
-    // Create job with unique slug in single query
+    // Create job with unique slug
     const baseSlug = jobTitle
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -175,21 +181,12 @@ export async function createOrGetJob(
     await db.insert(job).values({
       id: jobId,
       slug: uniqueSlug,
-      title: jobTitle,
-      industryId: finalIndustryId,
-      category: finalIndustryName,
+      name: jobTitle,
+      category,
       description: `Job: ${jobTitle}`,
-      shortDescription: jobTitle,
-      keyResponsibilities: [],
-      automationPercentage: 0,
-      automationStatus: "safe",
-      totalTasks: 0,
-      tasksReplaceable: 0,
-      tasksPartial: 0,
-      tasksSafe: 0,
-      confidenceLevel: "low",
-      verified: false,
-      dataQuality: 0,
+      automationRiskPercentage: 0,
+      riskLevel: "low",
+      confidence: "medium",
     });
 
     return { success: true, jobId };

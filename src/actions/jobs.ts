@@ -6,17 +6,13 @@ import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db";
 import { user, userBadge, userProfile, userReputation } from "@/db/schema";
 import { capability } from "@/db/schema/capabilities";
-import { industry } from "@/db/schema/industries";
 import {
-  type AutomationStatus,
   job,
   jobCapability,
   jobComment,
-  jobGeographicData,
-  jobTracking,
-  relatedJob,
   task,
   taskCapability,
+  type JobCategory,
 } from "@/db/schema/jobs";
 import { checkOnboardingFromSession } from "@/lib/session-utils";
 

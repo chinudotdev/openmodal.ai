@@ -1,8 +1,7 @@
-import { eq, ilike, or } from "drizzle-orm";
+import { ilike, or } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { capability } from "@/db/schema/capabilities";
-import { industry } from "@/db/schema/industries";
 import { job } from "@/db/schema/jobs";
 
 export interface SearchResult {
@@ -68,16 +67,14 @@ export async function GET(request: NextRequest) {
         .select({
           id: job.id,
           slug: job.slug,
-          title: job.title,
-          shortDescription: job.shortDescription,
+          name: job.name,
+          description: job.description,
         })
         .from(job)
-        .innerJoin(industry, eq(job.industryId, industry.id))
         .where(
           or(
-            ilike(job.title, searchPattern),
-            ilike(job.shortDescription, searchPattern),
-            ilike(industry.name, searchPattern),
+            ilike(job.name, searchPattern),
+            ilike(job.description, searchPattern),
             ilike(job.category, searchPattern),
           ),
         )
@@ -85,10 +82,10 @@ export async function GET(request: NextRequest) {
 
       jobs = jobResults.map((j) => ({
         id: j.id,
-        title: j.title,
+        title: j.name,
         type: "job" as const,
         url: `/jobs/${j.slug}`,
-        description: j.shortDescription || undefined,
+        description: j.description || undefined,
       }));
     } catch (error) {
       console.error("Error searching jobs:", error);

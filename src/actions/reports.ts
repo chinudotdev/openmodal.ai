@@ -14,9 +14,8 @@ import {
   userProfile,
   userReputation,
 } from "@/db/schema";
-import { capability, capabilityCategory } from "@/db/schema/capabilities";
-import { industry } from "@/db/schema/industries";
-import { job } from "@/db/schema/jobs";
+import { capability } from "@/db/schema/capabilities";
+import { job, type JobCategory } from "@/db/schema/jobs";
 import { checkOnboardingFromSession } from "@/lib/session-utils";
 import {
   type BarrierReportInput,
@@ -28,53 +27,36 @@ import {
 } from "@/lib/validations";
 
 /**
- * Helper: Create or get job by title
+ * Helper: Create or get job by name
  */
 async function createOrGetJob(
   jobTitle: string,
-  industryName?: string,
+  _industryName?: string,
 ): Promise<string> {
-  // Find or create industry
-  let industryRecord = await db
-    .select()
-    .from(industry)
-    .where(eq(industry.name, industryName || "Unknown"))
-    .limit(1);
+  // Map industry name to valid category or default to "other"
+  const validCategories: JobCategory[] = [
+    "healthcare",
+    "technology",
+    "trades",
+    "service",
+    "creative",
+    "finance",
+    "education",
+    "legal",
+    "manufacturing",
+    "other",
+  ];
+  const category: JobCategory = validCategories.includes(
+    _industryName?.toLowerCase() as JobCategory,
+  )
+    ? (_industryName!.toLowerCase() as JobCategory)
+    : "other";
 
-  if (industryRecord.length === 0) {
-    // Create new industry
-    const industryId = `industry_${generateRandomString(16)}`;
-    const industrySlug = (industryName || "unknown")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "_")
-      .replace(/(^_|_$)/g, "");
-
-    await db.insert(industry).values({
-      id: industryId,
-      slug: industrySlug,
-      name: industryName || "Unknown",
-      displayOrder: 0,
-      status: "active",
-    });
-
-    industryRecord = await db
-      .select()
-      .from(industry)
-      .where(eq(industry.id, industryId))
-      .limit(1);
-  }
-
-  if (industryRecord.length === 0) {
-    throw new Error("Failed to create industry");
-  }
-
-  const industryId = industryRecord[0].id;
-
-  // Try to find existing job by title
+  // Try to find existing job by name
   const existing = await db
     .select()
     .from(job)
-    .where(eq(job.title, jobTitle))
+    .where(eq(job.name, jobTitle))
     .limit(1);
 
   if (existing.length > 0) {
@@ -91,21 +73,12 @@ async function createOrGetJob(
   await db.insert(job).values({
     id: jobId,
     slug,
-    title: jobTitle,
-    industryId,
-    category: industryName || "Unknown",
+    name: jobTitle,
+    category,
     description: `Job: ${jobTitle}`,
-    shortDescription: jobTitle,
-    keyResponsibilities: [],
-    automationPercentage: 0,
-    automationStatus: "safe",
-    totalTasks: 0,
-    tasksReplaceable: 0,
-    tasksPartial: 0,
-    tasksSafe: 0,
-    confidenceLevel: "low",
-    verified: false,
-    dataQuality: 0,
+    automationRiskPercentage: 0,
+    riskLevel: "low",
+    confidence: "medium",
   });
 
   return jobId;
@@ -116,7 +89,7 @@ async function createOrGetJob(
  */
 async function createOrGetCapability(
   capabilityName: string,
-  categoryId?: string,
+  _categoryId?: string,
 ): Promise<string> {
   // Try to find existing capability by name
   const existing = await db
@@ -136,30 +109,18 @@ async function createOrGetCapability(
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-  // Get default category if not provided
-  let finalCategoryId = categoryId;
-  if (!finalCategoryId) {
-    const categories = await db.select().from(capabilityCategory).limit(1);
-    finalCategoryId = categories[0]?.id || generateRandomString(32);
-  }
-
+  // Default to "cognitive" category for new capabilities
   await db.insert(capability).values({
     id: capabilityId,
     slug,
     name: capabilityName,
-    categoryId: finalCategoryId,
+    category: "cognitive", // Default category enum
     description: capabilityName,
-    technicalDescription: `Capability: ${capabilityName}`,
-    whyItMatters: `This capability is important for automation.`,
     progressPercentage: 0,
     status: "unsolved",
-    confidenceLevel: "low",
     whatWorks: [],
     whatStruggles: [],
     whatDoesntWork: [],
-    jobsProtectedCount: 0,
-    jobsProtectedExamples: [],
-    researchActivityCount: 0,
   });
 
   return capabilityId;
@@ -982,11 +943,11 @@ export async function getApprovedReports(limit = 20, offset = 0) {
 }
 
 /**
- * Get personalized reports based on user's job title and industry
+ * Get personalized reports based on user's job name and category
  */
 export async function getPersonalizedReports(
   jobTitle?: string | null,
-  industry?: string | null,
+  category?: string | null,
   limit = 10,
 ) {
   "use cache";
@@ -998,34 +959,33 @@ export async function getPersonalizedReports(
       isNull(report.deletedAt),
     ];
 
-    // If user has job title or industry, filter by them
-    if (jobTitle || industry) {
+    // If user has job name or category, filter by them
+    if (jobTitle || category) {
       const jobConditions: SQL<unknown>[] = [];
       if (jobTitle) {
         const jobTitlePattern = `%${jobTitle}%`;
-        // Match reports with same job title (from jobId or jobTitle field)
+        // Match reports with same job name (from jobId or jobTitle field)
         const jobTitleCondition = or(
           ilike(report.jobTitle, jobTitlePattern),
           sql`EXISTS (
             SELECT 1 FROM ${job} j
             WHERE j.id = ${report.jobId}
-            AND j.title ILIKE ${jobTitlePattern}
+            AND j.name ILIKE ${jobTitlePattern}
           )`,
         );
         if (jobTitleCondition) {
           jobConditions.push(jobTitleCondition);
         }
       }
-      if (industry) {
-        const industryPattern = `%${industry}%`;
-        // Match reports with same industry
-        const industryCondition = sql`EXISTS (
+      if (category) {
+        const categoryPattern = `%${category}%`;
+        // Match reports with same category
+        const categoryCondition = sql`EXISTS (
           SELECT 1 FROM ${job} j
-          INNER JOIN industry i ON j.industry_id = i.id
           WHERE j.id = ${report.jobId}
-          AND i.name ILIKE ${industryPattern}
+          AND j.category ILIKE ${categoryPattern}
         )`;
-        jobConditions.push(industryCondition);
+        jobConditions.push(categoryCondition);
       }
       if (jobConditions.length > 0) {
         const combinedCondition = or(...jobConditions);
