@@ -9,6 +9,8 @@
 - Build runs via `bun run build` which includes TypeScript checking
 - Capability schema uses: `CapabilityCategory` type ("physical" | "cognitive" | "social" | "meta")
 - Capability schema uses: `CapabilityStatus` type ("solved" | "partial" | "unsolved")
+- Job schema uses: `JobCategory`, `RiskLevel`, `Confidence`, `Automatable`, `ImportanceLevel` types
+- Job field renames: `title` → `name`, `automationStatus` → `riskLevel`, `industryId` → `category` enum
 
 ---
 
@@ -27,6 +29,25 @@
   - Main blockers: `src/actions/admin-content.ts` and `src/actions/capabilities.ts` import non-existent exports
   - Need to complete US-003 (remove admin pages) and US-005 (remove admin-content.ts) to clear these errors
   - The schema is the source of truth - fix consumers, don't recreate deleted tables
+
+---
+
+## 2025-01-21 - US-002 (Update Job Schema Exports)
+- **Status**: COMPLETE
+- **What was verified**:
+  - Schema `src/db/schema/jobs.ts` exports all required enum types
+  - `JobCategory` type exported (line 54): "healthcare" | "technology" | "trades" | "service" | "creative" | "finance" | "education" | "legal" | "manufacturing" | "other"
+  - `RiskLevel` type exported (line 55): "low" | "medium" | "high" | "critical"
+  - `Confidence` type exported (line 56): "low" | "medium" | "high"
+  - `Automatable` type exported (line 57): "yes" | "partial" | "no"
+  - `ImportanceLevel` type exported (line 58): "critical" | "important" | "minor"
+- **Files examined**:
+  - `src/db/schema/jobs.ts` (all exports correct)
+  - `src/db/schema/index.ts` (re-exports jobs)
+- **Learnings for future iterations**:
+  - Job schema also correctly renamed: `title` → `name`, `automationStatus` → `riskLevel`, `industryId` → `category` enum
+  - Job schema removed tables: `industry`, `jobTracking`, `relatedJob`
+  - Same blocking pattern as US-001 - typecheck will pass once consuming files are fixed
 
 ---
 
