@@ -1,0 +1,32 @@
+# Ralph Progress Log
+# Project: OpenModal Schema Migration Fix
+# Branch: ralph/schema-migration-fix
+# Started: 2025-01-21
+
+## Codebase Patterns
+- Schema files are in `src/db/schema/` and exported through `src/db/schema/index.ts`
+- The new schema uses enums (e.g., `capabilityCategoryEnum`) instead of separate tables
+- Build runs via `bun run build` which includes TypeScript checking
+- Capability schema uses: `CapabilityCategory` type ("physical" | "cognitive" | "social" | "meta")
+- Capability schema uses: `CapabilityStatus` type ("solved" | "partial" | "unsolved")
+
+---
+
+## 2025-01-21 - US-001 (Update Capability Schema Exports)
+- **Status**: COMPLETE
+- **What was verified**:
+  - Schema `src/db/schema/capabilities.ts` already correct - no `capabilityCategory` or `capabilityTracking` tables
+  - `CapabilityCategory` type exported (line 28)
+  - `CapabilityStatus` type exported (line 29)
+  - `capabilityCategoryEnum` and `capabilityStatusEnum` exported
+- **Files examined**:
+  - `src/db/schema/capabilities.ts` (already correct)
+  - `src/db/schema/index.ts` (exports capabilities)
+- **Learnings for future iterations**:
+  - Typecheck fails due to CONSUMING files (not schema) still importing deleted tables
+  - Main blockers: `src/actions/admin-content.ts` and `src/actions/capabilities.ts` import non-existent exports
+  - Need to complete US-003 (remove admin pages) and US-005 (remove admin-content.ts) to clear these errors
+  - The schema is the source of truth - fix consumers, don't recreate deleted tables
+
+---
+

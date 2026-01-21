@@ -1,0 +1,514 @@
+{
+  "project": "OpenModal",
+  "branchName": "ralph/schema-migration-fix",
+  "description": "Fix all breaking public-facing pages due to schema restructure - Update capabilities, jobs, reports pages and remove admin/moderation pages",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Update Capability Schema Exports",
+      "description": "As a developer, I need the capability schema exports to match the new structure so that all imports work correctly.",
+      "acceptanceCriteria": [
+        "Remove `capabilityCategory` table export from schema index if present",
+        "Remove `capabilityTracking` table export from schema index if present",
+        "Verify enum types are exported: `CapabilityCategory`, `CapabilityStatus`",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Schema exports are correct. capabilityCategory/capabilityTracking tables removed, CapabilityCategory and CapabilityStatus types exported. Typecheck will pass after US-003 (remove admin pages) and US-005 (remove admin-content.ts) are completed, as those files still import deleted tables."
+    },
+    {
+      "id": "US-002",
+      "title": "Update Job Schema Exports",
+      "description": "As a developer, I need the job schema exports to match the new structure so that all imports work correctly.",
+      "acceptanceCriteria": [
+        "Verify enum types are exported: `JobCategory`, `RiskLevel`, `Confidence`, `Automatable`, `ImportanceLevel`",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Remove Admin Pages Directory",
+      "description": "As a developer, I need to remove all admin pages since they are being deprecated.",
+      "acceptanceCriteria": [
+        "Remove `src/app/admin/` directory entirely",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Remove Moderation Pages Directory",
+      "description": "As a developer, I need to remove all moderation pages since they are being deprecated.",
+      "acceptanceCriteria": [
+        "Remove `src/app/moderation/` directory entirely",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Remove Admin Content Actions",
+      "description": "As a developer, I need to remove admin-related server actions.",
+      "acceptanceCriteria": [
+        "Remove `src/actions/admin-content.ts` file if it exists",
+        "Remove any imports of admin-content actions from other files",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Remove Industry Schema",
+      "description": "As a developer, I need to remove industry table references since it's replaced by enum.",
+      "acceptanceCriteria": [
+        "Remove `src/db/schema/industries.ts` if it exists",
+        "Remove industry-related exports from schema index",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Clean Up Schema Index Exports",
+      "description": "As a developer, I need the schema index to export only valid tables and types.",
+      "acceptanceCriteria": [
+        "Update `src/db/schema/index.ts` to export all new schema files (discussions, organizations, suggestions, technologies)",
+        "Remove exports for any deleted tables (capabilityCategory, capabilityTracking, industry, jobTracking, relatedJob)",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Fix Capabilities Action - Remove Old Imports",
+      "description": "As a developer, I need to remove imports for deleted tables from capabilities action.",
+      "acceptanceCriteria": [
+        "Remove imports for `capabilityCategory` table from `src/actions/capabilities.ts`",
+        "Remove imports for `capabilityTracking` table from `src/actions/capabilities.ts`",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Fix Capabilities Action - Update Queries",
+      "description": "As a developer, I need to update capabilities queries to use new schema structure.",
+      "acceptanceCriteria": [
+        "Update `getCapabilities()` to use `category` enum directly instead of `categoryId` FK join",
+        "Remove joins to `capabilityCategory` table",
+        "Return `whatWorks`, `whatStruggles`, `whatDoesntWork` arrays in response",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Fix Capabilities Action - Remove Deleted Field References",
+      "description": "As a developer, I need to remove references to deleted capability fields.",
+      "acceptanceCriteria": [
+        "Remove references to: `technicalDescription`, `whyItMatters`, `confidenceLevel`, `timelineEstimate`, `expertConsensus`, `communityPredictionMedian`, `reasoning`",
+        "Remove references to: `jobsProtectedCount`, `jobsProtectedExamples`, `researchActivityCount`, `recentBreakthroughDate`",
+        "Remove references to: `viewCount`, `trackingCount`",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Fix Capabilities Action - Remove Tracking Functions",
+      "description": "As a developer, I need to remove tracking-related functions from capabilities action.",
+      "acceptanceCriteria": [
+        "Remove `trackCapability()` function if it exists",
+        "Remove `incrementViewCount()` function for capabilities if it exists",
+        "Remove any other functions that reference deleted tracking tables/fields",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Fix Jobs Action - Remove Old Imports",
+      "description": "As a developer, I need to remove imports for deleted tables from jobs action.",
+      "acceptanceCriteria": [
+        "Remove import for `industry` table from `src/actions/jobs.ts`",
+        "Remove import for `jobTracking` table if present",
+        "Remove import for `relatedJob` table if present",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Fix Jobs Action - Update Field References",
+      "description": "As a developer, I need to update field name references in jobs action.",
+      "acceptanceCriteria": [
+        "Update all `title` field references to `name`",
+        "Update all `automationStatus` field references to `riskLevel`",
+        "Update `industryId` FK joins to use `category` enum directly",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Fix Jobs Action - Remove Deleted Field References",
+      "description": "As a developer, I need to remove references to deleted job fields.",
+      "acceptanceCriteria": [
+        "Remove references to: `shortDescription`, `keyResponsibilities`, `totalTasks`, `tasksReplaceable`, `tasksPartial`, `tasksSafe`",
+        "Remove references to: `totalWorkersGlobal`, `totalWorkersUsa`, `medianSalaryUsa`, `growthOutlook`, `growthRate`",
+        "Remove references to: `blsOccCode`, `estimatedAutomationYear`, `metaDescription`, `metaKeywords`",
+        "Remove references to: `viewCount`, `trackingCount`, `reportCount`, `verified`, `lastReviewed`",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Fix Jobs Action - Remove Tracking and Related Functions",
+      "description": "As a developer, I need to remove tracking and related jobs functions.",
+      "acceptanceCriteria": [
+        "Remove `trackJob()` function if it exists",
+        "Remove `incrementViewCount()` function for jobs if it exists",
+        "Remove `getRelatedJobs()` function if it exists",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Fix Reports Action - Update Table References",
+      "description": "As a developer, I need to update reports action to use impactReport table.",
+      "acceptanceCriteria": [
+        "Update table references from `report` to `impactReport` in `src/actions/reports.ts`",
+        "Update imports to use correct table name",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Fix Reports Action - Remove Deleted Fields",
+      "description": "As a developer, I need to remove references to deleted report fields.",
+      "acceptanceCriteria": [
+        "Remove references to: `isDraft`, `reportType`, `company`, `workersAffected`, `impactType`",
+        "Remove references to: `automationPercentage`, `performanceComparison`, `moderationNotes`",
+        "Remove references to: `downvotes`, `verificationCount`, `commentCount`, `deletedAt`, `publishedAt`",
+        "Update to use `technologyId` (required) and `jobId` (optional) connections",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Fix Capability Card Component",
+      "description": "As a user viewing capabilities, I want to see capability cards with accurate data from the new schema.",
+      "acceptanceCriteria": [
+        "Update `capability.category?.name` to use enum value directly (category is now a string enum, not an object)",
+        "Remove `timelineEstimate` display",
+        "Remove `jobsProtectedCount` display",
+        "Remove `trackingCount` display",
+        "Remove `researchActivityCount` display",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Fix Capability Header Component",
+      "description": "As a user viewing a capability detail page, I want to see the header with accurate data.",
+      "acceptanceCriteria": [
+        "Update `capability-header.tsx` to use new field names",
+        "Use `category` enum value directly instead of `category.name`",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Fix Capability Description Component",
+      "description": "As a user viewing a capability detail page, I want to see the description section with available data.",
+      "acceptanceCriteria": [
+        "Remove `technicalDescription` display from `capability-description.tsx`",
+        "Remove `whyItMatters` display",
+        "Add display for `whatWorks`, `whatStruggles`, `whatDoesntWork` arrays if component exists",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Fix/Remove Capability Timeline and Prediction Components",
+      "description": "As a developer, I need to update or remove timeline and prediction components.",
+      "acceptanceCriteria": [
+        "Remove or update `timeline-forecast.tsx` - fields `timelineEstimate`, `communityPredictionMedian` are deleted",
+        "Remove or update `prediction-display.tsx` - prediction fields are removed",
+        "Typecheck passes"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Fix Capabilities Dashboard Category Breakdown",
+      "description": "As a user viewing the capabilities dashboard, I want to see category breakdown using the new enum structure.",
+      "acceptanceCriteria": [
+        "Update `category-breakdown.tsx` to use `category` enum values (physical, cognitive, social, meta)",
+        "Remove joins to `capabilityCategory` table",
+        "Update grouping/filtering logic to use enum string values",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Fix Job Card Component",
+      "description": "As a user viewing jobs, I want to see job cards with accurate data from the new schema.",
+      "acceptanceCriteria": [
+        "Update `job.title` references to `job.name`",
+        "Remove `shortDescription` display",
+        "Remove `totalWorkersGlobal` display",
+        "Remove `medianSalaryUsa` display",
+        "Update `automationStatus` to `riskLevel`",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Fix Job Detail Page - At a Glance Component",
+      "description": "As a user viewing a job detail page, I want to see the at a glance section with accurate data.",
+      "acceptanceCriteria": [
+        "Update `automationStatus` to `riskLevel` in `at-a-glance.tsx`",
+        "Remove `estimatedAutomationYear` display",
+        "Update to use `automationRiskPercentage` field",
+        "Update to use job-level `confidence` field",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Fix Job Detail Page - Quick Stats Grid",
+      "description": "As a user viewing a job detail page, I want to see quick stats with available data only.",
+      "acceptanceCriteria": [
+        "Remove `totalWorkersGlobal` stat from `quick-stats-grid.tsx`",
+        "Remove `medianSalaryUsa` stat",
+        "Remove `growthRate` stat",
+        "Remove `estimatedAutomationYear` stat",
+        "Show stats for: `automationRiskPercentage`, `riskLevel`, `timelineEstimate`, `confidence`",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Fix Job Detail Page - About Section",
+      "description": "As a user viewing a job detail page, I want to see the about section with available data.",
+      "acceptanceCriteria": [
+        "Update `job.title` to `job.name` in `about-section.tsx`",
+        "Remove `keyResponsibilities` display",
+        "Remove `shortDescription` display",
+        "Use `description` field for job information",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Remove Related Jobs Component",
+      "description": "As a developer, I need to remove the related jobs feature since the relatedJob table is deleted.",
+      "acceptanceCriteria": [
+        "Remove `related-jobs.tsx` component file or make it render null/placeholder",
+        "Remove references to related jobs in job detail page layout",
+        "Remove any `getRelatedJobs` action calls from components",
+        "Typecheck passes"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-028",
+      "title": "Fix Job Autocomplete Component",
+      "description": "As a user searching for jobs, I want the autocomplete to work with new field names.",
+      "acceptanceCriteria": [
+        "Update `job.title` references to `job.name` in job autocomplete components",
+        "Remove `shortDescription` from search results display",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-029",
+      "title": "Fix Job Comparison Table",
+      "description": "As a user comparing jobs, I want the comparison to show available data only.",
+      "acceptanceCriteria": [
+        "Remove comparison columns for deleted fields in job comparison",
+        "Update field references from `title` to `name`",
+        "Show comparison for: `name`, `category`, `description`, `automationRiskPercentage`, `riskLevel`, `timelineEstimate`, `confidence`",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Fix Search API Route",
+      "description": "As a user searching the platform, I want search to work with new field names.",
+      "acceptanceCriteria": [
+        "Update job search to use `name` instead of `title` in `src/app/api/search/route.ts`",
+        "Update capability search to use new field structure",
+        "Remove references to deleted fields in search indexing",
+        "Typecheck passes"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-031",
+      "title": "Fix Dashboard Actions",
+      "description": "As a user viewing my dashboard, I want it to work without tracking count fields.",
+      "acceptanceCriteria": [
+        "Remove references to `trackingCount` fields in `src/actions/dashboard.ts`",
+        "Update dashboard queries to use new schema field names",
+        "Typecheck passes"
+      ],
+      "priority": 31,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-032",
+      "title": "Fix Onboarding Actions",
+      "description": "As a new user going through onboarding, I want it to work with the new schema.",
+      "acceptanceCriteria": [
+        "Update job references in `src/actions/onboarding.ts` to use `name` instead of `title`",
+        "Update any capability references to use new field names",
+        "Typecheck passes"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-033",
+      "title": "Fix Onboarding Validations",
+      "description": "As a developer, I need onboarding validation schemas to match new schema.",
+      "acceptanceCriteria": [
+        "Update validation schemas in `src/lib/validations/onboarding.ts`",
+        "Remove validation for deleted fields",
+        "Typecheck passes"
+      ],
+      "priority": 33,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-034",
+      "title": "Fix Report Validations",
+      "description": "As a user submitting reports, I want validation to match the new impact report schema.",
+      "acceptanceCriteria": [
+        "Update `src/lib/validations/reports.ts` to match new `impactReport` schema",
+        "Remove validation for deleted fields",
+        "Add validation for required `technologyId` connection",
+        "Typecheck passes"
+      ],
+      "priority": 34,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-035",
+      "title": "Update Mock Data",
+      "description": "As a developer, I need mock data to match the new schema for testing.",
+      "acceptanceCriteria": [
+        "Update `src/lib/mock-data.ts` to use `name` instead of `title` for jobs",
+        "Update capability mock data to use enum category values",
+        "Remove mock data for deleted fields",
+        "Typecheck passes"
+      ],
+      "priority": 35,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-036",
+      "title": "Final Build Verification",
+      "description": "As a developer, I need the application to build successfully with no TypeScript errors.",
+      "acceptanceCriteria": [
+        "Run `bun run build` successfully with no errors",
+        "Run `bun run lint` with no errors",
+        "All public pages load without runtime errors",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 36,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
