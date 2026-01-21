@@ -15,9 +15,8 @@ import { checkOnboardingFromSession } from "@/lib/session-utils";
 
 // Types
 export type CapabilityFilters = {
-  categoryId?: string;
+  category?: "physical" | "cognitive" | "social" | "meta";
   status?: CapabilityStatus;
-  timeline?: "near" | "medium" | "far";
   search?: string;
 };
 
@@ -33,44 +32,9 @@ export async function getCapabilityBySlug(slug: string) {
   "use cache";
   cacheLife({ stale: 3600, revalidate: 3600 * 24 });
 
-  // Single query with JSON aggregation for bottlenecks and organizations
   const result = await db
-    .select({
-      capability,
-      category: capabilityCategory,
-      bottlenecks: sql<Array<typeof bottleneck.$inferSelect>>`
-        COALESCE(
-          (SELECT json_agg(b.* ORDER BY b.severity DESC)
-           FROM ${bottleneck} b
-           WHERE b.capability_id = ${capability.id}),
-          '[]'::json
-        )
-      `.as("bottlenecks"),
-      organizations: sql<
-        Array<{
-          organization: typeof organization.$inferSelect;
-          focusArea: string | null;
-        }>
-      >`
-        COALESCE(
-          (SELECT json_agg(
-            json_build_object(
-              'organization', row_to_json(o.*),
-              'focusArea', co.focus_area
-            )
-           )
-           FROM ${capabilityOrganization} co
-           INNER JOIN ${organization} o ON co.organization_id = o.id
-           WHERE co.capability_id = ${capability.id}),
-          '[]'::json
-        )
-      `.as("organizations"),
-    })
+    .select()
     .from(capability)
-    .leftJoin(
-      capabilityCategory,
-      eq(capability.categoryId, capabilityCategory.id),
-    )
     .where(eq(capability.slug, slug))
     .limit(1);
 
@@ -78,17 +42,7 @@ export async function getCapabilityBySlug(slug: string) {
     return null;
   }
 
-  const data = result[0];
-
-  return {
-    ...data.capability,
-    category: data.category || undefined,
-    bottlenecks: data.bottlenecks || [],
-    organizations: (data.organizations || []).map((org) => ({
-      ...org.organization,
-      focusArea: org.focusArea,
-    })),
-  };
+  return result[0];
 }
 
 // Get capabilities with filters
@@ -103,41 +57,12 @@ export async function getCapabilities(
 
   const conditions = [];
 
-  if (filters.categoryId) {
-    conditions.push(eq(capability.categoryId, filters.categoryId));
+  if (filters.category) {
+    conditions.push(eq(capability.category, filters.category));
   }
 
   if (filters.status) {
     conditions.push(eq(capability.status, filters.status));
-  }
-
-  if (filters.timeline) {
-    // Timeline filtering based on timeline_estimate text
-    // This is a simplified version - you might want to parse the text
-    // For now, we'll filter based on keywords
-    if (filters.timeline === "near") {
-      conditions.push(
-        or(
-          ilike(capability.timelineEstimate, "%0-5%"),
-          ilike(capability.timelineEstimate, "%1-5%"),
-          ilike(capability.timelineEstimate, "%2-5%"),
-        ),
-      );
-    } else if (filters.timeline === "medium") {
-      conditions.push(
-        or(
-          ilike(capability.timelineEstimate, "%5-15%"),
-          ilike(capability.timelineEstimate, "%10-15%"),
-        ),
-      );
-    } else if (filters.timeline === "far") {
-      conditions.push(
-        or(
-          ilike(capability.timelineEstimate, "%15+%"),
-          ilike(capability.timelineEstimate, "%20+%"),
-        ),
-      );
-    }
   }
 
   if (filters.search) {
@@ -157,7 +82,6 @@ export async function getCapabilities(
       case "progress_asc":
         return asc(capability.progressPercentage);
       case "jobs_desc":
-        return desc(capability.jobsProtectedCount);
       case "activity_desc":
         return desc(capability.updatedAt);
       case "name_asc":
@@ -167,17 +91,7 @@ export async function getCapabilities(
     }
   };
 
-  // Single query with LEFT JOIN to get capabilities and categories
-  const baseQuery = db
-    .select({
-      capability,
-      category: capabilityCategory,
-    })
-    .from(capability)
-    .leftJoin(
-      capabilityCategory,
-      eq(capability.categoryId, capabilityCategory.id),
-    );
+  const baseQuery = db.select().from(capability);
 
   const queryWithWhere =
     conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
@@ -188,22 +102,21 @@ export async function getCapabilities(
     .limit(limit)
     .offset(offset);
 
-  // Map results to match the expected format
-  return results.map((result) => ({
-    ...result.capability,
-    category: result.category || undefined,
-  }));
+  return results;
 }
 
-// Get capability categories
+// Get capability categories (static enum values)
 export async function getCapabilityCategories() {
   "use cache";
   cacheLife({ stale: 3600, revalidate: 3600 * 24 });
 
-  return db
-    .select()
-    .from(capabilityCategory)
-    .orderBy(asc(capabilityCategory.name));
+  // Categories are now a static enum instead of a table
+  return [
+    { id: "physical", name: "Physical", slug: "physical" },
+    { id: "cognitive", name: "Cognitive", slug: "cognitive" },
+    { id: "social", name: "Social", slug: "social" },
+    { id: "meta", name: "Meta", slug: "meta" },
+  ];
 }
 
 // Track capability
