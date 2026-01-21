@@ -7,21 +7,10 @@ import { db } from "@/db";
 import { userBadge, userProfile, userReputation } from "@/db/schema";
 import { user } from "@/db/schema/auth";
 import {
-  bottleneck,
   type CapabilityStatus,
-  type CommentVoteType,
   capability,
-  capabilityCategory,
-  capabilityComment,
-  capabilityCommentVote,
-  capabilityOrganization,
-  capabilityPrediction,
-  capabilityTracking,
-  organization,
-  type PredictionBackground,
-  type PredictionConfidence,
 } from "@/db/schema/capabilities";
-import { job, jobComment } from "@/db/schema/jobs";
+import { job } from "@/db/schema/jobs";
 import { checkOnboardingFromSession } from "@/lib/session-utils";
 
 // Types
