@@ -1,11 +1,9 @@
-import { Building2, Share2, Users } from "lucide-react";
 import type { getCapabilityBySlug } from "@/actions/capabilities";
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from "@/lib/date-utils";
 import { ShareButton } from "./share-button";
-import { TrackButton } from "./track-button";
 
 type Capability = Awaited<ReturnType<typeof getCapabilityBySlug>>;
 
@@ -25,8 +23,8 @@ export function CapabilityHeader({ capability }: CapabilityHeaderProps) {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span>
               Category:{" "}
-              <span className="font-medium text-foreground">
-                {capability.category?.name}
+              <span className="font-medium capitalize text-foreground">
+                {capability.category}
               </span>
             </span>
             <span>•</span>
@@ -37,7 +35,6 @@ export function CapabilityHeader({ capability }: CapabilityHeaderProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <TrackButton capabilityId={capability.id} />
           <ShareButton slug={capability.slug} />
         </div>
       </div>
@@ -63,66 +60,12 @@ export function CapabilityHeader({ capability }: CapabilityHeaderProps) {
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-4">
                 <StatusBadge status={capability.status} />
-                <span className="text-muted-foreground">
-                  Confidence:{" "}
-                  <span className="font-medium capitalize text-foreground">
-                    {capability.confidenceLevel}
-                  </span>
-                </span>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
-          <CardContent className="pt-0 px-0">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Users className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Tracking</p>
-                <p className="text-lg font-semibold text-foreground">
-                  {capability.trackingCount.toLocaleString("en-US")}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
-          <CardContent className="pt-0 px-0">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Building2 className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Organizations</p>
-                <p className="text-lg font-semibold text-foreground">
-                  {capability.researchActivityCount}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
-          <CardContent className="pt-0 px-0">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Share2 className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Views</p>
-                <p className="text-lg font-semibold text-foreground">
-                  {capability.viewCount.toLocaleString("en-US")}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }
