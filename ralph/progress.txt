@@ -51,3 +51,157 @@
 
 ---
 
+## 2025-01-21 - US-003 (Remove Admin Pages Directory)
+- **Status**: COMPLETE
+- **What was implemented**:
+  - Removed entire `src/app/admin/` directory (63 files deleted)
+  - No other files imported from admin directory - clean removal
+- **Files changed**:
+  - Deleted: `src/app/admin/**/*` (63 files total)
+- **Learnings for future iterations**:
+  - Admin directory had no external dependencies - safe to delete entirely
+  - Build still has 34 errors but all are in action files (capabilities.ts, jobs.ts, etc.) not related to admin
+  - The remaining errors are addressed by subsequent stories (US-008+)
+  - No need to check for admin imports - Next.js App Router pages don't get imported elsewhere
+
+---
+
+## 2025-01-21 - US-004 (Remove Moderation Pages Directory)
+- **Status**: COMPLETE
+- **What was implemented**:
+  - Removed entire `src/app/moderation/` directory (16 files deleted)
+  - Verified no external imports from this directory
+- **Files changed**:
+  - Deleted: `src/app/moderation/**/*` (16 files total including tabs and components)
+- **Learnings for future iterations**:
+  - Same pattern as admin directory - Next.js App Router pages don't export, so safe to delete
+  - Files that still reference "moderation" are using it as field names (e.g., `moderationStatus`) not imports
+  - Build still has 34 errors - all in action files, not related to moderation directory
+  - Commit hash: 2891826
+
+---
+
+## 2025-01-21 - US-005 (Remove Admin Content Actions)
+- **Status**: COMPLETE
+- **What was implemented**:
+  - Removed `src/actions/admin-content.ts` file (1124 lines deleted)
+  - File was importing deprecated tables: `capabilityCategory`, `industry`, etc.
+  - Verified no external imports of this file in src directory
+- **Files changed**:
+  - Deleted: `src/actions/admin-content.ts`
+- **Learnings for future iterations**:
+  - The admin-content.ts file was never imported by other files - completely isolated admin functionality
+  - Build still has 34 errors - all in other action files (capabilities.ts, jobs.ts) addressed by US-008+
+  - Pattern continues: focus on removing deprecated files, fix consumers later
+  - Commit hash: 8ed3b28
+
+---
+
+## 2025-01-21 - US-006 (Remove Industry Schema)
+- **Status**: COMPLETE
+- **What was implemented**:
+  - Deleted `src/db/schema/industries.ts` file
+  - Updated `src/actions/jobs.ts` - removed industry import, updated to use job.category enum
+  - Updated `src/actions/onboarding.ts` - replaced industry table joins with job.category, updated getAllIndustries() to return category enum values
+  - Updated `src/actions/reports.ts` - replaced industry table operations with job.category enum, updated createOrGetJob helper
+  - Updated `src/app/api/search/route.ts` - removed industry join, search now uses job.name and job.category
+- **Files changed**:
+  - Deleted: `src/db/schema/industries.ts`
+  - Modified: `src/actions/jobs.ts`
+  - Modified: `src/actions/onboarding.ts`
+  - Modified: `src/actions/reports.ts`
+  - Modified: `src/app/api/search/route.ts`
+- **Learnings for future iterations**:
+  - Industry table was referenced in 4 files via direct imports (not through schema index)
+  - The schema index never exported industry, so no changes needed there
+  - Replacing industry table requires updating queries to use job.category enum directly
+  - When creating jobs, map industry name to valid JobCategory enum value or default to "other"
+  - Build still has 30 errors from other deleted tables (capabilities-related, jobComment, etc.) addressed by US-008+
+  - Commit hash: 5cbeb70
+
+---
+
+## 2025-01-21 - US-007 (Clean Up Schema Index Exports)
+- **Status**: COMPLETE
+- **What was implemented**:
+  - Added `discussions.ts` export to `src/db/schema/index.ts`
+  - Verified all 4 new schema files are now exported: discussions, organizations, suggestions, technologies
+  - Verified no deleted tables are exported (they never were in the index)
+- **Files changed**:
+  - Modified: `src/db/schema/index.ts` (added discussions export)
+  - Added: `src/db/schema/discussions.ts` (was untracked, now part of commit)
+- **Learnings for future iterations**:
+  - Schema index was already mostly correct - only discussions.ts was missing
+  - The deleted tables (capabilityCategory, capabilityTracking, industry, jobTracking, relatedJob) were never exported via index
+  - Build has 30 errors from consumer action files (capabilities.ts, jobs.ts) importing deleted tables directly
+  - Consumer files bypass schema index by importing from `@/db/schema/capabilities` directly
+  - Commit hash: edf608f
+
+---
+
+## 2025-01-21 - US-008 (Fix Capabilities Action - Remove Old Imports)
+- **Status**: COMPLETE
+- **What was implemented**:
+  - Removed all non-existent imports from `src/actions/capabilities.ts`
+  - Removed: `capabilityCategory`, `capabilityTracking`, `bottleneck`
+  - Removed: `capabilityComment`, `capabilityCommentVote`, `capabilityOrganization`
+  - Removed: `capabilityPrediction`, `organization`, `jobComment`
+  - Removed: `CommentVoteType`, `PredictionBackground`, `PredictionConfidence` types
+  - Kept only: `capability`, `CapabilityStatus` type, `job`
+- **Files changed**:
+  - Modified: `src/actions/capabilities.ts` (reduced imports from 14 to 4)
+- **Learnings for future iterations**:
+  - Many tables were removed in schema restructure: capabilityCategory (now enum), capabilityTracking, bottleneck, capabilityComment, capabilityCommentVote, capabilityOrganization, capabilityPrediction
+  - jobComment was also removed from jobs schema
+  - After removing imports, remaining errors are in function bodies that USE the removed tables/fields
+  - These will be fixed by US-009 (update queries), US-010 (remove field refs), US-011 (remove tracking functions)
+  - Errors now down to 21 (from 30), remaining in: dashboard.ts, jobs.ts, comments.ts
+  - Commit hash: fa88ff2
+
+---
+
+## 2025-01-21 - US-009 (Fix Capabilities Action - Update Queries)
+- **Status**: COMPLETE
+- **What was implemented**:
+  - Updated `getCapabilityBySlug()` to use simplified query without joins to deleted tables (bottleneck, capabilityOrganization, organization, capabilityCategory)
+  - Updated `getCapabilities()` to use `category` enum directly instead of `categoryId` FK join
+  - Removed joins to `capabilityCategory` table (now an enum)
+  - Updated `CapabilityFilters` type to use category enum values ("physical" | "cognitive" | "social" | "meta")
+  - Removed timeline filter (timelineEstimate field was removed from schema)
+  - Updated `getCapabilityCategories()` to return static enum values instead of querying deleted capabilityCategory table
+  - `whatWorks`, `whatStruggles`, `whatDoesntWork` arrays now returned in response (schema fields returned by simplified query)
+- **Files changed**:
+  - Modified: `src/actions/capabilities.ts` (reduced from 1077 to 990 lines)
+- **Learnings for future iterations**:
+  - Capability schema now uses enum for category: "physical" | "cognitive" | "social" | "meta"
+  - When replacing table joins with enum values, return static arrays instead of database queries
+  - The simplified queries now return all schema fields directly, including arrays like whatWorks
+  - Typecheck still has 84 errors in capabilities.ts from function bodies using deleted tables/fields
+  - These are addressed by US-010 (remove field refs) and US-011 (remove tracking/comment/prediction functions)
+  - Commit hash: 1a36f38
+
+---
+
+## 2025-01-22 - US-010 & US-011 (Clean up Capabilities Action)
+- **Status**: COMPLETE
+- **What was implemented**:
+  - Removed all functions referencing deleted tables/fields from `src/actions/capabilities.ts`
+  - Removed tracking functions: `trackCapability()`, `untrackCapability()`, `isTrackingCapability()`
+  - Removed comment functions: `createComment()`, `updateComment()`, `deleteComment()`, `voteComment()`, `getComments()`
+  - Removed prediction functions: `submitPrediction()`, `getUserPrediction()`
+  - Removed `incrementViewCount()` function (used deleted `viewCount` field)
+  - Converted `getActivities()` to stub returning empty array
+  - Converted `getStats()` to stub returning zero values
+  - Simplified `getAGIProgress()` to use only capability table (removed references to deleted tracking/comment/prediction tables)
+  - Removed unused imports: `generateRandomString`, `sql`, `userBadge`, `userProfile`, `userReputation`, `user`, `job`, `checkOnboardingFromSession`
+- **Files changed**:
+  - Modified: `src/actions/capabilities.ts` (reduced from 990 to 236 lines)
+- **Learnings for future iterations**:
+  - When tables are removed, functions using them need to be removed or converted to stubs
+  - Exported types (Activity, ActivityType, Stats, AGIProgress) should be preserved for backwards compatibility with consumers
+  - Downstream components will have import errors for removed functions - these are separate stories (US-018+)
+  - Build now has 39 errors from consumers importing removed functions from capabilities.ts
+  - Commit hash: a558639
+
+---
+
