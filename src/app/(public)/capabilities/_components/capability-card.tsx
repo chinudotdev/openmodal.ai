@@ -26,7 +26,7 @@ export function CapabilityCard({ capability }: CapabilityCardProps) {
             <StatusBadge status={capability.status} />
           </div>
           <p className="text-sm text-muted-foreground">
-            Category: {capability.category?.name || "Unknown"} • Updated{" "}
+            Category: {capability.category || "Unknown"} • Updated{" "}
             {formatDistanceToNow(capability.updatedAt, { addSuffix: true })}
           </p>
         </CardHeader>
@@ -50,29 +50,17 @@ export function CapabilityCard({ capability }: CapabilityCardProps) {
             <ProgressBar progress={capability.progressPercentage} size="md" />
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-muted-foreground">Timeline</p>
-              <p className="font-semibold text-foreground">
-                {capability.timelineEstimate || "Unknown"}
-              </p>
+          {/* What Works - show first 2 items */}
+          {capability.whatWorks && capability.whatWorks.length > 0 && (
+            <div className="text-sm">
+              <p className="text-muted-foreground mb-1">What works:</p>
+              <ul className="list-disc list-inside text-foreground">
+                {capability.whatWorks.slice(0, 2).map((item: string, idx: number) => (
+                  <li key={idx} className="truncate">{item}</li>
+                ))}
+              </ul>
             </div>
-            <div>
-              <p className="text-muted-foreground">Jobs Protected</p>
-              <p className="font-semibold text-foreground">
-                {(capability.jobsProtectedCount / 1000000).toFixed(1)}M
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <span>
-              {capability.trackingCount.toLocaleString("en-US")} tracking
-            </span>
-            <span>•</span>
-            <span>{capability.researchActivityCount} organizations</span>
-          </div>
+          )}
         </CardContent>
 
         <CardFooter>
