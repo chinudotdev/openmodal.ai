@@ -1,53 +1,42 @@
 "use server";
 
-import { generateRandomString } from "better-auth/crypto";
 import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
-import { cacheLife, cacheTag } from "next/cache";
+import { cacheLife } from "next/cache";
 import { db } from "@/db";
-import { user, userBadge, userProfile, userReputation } from "@/db/schema";
 import { capability } from "@/db/schema/capabilities";
 import {
   job,
   jobCapability,
-  jobComment,
   task,
   taskCapability,
   type JobCategory,
+  type RiskLevel,
 } from "@/db/schema/jobs";
-import { checkOnboardingFromSession } from "@/lib/session-utils";
 
 // Types
 export type JobFilters = {
-  industryId?: string;
-  status?: AutomationStatus;
+  category?: JobCategory;
+  riskLevel?: RiskLevel;
   riskMin?: number;
   riskMax?: number;
-  salaryMin?: number;
-  salaryMax?: number;
   search?: string;
 };
 
 export type JobSort =
   | "risk_desc"
   | "risk_asc"
-  | "workers_desc"
-  | "salary_desc"
   | "name_asc"
   | "updated_desc";
-
-export type CommentVoteType = "up" | "down";
 
 // Type for job comparison data (matches JobComparisonTable props)
 export type JobComparisonData = {
   id: string;
   slug: string;
-  title: string;
-  automationPercentage: number;
-  automationStatus: "safe" | "partial" | "high_risk" | "automated";
-  totalWorkersGlobal: number | null;
-  medianSalaryUsa: number | null;
-  estimatedAutomationYear: number | null;
-  growthRate: number | null;
+  name: string;
+  automationRiskPercentage: number;
+  riskLevel: RiskLevel;
+  timelineEstimate: string | null;
+  confidence: string;
 };
 
 // Compare jobs (up to 3)
@@ -70,35 +59,28 @@ export async function compareJobs(
       .select({
         id: job.id,
         slug: job.slug,
-        title: job.title,
-        automationPercentage: job.automationPercentage,
-        automationStatus: job.automationStatus,
-        totalWorkersGlobal: job.totalWorkersGlobal,
-        medianSalaryUsa: job.medianSalaryUsa,
-        estimatedAutomationYear: job.estimatedAutomationYear,
-        growthRate: job.growthRate,
+        name: job.name,
+        automationRiskPercentage: job.automationRiskPercentage,
+        riskLevel: job.riskLevel,
+        timelineEstimate: job.timelineEstimate,
+        confidence: job.confidence,
       })
       .from(job)
-      .innerJoin(industry, eq(job.industryId, industry.id))
       .where(inArray(job.slug, jobSlugs));
 
-    // Return jobs in the order of the slugs provided, with proper type conversions
+    // Return jobs in the order of the slugs provided
     return jobSlugs
-      .map((slug) => jobs.find((job) => job.slug === slug))
-      .filter((job): job is NonNullable<typeof job> => job !== undefined)
+      .map((slug) => jobs.find((j) => j.slug === slug))
+      .filter((j): j is NonNullable<typeof j> => j !== undefined)
       .map(
-        (job): JobComparisonData => ({
-          id: job.id,
-          slug: job.slug,
-          title: job.title,
-          automationPercentage: job.automationPercentage,
-          automationStatus: job.automationStatus,
-          totalWorkersGlobal: job.totalWorkersGlobal,
-          medianSalaryUsa: job.medianSalaryUsa
-            ? Number(job.medianSalaryUsa)
-            : null,
-          estimatedAutomationYear: job.estimatedAutomationYear,
-          growthRate: job.growthRate ? Number(job.growthRate) : null,
+        (j): JobComparisonData => ({
+          id: j.id,
+          slug: j.slug,
+          name: j.name,
+          automationRiskPercentage: j.automationRiskPercentage,
+          riskLevel: j.riskLevel,
+          timelineEstimate: j.timelineEstimate,
+          confidence: j.confidence,
         }),
       );
   } catch (error) {
@@ -113,12 +95,8 @@ export async function getJobBySlug(slug: string) {
   cacheLife({ stale: 300, revalidate: 3600 * 2 });
 
   const result = await db
-    .select({
-      job,
-      industry,
-    })
+    .select()
     .from(job)
-    .innerJoin(industry, eq(job.industryId, industry.id))
     .where(eq(job.slug, slug))
     .limit(1);
 
@@ -126,10 +104,10 @@ export async function getJobBySlug(slug: string) {
     return null;
   }
 
-  const jobData = { ...result[0].job, industry: result[0].industry };
+  const jobData = result[0];
 
   // Run independent queries in parallel
-  const [tasks, jobCaps, geographicData, related] = await Promise.all([
+  const [tasks, jobCaps] = await Promise.all([
     // Get tasks
     db
       .select()
@@ -141,7 +119,6 @@ export async function getJobBySlug(slug: string) {
       .select({
         capabilityId: jobCapability.capabilityId,
         importance: jobCapability.importance,
-        taskCount: jobCapability.taskCount,
         percentageOfJob: jobCapability.percentageOfJob,
         blockingAutomation: jobCapability.blockingAutomation,
         notes: jobCapability.notes,
@@ -154,24 +131,6 @@ export async function getJobBySlug(slug: string) {
         desc(jobCapability.blockingAutomation),
         desc(jobCapability.percentageOfJob),
       ),
-    // Get geographic data
-    db
-      .select()
-      .from(jobGeographicData)
-      .where(eq(jobGeographicData.jobId, jobData.id))
-      .orderBy(desc(jobGeographicData.workersCount)),
-    // Get related jobs
-    db
-      .select({
-        relatedJob: job,
-        similarityScore: relatedJob.similarityScore,
-        relationshipType: relatedJob.relationshipType,
-      })
-      .from(relatedJob)
-      .innerJoin(job, eq(relatedJob.relatedJobId, job.id))
-      .where(eq(relatedJob.jobId, jobData.id))
-      .orderBy(desc(relatedJob.similarityScore))
-      .limit(10),
   ]);
 
   // Get task capabilities (depends on tasks)
@@ -209,16 +168,9 @@ export async function getJobBySlug(slug: string) {
     capabilities: jobCaps.map((jc) => ({
       ...jc.capability,
       importance: jc.importance,
-      taskCount: jc.taskCount,
       percentageOfJob: jc.percentageOfJob,
       blockingAutomation: jc.blockingAutomation,
       notes: jc.notes,
-    })),
-    geographicData,
-    relatedJobs: related.map((r) => ({
-      ...r.relatedJob,
-      similarityScore: r.similarityScore,
-      relationshipType: r.relationshipType,
     })),
   };
 }
@@ -235,49 +187,34 @@ export async function getJobs(
 
   const conditions = [];
 
-  if (filters.industryId) {
-    conditions.push(eq(job.industryId, filters.industryId));
+  if (filters.category) {
+    conditions.push(eq(job.category, filters.category));
   }
 
-  if (filters.status) {
-    conditions.push(eq(job.automationStatus, filters.status));
+  if (filters.riskLevel) {
+    conditions.push(eq(job.riskLevel, filters.riskLevel));
   }
 
   if (filters.riskMin !== undefined) {
-    conditions.push(sql`${job.automationPercentage} >= ${filters.riskMin}`);
+    conditions.push(sql`${job.automationRiskPercentage} >= ${filters.riskMin}`);
   }
 
   if (filters.riskMax !== undefined) {
-    conditions.push(sql`${job.automationPercentage} <= ${filters.riskMax}`);
-  }
-
-  if (filters.salaryMin !== undefined) {
-    conditions.push(sql`${job.medianSalaryUsa} >= ${filters.salaryMin}`);
-  }
-
-  if (filters.salaryMax !== undefined) {
-    conditions.push(sql`${job.medianSalaryUsa} <= ${filters.salaryMax}`);
+    conditions.push(sql`${job.automationRiskPercentage} <= ${filters.riskMax}`);
   }
 
   if (filters.search) {
     conditions.push(
       or(
-        ilike(job.title, `%${filters.search}%`),
-        ilike(job.shortDescription, `%${filters.search}%`),
-        ilike(industry.name, `%${filters.search}%`),
+        ilike(job.name, `%${filters.search}%`),
+        ilike(job.description, `%${filters.search}%`),
         ilike(job.category, `%${filters.search}%`),
       ),
     );
   }
 
-  // Build query with where clause and join industry
-  const baseQuery = db
-    .select({
-      job,
-      industry,
-    })
-    .from(job)
-    .innerJoin(industry, eq(job.industryId, industry.id));
+  // Build query with where clause
+  const baseQuery = db.select().from(job);
   const queryWithWhere =
     conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
 
@@ -285,19 +222,15 @@ export async function getJobs(
   const getSortOrder = () => {
     switch (sort) {
       case "risk_desc":
-        return desc(job.automationPercentage);
+        return desc(job.automationRiskPercentage);
       case "risk_asc":
-        return asc(job.automationPercentage);
-      case "workers_desc":
-        return desc(job.totalWorkersGlobal);
-      case "salary_desc":
-        return desc(job.medianSalaryUsa);
+        return asc(job.automationRiskPercentage);
       case "name_asc":
-        return asc(job.title);
+        return asc(job.name);
       case "updated_desc":
         return desc(job.updatedAt);
       default:
-        return desc(job.automationPercentage);
+        return desc(job.automationRiskPercentage);
     }
   };
 
@@ -307,304 +240,29 @@ export async function getJobs(
     .limit(limit)
     .offset(offset);
 
-  // Map results to include industry relationship
-  return results.map((r) => ({
-    ...r.job,
-    industry: r.industry,
-  }));
-}
-
-// Get job categories/industries
-export async function getJobCategories() {
-  "use cache";
-  cacheLife({ stale: 600, revalidate: 3600 * 5 });
-  const results = await db
-    .selectDistinct({
-      id: industry.id,
-      name: industry.name,
-      slug: industry.slug,
-      icon: industry.icon,
-    })
-    .from(industry)
-    .innerJoin(job, eq(job.industryId, industry.id))
-    .orderBy(asc(industry.name));
-
   return results;
 }
 
-// Track job
-export async function trackJob(jobId: string, userId: string) {
-  // Check onboarding completion from session
-  const onboardingCompleted = await checkOnboardingFromSession();
-  if (onboardingCompleted === null) {
-    return { success: false, error: "Please sign in to track jobs" };
-  }
-  if (!onboardingCompleted) {
-    return {
-      success: false,
-      error: "Please complete onboarding before tracking jobs",
-    };
-  }
+// Get job categories (static enum values)
+export async function getJobCategories() {
+  "use cache";
+  cacheLife({ stale: 600, revalidate: 3600 * 5 });
 
-  // Check if already tracking
-  const existing = await db
-    .select()
-    .from(jobTracking)
-    .where(and(eq(jobTracking.jobId, jobId), eq(jobTracking.userId, userId)))
-    .limit(1);
+  // Return static category enum values
+  const categories: Array<{ id: JobCategory; name: string; slug: string }> = [
+    { id: "healthcare", name: "Healthcare", slug: "healthcare" },
+    { id: "technology", name: "Technology", slug: "technology" },
+    { id: "trades", name: "Trades", slug: "trades" },
+    { id: "service", name: "Service", slug: "service" },
+    { id: "creative", name: "Creative", slug: "creative" },
+    { id: "finance", name: "Finance", slug: "finance" },
+    { id: "education", name: "Education", slug: "education" },
+    { id: "legal", name: "Legal", slug: "legal" },
+    { id: "manufacturing", name: "Manufacturing", slug: "manufacturing" },
+    { id: "other", name: "Other", slug: "other" },
+  ];
 
-  if (existing.length > 0) {
-    return { success: true, alreadyTracking: true };
-  }
-
-  // Create tracking record and update tracking count in parallel
-  await Promise.all([
-    db.insert(jobTracking).values({
-      id: generateRandomString(32),
-      jobId,
-      userId,
-      emailNotifications: true,
-    }),
-    db
-      .update(job)
-      .set({
-        trackingCount: sql`${job.trackingCount} + 1`,
-      })
-      .where(eq(job.id, jobId)),
-  ]);
-
-  return { success: true, alreadyTracking: false };
-}
-
-// Untrack job
-export async function untrackJob(jobId: string, userId: string) {
-  // Check onboarding completion from session
-  const onboardingCompleted = await checkOnboardingFromSession();
-  if (onboardingCompleted === null) {
-    return { success: false, error: "Please sign in to untrack jobs" };
-  }
-  if (!onboardingCompleted) {
-    return {
-      success: false,
-      error: "Please complete onboarding before untracking jobs",
-    };
-  }
-
-  // Delete tracking record and update tracking count in parallel
-  await Promise.all([
-    db
-      .delete(jobTracking)
-      .where(and(eq(jobTracking.jobId, jobId), eq(jobTracking.userId, userId))),
-    db
-      .update(job)
-      .set({
-        trackingCount: sql`GREATEST(${job.trackingCount} - 1, 0)`,
-      })
-      .where(eq(job.id, jobId)),
-  ]);
-
-  return { success: true };
-}
-
-// Check if user is tracking
-export async function isTrackingJob(jobId: string, userId: string) {
-  const result = await db
-    .select()
-    .from(jobTracking)
-    .where(and(eq(jobTracking.jobId, jobId), eq(jobTracking.userId, userId)))
-    .limit(1);
-
-  return result.length > 0;
-}
-
-// Increment view count
-export async function incrementViewCount(jobId: string) {
-  await db
-    .update(job)
-    .set({
-      viewCount: sql`${job.viewCount} + 1`,
-    })
-    .where(eq(job.id, jobId));
-
-  return { success: true };
-}
-
-// Get comments
-export async function getJobComments(jobId: string, parentId?: string) {
-  // Fetch all comments for the job to build tree structure with user info
-  const rows = await db
-    .select({
-      comment: jobComment,
-      author: {
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        displayUsername: user.displayUsername,
-        image: user.image,
-      },
-      profile: {
-        displayName: userProfile.displayName,
-        industry: userProfile.industry,
-        location: userProfile.location,
-        country: userProfile.country,
-        stateProvince: userProfile.stateProvince,
-        city: userProfile.city,
-      },
-      reputation: {
-        reputationPoints: userReputation.reputationPoints,
-        tier: userReputation.tier,
-      },
-      badges: sql<Array<typeof userBadge.$inferSelect>>`
-        COALESCE(
-          (SELECT json_agg(b.* ORDER BY b.earned_at DESC)
-           FROM ${userBadge} b
-           WHERE b.user_id = ${jobComment.userId}),
-          '[]'::json
-        )
-      `.as("badges"),
-    })
-    .from(jobComment)
-    .leftJoin(user, eq(jobComment.userId, user.id))
-    .leftJoin(userProfile, eq(userProfile.userId, user.id))
-    .leftJoin(userReputation, eq(userReputation.userId, user.id))
-    .where(eq(jobComment.jobId, jobId))
-    .orderBy(desc(jobComment.upvotes), desc(jobComment.createdAt));
-
-  type CommentWithMeta = (typeof rows)[number]["comment"] & {
-    author: (typeof rows)[number]["author"] | null;
-    profile: (typeof rows)[number]["profile"] | null;
-    reputation: (typeof rows)[number]["reputation"] | null;
-    badges: (typeof rows)[number]["badges"];
-    replies: CommentWithMeta[];
-  };
-
-  const items: CommentWithMeta[] = rows.map((row) => ({
-    ...row.comment,
-    author: row.author || null,
-    profile: row.profile || null,
-    reputation: row.reputation || null,
-    badges: row.badges || [],
-    replies: [],
-  }));
-
-  // Build reply tree structure
-  const commentMap = new Map<string, CommentWithMeta>();
-  const rootComments: CommentWithMeta[] = [];
-
-  for (const item of items) {
-    commentMap.set(item.id, item);
-  }
-
-  for (const item of items) {
-    if (item.parentId) {
-      const parent = commentMap.get(item.parentId);
-      if (parent) {
-        parent.replies.push(item);
-      }
-    } else {
-      rootComments.push(item);
-    }
-  }
-
-  // If parentId is provided, return only that comment's replies
-  if (parentId) {
-    const parentComment = commentMap.get(parentId);
-    return parentComment ? parentComment.replies : [];
-  }
-
-  return rootComments;
-}
-
-// Create comment
-export async function createJobComment(
-  jobId: string,
-  userId: string,
-  content: string,
-  parentId?: string,
-) {
-  // Check onboarding completion from session
-  const onboardingCompleted = await checkOnboardingFromSession();
-  if (onboardingCompleted === null) {
-    return { success: false, error: "Please sign in to comment" };
-  }
-  if (!onboardingCompleted) {
-    return {
-      success: false,
-      error: "Please complete onboarding before commenting",
-    };
-  }
-
-  const id = generateRandomString(32);
-  await db.insert(jobComment).values({
-    id,
-    jobId,
-    userId,
-    parentId: parentId || null,
-    content,
-    upvotes: 0,
-  });
-
-  return { success: true, commentId: id };
-}
-
-// Vote comment
-export async function voteJobComment(
-  commentId: string,
-  userId: string,
-  voteType: CommentVoteType,
-) {
-  // Check onboarding completion from session
-  const onboardingCompleted = await checkOnboardingFromSession();
-  if (onboardingCompleted === null) {
-    return { success: false, error: "Please sign in to vote" };
-  }
-  if (!onboardingCompleted) {
-    return {
-      success: false,
-      error: "Please complete onboarding before voting",
-    };
-  }
-
-  // Note: This is a simplified version. In a full implementation,
-  // you'd have a job_comment_vote table similar to capability_comment_vote
-  // For now, we'll just update upvotes directly
-  const current = await db
-    .select({ upvotes: jobComment.upvotes })
-    .from(jobComment)
-    .where(eq(jobComment.id, commentId))
-    .limit(1);
-
-  if (current.length > 0) {
-    const delta = voteType === "up" ? 1 : -1;
-    const newUpvotes = Math.max(0, current[0].upvotes + delta);
-    await db
-      .update(jobComment)
-      .set({ upvotes: newUpvotes })
-      .where(eq(jobComment.id, commentId));
-  }
-
-  return { success: true };
-}
-
-// Get related jobs
-export async function getRelatedJobs(jobId: string) {
-  const related = await db
-    .select({
-      relatedJob: job,
-      similarityScore: relatedJob.similarityScore,
-      relationshipType: relatedJob.relationshipType,
-    })
-    .from(relatedJob)
-    .innerJoin(job, eq(relatedJob.relatedJobId, job.id))
-    .where(eq(relatedJob.jobId, jobId))
-    .orderBy(desc(relatedJob.similarityScore))
-    .limit(10);
-
-  return related.map((r) => ({
-    ...r.relatedJob,
-    similarityScore: r.similarityScore,
-    relationshipType: r.relationshipType,
-  }));
+  return categories;
 }
 
 // Get job tasks
@@ -655,7 +313,6 @@ export async function getJobCapabilities(jobId: string) {
     .select({
       capabilityId: jobCapability.capabilityId,
       importance: jobCapability.importance,
-      taskCount: jobCapability.taskCount,
       percentageOfJob: jobCapability.percentageOfJob,
       blockingAutomation: jobCapability.blockingAutomation,
       notes: jobCapability.notes,
@@ -672,7 +329,6 @@ export async function getJobCapabilities(jobId: string) {
   return jobCaps.map((jc) => ({
     ...jc.capability,
     importance: jc.importance,
-    taskCount: jc.taskCount,
     percentageOfJob: jc.percentageOfJob,
     blockingAutomation: jc.blockingAutomation,
     notes: jc.notes,
@@ -689,31 +345,28 @@ export async function searchJobs(query: string, limit = 10) {
     .select({
       id: job.id,
       slug: job.slug,
-      title: job.title,
-      industry: industry,
-      automationPercentage: job.automationPercentage,
-      automationStatus: job.automationStatus,
-      totalWorkersGlobal: job.totalWorkersGlobal,
+      name: job.name,
+      category: job.category,
+      automationRiskPercentage: job.automationRiskPercentage,
+      riskLevel: job.riskLevel,
     })
     .from(job)
-    .innerJoin(industry, eq(job.industryId, industry.id))
     .where(
       or(
-        ilike(job.title, `%${query}%`),
-        ilike(job.shortDescription, `%${query}%`),
-        ilike(industry.name, `%${query}%`),
+        ilike(job.name, `%${query}%`),
+        ilike(job.description, `%${query}%`),
+        ilike(job.category, `%${query}%`),
       ),
     )
-    .orderBy(asc(job.title))
+    .orderBy(asc(job.name))
     .limit(limit);
 
   return results.map((r) => ({
     id: r.id,
     slug: r.slug,
-    title: r.title,
-    industry: r.industry.name,
-    automationPercentage: r.automationPercentage,
-    automationStatus: r.automationStatus,
-    totalWorkersGlobal: r.totalWorkersGlobal,
+    name: r.name,
+    category: r.category,
+    automationRiskPercentage: r.automationRiskPercentage,
+    riskLevel: r.riskLevel,
   }));
 }
