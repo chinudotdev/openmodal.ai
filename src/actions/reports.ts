@@ -1,138 +1,47 @@
 "use server";
 
 import { generateRandomString } from "better-auth/crypto";
-import { and, desc, eq, ilike, isNull, or, type SQL, sql } from "drizzle-orm";
+import { and, desc, eq, or, type SQL, sql } from "drizzle-orm";
 import { cacheLife } from "next/cache";
-import { z } from "zod";
 import { db } from "@/db";
 import {
+  impactReport,
+  impactReportCapability,
   type ReportStatus,
-  report,
-  reportEvidence,
   user,
   userBadge,
   userProfile,
   userReputation,
 } from "@/db/schema";
-import { capability } from "@/db/schema/capabilities";
-import { job, type JobCategory } from "@/db/schema/jobs";
+import { technology } from "@/db/schema/technologies";
+import { job } from "@/db/schema/jobs";
 import { checkOnboardingFromSession } from "@/lib/session-utils";
-import {
-  type BarrierReportInput,
-  barrierReportSchema,
-  type DeploymentReportInput,
-  deploymentReportSchema,
-  type ResearchReportInput,
-  researchReportSchema,
-} from "@/lib/validations";
 
-/**
- * Helper: Create or get job by name
- */
-async function createOrGetJob(
-  jobTitle: string,
-  _industryName?: string,
-): Promise<string> {
-  // Map industry name to valid category or default to "other"
-  const validCategories: JobCategory[] = [
-    "healthcare",
-    "technology",
-    "trades",
-    "service",
-    "creative",
-    "finance",
-    "education",
-    "legal",
-    "manufacturing",
-    "other",
-  ];
-  const category: JobCategory = validCategories.includes(
-    _industryName?.toLowerCase() as JobCategory,
-  )
-    ? (_industryName!.toLowerCase() as JobCategory)
-    : "other";
+// ============================================
+// TYPES
+// ============================================
 
-  // Try to find existing job by name
-  const existing = await db
-    .select()
-    .from(job)
-    .where(eq(job.name, jobTitle))
-    .limit(1);
-
-  if (existing.length > 0) {
-    return existing[0].id;
-  }
-
-  // Create new job with basic info
-  const jobId = generateRandomString(32);
-  const slug = jobTitle
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-
-  await db.insert(job).values({
-    id: jobId,
-    slug,
-    name: jobTitle,
-    category,
-    description: `Job: ${jobTitle}`,
-    automationRiskPercentage: 0,
-    riskLevel: "low",
-    confidence: "medium",
-  });
-
-  return jobId;
+export interface ImpactReportInput {
+  title: string;
+  description: string;
+  location?: string;
+  eventDate?: Date;
+  sourceUrl?: string;
+  technologyId: string;
+  jobId?: string;
+  capabilityIds?: string[];
 }
 
-/**
- * Helper: Create or get capability by name
- */
-async function createOrGetCapability(
-  capabilityName: string,
-  _categoryId?: string,
-): Promise<string> {
-  // Try to find existing capability by name
-  const existing = await db
-    .select()
-    .from(capability)
-    .where(eq(capability.name, capabilityName))
-    .limit(1);
-
-  if (existing.length > 0) {
-    return existing[0].id;
-  }
-
-  // Create new capability with basic info
-  const capabilityId = generateRandomString(32);
-  const slug = capabilityName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-
-  // Default to "cognitive" category for new capabilities
-  await db.insert(capability).values({
-    id: capabilityId,
-    slug,
-    name: capabilityName,
-    category: "cognitive", // Default category enum
-    description: capabilityName,
-    progressPercentage: 0,
-    status: "unsolved",
-    whatWorks: [],
-    whatStruggles: [],
-    whatDoesntWork: [],
-  });
-
-  return capabilityId;
-}
+// ============================================
+// SUBMIT REPORT
+// ============================================
 
 /**
- * Submit report (create or update)
+ * Submit a new impact report
  */
 export async function submitReport(
   userId: string,
-  reportData: DeploymentReportInput | BarrierReportInput | ResearchReportInput,
-  reportId?: string, // Optional: if provided, update existing draft instead of creating new
+  reportData: ImpactReportInput,
 ) {
   try {
     // Check onboarding completion from session
@@ -147,510 +56,100 @@ export async function submitReport(
       };
     }
 
-    // Validate report data
-    let validatedData:
-      | DeploymentReportInput
-      | BarrierReportInput
-      | ResearchReportInput;
-    if (reportData.type === "deployment") {
-      validatedData = deploymentReportSchema.parse(reportData);
-    } else if (reportData.type === "barrier") {
-      validatedData = barrierReportSchema.parse(reportData);
-    } else {
-      validatedData = researchReportSchema.parse(reportData);
-    }
-
-    // Create or get job/capability if needed
-    let jobId: string | null = null;
-    let capabilityId: string | null = null;
-
+    // Validate required fields
     if (
-      validatedData.type === "deployment" ||
-      validatedData.type === "barrier"
+      !reportData.title ||
+      !reportData.description ||
+      !reportData.technologyId
     ) {
-      if (validatedData.step1.jobId) {
-        jobId = validatedData.step1.jobId;
-      } else if (validatedData.step1.jobTitle) {
-        jobId = await createOrGetJob(
-          validatedData.step1.jobTitle,
-          undefined, // industry not in schema
-        );
-      }
+      return {
+        success: false,
+        error: "Title, description, and technology are required",
+      };
     }
 
-    if (validatedData.type === "barrier" || validatedData.type === "research") {
-      if (validatedData.step1.capabilityId) {
-        capabilityId = validatedData.step1.capabilityId;
-      } else if (
-        validatedData.type === "research" &&
-        validatedData.step1.capabilityName
-      ) {
-        capabilityId = await createOrGetCapability(
-          validatedData.step1.capabilityName,
-        );
-      }
+    // Verify technology exists
+    const tech = await db
+      .select({ id: technology.id })
+      .from(technology)
+      .where(eq(technology.id, reportData.technologyId))
+      .limit(1);
+
+    if (tech.length === 0) {
+      return { success: false, error: "Technology not found" };
     }
 
-    // Check if updating existing draft
-    const isUpdate = !!reportId;
-    const finalReportId = reportId || generateRandomString(32);
-
-    if (isUpdate && reportId) {
-      // Verify the report exists, belongs to user, and is a draft
-      const existing = await db
-        .select()
-        .from(report)
-        .where(
-          and(
-            eq(report.id, reportId),
-            eq(report.userId, userId),
-            eq(report.isDraft, true),
-            isNull(report.deletedAt),
-          ),
-        )
+    // Verify job exists if provided
+    if (reportData.jobId) {
+      const jobExists = await db
+        .select({ id: job.id })
+        .from(job)
+        .where(eq(job.id, reportData.jobId))
         .limit(1);
 
-      if (existing.length === 0) {
-        return {
-          success: false,
-          error: "Draft not found or you don't have permission to edit it",
-        };
+      if (jobExists.length === 0) {
+        return { success: false, error: "Job not found" };
       }
     }
 
-    const status: ReportStatus = validatedData.isDraft ? "draft" : "pending";
-
-    const reportValues = {
-      id: finalReportId,
-      userId,
-      type: validatedData.type,
-      status,
-      isDraft: validatedData.isDraft || false,
-      jobId,
-      jobTitle:
-        validatedData.type === "deployment" || validatedData.type === "barrier"
-          ? validatedData.step1.jobTitle
-          : null,
-      capabilityId,
-      technology: validatedData.step1.technology,
-      company:
-        validatedData.type === "research"
-          ? validatedData.step1.organization || null
-          : validatedData.type === "deployment" ||
-              validatedData.type === "barrier"
-            ? validatedData.step1.company || null
-            : null,
-      country: validatedData.step1.country || null,
-      stateProvince: validatedData.step1.stateProvince || null,
-      city: validatedData.step1.city || null,
-      location: validatedData.step1.location || null,
-      deploymentStatus:
-        validatedData.type === "deployment"
-          ? validatedData.step2.deploymentStatus
-          : null,
-      deploymentDate:
-        validatedData.type === "deployment" &&
-        validatedData.step2.deploymentDate
-          ? validatedData.step2.deploymentDate
-          : null,
-      workersAffected:
-        validatedData.type === "deployment"
-          ? validatedData.step2.workersAffected
-          : null,
-      impactType:
-        validatedData.type === "deployment"
-          ? validatedData.step2.impactType
-          : null,
-      automationPercentage:
-        validatedData.type === "deployment"
-          ? validatedData.step2.automationPercentage
-          : null,
-      performanceComparison:
-        validatedData.type === "deployment"
-          ? validatedData.step2.performanceComparison
-          : null,
-      description: validatedData.step3.description,
-      publishedAt: null, // Only published when approved by moderator
-      updatedAt: new Date(),
-    };
-
-    // Wrap draft update operations in transaction to ensure atomicity
-    // If report update fails, evidence deletion is rolled back
-    await db.transaction(async (tx) => {
-      // Delete existing evidence if updating
-      if (isUpdate) {
-        await tx
-          .delete(reportEvidence)
-          .where(eq(reportEvidence.reportId, finalReportId));
-      }
-
-      // Update or insert report
-      if (isUpdate) {
-        await tx
-          .update(report)
-          .set(reportValues)
-          .where(eq(report.id, finalReportId));
-      } else {
-        await tx.insert(report).values(reportValues);
-      }
-
-      // Save evidence
-      if (
-        validatedData.step3.evidenceLinks &&
-        validatedData.step3.evidenceLinks.length > 0
-      ) {
-        const evidence = validatedData.step3.evidenceLinks.map((url) => ({
-          id: generateRandomString(32),
-          reportId: finalReportId,
-          type: "link",
-          url,
-          description: null,
-        }));
-
-        await tx.insert(reportEvidence).values(evidence);
-      }
-
-      if (
-        validatedData.step3.fileUrls &&
-        validatedData.step3.fileUrls.length > 0
-      ) {
-        const fileEvidence = validatedData.step3.fileUrls.map((fileUrl) => ({
-          id: generateRandomString(32),
-          reportId: finalReportId,
-          type: "photo",
-          fileUrl,
-          description: null,
-        }));
-
-        await tx.insert(reportEvidence).values(fileEvidence);
-      }
-    });
-
-    return { success: true, reportId: finalReportId };
-  } catch (error) {
-    console.error("Error submitting report:", error);
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        error: error.issues[0]?.message || "Validation failed",
-      };
-    }
-    return { success: false, error: "Failed to submit report" };
-  }
-}
-
-/**
- * Save report as draft
- */
-export async function saveReportDraft(
-  userId: string,
-  reportData: Partial<
-    DeploymentReportInput | BarrierReportInput | ResearchReportInput
-  >,
-) {
-  try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to save drafts" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before saving drafts",
-      };
-    }
-
-    // Create draft report with partial data
     const reportId = generateRandomString(32);
 
-    await db.insert(report).values({
-      id: reportId,
-      userId,
-      type: reportData.type || "deployment",
-      status: "draft",
-      isDraft: true,
-      technology: "", // Required field, will be filled when draft is completed
-      description: "", // Required field, will be filled when draft is completed
-      publishedAt: null,
+    await db.transaction(async (tx) => {
+      // Insert impact report
+      await tx.insert(impactReport).values({
+        id: reportId,
+        title: reportData.title,
+        description: reportData.description,
+        location: reportData.location || null,
+        eventDate: reportData.eventDate || null,
+        sourceUrl: reportData.sourceUrl || null,
+        technologyId: reportData.technologyId,
+        jobId: reportData.jobId || null,
+        status: "pending",
+        submittedBy: userId,
+        verificationStatus: "unverified",
+        upvotes: 0,
+        isFeatured: false,
+      });
+
+      // Insert capability connections if provided
+      if (reportData.capabilityIds && reportData.capabilityIds.length > 0) {
+        const capabilityConnections = reportData.capabilityIds.map(
+          (capabilityId) => ({
+            id: generateRandomString(32),
+            impactReportId: reportId,
+            capabilityId,
+          }),
+        );
+        await tx.insert(impactReportCapability).values(capabilityConnections);
+      }
     });
 
     return { success: true, reportId };
   } catch (error) {
-    console.error("Error saving draft:", error);
-    return { success: false, error: "Failed to save draft" };
+    console.error("Error submitting report:", error);
+    return { success: false, error: "Failed to submit report" };
   }
 }
 
-/**
- * Publish draft report
- */
-export async function publishDraft(reportId: string, userId: string) {
-  try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to publish reports" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before publishing reports",
-      };
-    }
-
-    // Check if report exists and belongs to user
-    const existing = await db
-      .select()
-      .from(report)
-      .where(
-        and(
-          eq(report.id, reportId),
-          eq(report.userId, userId),
-          eq(report.isDraft, true),
-          isNull(report.deletedAt),
-        ),
-      )
-      .limit(1);
-
-    if (existing.length === 0) {
-      return { success: false, error: "Draft not found" };
-    }
-
-    // Update report status
-    await db
-      .update(report)
-      .set({
-        isDraft: false,
-        status: "pending",
-        updatedAt: new Date(),
-      })
-      .where(eq(report.id, reportId));
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error publishing draft:", error);
-    return { success: false, error: "Failed to publish draft" };
-  }
-}
+// ============================================
+// GET REPORTS
+// ============================================
 
 /**
  * Get user's reports
  */
-export async function getUserReports(userId: string, includeDrafts = true) {
+export async function getUserReports(userId: string) {
   try {
-    const conditions = [eq(report.userId, userId), isNull(report.deletedAt)];
-
-    if (!includeDrafts) {
-      conditions.push(eq(report.isDraft, false));
-    }
-
     const reports = await db
       .select()
-      .from(report)
-      .where(and(...conditions))
-      .orderBy(desc(report.createdAt));
+      .from(impactReport)
+      .where(eq(impactReport.submittedBy, userId))
+      .orderBy(desc(impactReport.createdAt));
 
     return reports;
   } catch (error) {
     console.error("Error getting user reports:", error);
-    return [];
-  }
-}
-
-/**
- * Get draft report for editing
- * Converts flat database structure to nested form structure
- */
-export async function getDraftForEditing(
-  reportId: string,
-  userId: string,
-): Promise<
-  | {
-      success: true;
-      data: DeploymentReportInput | BarrierReportInput | ResearchReportInput;
-    }
-  | { success: false; error: string }
-> {
-  try {
-    // Get the report and verify ownership
-    const draftReport = await db
-      .select()
-      .from(report)
-      .where(
-        and(
-          eq(report.id, reportId),
-          eq(report.userId, userId),
-          eq(report.isDraft, true),
-          isNull(report.deletedAt),
-        ),
-      )
-      .limit(1);
-
-    if (draftReport.length === 0) {
-      return {
-        success: false,
-        error: "Draft not found or you don't have permission",
-      };
-    }
-
-    const r = draftReport[0];
-
-    // Get evidence links
-    const evidence = await db
-      .select()
-      .from(reportEvidence)
-      .where(eq(reportEvidence.reportId, reportId));
-
-    const evidenceLinks = evidence
-      .filter(
-        (e): e is typeof e & { url: string } => e.type === "link" && !!e.url,
-      )
-      .map((e) => e.url);
-    const fileUrls = evidence
-      .filter(
-        (e): e is typeof e & { fileUrl: string } =>
-          e.type === "photo" && !!e.fileUrl,
-      )
-      .map((e) => e.fileUrl);
-
-    // Convert to form structure based on report type
-    if (r.type === "deployment") {
-      const formData: DeploymentReportInput = {
-        type: "deployment",
-        isDraft: true,
-        step1: {
-          jobId: r.jobId || undefined,
-          jobTitle: r.jobTitle || "",
-          technology: r.technology,
-          company: r.company || undefined,
-          country: r.country || "",
-          stateProvince: r.stateProvince || undefined,
-          city: r.city || undefined,
-          location: r.location || undefined,
-        },
-        step2: {
-          deploymentStatus:
-            (r.deploymentStatus as
-              | "fully_deployed"
-              | "pilot"
-              | "announced"
-              | "failed") || "pilot",
-          deploymentDate: r.deploymentDate || undefined,
-          workersAffected: r.workersAffected || undefined,
-          impactType:
-            (r.impactType as
-              | "completely_replaced"
-              | "partially_replaced"
-              | "augmented"
-              | "no_job_loss") || "no_job_loss",
-          automationPercentage: r.automationPercentage || 0,
-          performanceComparison:
-            (r.performanceComparison as
-              | "better_than_humans"
-              | "about_same"
-              | "worse_improving"
-              | "worse_not_improving") || "about_same",
-        },
-        step3: {
-          description: r.description || "",
-          evidenceLinks: evidenceLinks.length > 0 ? evidenceLinks : [""],
-          fileUrls: fileUrls.length > 0 ? fileUrls : undefined,
-          source: "other", // Default since source field doesn't exist in DB schema
-          sourceOther: undefined,
-        },
-      };
-      return { success: true, data: formData };
-    }
-
-    if (r.type === "barrier") {
-      // Note: barrier step2 fields may not be in DB schema yet, using defaults
-      const formData: BarrierReportInput = {
-        type: "barrier",
-        isDraft: true,
-        step1: {
-          jobId: r.jobId || undefined,
-          jobTitle: r.jobTitle || "",
-          capabilityId: r.capabilityId || undefined,
-          technology: r.technology,
-          company: r.company || undefined,
-          country: r.country || "",
-          stateProvince: r.stateProvince || undefined,
-          city: r.city || undefined,
-          location: r.location || undefined,
-        },
-        step2: {
-          barrierType: "other", // Default since field may not exist in schema
-          barrierDescription: "", // Default since field may not exist in schema
-          estimatedSolveDate: undefined,
-          organizationsWorkingOnIt: undefined,
-        },
-        step3: {
-          description: r.description || "",
-          evidenceLinks: evidenceLinks.length > 0 ? evidenceLinks : [""],
-          fileUrls: fileUrls.length > 0 ? fileUrls : undefined,
-          source: "other", // Default since field may not exist in schema
-          sourceOther: undefined,
-        },
-      };
-      return { success: true, data: formData };
-    }
-
-    // Research report
-    // Note: research step2 fields may not be in DB schema yet, using defaults
-    const formData: ResearchReportInput = {
-      type: "research",
-      isDraft: true,
-      step1: {
-        capabilityId: r.capabilityId || undefined,
-        capabilityName: "", // Default since field may not exist in schema
-        technology: r.technology,
-        organization: r.company || undefined,
-        country: r.country || undefined,
-        stateProvince: r.stateProvince || undefined,
-        city: r.city || undefined,
-      },
-      step2: {
-        researchType: "other", // Default since field may not exist in schema
-        impactDescription: "", // Default since field may not exist in schema
-        publicationDate: undefined,
-        potentialJobsAffected: undefined,
-      },
-      step3: {
-        description: r.description || "",
-        evidenceLinks: evidenceLinks.length > 0 ? evidenceLinks : [""],
-        fileUrls: fileUrls.length > 0 ? fileUrls : undefined,
-        source: "other", // Default since field may not exist in schema
-        sourceOther: undefined,
-      },
-    };
-    return { success: true, data: formData };
-  } catch (error) {
-    console.error("Error getting draft for editing:", error);
-    return { success: false, error: "Failed to load draft" };
-  }
-}
-
-/**
- * Get user's drafts
- */
-export async function getUserDrafts(userId: string) {
-  try {
-    const drafts = await db
-      .select()
-      .from(report)
-      .where(
-        and(
-          eq(report.userId, userId),
-          eq(report.isDraft, true),
-          isNull(report.deletedAt),
-        ),
-      )
-      .orderBy(desc(report.createdAt));
-
-    return drafts;
-  } catch (error) {
-    console.error("Error getting user drafts:", error);
     return [];
   }
 }
@@ -662,10 +161,9 @@ export async function getReportById(reportId: string) {
   "use cache";
   cacheLife({ stale: 1800, revalidate: 3600 * 2 });
   try {
-    // Single query with LEFT JOINs and JSON aggregation for evidence and badges
     const result = await db
       .select({
-        report,
+        report: impactReport,
         author: {
           id: user.id,
           name: user.name,
@@ -675,28 +173,29 @@ export async function getReportById(reportId: string) {
         },
         authorProfile: userProfile,
         authorReputation: userReputation,
-        evidence: sql<Array<typeof reportEvidence.$inferSelect>>`
-          COALESCE(
-            (SELECT json_agg(e.* ORDER BY e.created_at)
-             FROM ${reportEvidence} e
-             WHERE e.report_id = ${report.id}),
-            '[]'::json
-          )
-        `.as("evidence"),
         authorBadges: sql<Array<typeof userBadge.$inferSelect>>`
           COALESCE(
             (SELECT json_agg(b.* ORDER BY b.earned_at DESC)
              FROM ${userBadge} b
-             WHERE b.user_id = ${report.userId}),
+             WHERE b.user_id = ${impactReport.submittedBy}),
             '[]'::json
           )
         `.as("author_badges"),
+        capabilities: sql<Array<{ id: string; name: string }>>`
+          COALESCE(
+            (SELECT json_agg(json_build_object('id', c.id, 'name', c.name))
+             FROM ${impactReportCapability} irc
+             JOIN capability c ON c.id = irc.capability_id
+             WHERE irc.impact_report_id = ${impactReport.id}),
+            '[]'::json
+          )
+        `.as("capabilities"),
       })
-      .from(report)
-      .leftJoin(user, eq(report.userId, user.id))
+      .from(impactReport)
+      .leftJoin(user, eq(impactReport.submittedBy, user.id))
       .leftJoin(userProfile, eq(userProfile.userId, user.id))
       .leftJoin(userReputation, eq(userReputation.userId, user.id))
-      .where(and(eq(report.id, reportId), isNull(report.deletedAt)))
+      .where(eq(impactReport.id, reportId))
       .limit(1);
 
     if (result.length === 0) {
@@ -707,181 +206,15 @@ export async function getReportById(reportId: string) {
 
     return {
       ...reportData.report,
-      evidence: reportData.evidence || [],
       author: reportData.author || null,
       authorProfile: reportData.authorProfile || null,
       authorReputation: reportData.authorReputation || null,
       authorBadges: reportData.authorBadges || [],
+      capabilities: reportData.capabilities || [],
     };
   } catch (error) {
     console.error("Error getting report:", error);
     return null;
-  }
-}
-
-/**
- * Update report
- */
-export async function updateReport(
-  reportId: string,
-  userId: string,
-  reportData: Partial<
-    DeploymentReportInput | BarrierReportInput | ResearchReportInput
-  >,
-) {
-  try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to update reports" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before updating reports",
-      };
-    }
-
-    // Check if report exists and belongs to user
-    const existing = await db
-      .select()
-      .from(report)
-      .where(
-        and(
-          eq(report.id, reportId),
-          eq(report.userId, userId),
-          isNull(report.deletedAt),
-        ),
-      )
-      .limit(1);
-
-    if (existing.length === 0) {
-      return { success: false, error: "Report not found" };
-    }
-
-    // Check if report has verifications (can't edit if verified)
-    if (
-      existing[0].verificationCount > 0 &&
-      existing[0].status === "approved"
-    ) {
-      return { success: false, error: "Cannot edit verified reports" };
-    }
-
-    // Update report
-    await db
-      .update(report)
-      .set({
-        ...reportData,
-        updatedAt: new Date(),
-      })
-      .where(eq(report.id, reportId));
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating report:", error);
-    return { success: false, error: "Failed to update report" };
-  }
-}
-
-/**
- * Soft delete report (only if no verifications)
- */
-export async function softDeleteReport(reportId: string, userId: string) {
-  try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to delete reports" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before deleting reports",
-      };
-    }
-
-    // Check if report exists and belongs to user
-    const existing = await db
-      .select()
-      .from(report)
-      .where(
-        and(
-          eq(report.id, reportId),
-          eq(report.userId, userId),
-          isNull(report.deletedAt),
-        ),
-      )
-      .limit(1);
-
-    if (existing.length === 0) {
-      return { success: false, error: "Report not found" };
-    }
-
-    // Check if report has verifications (can't delete if verified)
-    if (existing[0].verificationCount > 0) {
-      return {
-        success: false,
-        error: "Cannot delete reports with verifications",
-      };
-    }
-
-    // Soft delete
-    await db
-      .update(report)
-      .set({
-        deletedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(report.id, reportId));
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error soft deleting report:", error);
-    return { success: false, error: "Failed to delete report" };
-  }
-}
-
-/**
- * Restore soft-deleted report
- */
-export async function restoreReport(reportId: string, userId: string) {
-  try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to restore reports" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before restoring reports",
-      };
-    }
-
-    // Check if report exists and belongs to user
-    const existing = await db
-      .select()
-      .from(report)
-      .where(and(eq(report.id, reportId), eq(report.userId, userId)))
-      .limit(1);
-
-    if (existing.length === 0) {
-      return { success: false, error: "Report not found" };
-    }
-
-    // Restore
-    await db
-      .update(report)
-      .set({
-        deletedAt: null,
-        updatedAt: new Date(),
-      })
-      .where(eq(report.id, reportId));
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error restoring report:", error);
-    return { success: false, error: "Failed to restore report" };
   }
 }
 
@@ -892,10 +225,9 @@ export async function getApprovedReports(limit = 20, offset = 0) {
   "use cache";
   cacheLife({ stale: 900, revalidate: 3600 * 2 });
   try {
-    // Single query with JSON aggregation for evidence and author info
     const reports = await db
       .select({
-        report,
+        report: impactReport,
         author: {
           id: user.id,
           name: user.name,
@@ -905,27 +237,17 @@ export async function getApprovedReports(limit = 20, offset = 0) {
         },
         authorProfile: userProfile,
         authorReputation: userReputation,
-        evidence: sql<Array<typeof reportEvidence.$inferSelect>>`
-          COALESCE(
-            (SELECT json_agg(e.* ORDER BY e.created_at)
-             FROM ${reportEvidence} e
-             WHERE e.report_id = ${report.id}),
-            '[]'::json
-          )
-        `.as("evidence"),
+        technologyName: technology.name,
+        jobName: job.name,
       })
-      .from(report)
-      .leftJoin(user, eq(report.userId, user.id))
+      .from(impactReport)
+      .leftJoin(user, eq(impactReport.submittedBy, user.id))
       .leftJoin(userProfile, eq(userProfile.userId, user.id))
       .leftJoin(userReputation, eq(userReputation.userId, user.id))
-      .where(
-        and(
-          eq(report.status, "approved"),
-          eq(report.isDraft, false),
-          isNull(report.deletedAt),
-        ),
-      )
-      .orderBy(desc(report.createdAt))
+      .leftJoin(technology, eq(impactReport.technologyId, technology.id))
+      .leftJoin(job, eq(impactReport.jobId, job.id))
+      .where(eq(impactReport.status, "approved"))
+      .orderBy(desc(impactReport.createdAt))
       .limit(limit)
       .offset(offset);
 
@@ -934,7 +256,8 @@ export async function getApprovedReports(limit = 20, offset = 0) {
       author: r.author || null,
       authorProfile: r.authorProfile || null,
       authorReputation: r.authorReputation || null,
-      evidence: r.evidence || [],
+      technologyName: r.technologyName || null,
+      jobName: r.jobName || null,
     }));
   } catch (error) {
     console.error("Error getting approved reports:", error);
@@ -953,36 +276,27 @@ export async function getPersonalizedReports(
   "use cache";
   cacheLife({ stale: 120, revalidate: 3600 * 2 });
   try {
-    const conditions = [
-      eq(report.status, "approved"),
-      eq(report.isDraft, false),
-      isNull(report.deletedAt),
-    ];
+    const conditions = [eq(impactReport.status, "approved")];
 
     // If user has job name or category, filter by them
     if (jobTitle || category) {
       const jobConditions: SQL<unknown>[] = [];
       if (jobTitle) {
         const jobTitlePattern = `%${jobTitle}%`;
-        // Match reports with same job name (from jobId or jobTitle field)
-        const jobTitleCondition = or(
-          ilike(report.jobTitle, jobTitlePattern),
-          sql`EXISTS (
-            SELECT 1 FROM ${job} j
-            WHERE j.id = ${report.jobId}
-            AND j.name ILIKE ${jobTitlePattern}
-          )`,
-        );
-        if (jobTitleCondition) {
-          jobConditions.push(jobTitleCondition);
-        }
+        // Match reports with jobs that have similar names
+        const jobTitleCondition = sql`EXISTS (
+          SELECT 1 FROM ${job} j
+          WHERE j.id = ${impactReport.jobId}
+          AND j.name ILIKE ${jobTitlePattern}
+        )`;
+        jobConditions.push(jobTitleCondition);
       }
       if (category) {
         const categoryPattern = `%${category}%`;
-        // Match reports with same category
+        // Match reports with jobs in the same category
         const categoryCondition = sql`EXISTS (
           SELECT 1 FROM ${job} j
-          WHERE j.id = ${report.jobId}
+          WHERE j.id = ${impactReport.jobId}
           AND j.category ILIKE ${categoryPattern}
         )`;
         jobConditions.push(categoryCondition);
@@ -995,10 +309,9 @@ export async function getPersonalizedReports(
       }
     }
 
-    // Single query with JSON aggregation for evidence and author info
     const reports = await db
       .select({
-        report,
+        report: impactReport,
         author: {
           id: user.id,
           name: user.name,
@@ -1008,21 +321,17 @@ export async function getPersonalizedReports(
         },
         authorProfile: userProfile,
         authorReputation: userReputation,
-        evidence: sql<Array<typeof reportEvidence.$inferSelect>>`
-          COALESCE(
-            (SELECT json_agg(e.* ORDER BY e.created_at)
-             FROM ${reportEvidence} e
-             WHERE e.report_id = ${report.id}),
-            '[]'::json
-          )
-        `.as("evidence"),
+        technologyName: technology.name,
+        jobName: job.name,
       })
-      .from(report)
-      .leftJoin(user, eq(report.userId, user.id))
+      .from(impactReport)
+      .leftJoin(user, eq(impactReport.submittedBy, user.id))
       .leftJoin(userProfile, eq(userProfile.userId, user.id))
       .leftJoin(userReputation, eq(userReputation.userId, user.id))
+      .leftJoin(technology, eq(impactReport.technologyId, technology.id))
+      .leftJoin(job, eq(impactReport.jobId, job.id))
       .where(and(...conditions))
-      .orderBy(desc(report.upvotes), desc(report.createdAt))
+      .orderBy(desc(impactReport.upvotes), desc(impactReport.createdAt))
       .limit(limit);
 
     return reports.map((r) => ({
@@ -1030,10 +339,329 @@ export async function getPersonalizedReports(
       author: r.author || null,
       authorProfile: r.authorProfile || null,
       authorReputation: r.authorReputation || null,
-      evidence: r.evidence || [],
+      technologyName: r.technologyName || null,
+      jobName: r.jobName || null,
     }));
   } catch (error) {
     console.error("Error getting personalized reports:", error);
+    return [];
+  }
+}
+
+// ============================================
+// UPDATE REPORT
+// ============================================
+
+/**
+ * Update report (only by owner, before approval)
+ */
+export async function updateReport(
+  reportId: string,
+  userId: string,
+  reportData: Partial<ImpactReportInput>,
+) {
+  try {
+    // Check onboarding completion from session
+    const onboardingCompleted = await checkOnboardingFromSession();
+    if (onboardingCompleted === null) {
+      return { success: false, error: "Please sign in to update reports" };
+    }
+    if (!onboardingCompleted) {
+      return {
+        success: false,
+        error: "Please complete onboarding before updating reports",
+      };
+    }
+
+    // Check if report exists and belongs to user
+    const existing = await db
+      .select()
+      .from(impactReport)
+      .where(
+        and(
+          eq(impactReport.id, reportId),
+          eq(impactReport.submittedBy, userId),
+        ),
+      )
+      .limit(1);
+
+    if (existing.length === 0) {
+      return { success: false, error: "Report not found" };
+    }
+
+    // Can't edit approved/rejected reports
+    if (existing[0].status !== "pending") {
+      return {
+        success: false,
+        error: "Cannot edit reports that have been reviewed",
+      };
+    }
+
+    // Update report
+    await db
+      .update(impactReport)
+      .set({
+        title: reportData.title,
+        description: reportData.description,
+        location: reportData.location,
+        eventDate: reportData.eventDate,
+        sourceUrl: reportData.sourceUrl,
+        technologyId: reportData.technologyId,
+        jobId: reportData.jobId,
+        updatedAt: new Date(),
+      })
+      .where(eq(impactReport.id, reportId));
+
+    // Update capability connections if provided
+    if (reportData.capabilityIds !== undefined) {
+      await db.transaction(async (tx) => {
+        // Remove existing capability connections
+        await tx
+          .delete(impactReportCapability)
+          .where(eq(impactReportCapability.impactReportId, reportId));
+
+        // Add new capability connections
+        if (reportData.capabilityIds && reportData.capabilityIds.length > 0) {
+          const capabilityConnections = reportData.capabilityIds.map(
+            (capabilityId) => ({
+              id: generateRandomString(32),
+              impactReportId: reportId,
+              capabilityId,
+            }),
+          );
+          await tx.insert(impactReportCapability).values(capabilityConnections);
+        }
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating report:", error);
+    return { success: false, error: "Failed to update report" };
+  }
+}
+
+// ============================================
+// DELETE REPORT
+// ============================================
+
+/**
+ * Delete report (only by owner, only if pending)
+ */
+export async function deleteReport(reportId: string, userId: string) {
+  try {
+    // Check onboarding completion from session
+    const onboardingCompleted = await checkOnboardingFromSession();
+    if (onboardingCompleted === null) {
+      return { success: false, error: "Please sign in to delete reports" };
+    }
+    if (!onboardingCompleted) {
+      return {
+        success: false,
+        error: "Please complete onboarding before deleting reports",
+      };
+    }
+
+    // Check if report exists and belongs to user
+    const existing = await db
+      .select()
+      .from(impactReport)
+      .where(
+        and(
+          eq(impactReport.id, reportId),
+          eq(impactReport.submittedBy, userId),
+        ),
+      )
+      .limit(1);
+
+    if (existing.length === 0) {
+      return { success: false, error: "Report not found" };
+    }
+
+    // Can only delete pending reports
+    if (existing[0].status !== "pending") {
+      return {
+        success: false,
+        error: "Cannot delete reports that have been reviewed",
+      };
+    }
+
+    // Delete report (cascade will handle capability connections)
+    await db.delete(impactReport).where(eq(impactReport.id, reportId));
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting report:", error);
+    return { success: false, error: "Failed to delete report" };
+  }
+}
+
+// ============================================
+// UPVOTE REPORT
+// ============================================
+
+/**
+ * Upvote a report
+ */
+export async function upvoteReport(reportId: string, _userId: string) {
+  try {
+    // Check onboarding completion from session
+    const onboardingCompleted = await checkOnboardingFromSession();
+    if (onboardingCompleted === null) {
+      return { success: false, error: "Please sign in to upvote reports" };
+    }
+
+    // Increment upvotes (simple implementation - no vote tracking table)
+    await db
+      .update(impactReport)
+      .set({
+        upvotes: sql`${impactReport.upvotes} + 1`,
+      })
+      .where(eq(impactReport.id, reportId));
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error upvoting report:", error);
+    return { success: false, error: "Failed to upvote report" };
+  }
+}
+
+// ============================================
+// REPORTS FOR JOB/TECHNOLOGY/CAPABILITY
+// ============================================
+
+/**
+ * Get reports for a specific job
+ */
+export async function getReportsForJob(jobId: string, limit = 10) {
+  "use cache";
+  cacheLife({ stale: 900, revalidate: 3600 * 2 });
+  try {
+    const reports = await db
+      .select({
+        report: impactReport,
+        author: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          displayUsername: user.displayUsername,
+          image: user.image,
+        },
+        technologyName: technology.name,
+      })
+      .from(impactReport)
+      .leftJoin(user, eq(impactReport.submittedBy, user.id))
+      .leftJoin(technology, eq(impactReport.technologyId, technology.id))
+      .where(
+        and(eq(impactReport.jobId, jobId), eq(impactReport.status, "approved")),
+      )
+      .orderBy(desc(impactReport.upvotes), desc(impactReport.createdAt))
+      .limit(limit);
+
+    return reports.map((r) => ({
+      ...r.report,
+      author: r.author || null,
+      technologyName: r.technologyName || null,
+    }));
+  } catch (error) {
+    console.error("Error getting reports for job:", error);
+    return [];
+  }
+}
+
+/**
+ * Get reports for a specific technology
+ */
+export async function getReportsForTechnology(
+  technologyId: string,
+  limit = 10,
+) {
+  "use cache";
+  cacheLife({ stale: 900, revalidate: 3600 * 2 });
+  try {
+    const reports = await db
+      .select({
+        report: impactReport,
+        author: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          displayUsername: user.displayUsername,
+          image: user.image,
+        },
+        jobName: job.name,
+      })
+      .from(impactReport)
+      .leftJoin(user, eq(impactReport.submittedBy, user.id))
+      .leftJoin(job, eq(impactReport.jobId, job.id))
+      .where(
+        and(
+          eq(impactReport.technologyId, technologyId),
+          eq(impactReport.status, "approved"),
+        ),
+      )
+      .orderBy(desc(impactReport.upvotes), desc(impactReport.createdAt))
+      .limit(limit);
+
+    return reports.map((r) => ({
+      ...r.report,
+      author: r.author || null,
+      jobName: r.jobName || null,
+    }));
+  } catch (error) {
+    console.error("Error getting reports for technology:", error);
+    return [];
+  }
+}
+
+/**
+ * Get reports demonstrating a specific capability
+ */
+export async function getReportsForCapability(
+  capabilityId: string,
+  limit = 10,
+) {
+  "use cache";
+  cacheLife({ stale: 900, revalidate: 3600 * 2 });
+  try {
+    const reports = await db
+      .select({
+        report: impactReport,
+        author: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          displayUsername: user.displayUsername,
+          image: user.image,
+        },
+        technologyName: technology.name,
+        jobName: job.name,
+      })
+      .from(impactReport)
+      .innerJoin(
+        impactReportCapability,
+        eq(impactReport.id, impactReportCapability.impactReportId),
+      )
+      .leftJoin(user, eq(impactReport.submittedBy, user.id))
+      .leftJoin(technology, eq(impactReport.technologyId, technology.id))
+      .leftJoin(job, eq(impactReport.jobId, job.id))
+      .where(
+        and(
+          eq(impactReportCapability.capabilityId, capabilityId),
+          eq(impactReport.status, "approved"),
+        ),
+      )
+      .orderBy(desc(impactReport.upvotes), desc(impactReport.createdAt))
+      .limit(limit);
+
+    return reports.map((r) => ({
+      ...r.report,
+      author: r.author || null,
+      technologyName: r.technologyName || null,
+      jobName: r.jobName || null,
+    }));
+  } catch (error) {
+    console.error("Error getting reports for capability:", error);
     return [];
   }
 }
