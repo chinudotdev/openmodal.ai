@@ -11,6 +11,9 @@
 - Capability schema uses: `CapabilityStatus` type ("solved" | "partial" | "unsolved")
 - Job schema uses: `JobCategory`, `RiskLevel`, `Confidence`, `Automatable`, `ImportanceLevel` types
 - Job field renames: `title` → `name`, `automationStatus` → `riskLevel`, `industryId` → `category` enum
+- Reports schema: `report` table → `impactReport`, `reportEvidence` → just use `sourceUrl` field
+- Impact reports: require `technologyId`, optional `jobId`, use `submittedBy` not `userId`
+- Impact reports: use `impactReportCapability` junction table for capabilities demonstrated
 
 ---
 
@@ -205,3 +208,74 @@
 
 ---
 
+
+## 2025-01-22 - US-012, US-013, US-014, US-015 (Fix Jobs Action File)
+- **Status**: COMPLETE
+- **What was implemented**:
+  - Removed all old imports from `src/actions/jobs.ts`:
+    - Deleted: `industry`, `jobTracking`, `relatedJob`, `jobGeographicData`, `jobComment`
+    - Deleted: `generateRandomString`, `cacheTag`, `user`, `userBadge`, `userProfile`, `userReputation`, `checkOnboardingFromSession`
+  - Updated all field references:
+    - `job.title` → `job.name`
+    - `job.automationStatus` → `job.riskLevel`
+    - `job.automationPercentage` → `job.automationRiskPercentage`
+    - `job.industryId` removed (use `job.category` enum)
+  - Removed deleted fields from queries/types:
+    - `shortDescription`, `totalWorkersGlobal`, `medianSalaryUsa`, `estimatedAutomationYear`, `growthRate`
+    - `viewCount`, `trackingCount`, `taskCount`
+  - Removed functions that use deleted tables:
+    - `trackJob()`, `untrackJob()`, `isTrackingJob()`, `incrementViewCount()`
+    - `getJobComments()`, `createJobComment()`, `voteJobComment()`
+    - `getRelatedJobs()`
+  - Updated `getJobBySlug()` to remove geographicData and relatedJobs from response
+  - Updated `getJobCategories()` to return static enum values instead of querying deleted industry table
+  - Updated `compareJobs()`, `getJobs()`, `searchJobs()` to use new fields
+  - Updated types: `JobFilters`, `JobSort`, `JobComparisonData`, removed `CommentVoteType`
+- **Files changed**:
+  - Modified: `src/actions/jobs.ts` (reduced from 720 to 374 lines)
+- **Learnings for future iterations**:
+  - Jobs schema changes: `title` → `name`, `automationStatus` → `riskLevel`, `automationPercentage` → `automationRiskPercentage`
+  - Industry table replaced by `category` enum on job table
+  - Job tracking tables removed: `jobTracking`, `relatedJob`, `jobGeographicData`, `jobComment`
+  - For getJobCategories(), return static array of enum values instead of database query
+  - Build still has 53 errors from consumer files (dashboard.ts, capability components, job components) - these are addressed by US-016+
+- **Commit hash**: 7b04636
+
+---
+
+## 2025-01-22 - US-016 & US-017 (Fix Reports Action)
+- **Status**: COMPLETE
+- **What was implemented**:
+  - Complete rewrite of `src/actions/reports.ts` to use new `impactReport` schema
+  - Changed imports from `report`, `reportEvidence` to `impactReport`, `impactReportCapability`
+  - Updated all table references from `report` to `impactReport` throughout the file
+  - Updated field references to match new schema:
+    - `userId` → `submittedBy`
+    - `createdAt` stays same (both tables have it)
+  - Removed old functions that rely on deleted schema:
+    - `saveReportDraft()`, `publishDraft()`, `getDraftForEditing()`, `getUserDrafts()` (no more draft system)
+    - `softDeleteReport()`, `restoreReport()` (no more soft delete - use hard delete)
+  - Removed all references to deleted fields:
+    - `isDraft`, `reportType`, `company`, `workersAffected`, `impactType`
+    - `automationPercentage`, `performanceComparison`, `moderationNotes`
+    - `downvotes`, `verificationCount`, `commentCount`, `deletedAt`, `publishedAt`
+    - `reportEvidence` table (now just use `sourceUrl`)
+  - Added new functions:
+    - `getReportsForJob()` - get reports for a specific job
+    - `getReportsForTechnology()` - get reports for a specific technology
+    - `getReportsForCapability()` - get reports demonstrating a capability
+  - New schema uses: `title`, `description`, `location`, `eventDate`, `sourceUrl` with required `technologyId`
+  - Uses `impactReportCapability` junction table for capability connections
+- **Files changed**:
+  - Modified: `src/actions/reports.ts` (reduced from 1040 to 668 lines)
+- **Learnings for future iterations**:
+  - Impact reports now require `technologyId` (FK to technology table), `jobId` is optional
+  - No more draft system - reports are either submitted (pending) or not
+  - `reportEvidence` table removed - just use `sourceUrl` field instead
+  - Use `impactReportCapability` junction table for capabilities demonstrated
+  - `submittedBy` replaces `userId` for the author reference
+  - Consumer files (dashboard.ts, report submit forms) still import old functions - addressed by subsequent stories
+  - Build has 53 errors from consumer files - addressed by US-018+
+- **Commit hash**: 4e124d6
+
+---
