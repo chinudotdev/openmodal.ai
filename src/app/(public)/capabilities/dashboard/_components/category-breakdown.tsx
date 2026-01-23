@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface CategoryBreakdownProps {
   categories: Array<{
-    category: any;
+    category: { id: string; name: string; slug: string };
     progress: number;
     solved: number;
     partial: number;
@@ -22,17 +22,24 @@ export function CategoryBreakdown({ categories }: CategoryBreakdownProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {categories.map(
           ({ category, progress, solved, partial, unsolved, capabilities }) => {
-            // Get top capabilities
-            const topCapabilities = capabilities
+            // Get top capabilities (sorted by highest progress)
+            const topCapabilities = [...capabilities]
               .sort((a, b) => b.progressPercentage - a.progressPercentage)
               .slice(0, 3);
 
-            const gaps = capabilities.filter(
-              (cap) => cap.status === "unsolved" || cap.status === "partial",
-            );
+            // Get gaps (unsolved/partial) sorted by lowest progress
+            const gaps = capabilities
+              .filter(
+                (cap) => cap.status === "unsolved" || cap.status === "partial",
+              )
+              .sort((a, b) => a.progressPercentage - b.progressPercentage)
+              .slice(0, 3);
 
             return (
-              <Card key={category.id} className="shadow-none border-0 bg-transparent rounded-none">
+              <Card
+                key={category.id}
+                className="shadow-none border-0 bg-transparent rounded-none"
+              >
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl">{category.name}</CardTitle>
@@ -82,20 +89,14 @@ export function CategoryBreakdown({ categories }: CategoryBreakdownProps) {
                         Key Gaps:
                       </h4>
                       <ul className="space-y-1">
-                        {gaps
-                          .sort(
-                            (a, b) =>
-                              b.jobsProtectedCount - a.jobsProtectedCount,
-                          )
-                          .slice(0, 3)
-                          .map((cap) => (
-                            <li
-                              key={cap.id}
-                              className="text-sm text-muted-foreground"
-                            >
-                              • {cap.name}: {cap.progressPercentage}%
-                            </li>
-                          ))}
+                        {gaps.map((cap) => (
+                          <li
+                            key={cap.id}
+                            className="text-sm text-muted-foreground"
+                          >
+                            • {cap.name}: {cap.progressPercentage}%
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   )}

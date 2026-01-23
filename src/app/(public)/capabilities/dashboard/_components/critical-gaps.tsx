@@ -18,7 +18,7 @@ export function CriticalGaps({ gaps }: CriticalGapsProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-destructive" />
-          Critical Gaps (What's Protecting Jobs)
+          Critical Gaps
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -53,14 +53,7 @@ export function CriticalGaps({ gaps }: CriticalGapsProps) {
                   {capability.status === "unsolved" ? "CRITICAL" : "MAJOR"}
                 </span>
                 <span>•</span>
-                <span>
-                  Protects{" "}
-                  {capability.jobsProtectedCount.toLocaleString("en-US")} jobs
-                </span>
-                <span>•</span>
-                <span>
-                  Timeline: {capability.timelineEstimate || "Unknown"}
-                </span>
+                <span className="capitalize">{capability.category}</span>
               </div>
             </div>
             <Link href={`/capabilities/${capability.slug}`}>
