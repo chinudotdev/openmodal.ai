@@ -66,7 +66,7 @@ export async function CompareContent({ searchParams }: PageProps) {
           <AddJobToCompare
             currentJobs={validJobs.map((job) => ({
               slug: job.slug,
-              title: job.title,
+              title: job.name,
             }))}
           />
 

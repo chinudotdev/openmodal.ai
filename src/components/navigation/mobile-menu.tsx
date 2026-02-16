@@ -76,7 +76,8 @@ export function MobileMenu() {
           <nav className="flex flex-col gap-1 px-3">
             {mainLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
+              const isActive =
+                pathname === link.href || pathname.startsWith(link.href + "/");
               return (
                 <Link
                   key={link.href}

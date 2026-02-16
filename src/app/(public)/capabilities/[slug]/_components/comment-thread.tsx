@@ -3,14 +3,12 @@
 import { ArrowUp, Award, MessageSquare, Reply } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { createComment, voteComment } from "@/actions/capabilities";
-import { OnboardingModal } from "@/components/onboarding-modal";
+// Comment functionality removed - use discussions instead
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSession } from "@/contexts/session-context";
-import { useOnboardingCheck } from "@/hooks/use-onboarding-check";
 import { formatDistanceToNow } from "@/lib/date-utils";
 import { CommentForm } from "./comment-form";
 
@@ -50,12 +48,6 @@ export function CommentThread({
   onCommentAdded,
 }: CommentThreadProps) {
   const { user } = useSession();
-  const {
-    checkOnboarding,
-    showOnboardingModal,
-    setShowOnboardingModal,
-    pendingAction,
-  } = useOnboardingCheck();
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
   const [upvotes, setUpvotes] = useState(comment.upvotes || 0);
@@ -76,15 +68,10 @@ export function CommentThread({
   const reputationPoints = comment.reputation?.reputationPoints ?? null;
 
   const handleVote = async () => {
-    // Check onboarding before voting
-    const canProceed = checkOnboarding("vote", async () => {
-      await performVote();
-    });
-
-    if (!canProceed) {
+    if (!user) {
+      toast.error("Please sign in to vote");
       return;
     }
-
     await performVote();
   };
 
@@ -93,23 +80,8 @@ export function CommentThread({
 
     setIsVoting(true);
     try {
-      const result = await voteComment(comment.id, user.id, "up");
-
-      // Handle backend error responses
-      if (result && !result.success) {
-        if (result.error?.includes("onboarding")) {
-          setShowOnboardingModal(true);
-          return;
-        }
-        toast.error(result.error || "Failed to vote");
-        return;
-      }
-
-      // Refresh comment data to get updated vote count
-      // The backend handles vote toggling, so we need to get the actual count
-      // For now, we'll trigger a refresh by calling onCommentAdded
-      // In a full implementation, you'd fetch the updated comment data
-      onCommentAdded();
+      // Comment voting removed - use discussions instead
+      toast.error("Comment voting is not available. Please use discussions.");
     } catch (error) {
       toast.error("Failed to vote");
     } finally {
@@ -118,15 +90,10 @@ export function CommentThread({
   };
 
   const handleReply = async (content: string) => {
-    // Check onboarding before replying
-    const canProceed = checkOnboarding("reply", async () => {
-      await performReply(content);
-    });
-
-    if (!canProceed) {
+    if (!user) {
+      toast.error("Please sign in to reply");
       return;
     }
-
     await performReply(content);
   };
 
@@ -134,26 +101,8 @@ export function CommentThread({
     if (!user) return;
 
     try {
-      const result = await createComment(
-        capabilityId,
-        user.id,
-        content,
-        comment.id,
-      );
-
-      // Handle backend error responses
-      if (result && !result.success) {
-        if (result.error?.includes("onboarding")) {
-          setShowOnboardingModal(true);
-          return;
-        }
-        toast.error(result.error || "Failed to post reply");
-        return;
-      }
-
-      setShowReplyForm(false);
-      onCommentAdded();
-      toast.success("Reply posted!");
+      // Comment functionality removed - use discussions instead
+      toast.error("Comments are not available. Please use discussions.");
     } catch (error) {
       toast.error("Failed to post reply");
     }
@@ -259,11 +208,6 @@ export function CommentThread({
           </div>
         )}
       </div>
-      <OnboardingModal
-        open={showOnboardingModal}
-        onOpenChange={setShowOnboardingModal}
-        action={pendingAction || "perform this action"}
-      />
     </>
   );
 }

@@ -45,7 +45,9 @@ export function RelatedCapabilities({
   return (
     <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
       <CardHeader className="px-0 pb-4">
-        <CardTitle className="text-lg font-semibold">Related Capabilities</CardTitle>
+        <CardTitle className="text-lg font-semibold">
+          Related Capabilities
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 px-0">
         <ul className="space-y-2">

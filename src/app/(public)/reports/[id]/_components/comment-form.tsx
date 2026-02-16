@@ -4,11 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createReportComment } from "@/actions/comments";
-import { OnboardingModal } from "@/components/onboarding-modal";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/contexts/session-context";
-import { useOnboardingCheck } from "@/hooks/use-onboarding-check";
 
 interface ReportCommentFormProps {
   reportId: string;
@@ -27,12 +25,6 @@ export function ReportCommentForm({
 }: ReportCommentFormProps) {
   const { user } = useSession();
   const router = useRouter();
-  const {
-    checkOnboarding,
-    showOnboardingModal,
-    setShowOnboardingModal,
-    pendingAction,
-  } = useOnboardingCheck();
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,11 +36,8 @@ export function ReportCommentForm({
       return;
     }
 
-    const canProceed = checkOnboarding("comment", async () => {
-      await performSubmit();
-    });
-
-    if (!canProceed) {
+    if (!user) {
+      toast.error("Please sign in to comment");
       return;
     }
 
@@ -73,10 +62,6 @@ export function ReportCommentForm({
         });
 
         if (!result?.success) {
-          if (result?.error?.includes("onboarding")) {
-            setShowOnboardingModal(true);
-            return;
-          }
           toast.error(result?.error || "Failed to post comment");
           return;
         }
@@ -117,11 +102,6 @@ export function ReportCommentForm({
           </Button>
         </div>
       </form>
-      <OnboardingModal
-        open={showOnboardingModal}
-        onOpenChange={setShowOnboardingModal}
-        action={pendingAction || "comment"}
-      />
     </>
   );
 }

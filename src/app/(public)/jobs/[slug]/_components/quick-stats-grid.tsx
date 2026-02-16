@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, DollarSign, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, Calendar, Gauge, TrendingUp } from "lucide-react";
 import type { getJobBySlug } from "@/actions/jobs";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -11,35 +11,8 @@ interface QuickStatsGridProps {
 }
 
 export function QuickStatsGrid({ job }: QuickStatsGridProps) {
-  const formatWorkers = (count: number | null) => {
-    if (!count) return "N/A";
-    if (count >= 1000000) {
-      return `${(count / 1000000).toFixed(1)}M`;
-    }
-    if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}k`;
-    }
-    return count.toLocaleString();
-  };
-
-  const formatSalary = (salary: number | string | null) => {
-    if (!salary) return "N/A";
-    const numSalary = typeof salary === "string" ? parseFloat(salary) : salary;
-    if (Number.isNaN(numSalary)) return "N/A";
-    return `$${(numSalary / 1000).toFixed(0)}k`;
-  };
-
-  const formatGrowth = (rate: number | string | null) => {
-    if (!rate) return "N/A";
-    const numRate = typeof rate === "string" ? parseFloat(rate) : rate;
-    if (Number.isNaN(numRate)) return "N/A";
-    const sign = numRate >= 0 ? "+" : "";
-    return `${sign}${numRate.toFixed(1)}%`;
-  };
-
-  const formatYear = (year: number | null) => {
-    if (!year) return "2050+";
-    return year.toString();
+  const formatRiskLevel = (level: "low" | "medium" | "high" | "critical") => {
+    return level.charAt(0).toUpperCase() + level.slice(1);
   };
 
   return (
@@ -48,12 +21,12 @@ export function QuickStatsGrid({ job }: QuickStatsGridProps) {
         <CardContent className="pt-0 px-0">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Users className="h-5 w-5 text-primary" />
+              <Gauge className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Workers (Global)</p>
+              <p className="text-sm text-muted-foreground">Automation Risk</p>
               <p className="text-lg font-semibold text-foreground">
-                {formatWorkers(job.totalWorkersGlobal)}
+                {job.automationRiskPercentage}%
               </p>
             </div>
           </div>
@@ -63,19 +36,34 @@ export function QuickStatsGrid({ job }: QuickStatsGridProps) {
         <CardContent className="pt-0 px-0">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <DollarSign className="h-5 w-5 text-primary" />
+              <AlertTriangle className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">
-                Median Salary (US)
-              </p>
-              <p className="text-lg font-semibold text-foreground">
-                {formatSalary(job.medianSalaryUsa)}
+              <p className="text-sm text-muted-foreground">Risk Level</p>
+              <p className="text-lg font-semibold text-foreground capitalize">
+                {formatRiskLevel(job.riskLevel)}
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
+      {job.timelineEstimate && (
+        <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
+          <CardContent className="pt-0 px-0">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Calendar className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Timeline</p>
+                <p className="text-lg font-semibold text-foreground">
+                  {job.timelineEstimate}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
         <CardContent className="pt-0 px-0">
           <div className="flex items-center gap-3">
@@ -83,24 +71,9 @@ export function QuickStatsGrid({ job }: QuickStatsGridProps) {
               <TrendingUp className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Growth</p>
-              <p className="text-lg font-semibold text-foreground">
-                {formatGrowth(job.growthRate)}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
-        <CardContent className="pt-0 px-0">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Calendar className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Timeline</p>
-              <p className="text-lg font-semibold text-foreground">
-                {formatYear(job.estimatedAutomationYear)} Safe
+              <p className="text-sm text-muted-foreground">Confidence</p>
+              <p className="text-lg font-semibold text-foreground capitalize">
+                {job.confidence}
               </p>
             </div>
           </div>

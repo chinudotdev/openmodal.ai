@@ -3,7 +3,7 @@
 import { and, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db";
-import { report, reportVerification, user, userReputation } from "@/db/schema";
+import { impactReport, reportVerification, user, userReputation } from "@/db/schema";
 
 type LeaderboardType =
   | "monthly_contributors"
@@ -49,18 +49,17 @@ export async function getLeaderboard(
         // Top contributors this month (by verified reports)
         query = db
           .select({
-            userId: report.userId,
+            userId: impactReport.submittedBy,
             count: sql<number>`COUNT(*)::int`.as("count"),
           })
-          .from(report)
+          .from(impactReport)
           .where(
             and(
-              eq(report.status, "approved"),
-              isNull(report.deletedAt),
-              gte(report.publishedAt, startOfMonth),
+              eq(impactReport.status, "approved"),
+              gte(impactReport.createdAt, startOfMonth),
             ),
           )
-          .groupBy(report.userId)
+          .groupBy(impactReport.submittedBy)
           .orderBy(desc(sql`COUNT(*)`))
           .limit(100);
         break;

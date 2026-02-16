@@ -55,9 +55,13 @@ export function CapabilityCard({ capability }: CapabilityCardProps) {
             <div className="text-sm">
               <p className="text-muted-foreground mb-1">What works:</p>
               <ul className="list-disc list-inside text-foreground">
-                {capability.whatWorks.slice(0, 2).map((item: string, idx: number) => (
-                  <li key={idx} className="truncate">{item}</li>
-                ))}
+                {capability.whatWorks
+                  .slice(0, 2)
+                  .map((item: string, idx: number) => (
+                    <li key={idx} className="truncate">
+                      {item}
+                    </li>
+                  ))}
               </ul>
             </div>
           )}

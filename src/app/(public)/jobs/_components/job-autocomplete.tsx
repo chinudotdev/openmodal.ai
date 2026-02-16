@@ -43,15 +43,20 @@ export function JobAutocomplete({ query, onSelect }: JobAutocompleteProps) {
     return null;
   }
 
-  const formatWorkers = (count: number | null) => {
-    if (!count) return "N/A";
-    if (count >= 1000000) {
-      return `${(count / 1000000).toFixed(1)}M`;
+  // Map riskLevel to old AutomationStatus format for badge component
+  const mapRiskLevelToStatus = (
+    riskLevel: "low" | "medium" | "high" | "critical",
+  ): "safe" | "partial" | "high_risk" | "automated" => {
+    switch (riskLevel) {
+      case "low":
+        return "safe";
+      case "medium":
+        return "partial";
+      case "high":
+        return "high_risk";
+      case "critical":
+        return "automated";
     }
-    if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}k`;
-    }
-    return count.toLocaleString();
   };
 
   return (
@@ -83,18 +88,15 @@ export function JobAutocomplete({ query, onSelect }: JobAutocompleteProps) {
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-foreground">
-                        {job.title}
+                        {job.name}
                       </h3>
-                      <JobStatusBadge status={job.automationStatus} />
+                      <JobStatusBadge status={mapRiskLevelToStatus(job.riskLevel)} />
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {typeof job.industry === "string"
-                        ? job.industry
-                        : job.industry.name}{" "}
-                      • {formatWorkers(job.totalWorkersGlobal)} workers
+                    <p className="text-sm text-muted-foreground capitalize">
+                      {job.category}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Risk: {job.automationPercentage}%
+                      Risk: {job.automationRiskPercentage}%
                     </p>
                   </div>
                 </div>

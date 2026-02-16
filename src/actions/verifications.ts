@@ -15,7 +15,6 @@ import {
   userProfile,
   userReputation,
 } from "@/db/schema";
-import { checkOnboardingFromSession } from "@/lib/session-utils";
 import { disputeSchema, verificationSchema } from "@/lib/validations";
 
 /**
@@ -26,18 +25,6 @@ export async function verifyReport(
   verificationData: z.infer<typeof verificationSchema>,
 ) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to verify reports" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before verifying reports",
-      };
-    }
-
     // Validate input
     const validated = verificationSchema.parse(verificationData);
 
@@ -205,18 +192,6 @@ export async function disputeReport(
   disputeData: z.infer<typeof disputeSchema>,
 ) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to dispute reports" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before disputing reports",
-      };
-    }
-
     // Validate input
     const validated = disputeSchema.parse(disputeData);
 
@@ -280,21 +255,6 @@ export async function softDeleteVerification(
   userId: string,
 ) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return {
-        success: false,
-        error: "Please sign in to delete verifications",
-      };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before deleting verifications",
-      };
-    }
-
     // Check if verification exists and belongs to user
     const existing = await db
       .select()
@@ -370,18 +330,6 @@ export async function softDeleteVerification(
  */
 export async function softDeleteDispute(disputeId: string, userId: string) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to delete disputes" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before deleting disputes",
-      };
-    }
-
     // Check if dispute exists and belongs to user
     const existing = await db
       .select()

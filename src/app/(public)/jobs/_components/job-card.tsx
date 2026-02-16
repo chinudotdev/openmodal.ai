@@ -19,55 +19,50 @@ interface JobCardProps {
   job: {
     id: string;
     slug: string;
-    title: string;
-    industry: { name: string; icon?: string | null } | string;
+    name: string;
     category: string;
-    shortDescription: string;
-    automationPercentage: number;
-    automationStatus: "safe" | "partial" | "high_risk" | "automated";
-    totalWorkersGlobal: number | null;
-    medianSalaryUsa: number | null;
+    description: string;
+    automationRiskPercentage: number;
+    riskLevel: "low" | "medium" | "high" | "critical";
     updatedAt: Date;
     capabilities?: Array<{
-      capability?: {
-        id: string;
-        slug: string;
-        name: string;
-        progressPercentage: number;
-      };
+      id: string;
+      slug: string;
+      name: string;
+      progressPercentage: number;
       importance?: "critical" | "important" | "minor";
     }>;
   };
 }
 
+// Map riskLevel to old AutomationStatus format for badge component
+const mapRiskLevelToStatus = (
+  riskLevel: "low" | "medium" | "high" | "critical",
+): "safe" | "partial" | "high_risk" | "automated" => {
+  switch (riskLevel) {
+    case "low":
+      return "safe";
+    case "medium":
+      return "partial";
+    case "high":
+      return "high_risk";
+    case "critical":
+      return "automated";
+  }
+};
+
 export function JobCard({ job }: JobCardProps) {
-  const formatWorkers = (count: number | null) => {
-    if (!count) return "N/A";
-    if (count >= 1000000) {
-      return `${(count / 1000000).toFixed(1)}M`;
-    }
-    if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}k`;
-    }
-    return count.toLocaleString();
-  };
-
-  const formatSalary = (salary: number | null) => {
-    if (!salary) return "N/A";
-    return `$${(salary / 1000).toFixed(0)}k`;
-  };
-
   // Get top 3 capabilities
   const topCapabilities =
     job.capabilities
-      ?.filter((jc) => jc.capability)
+      ?.filter((cap) => cap)
       .slice(0, 3)
-      .map((jc) => ({
-        capabilityId: jc.capability!.id,
-        capabilitySlug: jc.capability!.slug,
-        capabilityName: jc.capability!.name,
-        progress: jc.capability!.progressPercentage,
-        importance: jc.importance || "minor",
+      .map((cap) => ({
+        capabilityId: cap.id,
+        capabilitySlug: cap.slug,
+        capabilityName: cap.name,
+        progress: cap.progressPercentage,
+        importance: cap.importance || "minor",
       })) || [];
 
   return (
@@ -75,21 +70,18 @@ export function JobCard({ job }: JobCardProps) {
       <Card className="h-full border-muted shadow-none bg-transparent hover:bg-muted hover:border-primary/20 transition-all duration-300 rounded-lg">
         <CardHeader>
           <div className="flex items-start justify-between">
-            <CardTitle className="text-lg">{job.title}</CardTitle>
-            <JobStatusBadge status={job.automationStatus} />
+            <CardTitle className="text-lg">{job.name}</CardTitle>
+            <JobStatusBadge status={mapRiskLevelToStatus(job.riskLevel)} />
           </div>
-          <p className="text-sm text-muted-foreground">
-            {typeof job.industry === "string"
-              ? job.industry
-              : job.industry.name}{" "}
-            | {job.category}
+          <p className="text-sm text-muted-foreground capitalize">
+            {job.category}
           </p>
         </CardHeader>
 
         <CardContent className="space-y-4">
           {/* Description */}
           <p className="text-sm text-muted-foreground line-clamp-2">
-            {job.shortDescription}
+            {job.description}
           </p>
 
           {/* Automation Risk */}
@@ -99,38 +91,22 @@ export function JobCard({ job }: JobCardProps) {
                 Automation Risk
               </span>
               <span className="text-sm font-bold text-primary">
-                {job.automationPercentage}%
+                {job.automationRiskPercentage}%
               </span>
             </div>
             <AutomationProgressBar
-              progress={job.automationPercentage}
+              progress={job.automationRiskPercentage}
               size="md"
             />
-          </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-muted-foreground">Workers</p>
-              <p className="font-semibold text-foreground">
-                {formatWorkers(job.totalWorkersGlobal)}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Median Salary</p>
-              <p className="font-semibold text-foreground">
-                {formatSalary(job.medianSalaryUsa)}
-              </p>
-            </div>
           </div>
 
           {/* Key Protection/Risk Capabilities */}
           {topCapabilities.length > 0 && (
             <div className="space-y-2">
               <p className="text-xs font-medium text-muted-foreground">
-                {job.automationPercentage <= 25
+                {job.automationRiskPercentage <= 25
                   ? "Protected by:"
-                  : job.automationPercentage <= 75
+                  : job.automationRiskPercentage <= 75
                     ? "Partially protected by:"
                     : "At risk due to:"}
               </p>

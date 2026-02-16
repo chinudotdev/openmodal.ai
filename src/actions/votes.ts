@@ -10,7 +10,6 @@ import {
   reportCommentVote,
   reportVote,
 } from "@/db/schema";
-import { checkOnboardingFromSession } from "@/lib/session-utils";
 import { commentVoteSchema, reportVoteSchema } from "@/lib/validations";
 
 /**
@@ -21,18 +20,6 @@ export async function voteReport(
   voteData: z.infer<typeof reportVoteSchema>,
 ) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to vote" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before voting",
-      };
-    }
-
     // Validate input
     const validated = reportVoteSchema.parse(voteData);
 
@@ -91,18 +78,6 @@ export async function voteComment(
   voteData: z.infer<typeof commentVoteSchema>,
 ) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to vote" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before voting",
-      };
-    }
-
     // Validate input
     const validated = commentVoteSchema.parse(voteData);
 

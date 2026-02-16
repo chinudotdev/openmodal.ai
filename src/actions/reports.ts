@@ -13,10 +13,8 @@ import {
   userProfile,
   userReputation,
 } from "@/db/schema";
-import { technology } from "@/db/schema/technologies";
 import { job } from "@/db/schema/jobs";
-import { checkOnboardingFromSession } from "@/lib/session-utils";
-
+import { technology } from "@/db/schema/technologies";
 // ============================================
 // TYPES
 // ============================================
@@ -44,17 +42,6 @@ export async function submitReport(
   reportData: ImpactReportInput,
 ) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to submit reports" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before submitting reports",
-      };
-    }
 
     // Validate required fields
     if (
@@ -361,18 +348,6 @@ export async function updateReport(
   reportData: Partial<ImpactReportInput>,
 ) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to update reports" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before updating reports",
-      };
-    }
-
     // Check if report exists and belongs to user
     const existing = await db
       .select()
@@ -450,18 +425,6 @@ export async function updateReport(
  */
 export async function deleteReport(reportId: string, userId: string) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to delete reports" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before deleting reports",
-      };
-    }
-
     // Check if report exists and belongs to user
     const existing = await db
       .select()
@@ -505,12 +468,6 @@ export async function deleteReport(reportId: string, userId: string) {
  */
 export async function upvoteReport(reportId: string, _userId: string) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to upvote reports" };
-    }
-
     // Increment upvotes (simple implementation - no vote tracking table)
     await db
       .update(impactReport)

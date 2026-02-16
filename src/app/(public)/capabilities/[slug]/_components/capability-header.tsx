@@ -65,7 +65,6 @@ export function CapabilityHeader({ capability }: CapabilityHeaderProps) {
           </div>
         </CardContent>
       </Card>
-
     </div>
   );
 }

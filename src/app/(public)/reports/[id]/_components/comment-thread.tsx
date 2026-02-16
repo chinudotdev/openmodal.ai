@@ -5,13 +5,11 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { createReportComment } from "@/actions/comments";
 import { voteComment } from "@/actions/votes";
-import { OnboardingModal } from "@/components/onboarding-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSession } from "@/contexts/session-context";
-import { useOnboardingCheck } from "@/hooks/use-onboarding-check";
 import { formatDistanceToNow } from "@/lib/date-utils";
 import { ReportCommentForm } from "./comment-form";
 
@@ -59,12 +57,6 @@ export function ReportCommentThread({
   onCommentAdded,
 }: CommentThreadProps) {
   const { user } = useSession();
-  const {
-    checkOnboarding,
-    showOnboardingModal,
-    setShowOnboardingModal,
-    pendingAction,
-  } = useOnboardingCheck();
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
   const [upvotes, setUpvotes] = useState(formatNumber(comment.upvotes));
@@ -86,14 +78,10 @@ export function ReportCommentThread({
   const reputationPoints = comment.reputation?.reputationPoints ?? null;
 
   const handleVote = async (voteType: "up" | "down") => {
-    const canProceed = checkOnboarding("vote", async () => {
-      await performVote(voteType);
-    });
-
-    if (!canProceed) {
+    if (!user) {
+      toast.error("Please sign in to vote");
       return;
     }
-
     await performVote(voteType);
   };
 
@@ -108,10 +96,6 @@ export function ReportCommentThread({
       });
 
       if (!result?.success) {
-        if (result?.error?.includes("onboarding")) {
-          setShowOnboardingModal(true);
-          return;
-        }
         toast.error(result?.error || "Failed to vote");
         return;
       }
@@ -125,14 +109,10 @@ export function ReportCommentThread({
   };
 
   const handleReply = async (content: string) => {
-    const canProceed = checkOnboarding("reply", async () => {
-      await performReply(content);
-    });
-
-    if (!canProceed) {
+    if (!user) {
+      toast.error("Please sign in to reply");
       return;
     }
-
     await performReply(content);
   };
 
@@ -147,10 +127,6 @@ export function ReportCommentThread({
       });
 
       if (!result?.success) {
-        if (result?.error?.includes("onboarding")) {
-          setShowOnboardingModal(true);
-          return;
-        }
         toast.error(result?.error || "Failed to post reply");
         return;
       }
@@ -281,11 +257,6 @@ export function ReportCommentThread({
           </div>
         )}
       </div>
-      <OnboardingModal
-        open={showOnboardingModal}
-        onOpenChange={setShowOnboardingModal}
-        action={pendingAction || "perform this action"}
-      />
     </>
   );
 }

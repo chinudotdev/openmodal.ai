@@ -3,12 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { createComment } from "@/actions/capabilities";
-import { OnboardingModal } from "@/components/onboarding-modal";
+// Comment functionality removed - use discussions instead
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/contexts/session-context";
-import { useOnboardingCheck } from "@/hooks/use-onboarding-check";
 
 interface CommentFormProps {
   capabilityId: string;
@@ -27,12 +25,6 @@ export function CommentForm({
 }: CommentFormProps) {
   const { user } = useSession();
   const router = useRouter();
-  const {
-    checkOnboarding,
-    showOnboardingModal,
-    setShowOnboardingModal,
-    pendingAction,
-  } = useOnboardingCheck();
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,12 +36,8 @@ export function CommentForm({
       return;
     }
 
-    // Check onboarding before submitting
-    const canProceed = checkOnboarding("comment", async () => {
-      await performSubmit();
-    });
-
-    if (!canProceed) {
+    if (!user) {
+      toast.error("Please sign in to comment");
       return;
     }
 
@@ -64,24 +52,9 @@ export function CommentForm({
       if (onSubmit) {
         await onSubmit(content);
       } else {
-        const result = await createComment(
-          capabilityId,
-          user.id,
-          content,
-          parentId,
-        );
-
-        // Handle backend error responses
-        if (result && !result.success) {
-          if (result.error?.includes("onboarding")) {
-            setShowOnboardingModal(true);
-            return;
-          }
-          toast.error(result.error || "Failed to post comment");
-          return;
-        }
-
-        toast.success("Comment posted!");
+        // Comment functionality removed - use discussions instead
+        toast.error("Comments are not available. Please use discussions.");
+        return;
       }
       setContent("");
       onCommentAdded?.();
@@ -114,11 +87,6 @@ export function CommentForm({
           </Button>
         </div>
       </form>
-      <OnboardingModal
-        open={showOnboardingModal}
-        onOpenChange={setShowOnboardingModal}
-        action={pendingAction || "comment"}
-      />
     </>
   );
 }

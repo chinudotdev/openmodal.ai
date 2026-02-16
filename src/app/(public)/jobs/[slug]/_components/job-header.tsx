@@ -14,18 +14,35 @@ interface JobHeaderProps {
   job: NonNullable<Job>;
 }
 
+// Map riskLevel to old AutomationStatus format for badge component
+const mapRiskLevelToStatus = (
+  riskLevel: "low" | "medium" | "high" | "critical",
+): "safe" | "partial" | "high_risk" | "automated" => {
+  switch (riskLevel) {
+    case "low":
+      return "safe";
+    case "medium":
+      return "partial";
+    case "high":
+      return "high_risk";
+    case "critical":
+      return "automated";
+  }
+};
+
+const getStatusMessage = (riskLevel: "low" | "medium" | "high" | "critical", percentage: number) => {
+  if (riskLevel === "low") {
+    return "This job is well-protected by unsolved AI capabilities";
+  } else if (riskLevel === "medium") {
+    return "This job is partially protected, some tasks can be automated";
+  } else if (riskLevel === "high") {
+    return "This job is at high risk of automation";
+  } else {
+    return "This job has been fully automated";
+  }
+};
+
 export function JobHeader({ job }: JobHeaderProps) {
-  const getStatusMessage = (status: string, percentage: number) => {
-    if (status === "safe") {
-      return "This job is well-protected by unsolved AI capabilities";
-    } else if (status === "partial") {
-      return "This job is partially protected, some tasks can be automated";
-    } else if (status === "high_risk") {
-      return "This job is at high risk of automation";
-    } else {
-      return "This job has been fully automated";
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -33,13 +50,11 @@ export function JobHeader({ job }: JobHeaderProps) {
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <JobStatusBadge status={job.automationStatus} />
-            <h1 className="text-4xl font-bold text-foreground">{job.title}</h1>
+            <JobStatusBadge status={mapRiskLevelToStatus(job.riskLevel)} />
+            <h1 className="text-4xl font-bold text-foreground">{job.name}</h1>
           </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>
-              {job.industry?.name || "Unknown"} | {job.category}
-            </span>
+            <span className="capitalize">{job.category}</span>
             <span>•</span>
             <span>
               Updated {formatDistanceToNow(job.updatedAt, { addSuffix: true })}
@@ -65,21 +80,21 @@ export function JobHeader({ job }: JobHeaderProps) {
                 Automation Risk
               </span>
               <span className="text-2xl font-bold text-primary">
-                {job.automationPercentage}%
+                {job.automationRiskPercentage}%
               </span>
             </div>
             <AutomationProgressBar
-              progress={job.automationPercentage}
+              progress={job.automationRiskPercentage}
               size="lg"
               animated
             />
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-4">
-                <JobStatusBadge status={job.automationStatus} />
+                <JobStatusBadge status={mapRiskLevelToStatus(job.riskLevel)} />
                 <span className="text-muted-foreground">
                   {getStatusMessage(
-                    job.automationStatus,
-                    job.automationPercentage,
+                    job.riskLevel,
+                    job.automationRiskPercentage,
                   )}
                 </span>
               </div>

@@ -12,47 +12,37 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+// Map riskLevel to old AutomationStatus format for badge component
+const mapRiskLevelToStatus = (
+  riskLevel: "low" | "medium" | "high" | "critical",
+): "safe" | "partial" | "high_risk" | "automated" => {
+  switch (riskLevel) {
+    case "low":
+      return "safe";
+    case "medium":
+      return "partial";
+    case "high":
+      return "high_risk";
+    case "critical":
+      return "automated";
+  }
+};
+
 interface JobComparisonTableProps {
   jobs: Array<{
     id: string;
     slug: string;
-    title: string;
-    automationPercentage: number;
-    automationStatus: "safe" | "partial" | "high_risk" | "automated";
-    totalWorkersGlobal: number | null;
-    medianSalaryUsa: number | null;
-    estimatedAutomationYear: number | null;
-    growthRate: number | null;
+    name: string;
+    category: string;
+    description: string;
+    automationRiskPercentage: number;
+    riskLevel: "low" | "medium" | "high" | "critical";
+    timelineEstimate: string | null;
+    confidence: "low" | "medium" | "high";
   }>;
 }
 
 export function JobComparisonTable({ jobs }: JobComparisonTableProps) {
-  const formatWorkers = (count: number | null) => {
-    if (!count) return "N/A";
-    if (count >= 1000000) {
-      return `${(count / 1000000).toFixed(1)}M`;
-    }
-    if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}k`;
-    }
-    return count.toLocaleString();
-  };
-
-  const formatSalary = (salary: number | null) => {
-    if (!salary) return "N/A";
-    return `$${(salary / 1000).toFixed(0)}k`;
-  };
-
-  const formatYear = (year: number | null) => {
-    if (!year) return "2050+";
-    return year.toString();
-  };
-
-  const formatGrowth = (rate: number | null) => {
-    if (!rate) return "N/A";
-    const sign = rate >= 0 ? "+" : "";
-    return `${sign}${rate.toFixed(1)}%`;
-  };
 
   if (jobs.length === 0) {
     return (
@@ -83,7 +73,7 @@ export function JobComparisonTable({ jobs }: JobComparisonTableProps) {
                       href={`/jobs/${job.slug}`}
                       className="hover:text-primary transition-colors"
                     >
-                      {job.title}
+                      {job.name}
                     </Link>
                   </TableHead>
                 ))}
@@ -91,47 +81,53 @@ export function JobComparisonTable({ jobs }: JobComparisonTableProps) {
             </TableHeader>
             <TableBody>
               <TableRow>
+                <TableCell className="font-medium">Name</TableCell>
+                {jobs.map((job) => (
+                  <TableCell key={job.id}>{job.name}</TableCell>
+                ))}
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Category</TableCell>
+                {jobs.map((job) => (
+                  <TableCell key={job.id} className="capitalize">
+                    {job.category}
+                  </TableCell>
+                ))}
+              </TableRow>
+              <TableRow>
                 <TableCell className="font-medium">Risk</TableCell>
                 {jobs.map((job) => (
                   <TableCell key={job.id}>
                     <div className="flex items-center gap-2">
-                      <JobStatusBadge status={job.automationStatus} />
-                      <span>{job.automationPercentage}%</span>
+                      <JobStatusBadge status={mapRiskLevelToStatus(job.riskLevel)} />
+                      <span>{job.automationRiskPercentage}%</span>
                     </div>
                   </TableCell>
                 ))}
               </TableRow>
               <TableRow>
-                <TableCell className="font-medium">Timeline</TableCell>
+                <TableCell className="font-medium">Risk Level</TableCell>
                 {jobs.map((job) => (
-                  <TableCell key={job.id}>
-                    {formatYear(job.estimatedAutomationYear)}
+                  <TableCell key={job.id} className="capitalize">
+                    {job.riskLevel}
                   </TableCell>
                 ))}
               </TableRow>
+              {jobs.some((job) => job.timelineEstimate) && (
+                <TableRow>
+                  <TableCell className="font-medium">Timeline</TableCell>
+                  {jobs.map((job) => (
+                    <TableCell key={job.id}>
+                      {job.timelineEstimate || "N/A"}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              )}
               <TableRow>
-                <TableCell className="font-medium">Workers</TableCell>
+                <TableCell className="font-medium">Confidence</TableCell>
                 {jobs.map((job) => (
-                  <TableCell key={job.id}>
-                    {formatWorkers(job.totalWorkersGlobal)}
-                  </TableCell>
-                ))}
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Salary</TableCell>
-                {jobs.map((job) => (
-                  <TableCell key={job.id}>
-                    {formatSalary(job.medianSalaryUsa)}
-                  </TableCell>
-                ))}
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Growth</TableCell>
-                {jobs.map((job) => (
-                  <TableCell key={job.id}>
-                    {formatGrowth(
-                      job.growthRate ? Number(job.growthRate) : null,
-                    )}
+                  <TableCell key={job.id} className="capitalize">
+                    {job.confidence}
                   </TableCell>
                 ))}
               </TableRow>
@@ -142,7 +138,7 @@ export function JobComparisonTable({ jobs }: JobComparisonTableProps) {
           {jobs.map((job) => (
             <Button key={job.id} variant="outline" asChild>
               <Link href={`/jobs/${job.slug}`}>
-                View {job.title}
+                View {job.name}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>

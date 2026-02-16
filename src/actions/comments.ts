@@ -5,14 +5,13 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
 import {
-  report,
+  impactReport,
   reportComment,
   user,
   userBadge,
   userProfile,
   userReputation,
 } from "@/db/schema";
-import { checkOnboardingFromSession } from "@/lib/session-utils";
 import { commentSchema, commentUpdateSchema } from "@/lib/validations";
 
 /**
@@ -20,21 +19,9 @@ import { commentSchema, commentUpdateSchema } from "@/lib/validations";
  */
 export async function createReportComment(
   userId: string,
-  commentData: z.infer<typeof commentSchema>
+  commentData: z.infer<typeof commentSchema>,
 ) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to comment" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before commenting",
-      };
-    }
-
     // Validate input
     const validated = commentSchema.parse(commentData);
 
@@ -57,9 +44,8 @@ export async function createReportComment(
         )
         RETURNING report_id
       )
-      UPDATE ${report}
+      UPDATE ${impactReport}
       SET 
-        comment_count = comment_count + 1,
         updated_at = NOW()
       WHERE id = (SELECT report_id FROM comment_insert)
     `);
@@ -121,8 +107,8 @@ export async function getReportComments(reportId: string) {
       .where(
         and(
           eq(reportComment.reportId, reportId),
-          isNull(reportComment.deletedAt)
-        )
+          isNull(reportComment.deletedAt),
+        ),
       )
       .orderBy(desc(reportComment.upvotes), desc(reportComment.createdAt));
 
@@ -174,21 +160,9 @@ export async function getReportComments(reportId: string) {
 export async function updateComment(
   commentId: string,
   userId: string,
-  commentData: z.infer<typeof commentUpdateSchema>
+  commentData: z.infer<typeof commentUpdateSchema>,
 ) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to update comments" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before updating comments",
-      };
-    }
-
     // Validate input
     const validated = commentUpdateSchema.parse(commentData);
 
@@ -200,8 +174,8 @@ export async function updateComment(
         and(
           eq(reportComment.id, commentId),
           eq(reportComment.userId, userId),
-          isNull(reportComment.deletedAt)
-        )
+          isNull(reportComment.deletedAt),
+        ),
       )
       .limit(1);
 
@@ -236,18 +210,6 @@ export async function updateComment(
  */
 export async function softDeleteComment(commentId: string, userId: string) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to delete comments" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before deleting comments",
-      };
-    }
-
     // Check if comment exists and belongs to user
     const existing = await db
       .select()
@@ -256,8 +218,8 @@ export async function softDeleteComment(commentId: string, userId: string) {
         and(
           eq(reportComment.id, commentId),
           eq(reportComment.userId, userId),
-          isNull(reportComment.deletedAt)
-        )
+          isNull(reportComment.deletedAt),
+        ),
       )
       .limit(1);
 
@@ -275,9 +237,8 @@ export async function softDeleteComment(commentId: string, userId: string) {
           AND deleted_at IS NULL
         RETURNING report_id
       )
-      UPDATE ${report}
+      UPDATE ${impactReport}
       SET 
-        comment_count = GREATEST(0, comment_count - 1),
         updated_at = NOW()
       WHERE id = (SELECT report_id FROM comment_delete)
     `);
@@ -294,24 +255,12 @@ export async function softDeleteComment(commentId: string, userId: string) {
  */
 export async function restoreComment(commentId: string, userId: string) {
   try {
-    // Check onboarding completion from session
-    const onboardingCompleted = await checkOnboardingFromSession();
-    if (onboardingCompleted === null) {
-      return { success: false, error: "Please sign in to restore comments" };
-    }
-    if (!onboardingCompleted) {
-      return {
-        success: false,
-        error: "Please complete onboarding before restoring comments",
-      };
-    }
-
     // Check if comment exists and belongs to user
     const existing = await db
       .select()
       .from(reportComment)
       .where(
-        and(eq(reportComment.id, commentId), eq(reportComment.userId, userId))
+        and(eq(reportComment.id, commentId), eq(reportComment.userId, userId)),
       )
       .limit(1);
 
@@ -328,9 +277,8 @@ export async function restoreComment(commentId: string, userId: string) {
           AND user_id = ${userId}
         RETURNING report_id
       )
-      UPDATE ${report}
+      UPDATE ${impactReport}
       SET 
-        comment_count = comment_count + 1,
         updated_at = NOW()
       WHERE id = (SELECT report_id FROM comment_restore)
     `);

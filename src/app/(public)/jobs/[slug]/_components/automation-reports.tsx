@@ -38,7 +38,9 @@ export function AutomationReports({ job }: AutomationReportsProps) {
     return (
       <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
         <CardHeader className="px-0 pb-4">
-          <CardTitle className="text-2xl font-semibold">Real-World Automation Reports</CardTitle>
+          <CardTitle className="text-2xl font-semibold">
+            Real-World Automation Reports
+          </CardTitle>
         </CardHeader>
         <CardContent className="px-0">
           <p className="text-sm text-muted-foreground text-center py-4">
@@ -56,14 +58,19 @@ export function AutomationReports({ job }: AutomationReportsProps) {
   return (
     <Card className="shadow-none border-0 bg-transparent rounded-none py-0">
       <CardHeader className="px-0 pb-4">
-        <CardTitle className="text-2xl font-semibold">Real-World Automation Reports</CardTitle>
+        <CardTitle className="text-2xl font-semibold">
+          Real-World Automation Reports
+        </CardTitle>
         <p className="text-sm text-muted-foreground">
           {reports.length} reports from the community:
         </p>
       </CardHeader>
       <CardContent className="space-y-4 px-0">
         {reports.map((report) => (
-          <Card key={report.id} className="border-l-4 border-l-primary shadow-none border-t-0 border-r-0 border-b-0 bg-muted/30 rounded-lg">
+          <Card
+            key={report.id}
+            className="border-l-4 border-l-primary shadow-none border-t-0 border-r-0 border-b-0 bg-muted/30 rounded-lg"
+          >
             <CardContent className="pt-6">
               <div className="space-y-3">
                 <div className="flex items-start justify-between">

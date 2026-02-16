@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getJobBySlug, incrementViewCount } from "@/actions/jobs";
+import { getJobBySlug } from "@/actions/jobs";
 import { AboutSection } from "./about-section";
 import { AtAGlance } from "./at-a-glance";
 import { AutomationReports } from "./automation-reports";
@@ -14,7 +14,6 @@ import { GeographicBreakdown } from "./geographic-breakdown";
 import { JobHeader } from "./job-header";
 import { QuickActions } from "./quick-actions";
 import { QuickStatsGrid } from "./quick-stats-grid";
-import { RelatedJobs } from "./related-jobs";
 import { RequiredCapabilities } from "./required-capabilities";
 import { TaskBreakdown } from "./task-breakdown";
 
@@ -24,9 +23,6 @@ export async function JobContent({ slug }: { slug: string }) {
   if (!job) {
     notFound();
   }
-
-  // Increment view count (fire and forget)
-  incrementViewCount(job.id).catch(console.error);
 
   return (
     <>
@@ -42,7 +38,7 @@ export async function JobContent({ slug }: { slug: string }) {
               Jobs
             </Link>
             <span>/</span>
-            <span className="text-foreground">{job.title}</span>
+            <span className="text-foreground">{job.name}</span>
           </nav>
         </div>
       </div>
@@ -80,7 +76,6 @@ export async function JobContent({ slug }: { slug: string }) {
           <div className="space-y-8">
             <QuickActions jobId={job.id} slug={job.slug} />
             <AtAGlance job={job} />
-            <RelatedJobs job={job} />
             <CapabilityWatchList job={job} />
             <CommunityStats job={job} />
             <ContributeSection jobId={job.id} slug={job.slug} />

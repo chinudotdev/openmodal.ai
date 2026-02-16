@@ -5,12 +5,12 @@ import { cacheLife } from "next/cache";
 import { db } from "@/db";
 import { capability } from "@/db/schema/capabilities";
 import {
+  type JobCategory,
   job,
   jobCapability,
+  type RiskLevel,
   task,
   taskCapability,
-  type JobCategory,
-  type RiskLevel,
 } from "@/db/schema/jobs";
 
 // Types
@@ -22,17 +22,15 @@ export type JobFilters = {
   search?: string;
 };
 
-export type JobSort =
-  | "risk_desc"
-  | "risk_asc"
-  | "name_asc"
-  | "updated_desc";
+export type JobSort = "risk_desc" | "risk_asc" | "name_asc" | "updated_desc";
 
 // Type for job comparison data (matches JobComparisonTable props)
 export type JobComparisonData = {
   id: string;
   slug: string;
   name: string;
+  category: JobCategory;
+  description: string;
   automationRiskPercentage: number;
   riskLevel: RiskLevel;
   timelineEstimate: string | null;
@@ -60,6 +58,8 @@ export async function compareJobs(
         id: job.id,
         slug: job.slug,
         name: job.name,
+        category: job.category,
+        description: job.description,
         automationRiskPercentage: job.automationRiskPercentage,
         riskLevel: job.riskLevel,
         timelineEstimate: job.timelineEstimate,
@@ -77,6 +77,8 @@ export async function compareJobs(
           id: j.id,
           slug: j.slug,
           name: j.name,
+          category: j.category,
+          description: j.description,
           automationRiskPercentage: j.automationRiskPercentage,
           riskLevel: j.riskLevel,
           timelineEstimate: j.timelineEstimate,
@@ -94,11 +96,7 @@ export async function getJobBySlug(slug: string) {
   "use cache";
   cacheLife({ stale: 300, revalidate: 3600 * 2 });
 
-  const result = await db
-    .select()
-    .from(job)
-    .where(eq(job.slug, slug))
-    .limit(1);
+  const result = await db.select().from(job).where(eq(job.slug, slug)).limit(1);
 
   if (result.length === 0) {
     return null;
@@ -369,4 +367,37 @@ export async function searchJobs(query: string, limit = 10) {
     automationRiskPercentage: r.automationRiskPercentage,
     riskLevel: r.riskLevel,
   }));
+}
+
+// Search jobs by title (for backwards compatibility with report forms)
+export async function searchJobsByTitle(query: string, limit = 10) {
+  if (!query || query.length < 2) {
+    return { success: true, jobs: [] };
+  }
+
+  try {
+    const jobs = await db
+      .select({
+        id: job.id,
+        name: job.name,
+        category: job.category,
+      })
+      .from(job)
+      .where(ilike(job.name, `%${query}%`))
+      .limit(limit)
+      .orderBy(asc(job.name));
+
+    // Map to expected format for backwards compatibility
+    return {
+      success: true,
+      jobs: jobs.map((j) => ({
+        id: j.id,
+        title: j.name,
+        industry: j.category,
+      })),
+    };
+  } catch (error) {
+    console.error("Error searching jobs:", error);
+    return { success: false, jobs: [], error: "Failed to search jobs" };
+  }
 }

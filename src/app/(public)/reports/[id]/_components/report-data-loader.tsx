@@ -1,8 +1,9 @@
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getReportById } from "@/actions/reports";
 import { getReportVerifications } from "@/actions/verifications";
 import { getUserVote } from "@/actions/votes";
-import { getSessionWithOnboarding } from "@/lib/session-utils";
+import { auth } from "@/lib/auth";
 import { ReportDetailContent } from "./report-detail-content";
 
 interface ReportDataLoaderProps {
@@ -19,7 +20,9 @@ export async function ReportDataLoader({ reportId }: ReportDataLoaderProps) {
   const verifications = await getReportVerifications(reportId);
 
   // Get user session and vote
-  const session = await getSessionWithOnboarding();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   const userVote = session?.user?.id
     ? await getUserVote(reportId, session.user.id)
     : null;

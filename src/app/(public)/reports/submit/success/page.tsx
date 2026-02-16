@@ -1,12 +1,8 @@
 import { CheckCircle2 } from "lucide-react";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { getUserReputation } from "@/actions/dashboard";
 import { getReportById } from "@/actions/reports";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { auth } from "@/lib/auth";
 import { ReportActions } from "./_components/report-actions";
 import { ReportActionsFallback } from "./_components/report-actions-fallback";
 import { ReportNextSteps } from "./_components/report-next-steps";
@@ -16,22 +12,12 @@ export default async function SubmissionSuccessPage({
 }: {
   searchParams: Promise<{ reportId?: string }>;
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    redirect("/login?callbackURL=/reports/submit/success");
-  }
-
   const { reportId } = await searchParams;
   const report = reportId ? await getReportById(reportId) : null;
-  const reputation = await getUserReputation(session.user.id);
 
-  // Calculate points based on report type
-  const pointsToAward =
-    report?.type === "deployment" ? 100 : report?.type === "barrier" ? 75 : 50;
-  const totalPoints = (reputation?.reputationPoints || 0) + pointsToAward;
+  // Calculate points based on report (simplified - no reputation system)
+  const pointsToAward = 50; // Default points for any report
+  const totalPoints = pointsToAward;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">

@@ -2,15 +2,15 @@
 
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { searchJobsByTitle } from "@/actions/onboarding";
+import { searchJobsByTitle } from "@/actions/jobs";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 interface JobOption {
   id: string;
-  title: string;
-  industry: string;
+  title: string; // This is actually job.name, kept as title for backwards compatibility with onChange callback
+  industry: string; // This is actually job.category, kept as industry for backwards compatibility
 }
 
 interface JobAutocompleteInputProps {
@@ -149,7 +149,7 @@ export function JobAutocompleteInput({
                 >
                   <div className="font-medium">{job.title}</div>
                   {job.industry && (
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-muted-foreground capitalize">
                       {job.industry}
                     </div>
                   )}
