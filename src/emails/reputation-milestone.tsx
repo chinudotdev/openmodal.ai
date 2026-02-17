@@ -8,22 +8,22 @@ import {
   Section,
   Tailwind,
   Text,
-} from "@react-email/components";
+} from '@react-email/components'
 
 interface ReputationMilestoneEmailProps {
-  userName: string;
-  newTier: string;
-  totalPoints: number;
-  dashboardUrl: string;
-  benefits: string[];
+  userName: string
+  newTier: string
+  totalPoints: number
+  dashboardUrl: string
+  benefits: Array<string>
 }
 
 const tierLabels: Record<string, string> = {
-  observer: "Observer",
-  contributor: "Contributor",
-  trusted: "Trusted",
-  expert: "Expert",
-};
+  observer: 'Observer',
+  contributor: 'Contributor',
+  trusted: 'Trusted',
+  expert: 'Expert',
+}
 
 export const ReputationMilestoneEmail = ({
   userName,
@@ -32,7 +32,7 @@ export const ReputationMilestoneEmail = ({
   dashboardUrl,
   benefits,
 }: ReputationMilestoneEmailProps) => {
-  const tierLabel = tierLabels[newTier] || newTier;
+  const tierLabel = tierLabels[newTier] || newTier
 
   return (
     <Html lang="en" dir="ltr">
@@ -50,7 +50,7 @@ export const ReputationMilestoneEmail = ({
               </Text>
 
               <Text className="text-[16px] text-gray-700 mb-[24px] leading-[24px]">
-                Congratulations! You've reached the <strong>{tierLabel}</strong>{" "}
+                Congratulations! You've reached the <strong>{tierLabel}</strong>{' '}
                 tier with <strong>{totalPoints} reputation points</strong>.
               </Text>
 
@@ -104,7 +104,7 @@ export const ReputationMilestoneEmail = ({
         </Body>
       </Tailwind>
     </Html>
-  );
-};
+  )
+}
 
-export default ReputationMilestoneEmail;
+export default ReputationMilestoneEmail

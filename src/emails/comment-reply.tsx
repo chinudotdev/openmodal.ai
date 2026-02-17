@@ -8,14 +8,14 @@ import {
   Section,
   Tailwind,
   Text,
-} from "@react-email/components";
+} from '@react-email/components'
 
 interface CommentReplyEmailProps {
-  userName: string;
-  replierName: string;
-  reportTitle: string;
-  commentPreview: string;
-  reportUrl: string;
+  userName: string
+  replierName: string
+  reportTitle: string
+  commentPreview: string
+  reportUrl: string
 }
 
 export const CommentReplyEmail = ({
@@ -93,7 +93,7 @@ export const CommentReplyEmail = ({
         </Body>
       </Tailwind>
     </Html>
-  );
-};
+  )
+}
 
-export default CommentReplyEmail;
+export default CommentReplyEmail

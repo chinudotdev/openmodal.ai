@@ -8,7 +8,7 @@ import {
   Section,
   Tailwind,
   Text,
-} from "@react-email/components";
+} from '@react-email/components'
 
 const EmailVerification = ({ url }: { url: string }) => {
   return (
@@ -66,7 +66,7 @@ const EmailVerification = ({ url }: { url: string }) => {
         </Body>
       </Tailwind>
     </Html>
-  );
-};
+  )
+}
 
-export default EmailVerification;
+export default EmailVerification
