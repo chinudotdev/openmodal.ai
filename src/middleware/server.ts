@@ -19,6 +19,26 @@ export const authMiddleware = createMiddleware({ type: 'function' }).server(
   },
 )
 
+/**
+ * Admin middleware - chains authMiddleware and checks for admin role
+ * Use this for server actions that require admin privileges
+ */
+export const adminMiddleware = createMiddleware()
+  .middleware([authMiddleware])
+  .server(async ({ next, context }) => {
+    // Check if user has admin role (authMiddleware already validated user exists)
+    if (context.user?.role !== 'admin') {
+      throw new Error('Forbidden: Admin role required')
+    }
+
+    return next({
+      context: {
+        ...context,
+        isAdmin: true,
+      },
+    })
+  })
+
 // Simple in-memory rate limiting
 // For production, use Redis or Cloudflare KV
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()

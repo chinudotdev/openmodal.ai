@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import z from 'zod'
-import { authMiddleware } from '@/middleware/server'
+import { adminMiddleware } from '@/middleware/server'
 import {
   createCapability,
   createCapabilitySubtype,
@@ -9,7 +9,6 @@ import {
   getAllCapabilities,
   getAllSubtypes,
   getCapabilityById,
-  getSubtypeBySlug,
   updateCapability,
   updateCapabilitySubtype,
 } from '@/data-layer/capabilities'
@@ -20,7 +19,7 @@ import {
 
 /**
  * Create a new capability
- * Admin only - requires auth middleware
+ * Admin only - uses adminMiddleware
  */
 export const createCapabilityFn = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -41,13 +40,8 @@ export const createCapabilityFn = createServerFn({ method: 'POST' })
       icon: z.string().optional(),
     }),
   )
-  .middleware([authMiddleware])
-  .handler(async ({ data, context }) => {
-    // Check if user is admin
-    if (context.user.role !== 'admin') {
-      return { success: false, error: 'Unauthorized' }
-    }
-
+  .middleware([adminMiddleware])
+  .handler(async ({ data }) => {
     try {
       const capability = await createCapability(data)
       return { success: true, data: capability }
@@ -65,7 +59,7 @@ export const createCapabilityFn = createServerFn({ method: 'POST' })
 
 /**
  * Update an existing capability
- * Admin only - requires auth middleware
+ * Admin only - uses adminMiddleware
  */
 export const updateCapabilityFn = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -85,13 +79,8 @@ export const updateCapabilityFn = createServerFn({ method: 'POST' })
       icon: z.string().optional(),
     }),
   )
-  .middleware([authMiddleware])
-  .handler(async ({ data, context }) => {
-    // Check if user is admin
-    if (context.user.role !== 'admin') {
-      return { success: false, error: 'Unauthorized' }
-    }
-
+  .middleware([adminMiddleware])
+  .handler(async ({ data }) => {
     try {
       const capability = await updateCapability(data)
       return { success: true, data: capability }
@@ -109,7 +98,7 @@ export const updateCapabilityFn = createServerFn({ method: 'POST' })
 
 /**
  * Delete a capability
- * Admin only - requires auth middleware
+ * Admin only - uses adminMiddleware
  */
 export const deleteCapabilityFn = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -117,13 +106,8 @@ export const deleteCapabilityFn = createServerFn({ method: 'POST' })
       id: z.string().min(1, 'ID is required'),
     }),
   )
-  .middleware([authMiddleware])
-  .handler(async ({ data, context }) => {
-    // Check if user is admin
-    if (context.user.role !== 'admin') {
-      return { success: false, error: 'Unauthorized' }
-    }
-
+  .middleware([adminMiddleware])
+  .handler(async ({ data }) => {
     try {
       await deleteCapability(data.id)
       return { success: true }
@@ -141,16 +125,11 @@ export const deleteCapabilityFn = createServerFn({ method: 'POST' })
 
 /**
  * Get all capabilities for admin
- * Admin only - requires auth middleware
+ * Admin only - uses adminMiddleware
  */
 export const getAllCapabilitiesForAdminFn = createServerFn({ method: 'GET' })
-  .middleware([authMiddleware])
-  .handler(async ({ context }) => {
-    // Check if user is admin
-    if (context.user.role !== 'admin') {
-      return { success: false, error: 'Unauthorized' }
-    }
-
+  .middleware([adminMiddleware])
+  .handler(async () => {
     try {
       const capabilities = await getAllCapabilities()
       return { success: true, data: capabilities }
@@ -168,7 +147,7 @@ export const getAllCapabilitiesForAdminFn = createServerFn({ method: 'GET' })
 
 /**
  * Get a single capability by ID for admin
- * Admin only - requires auth middleware
+ * Admin only - uses adminMiddleware
  */
 export const getCapabilityForAdminFn = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -176,13 +155,8 @@ export const getCapabilityForAdminFn = createServerFn({ method: 'POST' })
       id: z.string().min(1, 'ID is required'),
     }),
   )
-  .middleware([authMiddleware])
-  .handler(async ({ data, context }) => {
-    // Check if user is admin
-    if (context.user.role !== 'admin') {
-      return { success: false, error: 'Unauthorized' }
-    }
-
+  .middleware([adminMiddleware])
+  .handler(async ({ data }) => {
     try {
       const capability = await getCapabilityById(data.id)
       if (!capability) {
@@ -205,7 +179,7 @@ export const getCapabilityForAdminFn = createServerFn({ method: 'POST' })
 
 /**
  * Create a new capability subtype
- * Admin only - requires auth middleware
+ * Admin only - uses adminMiddleware
  */
 export const createCapabilitySubtypeFn = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -232,13 +206,8 @@ export const createCapabilitySubtypeFn = createServerFn({ method: 'POST' })
       whatDoesntWork: z.array(z.string()).default([]),
     }),
   )
-  .middleware([authMiddleware])
-  .handler(async ({ data, context }) => {
-    // Check if user is admin
-    if (context.user.role !== 'admin') {
-      return { success: false, error: 'Unauthorized' }
-    }
-
+  .middleware([adminMiddleware])
+  .handler(async ({ data }) => {
     try {
       const subtype = await createCapabilitySubtype(data)
       return { success: true, data: subtype }
@@ -256,7 +225,7 @@ export const createCapabilitySubtypeFn = createServerFn({ method: 'POST' })
 
 /**
  * Update an existing capability subtype
- * Admin only - requires auth middleware
+ * Admin only - uses adminMiddleware
  */
 export const updateCapabilitySubtypeFn = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -278,13 +247,8 @@ export const updateCapabilitySubtypeFn = createServerFn({ method: 'POST' })
       whatDoesntWork: z.array(z.string()).optional(),
     }),
   )
-  .middleware([authMiddleware])
-  .handler(async ({ data, context }) => {
-    // Check if user is admin
-    if (context.user.role !== 'admin') {
-      return { success: false, error: 'Unauthorized' }
-    }
-
+  .middleware([adminMiddleware])
+  .handler(async ({ data }) => {
     try {
       const subtype = await updateCapabilitySubtype(data)
       return { success: true, data: subtype }
@@ -302,7 +266,7 @@ export const updateCapabilitySubtypeFn = createServerFn({ method: 'POST' })
 
 /**
  * Delete a capability subtype
- * Admin only - requires auth middleware
+ * Admin only - uses adminMiddleware
  */
 export const deleteCapabilitySubtypeFn = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -310,13 +274,8 @@ export const deleteCapabilitySubtypeFn = createServerFn({ method: 'POST' })
       id: z.string().min(1, 'ID is required'),
     }),
   )
-  .middleware([authMiddleware])
-  .handler(async ({ data, context }) => {
-    // Check if user is admin
-    if (context.user.role !== 'admin') {
-      return { success: false, error: 'Unauthorized' }
-    }
-
+  .middleware([adminMiddleware])
+  .handler(async ({ data }) => {
     try {
       await deleteCapabilitySubtype(data.id)
       return { success: true }
@@ -334,16 +293,11 @@ export const deleteCapabilitySubtypeFn = createServerFn({ method: 'POST' })
 
 /**
  * Get all subtypes for admin
- * Admin only - requires auth middleware
+ * Admin only - uses adminMiddleware
  */
 export const getAllSubtypesForAdminFn = createServerFn({ method: 'GET' })
-  .middleware([authMiddleware])
-  .handler(async ({ context }) => {
-    // Check if user is admin
-    if (context.user.role !== 'admin') {
-      return { success: false, error: 'Unauthorized' }
-    }
-
+  .middleware([adminMiddleware])
+  .handler(async () => {
     try {
       const subtypes = await getAllSubtypes()
 
@@ -371,7 +325,7 @@ export const getAllSubtypesForAdminFn = createServerFn({ method: 'GET' })
 
 /**
  * Get a single subtype by ID for admin
- * Admin only - requires auth middleware
+ * Admin only - uses adminMiddleware
  */
 export const getSubtypeForAdminFn = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -379,15 +333,10 @@ export const getSubtypeForAdminFn = createServerFn({ method: 'POST' })
       id: z.string().min(1, 'ID is required'),
     }),
   )
-  .middleware([authMiddleware])
-  .handler(async ({ data, context }) => {
-    // Check if user is admin
-    if (context.user.role !== 'admin') {
-      return { success: false, error: 'Unauthorized' }
-    }
-
+  .middleware([adminMiddleware])
+  .handler(async ({ data }) => {
     try {
-      // Use slug to get subtype (since we don't have getById)
+      // Get all subtypes and find by ID
       const subtypes = await getAllSubtypes()
       const subtype = subtypes.find((s) => s.id === data.id)
 
