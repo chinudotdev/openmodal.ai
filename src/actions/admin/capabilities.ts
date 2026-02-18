@@ -7,7 +7,9 @@ import {
   deleteCapability,
   deleteCapabilitySubtype,
   getAllCapabilities,
+  getAllSubtypes,
   getCapabilityById,
+  getSubtypeBySlug,
   updateCapability,
   updateCapabilitySubtype,
 } from '@/data-layer/capabilities'
@@ -326,6 +328,89 @@ export const deleteCapabilitySubtypeFn = createServerFn({ method: 'POST' })
           error instanceof Error
             ? error.message
             : 'Failed to delete capability subtype',
+      }
+    }
+  })
+
+/**
+ * Get all subtypes for admin
+ * Admin only - requires auth middleware
+ */
+export const getAllSubtypesForAdminFn = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    // Check if user is admin
+    if (context.user.role !== 'admin') {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    try {
+      const subtypes = await getAllSubtypes()
+
+      // Fetch parent capability for each subtype
+      const subtypesWithCapabilities = await Promise.all(
+        subtypes.map(async (subtype) => {
+          const capability = await getCapabilityById(subtype.capabilityId)
+          return {
+            ...subtype,
+            capability,
+          }
+        }),
+      )
+
+      return { success: true, data: subtypesWithCapabilities }
+    } catch (error) {
+      console.error('Error fetching subtypes:', error)
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to fetch subtypes',
+      }
+    }
+  })
+
+/**
+ * Get a single subtype by ID for admin
+ * Admin only - requires auth middleware
+ */
+export const getSubtypeForAdminFn = createServerFn({ method: 'POST' })
+  .inputValidator(
+    z.object({
+      id: z.string().min(1, 'ID is required'),
+    }),
+  )
+  .middleware([authMiddleware])
+  .handler(async ({ data, context }) => {
+    // Check if user is admin
+    if (context.user.role !== 'admin') {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    try {
+      // Use slug to get subtype (since we don't have getById)
+      const subtypes = await getAllSubtypes()
+      const subtype = subtypes.find((s) => s.id === data.id)
+
+      if (!subtype) {
+        return { success: false, error: 'Subtype not found' }
+      }
+
+      // Fetch parent capability
+      const capability = await getCapabilityById(subtype.capabilityId)
+
+      return {
+        success: true,
+        data: {
+          ...subtype,
+          capability,
+        },
+      }
+    } catch (error) {
+      console.error('Error fetching subtype:', error)
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to fetch subtype',
       }
     }
   })
