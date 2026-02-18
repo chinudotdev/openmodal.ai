@@ -119,11 +119,7 @@ function TechnologiesPage() {
         <section className="container mx-auto px-6 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {technologies.map((tech) => (
-              <Link
-                key={tech.id}
-                to="/technologies"
-                className="group"
-              >
+              <Link key={tech.id} to="/technologies" className="group">
                 <Card className="h-full transition-all hover:shadow-lg hover:border-primary/50">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">

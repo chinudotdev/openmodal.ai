@@ -29,10 +29,13 @@ src/routes/
 │   │   └── index.tsx       # /technologies
 │   └── reports/
 │       └── index.tsx       # /reports
-├── _authed/                # Protected route group
+├── _authed/                # Protected route group (requires auth)
 │   ├── route.tsx           # Layout for authed routes
 │   └── dashboard/
 │       └── index.tsx       # /dashboard
+├── admin/                  # Admin route group (requires admin role)
+│   ├── route.tsx           # Layout with admin role check
+│   └── index.tsx           # /admin
 └── api/                    # API routes
     └── auth/
         └── $.ts            # /api/auth/* (catch-all)
@@ -42,15 +45,17 @@ src/routes/
 
 ## Route File Conventions
 
-| File/Folder                          | Route                          | Description                           |
-| ------------------------------------ | ------------------------------ | ------------------------------------- |
-| `__root.tsx`                         | `/`                            | Root layout, wraps all routes         |
-| `_public/index.tsx`                  | `/`                            | Home page (public route group)        |
-| `_public/about.tsx`                  | `/about`                       | About page (public)                   |
-| `_authed/route.tsx`                  | `/dashboard/*`                 | Protected route group layout          |
-| `_authed/dashboard/index.tsx`        | `/dashboard`                   | Nested index (protected)              |
-| `_public/capabilities/index.tsx`     | `/capabilities`                | Root path for nested routes           |
-| `_public/capabilities/$slug/index.tsx` | `/capabilities/:slug`          | Single dynamic path (use index.tsx)   |
+| File/Folder                               | Route                          | Description                           |
+| ----------------------------------------- | ------------------------------ | ------------------------------------- |
+| `__root.tsx`                              | `/`                            | Root layout, wraps all routes         |
+| `_public/index.tsx`                       | `/`                            | Home page (public route group)        |
+| `_public/about.tsx`                       | `/about`                       | About page (public)                   |
+| `_authed/route.tsx`                       | `/dashboard/*`                 | Protected route group layout          |
+| `_authed/dashboard/index.tsx`             | `/dashboard`                   | Nested index (protected)              |
+| `admin/route.tsx`                         | `/admin/*`                     | Admin-only route group layout         |
+| `admin/index.tsx`                         | `/admin`                       | Admin dashboard (admin role required) |
+| `_public/capabilities/index.tsx`          | `/capabilities`                | Root path for nested routes           |
+| `_public/capabilities/$slug/index.tsx`    | `/capabilities/:slug`          | Single dynamic path (use index.tsx)   |
 | `_public/capabilities/$slug/$subslug.tsx` | `/capabilities/:slug/:subslug` | Multiple dynamic paths (nested files) |
 
 ## Nested Dynamic Routes Pattern
@@ -231,6 +236,43 @@ function DashboardPage() {
   return <div>Welcome, {session.user.name}</div>
 }
 ```
+
+### Role-Based Protected Routes
+
+For routes that require specific user roles (e.g., admin), create a separate route group with role checking:
+
+```typescript
+// src/routes/admin/route.tsx
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { getSessionFn } from '@/actions/session'
+
+export const Route = createFileRoute('/admin')({
+  beforeLoad: async ({ location }) => {
+    const session = await getSessionFn()
+
+    if (!session) {
+      throw redirect({
+        to: '/login',
+        search: { redirect: location.href },
+      })
+    }
+
+    // Check for admin role
+    if (session.user.role !== 'admin') {
+      throw redirect({ to: '/' })
+    }
+
+    return { session }
+  },
+  component: AdminLayout,
+})
+
+function AdminLayout() {
+  return <Outlet /> // Renders admin routes
+}
+```
+
+**Available roles:** `observer`, `contributor`, `trusted`, `expert`, `moderator`, `admin` (see `src/lib/permissions.ts`)
 
 ## Route Context
 
@@ -447,7 +489,9 @@ function DashboardLayout() {
 1. **Use route groups** (`_folderName`) for layouts without path segments
    - `_public/` - public routes with shared layout
    - `_authed/` - protected routes with auth middleware
-2. **Always redirect with search params** when redirecting unauthenticated users
-3. **Use `router.invalidate()`** after mutations to refresh stale data
-4. **Keep `beforeLoad` lightweight** - move heavy logic to loaders
-5. **Use `Route.useRouteContext()`** for data passed from parent routes
+   - `admin/` - role-protected routes (not prefixed with `_` since it's a real path)
+2. **Role-based protection** - Check `session.user.role` in `beforeLoad` for admin-only routes
+3. **Always redirect with search params** when redirecting unauthenticated users
+4. **Use `router.invalidate()`** after mutations to refresh stale data
+5. **Keep `beforeLoad` lightweight** - move heavy logic to loaders
+6. **Use `Route.useRouteContext()`** for data passed from parent routes

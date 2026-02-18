@@ -1,5 +1,5 @@
 import { asc, desc, eq, ilike } from 'drizzle-orm'
-import type { CapabilityCategory } from '@/db/schema/capabilities'
+import { nanoid } from 'nanoid'
 import { db } from '@/db'
 import { capability, capabilitySubtype } from '@/db/schema/capabilities'
 import { job, task, taskCapabilitySubtype } from '@/db/schema/jobs'
@@ -20,7 +20,6 @@ export async function getAllCapabilities() {
         id: capability.id,
         slug: capability.slug,
         name: capability.name,
-        category: capability.category,
         description: capability.description,
         icon: capability.icon,
         createdAt: capability.createdAt,
@@ -88,35 +87,6 @@ export async function getCapabilityById(id: string) {
   } catch (error) {
     console.error('Error fetching capability by ID:', error)
     return null
-  }
-}
-
-export async function getCapabilitiesByCategory(
-  category: CapabilityCategory | 'All',
-) {
-  try {
-    if (category === 'All') {
-      return getAllCapabilities()
-    }
-
-    const capabilities = await db
-      .select({
-        id: capability.id,
-        slug: capability.slug,
-        name: capability.name,
-        category: capability.category,
-        description: capability.description,
-        icon: capability.icon,
-        createdAt: capability.createdAt,
-      })
-      .from(capability)
-      .where(eq(capability.category, category))
-      .orderBy(asc(capability.name))
-
-    return capabilities
-  } catch (error) {
-    console.error('Error fetching capabilities by category:', error)
-    return []
   }
 }
 
@@ -341,39 +311,155 @@ export async function getOverallProgress() {
   }
 }
 
-export async function getCapabilitiesProgressByCategory() {
+// ============================================
+// ADMIN CAPABILITY OPERATIONS
+// ============================================
+
+export interface CreateCapabilityInput {
+  name: string
+  slug: string
+  description: string
+  icon?: string
+}
+
+export async function createCapability(input: CreateCapabilityInput) {
   try {
-    const capabilities = await getAllCapabilities()
+    const id = nanoid()
+    const [newCapability] = await db
+      .insert(capability)
+      .values({
+        id,
+        slug: input.slug,
+        name: input.name,
+        description: input.description,
+        icon: input.icon,
+      })
+      .returning()
 
-    const byCategory = {
-      cognitive: { total: 0, count: 0, avg: 0 },
-      physical: { total: 0, count: 0, avg: 0 },
-      social: { total: 0, count: 0, avg: 0 },
-      meta: { total: 0, count: 0, avg: 0 },
-    }
-
-    capabilities.forEach((cap) => {
-      const cat = cap.category
-      byCategory[cat].total += cap.progress
-      byCategory[cat].count += 1
-    })
-
-    Object.keys(byCategory).forEach((key) => {
-      const cat = key as keyof typeof byCategory
-      byCategory[cat].avg =
-        byCategory[cat].count > 0
-          ? Math.round(byCategory[cat].total / byCategory[cat].count)
-          : 0
-    })
-
-    return byCategory
+    return newCapability
   } catch (error) {
-    console.error('Error getting progress by category:', error)
-    return {
-      cognitive: { total: 0, count: 0, avg: 0 },
-      physical: { total: 0, count: 0, avg: 0 },
-      social: { total: 0, count: 0, avg: 0 },
-      meta: { total: 0, count: 0, avg: 0 },
-    }
+    console.error('Error creating capability:', error)
+    throw error
+  }
+}
+
+export interface UpdateCapabilityInput {
+  id: string
+  name?: string
+  slug?: string
+  description?: string
+  icon?: string
+}
+
+export async function updateCapability(input: UpdateCapabilityInput) {
+  try {
+    const { id, ...updates } = input
+    const [updatedCapability] = await db
+      .update(capability)
+      .set(updates)
+      .where(eq(capability.id, id))
+      .returning()
+
+    return updatedCapability
+  } catch (error) {
+    console.error('Error updating capability:', error)
+    throw error
+  }
+}
+
+export async function deleteCapability(id: string) {
+  try {
+    await db.delete(capability).where(eq(capability.id, id))
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting capability:', error)
+    throw error
+  }
+}
+
+// ============================================
+// ADMIN CAPABILITY SUBTYPE OPERATIONS
+// ============================================
+
+export interface CreateCapabilitySubtypeInput {
+  capabilityId: string
+  name: string
+  slug: string
+  domain: string
+  description: string
+  progressPercentage?: number
+  status?: 'solved' | 'partial' | 'unsolved'
+  whatWorks?: Array<string>
+  whatStruggles?: Array<string>
+  whatDoesntWork?: Array<string>
+}
+
+export async function createCapabilitySubtype(
+  input: CreateCapabilitySubtypeInput,
+) {
+  try {
+    const id = nanoid()
+    const [newSubtype] = await db
+      .insert(capabilitySubtype)
+      .values({
+        id,
+        capabilityId: input.capabilityId,
+        slug: input.slug,
+        name: input.name,
+        domain: input.domain,
+        description: input.description,
+        progressPercentage: input.progressPercentage ?? 0,
+        status: input.status ?? 'unsolved',
+        whatWorks: input.whatWorks ?? [],
+        whatStruggles: input.whatStruggles ?? [],
+        whatDoesntWork: input.whatDoesntWork ?? [],
+      })
+      .returning()
+
+    return newSubtype
+  } catch (error) {
+    console.error('Error creating capability subtype:', error)
+    throw error
+  }
+}
+
+export interface UpdateCapabilitySubtypeInput {
+  id: string
+  name?: string
+  slug?: string
+  domain?: string
+  description?: string
+  progressPercentage?: number
+  status?: 'solved' | 'partial' | 'unsolved'
+  whatWorks?: Array<string>
+  whatStruggles?: Array<string>
+  whatDoesntWork?: Array<string>
+}
+
+export async function updateCapabilitySubtype(
+  input: UpdateCapabilitySubtypeInput,
+) {
+  try {
+    const { id, ...updates } = input
+    const [updatedSubtype] = await db
+      .update(capabilitySubtype)
+      .set(updates)
+      .where(eq(capabilitySubtype.id, id))
+      .returning()
+
+    return updatedSubtype
+  } catch (error) {
+    console.error('Error updating capability subtype:', error)
+    throw error
+  }
+}
+
+export async function deleteCapabilitySubtype(id: string) {
+  try {
+    await db.delete(capabilitySubtype).where(eq(capabilitySubtype.id, id))
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting capability subtype:', error)
+    throw error
   }
 }

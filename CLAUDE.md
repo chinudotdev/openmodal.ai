@@ -85,6 +85,9 @@ src/routes/
 ├── _authed/             # Protected routes (requires auth)
 │   ├── route.tsx        # Auth layout (checks session, onboarding)
 │   └── dashboard/       # Dashboard routes
+├── admin/               # Admin routes (requires admin role)
+│   ├── route.tsx        # Admin layout (checks session + admin role)
+│   └── index.tsx        # /admin
 └── api/                 # API routes
     └── auth/$.ts        # Better Auth handler
 ```

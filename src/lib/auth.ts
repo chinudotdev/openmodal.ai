@@ -57,8 +57,8 @@ export const auth = betterAuth({
       return {
         user: {
           ...user,
-          onboardingCompleted: onboardingStatus.completed,
-          role: onboardingStatus.role,
+          onboardingCompleted: onboardingStatus.completed as boolean,
+          role: onboardingStatus.role as 'admin' | 'observer',
         },
         session,
       }

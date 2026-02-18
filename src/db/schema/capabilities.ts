@@ -5,13 +5,6 @@ import { integer, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 // ENUMS (from restructure doc)
 // ============================================
 
-export const capabilityCategoryEnum = pgEnum('capability_category', [
-  'physical',
-  'cognitive',
-  'social',
-  'meta',
-])
-
 export const capabilityStatusEnum = pgEnum('capability_status', [
   'solved',
   'partial',
@@ -19,7 +12,6 @@ export const capabilityStatusEnum = pgEnum('capability_status', [
 ])
 
 // Type exports
-export type CapabilityCategory = 'physical' | 'cognitive' | 'social' | 'meta'
 export type CapabilityStatus = 'solved' | 'partial' | 'unsolved'
 
 // ============================================
@@ -33,9 +25,6 @@ export const capability = pgTable('capability', {
   id: text('id').primaryKey(),
   slug: text('slug').notNull().unique(),
   name: text('name').notNull(), // e.g., "Reasoning", "Image Recognition"
-
-  // Category (enum, not FK)
-  category: capabilityCategoryEnum('category').notNull(),
 
   // Content
   description: text('description').notNull(), // 2-3 sentences

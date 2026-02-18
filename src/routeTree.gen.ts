@@ -13,18 +13,23 @@ import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicTermsRouteImport } from './routes/_public/terms'
 import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
+import { Route as AdminCapabilitiesIndexRouteImport } from './routes/admin/capabilities/index'
 import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/technologies/index'
 import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
 import { Route as PublicJobsIndexRouteImport } from './routes/_public/jobs/index'
 import { Route as PublicCapabilitiesIndexRouteImport } from './routes/_public/capabilities/index'
 import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AdminCapabilitiesAddRouteImport } from './routes/admin/capabilities/add'
 import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
+import { Route as AdminCapabilitiesIdEditRouteImport } from './routes/admin/capabilities/$id/edit'
 import { Route as PublicCapabilitiesSlugSubslugRouteImport } from './routes/_public/capabilities/$slug/$subslug'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
@@ -47,9 +52,19 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthedRouteRoute = AuthedRouteRouteImport.update({
   id: '/_authed',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/_public/',
@@ -70,6 +85,11 @@ const PublicAboutRoute = PublicAboutRouteImport.update({
   id: '/_public/about',
   path: '/about',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCapabilitiesIndexRoute = AdminCapabilitiesIndexRouteImport.update({
+  id: '/capabilities/',
+  path: '/capabilities/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const PublicTechnologiesIndexRoute = PublicTechnologiesIndexRouteImport.update({
   id: '/_public/technologies/',
@@ -101,12 +121,22 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCapabilitiesAddRoute = AdminCapabilitiesAddRouteImport.update({
+  id: '/capabilities/add',
+  path: '/capabilities/add',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const PublicCapabilitiesSlugIndexRoute =
   PublicCapabilitiesSlugIndexRouteImport.update({
     id: '/_public/capabilities/$slug/',
     path: '/capabilities/$slug/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminCapabilitiesIdEditRoute = AdminCapabilitiesIdEditRouteImport.update({
+  id: '/capabilities/$id/edit',
+  path: '/capabilities/$id/edit',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const PublicCapabilitiesSlugSubslugRoute =
   PublicCapabilitiesSlugSubslugRouteImport.update({
     id: '/_public/capabilities/$slug/$subslug',
@@ -116,6 +146,7 @@ const PublicCapabilitiesSlugSubslugRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
@@ -123,13 +154,17 @@ export interface FileRoutesByFullPath {
   '/about': typeof PublicAboutRoute
   '/privacy': typeof PublicPrivacyRoute
   '/terms': typeof PublicTermsRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/capabilities/add': typeof AdminCapabilitiesAddRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard/': typeof AuthedDashboardIndexRoute
   '/capabilities/': typeof PublicCapabilitiesIndexRoute
   '/jobs/': typeof PublicJobsIndexRoute
   '/reports/': typeof PublicReportsIndexRoute
   '/technologies/': typeof PublicTechnologiesIndexRoute
+  '/admin/capabilities/': typeof AdminCapabilitiesIndexRoute
   '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
+  '/admin/capabilities/$id/edit': typeof AdminCapabilitiesIdEditRoute
   '/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
 }
 export interface FileRoutesByTo {
@@ -141,18 +176,23 @@ export interface FileRoutesByTo {
   '/about': typeof PublicAboutRoute
   '/privacy': typeof PublicPrivacyRoute
   '/terms': typeof PublicTermsRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/capabilities/add': typeof AdminCapabilitiesAddRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard': typeof AuthedDashboardIndexRoute
   '/capabilities': typeof PublicCapabilitiesIndexRoute
   '/jobs': typeof PublicJobsIndexRoute
   '/reports': typeof PublicReportsIndexRoute
   '/technologies': typeof PublicTechnologiesIndexRoute
+  '/admin/capabilities': typeof AdminCapabilitiesIndexRoute
   '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
+  '/admin/capabilities/$id/edit': typeof AdminCapabilitiesIdEditRoute
   '/capabilities/$slug': typeof PublicCapabilitiesSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authed': typeof AuthedRouteRouteWithChildren
+  '/admin': typeof AdminRouteRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
@@ -161,19 +201,24 @@ export interface FileRoutesById {
   '/_public/privacy': typeof PublicPrivacyRoute
   '/_public/terms': typeof PublicTermsRoute
   '/_public/': typeof PublicIndexRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/capabilities/add': typeof AdminCapabilitiesAddRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authed/dashboard/': typeof AuthedDashboardIndexRoute
   '/_public/capabilities/': typeof PublicCapabilitiesIndexRoute
   '/_public/jobs/': typeof PublicJobsIndexRoute
   '/_public/reports/': typeof PublicReportsIndexRoute
   '/_public/technologies/': typeof PublicTechnologiesIndexRoute
+  '/admin/capabilities/': typeof AdminCapabilitiesIndexRoute
   '/_public/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
+  '/admin/capabilities/$id/edit': typeof AdminCapabilitiesIdEditRoute
   '/_public/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/forgot-password'
     | '/login'
     | '/signup'
@@ -181,13 +226,17 @@ export interface FileRouteTypes {
     | '/about'
     | '/privacy'
     | '/terms'
+    | '/admin/'
+    | '/admin/capabilities/add'
     | '/api/auth/$'
     | '/dashboard/'
     | '/capabilities/'
     | '/jobs/'
     | '/reports/'
     | '/technologies/'
+    | '/admin/capabilities/'
     | '/capabilities/$slug/$subslug'
+    | '/admin/capabilities/$id/edit'
     | '/capabilities/$slug/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -199,17 +248,22 @@ export interface FileRouteTypes {
     | '/about'
     | '/privacy'
     | '/terms'
+    | '/admin'
+    | '/admin/capabilities/add'
     | '/api/auth/$'
     | '/dashboard'
     | '/capabilities'
     | '/jobs'
     | '/reports'
     | '/technologies'
+    | '/admin/capabilities'
     | '/capabilities/$slug/$subslug'
+    | '/admin/capabilities/$id/edit'
     | '/capabilities/$slug'
   id:
     | '__root__'
     | '/_authed'
+    | '/admin'
     | '/forgot-password'
     | '/login'
     | '/signup'
@@ -218,18 +272,23 @@ export interface FileRouteTypes {
     | '/_public/privacy'
     | '/_public/terms'
     | '/_public/'
+    | '/admin/'
+    | '/admin/capabilities/add'
     | '/api/auth/$'
     | '/_authed/dashboard/'
     | '/_public/capabilities/'
     | '/_public/jobs/'
     | '/_public/reports/'
     | '/_public/technologies/'
+    | '/admin/capabilities/'
     | '/_public/capabilities/$slug/$subslug'
+    | '/admin/capabilities/$id/edit'
     | '/_public/capabilities/$slug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
@@ -277,12 +336,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authed': {
       id: '/_authed'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthedRouteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/_public/': {
       id: '/_public/'
@@ -311,6 +384,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/about'
       preLoaderRoute: typeof PublicAboutRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/capabilities/': {
+      id: '/admin/capabilities/'
+      path: '/capabilities'
+      fullPath: '/admin/capabilities/'
+      preLoaderRoute: typeof AdminCapabilitiesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/_public/technologies/': {
       id: '/_public/technologies/'
@@ -354,12 +434,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/capabilities/add': {
+      id: '/admin/capabilities/add'
+      path: '/capabilities/add'
+      fullPath: '/admin/capabilities/add'
+      preLoaderRoute: typeof AdminCapabilitiesAddRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/_public/capabilities/$slug/': {
       id: '/_public/capabilities/$slug/'
       path: '/capabilities/$slug'
       fullPath: '/capabilities/$slug/'
       preLoaderRoute: typeof PublicCapabilitiesSlugIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/capabilities/$id/edit': {
+      id: '/admin/capabilities/$id/edit'
+      path: '/capabilities/$id/edit'
+      fullPath: '/admin/capabilities/$id/edit'
+      preLoaderRoute: typeof AdminCapabilitiesIdEditRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/_public/capabilities/$slug/$subslug': {
       id: '/_public/capabilities/$slug/$subslug'
@@ -383,8 +477,27 @@ const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
   AuthedRouteRouteChildren,
 )
 
+interface AdminRouteRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminCapabilitiesAddRoute: typeof AdminCapabilitiesAddRoute
+  AdminCapabilitiesIndexRoute: typeof AdminCapabilitiesIndexRoute
+  AdminCapabilitiesIdEditRoute: typeof AdminCapabilitiesIdEditRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+  AdminCapabilitiesAddRoute: AdminCapabilitiesAddRoute,
+  AdminCapabilitiesIndexRoute: AdminCapabilitiesIndexRoute,
+  AdminCapabilitiesIdEditRoute: AdminCapabilitiesIdEditRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthedRouteRoute: AuthedRouteRouteWithChildren,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,

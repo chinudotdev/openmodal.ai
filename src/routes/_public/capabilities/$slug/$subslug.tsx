@@ -9,10 +9,10 @@ export const Route = createFileRoute('/_public/capabilities/$slug/$subslug')({
   component: CapabilitySubtypePage,
   loader: async ({ params }) => {
     const result = await getSubtypeBySlugFn({ data: { slug: params.subslug } })
-    if (!result.success || !result.data) {
+    if (!result) {
       throw notFound()
     }
-    return result
+    return { data: result }
   },
   pendingComponent: () => (
     <div className="min-h-svh flex items-center justify-center">
@@ -155,10 +155,7 @@ function CapabilitySubtypePage() {
                     params={{ slug: parentCapability.slug }}
                     className="text-primary hover:underline"
                   >
-                    {parentCapability.name} (
-                    {parentCapability.category.charAt(0).toUpperCase() +
-                      parentCapability.category.slice(1)}
-                    )
+                    {parentCapability.name}
                   </Link>
                 </div>
               )}

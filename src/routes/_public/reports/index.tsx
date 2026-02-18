@@ -140,11 +140,7 @@ function ReportsPage() {
         <section className="container mx-auto px-6 py-12">
           <div className="space-y-6">
             {reports.map((report) => (
-              <Link
-                key={report.id}
-                to="/reports"
-                className="group block"
-              >
+              <Link key={report.id} to="/reports" className="group block">
                 <Card className="transition-all hover:shadow-lg hover:border-primary/50">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -174,9 +170,7 @@ function ReportsPage() {
                         <p className="text-sm text-muted-foreground">
                           {report.verifications} verifications
                         </p>
-                        <span className="text-sm text-primary">
-                          View →
-                        </span>
+                        <span className="text-sm text-primary">View →</span>
                       </div>
                     </div>
                   </CardContent>

@@ -1,4 +1,4 @@
-import { Link, createFileRoute, redirect } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -11,20 +11,14 @@ import {
 export const Route = createFileRoute('/_public/capabilities/')({
   component: CapabilitiesPage,
   loader: async () => {
-    const [capabilitiesResult, progressResult] = await Promise.all([
+    const [capabilities, overallProgress] = await Promise.all([
       getAllCapabilitiesFn(),
       getOverallProgressFn(),
     ])
 
-    if (!capabilitiesResult.success) {
-      throw redirect({
-        to: '/',
-      })
-    }
-
     return {
-      capabilities: capabilitiesResult.data,
-      overallProgress: progressResult.data,
+      capabilities,
+      overallProgress,
     }
   },
   pendingComponent: () => (
@@ -45,8 +39,6 @@ function CapabilitiesPage() {
     ...cap,
     status: cap.status.charAt(0).toUpperCase() + cap.status.slice(1),
   }))
-
-  const categories = ['Cognitive', 'Physical', 'Social', 'Meta']
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -119,26 +111,6 @@ function CapabilitiesPage() {
                 Track what AI can and can't do across different domains. See how
                 capabilities are progressing and which jobs they affect.
               </p>
-
-              {/* Category Filter */}
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  Filter by:
-                </span>
-                {categories.map((category) => (
-                  <Button
-                    key={category}
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={() => {
-                      // TODO: Implement filtering
-                    }}
-                  >
-                    {category}
-                  </Button>
-                ))}
-              </div>
             </div>
           </div>
         </section>
@@ -164,9 +136,6 @@ function CapabilitiesPage() {
                           <h3 className="font-semibold group-hover:text-primary transition-colors">
                             {capability.name}
                           </h3>
-                          <p className="text-xs text-muted-foreground capitalize">
-                            {capability.category}
-                          </p>
                         </div>
                       </div>
                       <Badge
@@ -242,7 +211,7 @@ function CapabilitiesPage() {
                       </span>
                       <br />
                       AI is making steady progress, but significant gaps remain
-                      in physical, social, and domain-specific reasoning.
+                      in domain-specific reasoning and real-world applications.
                     </p>
                   </div>
                 </CardContent>

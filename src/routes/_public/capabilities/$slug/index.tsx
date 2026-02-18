@@ -9,10 +9,10 @@ export const Route = createFileRoute('/_public/capabilities/$slug/')({
   component: CapabilityPage,
   loader: async ({ params }) => {
     const result = await getCapabilityBySlugFn({ data: { slug: params.slug } })
-    if (!result.success || !result.data) {
+    if (!result) {
       throw notFound()
     }
-    return result
+    return { data: result }
   },
   pendingComponent: () => (
     <div className="min-h-svh flex items-center justify-center">
@@ -155,9 +155,7 @@ function CapabilityPage() {
                   {getStatusIcon(overallStatus)} {statusTitle}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
-                  {capability.category.charAt(0).toUpperCase() +
-                    capability.category.slice(1)}{' '}
-                  • {subtypes.length} domains tracked
+                  {subtypes.length} domains tracked
                 </span>
               </div>
 
@@ -218,9 +216,11 @@ function CapabilityPage() {
                               ✅ What works:
                             </p>
                             <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-                              {subtype.whatWorks.slice(0, 3).map((item: string, i: number) => (
-                                <li key={i}>{item}</li>
-                              ))}
+                              {subtype.whatWorks
+                                .slice(0, 3)
+                                .map((item: string, i: number) => (
+                                  <li key={i}>{item}</li>
+                                ))}
                               {subtype.whatWorks.length > 3 && (
                                 <li className="text-xs">
                                   +{subtype.whatWorks.length - 3} more

@@ -2,8 +2,6 @@ import { createServerFn } from '@tanstack/react-start'
 import z from 'zod'
 import {
   getAllCapabilities,
-  getCapabilitiesByCategory,
-  getCapabilitiesProgressByCategory,
   getCapabilityById,
   getCapabilityBySlug,
   getJobsBySubtypeId,
@@ -26,24 +24,7 @@ import { rateLimitMiddleware } from '@/middleware/server'
 export const getAllCapabilitiesFn = createServerFn({ method: 'GET' })
   .middleware([rateLimitMiddleware({ max: 60, window: 60 })])
   .handler(async () => {
-    const capabilities = await getAllCapabilities()
-    return { success: true, data: capabilities }
-  })
-
-/**
- * Fetch capabilities by category
- * Public endpoint - no auth required
- */
-export const getCapabilitiesByCategoryFn = createServerFn({ method: 'POST' })
-  .inputValidator(
-    z.object({
-      category: z.enum(['All', 'cognitive', 'physical', 'social', 'meta']),
-    }),
-  )
-  .middleware([rateLimitMiddleware({ max: 60, window: 60 })])
-  .handler(async ({ data }) => {
-    const capabilities = await getCapabilitiesByCategory(data.category)
-    return { success: true, data: capabilities }
+    return await getAllCapabilities()
   })
 
 /**
@@ -60,18 +41,15 @@ export const getCapabilityBySlugFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const capability = await getCapabilityBySlug(data.slug)
     if (!capability) {
-      return { success: false, error: 'Capability not found' }
+      return null
     }
 
     // Fetch related data
     const subtypes = await getSubtypesByCapabilityId(capability.id)
 
     return {
-      success: true,
-      data: {
-        ...capability,
-        subtypes,
-      },
+      ...capability,
+      subtypes,
     }
   })
 
@@ -83,15 +61,7 @@ export const getOverallProgressFn = createServerFn({ method: 'GET' })
   .middleware([rateLimitMiddleware({ max: 30, window: 60 })])
   .handler(async () => {
     const progress = await getOverallProgress()
-    const byCategory = await getCapabilitiesProgressByCategory()
-
-    return {
-      success: true,
-      data: {
-        overall: progress,
-        byCategory,
-      },
-    }
+    return { overall: progress }
   })
 
 // ============================================
@@ -112,7 +82,7 @@ export const getSubtypeBySlugFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const subtype = await getSubtypeBySlug(data.slug)
     if (!subtype) {
-      return { success: false, error: 'Subtype not found' }
+      return null
     }
 
     // Fetch parent capability by ID
@@ -126,14 +96,11 @@ export const getSubtypeBySlugFn = createServerFn({ method: 'POST' })
     ])
 
     return {
-      success: true,
-      data: {
-        ...subtype,
-        parentCapability,
-        technologies,
-        jobs,
-        organizations,
-      },
+      ...subtype,
+      parentCapability,
+      technologies,
+      jobs,
+      organizations,
     }
   })
 
@@ -149,12 +116,7 @@ export const getTechnologiesBySubtypeFn = createServerFn({ method: 'POST' })
   )
   .middleware([rateLimitMiddleware({ max: 60, window: 60 })])
   .handler(async ({ data }) => {
-    const technologies = await getTechnologiesBySubtypeId(data.subtypeId)
-
-    return {
-      success: true,
-      data: technologies,
-    }
+    return await getTechnologiesBySubtypeId(data.subtypeId)
   })
 
 /**
@@ -169,12 +131,7 @@ export const getJobsBySubtypeFn = createServerFn({ method: 'POST' })
   )
   .middleware([rateLimitMiddleware({ max: 60, window: 60 })])
   .handler(async ({ data }) => {
-    const jobs = await getJobsBySubtypeId(data.subtypeId)
-
-    return {
-      success: true,
-      data: jobs,
-    }
+    return await getJobsBySubtypeId(data.subtypeId)
   })
 
 /**
@@ -189,10 +146,5 @@ export const getOrganizationsBySubtypeFn = createServerFn({ method: 'POST' })
   )
   .middleware([rateLimitMiddleware({ max: 60, window: 60 })])
   .handler(async ({ data }) => {
-    const organizations = await getOrganizationsBySubtypeId(data.subtypeId)
-
-    return {
-      success: true,
-      data: organizations,
-    }
+    return await getOrganizationsBySubtypeId(data.subtypeId)
   })
