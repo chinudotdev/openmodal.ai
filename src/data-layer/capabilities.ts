@@ -110,8 +110,17 @@ export async function getAllSubtypes() {
         whatStruggles: capabilitySubtype.whatStruggles,
         whatDoesntWork: capabilitySubtype.whatDoesntWork,
         createdAt: capabilitySubtype.createdAt,
+        // Capability fields
+        capability: {
+          id: capability.id,
+          slug: capability.slug,
+          name: capability.name,
+          description: capability.description,
+          icon: capability.icon,
+        },
       })
       .from(capabilitySubtype)
+      .innerJoin(capability, eq(capabilitySubtype.capabilityId, capability.id))
       .orderBy(asc(capabilitySubtype.name))
 
     return subtypes

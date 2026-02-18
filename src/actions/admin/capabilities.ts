@@ -8,7 +8,6 @@ import {
   deleteCapabilitySubtype,
   getAllCapabilities,
   getAllSubtypes,
-  getCapabilityById,
   updateCapability,
   updateCapabilitySubtype,
 } from '@/data-layer/capabilities'
@@ -300,19 +299,7 @@ export const getAllSubtypesForAdminFn = createServerFn({ method: 'GET' })
   .handler(async () => {
     try {
       const subtypes = await getAllSubtypes()
-
-      // Fetch parent capability for each subtype
-      const subtypesWithCapabilities = await Promise.all(
-        subtypes.map(async (subtype) => {
-          const capability = await getCapabilityById(subtype.capabilityId)
-          return {
-            ...subtype,
-            capability,
-          }
-        }),
-      )
-
-      return { success: true, data: subtypesWithCapabilities }
+      return { success: true, data: subtypes }
     } catch (error) {
       console.error('Error fetching subtypes:', error)
       return {
@@ -336,7 +323,7 @@ export const getSubtypeForAdminFn = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
   .handler(async ({ data }) => {
     try {
-      // Get all subtypes and find by ID
+      // Get all subtypes and find by ID (includes capability from join)
       const subtypes = await getAllSubtypes()
       const subtype = subtypes.find((s) => s.id === data.id)
 
@@ -344,15 +331,9 @@ export const getSubtypeForAdminFn = createServerFn({ method: 'POST' })
         return { success: false, error: 'Subtype not found' }
       }
 
-      // Fetch parent capability
-      const capability = await getCapabilityById(subtype.capabilityId)
-
       return {
         success: true,
-        data: {
-          ...subtype,
-          capability,
-        },
+        data: subtype,
       }
     } catch (error) {
       console.error('Error fetching subtype:', error)
