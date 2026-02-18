@@ -14,6 +14,7 @@ Before diving in, make sure you understand these critical patterns:
 
 - **[CLAUDE.md](../CLAUDE.md)** - Main guide for Claude Code and developers
 - **[Quick Reference](quick-reference.md)** - Common patterns and commands
+- **[Common Errors](common-errors.md)** - Frequent mistakes and how to avoid them
 
 ## Platform & Domain
 
@@ -57,6 +58,7 @@ Before diving in, make sure you understand these critical patterns:
 | Entity Relationships  | [Relationships](relationships.md)                            |
 | Development Commands  | [Quick Reference](quick-reference.md#bun-commands)           |
 | Database Commands     | [Quick Reference](quick-reference.md#database-commands)      |
+| Common Errors         | [Common Errors](common-errors.md) ⚠️                         |
 | Data Layer Pattern    | [Database Guide](database.md)                                |
 | Form Implementation   | [Forms Guide](forms.md)                                      |
 | Nested Dynamic Routes | [Routing Guide](routing.md#nested-dynamic-routes-pattern) ⚠️ |

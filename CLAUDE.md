@@ -62,19 +62,34 @@ TanStack Start uses file-based routing in `src/routes/`:
 ```
 src/routes/
 ├── __root.tsx           # Root layout, required
-├── index.tsx            # Home page (/)
 ├── login.tsx            # Login page (/login)
+├── signup.tsx           # Signup page (/signup)
+├── forgot-password.tsx  # Forgot password page (/forgot-password)
+├── verify-email.tsx     # Email verification page (/verify-email)
+├── _public/             # Public routes (no auth required)
+│   ├── index.tsx        # Home page (/)
+│   ├── about.tsx        # About page (/about)
+│   ├── privacy.tsx      # Privacy policy (/privacy)
+│   ├── terms.tsx        # Terms of service (/terms)
+│   ├── capabilities/    # Public capabilities routes
+│   │   ├── index.tsx    # /capabilities (root)
+│   │   └── $slug/
+│   │       ├── index.tsx    # /capabilities/:slug
+│   │       └── $subslug.tsx # /capabilities/:slug/:subslug
+│   ├── jobs/
+│   │   └── index.tsx    # /jobs
+│   ├── technologies/
+│   │   └── index.tsx    # /technologies
+│   └── reports/
+│       └── index.tsx    # /reports
 ├── _authed/             # Protected routes (requires auth)
 │   ├── route.tsx        # Auth layout (checks session, onboarding)
 │   └── dashboard/       # Dashboard routes
-├── capabilities/        # Nested routes example
-│   ├── index.tsx        # /capabilities (root)
-│   └── $slug/
-│       ├── index.tsx    # /capabilities/:slug
-│       └── $subslug.tsx # /capabilities/:slug/:subslug
 └── api/                 # API routes
     └── auth/$.ts        # Better Auth handler
 ```
+
+**Route groups:** Folders prefixed with `_` (like `_public` and `_authed`) are route groups that don't add path segments but allow shared layouts/middleware.
 
 **Route protection:** Create a `_authed` folder with a `route.tsx` that uses `beforeLoad` to check session. Nested routes inherit this protection.
 

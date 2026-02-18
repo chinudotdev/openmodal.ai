@@ -9,34 +9,49 @@ Routes are defined as files in `src/routes/` using the TanStack Router file-base
 ```
 src/routes/
 ├── __root.tsx              # Root layout (required)
-├── index.tsx               # Home page (/)
 ├── login.tsx               # Login page (/login)
 ├── signup.tsx              # Signup page (/signup)
-├── about.tsx               # About page (/about)
+├── forgot-password.tsx     # Forgot password (/forgot-password)
+├── verify-email.tsx        # Email verification (/verify-email)
+├── _public/                # Public route group (no auth required)
+│   ├── index.tsx           # Home page (/)
+│   ├── about.tsx           # About page (/about)
+│   ├── privacy.tsx         # Privacy policy (/privacy)
+│   ├── terms.tsx           # Terms of service (/terms)
+│   ├── capabilities/       # Capabilities routes
+│   │   ├── index.tsx       # /capabilities
+│   │   └── $slug/
+│   │       ├── index.tsx   # /capabilities/:slug
+│   │       └── $subslug.tsx # /capabilities/:slug/:subslug
+│   ├── jobs/
+│   │   └── index.tsx       # /jobs
+│   ├── technologies/
+│   │   └── index.tsx       # /technologies
+│   └── reports/
+│       └── index.tsx       # /reports
 ├── _authed/                # Protected route group
 │   ├── route.tsx           # Layout for authed routes
-│   ├── dashboard/          # Dashboard routes
-│   │   └── index.tsx       # /dashboard
-│   └── settings/
-│       └── index.tsx       # /settings
+│   └── dashboard/
+│       └── index.tsx       # /dashboard
 └── api/                    # API routes
     └── auth/
         └── $.ts            # /api/auth/* (catch-all)
 ```
 
+**Route groups:** Folders prefixed with `_` (like `_public` and `_authed`) create logical grouping without adding path segments. They're useful for shared layouts and middleware.
+
 ## Route File Conventions
 
-| File/Folder                       | Route                          | Description                           |
-| --------------------------------- | ------------------------------ | ------------------------------------- |
-| `__root.tsx`                      | `/`                            | Root layout, wraps all routes         |
-| `index.tsx`                       | `/`                            | Index/home page                       |
-| `about.tsx`                       | `/about`                       | Simple route                          |
-| `_authed/route.tsx`               | `/dashboard/*`                 | Route group layout                    |
-| `_authed/dashboard/index.tsx`     | `/dashboard`                   | Nested index                          |
-| `api/$.ts`                        | `/api/*`                       | Catch-all route                       |
-| `capabilities/index.tsx`          | `/capabilities`                | Root path for nested routes           |
-| `capabilities/$slug/index.tsx`    | `/capabilities/:slug`          | Single dynamic path (use index.tsx)   |
-| `capabilities/$slug/$subslug.tsx` | `/capabilities/:slug/:subslug` | Multiple dynamic paths (nested files) |
+| File/Folder                          | Route                          | Description                           |
+| ------------------------------------ | ------------------------------ | ------------------------------------- |
+| `__root.tsx`                         | `/`                            | Root layout, wraps all routes         |
+| `_public/index.tsx`                  | `/`                            | Home page (public route group)        |
+| `_public/about.tsx`                  | `/about`                       | About page (public)                   |
+| `_authed/route.tsx`                  | `/dashboard/*`                 | Protected route group layout          |
+| `_authed/dashboard/index.tsx`        | `/dashboard`                   | Nested index (protected)              |
+| `_public/capabilities/index.tsx`     | `/capabilities`                | Root path for nested routes           |
+| `_public/capabilities/$slug/index.tsx` | `/capabilities/:slug`          | Single dynamic path (use index.tsx)   |
+| `_public/capabilities/$slug/$subslug.tsx` | `/capabilities/:slug/:subslug` | Multiple dynamic paths (nested files) |
 
 ## Nested Dynamic Routes Pattern
 
@@ -47,7 +62,7 @@ src/routes/
 For a route like `/capabilities/:slug`, create a folder with an `index.tsx` file:
 
 ```
-src/routes/capabilities/
+src/routes/_public/capabilities/
 ├── index.tsx          # /capabilities (root path)
 └── $slug/
     └── index.tsx      # /capabilities/:slug (single dynamic)
@@ -60,7 +75,7 @@ src/routes/capabilities/
 For routes like `/capabilities/:slug/:subslug`, use nested folders with the next segment as a file:
 
 ```
-src/routes/capabilities/
+src/routes/_public/capabilities/
 ├── index.tsx          # /capabilities (root path)
 └── $slug/
     ├── index.tsx      # /capabilities/:slug (single dynamic)
@@ -70,10 +85,10 @@ src/routes/capabilities/
 ### Example Implementation
 
 ```typescript
-// src/routes/capabilities/$slug/index.tsx
+// src/routes/_public/capabilities/$slug/index.tsx
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/capabilities/$slug/')({
+export const Route = createFileRoute('/_public/capabilities/$slug/')({
   component: CapabilityPage,
 })
 
@@ -84,10 +99,10 @@ function CapabilityPage() {
 ```
 
 ```typescript
-// src/routes/capabilities/$slug/$subslug.tsx
+// src/routes/_public/capabilities/$slug/$subslug.tsx
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/capabilities/$slug/$subslug')({
+export const Route = createFileRoute('/_public/capabilities/$slug/$subslug')({
   component: CapabilitySubtypePage,
 })
 
@@ -109,7 +124,7 @@ function CapabilitySubtypePage() {
 If you need more nesting (e.g., `/capabilities/:slug/:subslug/:id`), the structure extends naturally:
 
 ```
-src/routes/capabilities/
+src/routes/_public/capabilities/
 ├── index.tsx
 └── $slug/
     ├── index.tsx
@@ -123,10 +138,10 @@ src/routes/capabilities/
 ### Basic Route
 
 ```typescript
-// src/routes/about.tsx
+// src/routes/_public/about.tsx
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/about')({
+export const Route = createFileRoute('/_public/about')({
   component: AboutPage,
 })
 
@@ -138,7 +153,7 @@ function AboutPage() {
 ### Route with Meta (SEO)
 
 ```typescript
-export const Route = createFileRoute('/about')({
+export const Route = createFileRoute('/_public/about')({
   component: AboutPage,
   meta: () => ({
     title: 'About OpenModal',
@@ -430,6 +445,8 @@ function DashboardLayout() {
 ## Tips
 
 1. **Use route groups** (`_folderName`) for layouts without path segments
+   - `_public/` - public routes with shared layout
+   - `_authed/` - protected routes with auth middleware
 2. **Always redirect with search params** when redirecting unauthenticated users
 3. **Use `router.invalidate()`** after mutations to refresh stale data
 4. **Keep `beforeLoad` lightweight** - move heavy logic to loaders

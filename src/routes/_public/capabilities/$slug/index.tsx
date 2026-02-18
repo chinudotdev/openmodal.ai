@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { getCapabilityBySlugFn } from '@/actions/capabilities'
 
-export const Route = createFileRoute('/capabilities/$slug/')({
+export const Route = createFileRoute('/_public/capabilities/$slug/')({
   component: CapabilityPage,
   loader: async ({ params }) => {
     const result = await getCapabilityBySlugFn({ data: { slug: params.slug } })

@@ -2,81 +2,68 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 
-export const Route = createFileRoute('/reports/')({
-  component: ReportsPage,
+export const Route = createFileRoute('/_public/jobs/')({
+  component: JobsPage,
   pendingComponent: () => (
     <div className="min-h-svh flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
-        <p className="text-muted-foreground">Loading reports...</p>
+        <p className="text-muted-foreground">Loading jobs...</p>
       </div>
     </div>
   ),
 })
 
-function ReportsPage() {
+function JobsPage() {
   // Mock data - TODO: Replace with real data fetching
-  const reports = [
+  const jobs = [
     {
       id: '1',
-      title: 'AI in Healthcare Diagnostics',
-      type: 'Research',
-      author: 'Dr. Jane Smith',
-      createdAt: '2024-01-15',
-      verifications: 24,
-      status: 'verified',
+      slug: 'software-developer',
+      name: 'Software Developer',
+      category: 'Technology',
+      automationRiskPercentage: 45,
+      riskLevel: 'medium',
+      icon: '💻',
     },
     {
       id: '2',
-      title: 'Customer Service Automation',
-      type: 'Deployment',
-      author: 'John Doe',
-      createdAt: '2024-01-10',
-      verifications: 18,
-      status: 'verified',
+      slug: 'data-scientist',
+      name: 'Data Scientist',
+      category: 'Technology',
+      automationRiskPercentage: 35,
+      riskLevel: 'low',
+      icon: '📊',
     },
     {
       id: '3',
-      title: 'Legal Document Analysis',
-      type: 'Barrier',
-      author: 'Sarah Johnson',
-      createdAt: '2024-01-05',
-      verifications: 12,
-      status: 'pending',
+      slug: 'content-writer',
+      name: 'Content Writer',
+      category: 'Creative',
+      automationRiskPercentage: 65,
+      riskLevel: 'high',
+      icon: '✍️',
     },
   ]
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'verified':
-        return 'bg-green-500/10 text-green-500 dark:text-green-400 border-green-500/20'
-      case 'pending':
-        return 'bg-yellow-500/10 text-yellow-500 dark:text-yellow-400 border-yellow-500/20'
-      case 'disputed':
-        return 'bg-red-500/10 text-red-500 dark:text-red-400 border-red-500/20'
-      default:
-        return ''
-    }
+  const getRiskColor = (risk: number) => {
+    if (risk >= 70) return 'text-red-500'
+    if (risk >= 40) return 'text-yellow-500'
+    return 'text-green-500'
   }
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'Research':
-        return '🔬'
-      case 'Deployment':
-        return '🚀'
-      case 'Barrier':
-        return '🚧'
-      default:
-        return '📄'
-    }
+  const getRiskLabel = (risk: number) => {
+    if (risk >= 70) return 'High Risk'
+    if (risk >= 40) return 'Medium Risk'
+    return 'Low Risk'
   }
 
   return (
     <div className="min-h-svh flex flex-col">
       {/* Header */}
-      <header className="border-b border-border/40 sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
+      <header className="border-b border-border/40 sticky top-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <div className="size-8 rounded-lg bg-primary flex items-center justify-center">
@@ -94,10 +81,10 @@ function ReportsPage() {
               Capabilities
             </Link>
             <Link
-              to="/reports"
+              to="/jobs"
               className="text-sm font-medium hover:text-foreground transition-colors"
             >
-              Reports
+              Jobs
             </Link>
             <Link
               to="/login"
@@ -118,65 +105,63 @@ function ReportsPage() {
           <div className="container mx-auto px-6 py-16">
             <div className="max-w-3xl">
               <h1 className="text-3xl md:text-5xl font-semibold tracking-tight mb-4">
-                Community Reports
+                Jobs at Risk of Automation
               </h1>
               <p className="text-lg text-muted-foreground mb-8">
-                Real-world experiences with AI capabilities. Browse verified
-                reports from the community and contribute your own insights.
+                Understand which jobs are most affected by AI capabilities and
+                automation. Track how the job market is evolving.
               </p>
-              <div className="flex items-center gap-4">
-                <Link to="/signup">
-                  <Button>📝 Submit Report</Button>
-                </Link>
-                <Link to="/login">
-                  <Button variant="outline">Sign In</Button>
-                </Link>
-              </div>
             </div>
           </div>
         </section>
 
-        {/* Reports List */}
+        {/* Jobs List */}
         <section className="container mx-auto px-6 py-12">
-          <div className="space-y-6">
-            {reports.map((report) => (
-              <Link
-                key={report.id}
-                to="/reports"
-                className="group block"
-              >
-                <Card className="transition-all hover:shadow-lg hover:border-primary/50">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {jobs.map((job) => (
+              <Link key={job.id} to="/jobs" className="group">
+                <Card className="h-full transition-all hover:shadow-lg hover:border-primary/50">
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-xl">
-                            {getTypeIcon(report.type)}
-                          </span>
-                          <Badge variant="outline">{report.type}</Badge>
-                          <Badge
-                            variant="outline"
-                            className={getStatusColor(report.status)}
-                          >
-                            {report.status.charAt(0).toUpperCase() +
-                              report.status.slice(1)}
-                          </Badge>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{job.icon}</span>
+                        <div>
+                          <h3 className="font-semibold group-hover:text-primary transition-colors">
+                            {job.name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground">
+                            {job.category}
+                          </p>
                         </div>
-                        <h3 className="text-lg font-semibold group-hover:text-primary transition-colors mb-2">
-                          {report.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          By {report.author} •{' '}
-                          {new Date(report.createdAt).toLocaleDateString()}
-                        </p>
                       </div>
-                      <div className="text-right ml-4">
-                        <p className="text-sm text-muted-foreground">
-                          {report.verifications} verifications
-                        </p>
-                        <span className="text-sm text-primary">
-                          View →
-                        </span>
+                      <Badge
+                        variant="outline"
+                        className={getRiskColor(job.automationRiskPercentage)}
+                      >
+                        {getRiskLabel(job.automationRiskPercentage)}
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-muted-foreground">
+                            Automation Risk
+                          </span>
+                          <span
+                            className={`text-xs font-medium ${getRiskColor(job.automationRiskPercentage)}`}
+                          >
+                            {job.automationRiskPercentage}%
+                          </span>
+                        </div>
+                        <Progress
+                          value={job.automationRiskPercentage}
+                          className="h-2"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/40">
+                        <span>View analysis →</span>
                       </div>
                     </div>
                   </CardContent>
@@ -190,15 +175,18 @@ function ReportsPage() {
         <section className="container mx-auto px-6 py-12">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-2xl font-semibold mb-4">
-              Share Your Experience
+              Track Your Job's Future
             </h2>
             <p className="text-muted-foreground mb-6">
-              Have firsthand experience with AI capabilities? Share your
-              insights and help others understand what AI can really do.
+              Stay informed about how AI is affecting your profession. Get
+              personalized insights and recommendations.
             </p>
             <div className="flex items-center justify-center gap-4">
               <Link to="/signup">
-                <Button>📝 Submit Report</Button>
+                <Button>📝 Get Started</Button>
+              </Link>
+              <Link to="/login">
+                <Button variant="outline">💼 Sign In</Button>
               </Link>
             </div>
           </div>

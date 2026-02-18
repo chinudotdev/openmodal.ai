@@ -10,41 +10,31 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
-import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as TechnologiesIndexRouteImport } from './routes/technologies/index'
-import { Route as ReportsIndexRouteImport } from './routes/reports/index'
-import { Route as JobsIndexRouteImport } from './routes/jobs/index'
-import { Route as CapabilitiesIndexRouteImport } from './routes/capabilities/index'
-import { Route as CapabilitiesSlugIndexRouteImport } from './routes/capabilities/$slug/index'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as PublicTermsRouteImport } from './routes/_public/terms'
+import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
+import { Route as PublicAboutRouteImport } from './routes/_public/about'
+import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/technologies/index'
+import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
+import { Route as PublicJobsIndexRouteImport } from './routes/_public/jobs/index'
+import { Route as PublicCapabilitiesIndexRouteImport } from './routes/_public/capabilities/index'
 import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
-import { Route as CapabilitiesSlugSubslugRouteImport } from './routes/capabilities/$slug/$subslug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
+import { Route as PublicCapabilitiesSlugSubslugRouteImport } from './routes/_public/capabilities/$slug/$subslug'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
   path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -57,43 +47,48 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthedRouteRoute = AuthedRouteRouteImport.update({
   id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
+const PublicIndexRoute = PublicIndexRouteImport.update({
+  id: '/_public/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TechnologiesIndexRoute = TechnologiesIndexRouteImport.update({
-  id: '/technologies/',
+const PublicTermsRoute = PublicTermsRouteImport.update({
+  id: '/_public/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
+  id: '/_public/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicAboutRoute = PublicAboutRouteImport.update({
+  id: '/_public/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicTechnologiesIndexRoute = PublicTechnologiesIndexRouteImport.update({
+  id: '/_public/technologies/',
   path: '/technologies/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReportsIndexRoute = ReportsIndexRouteImport.update({
-  id: '/reports/',
+const PublicReportsIndexRoute = PublicReportsIndexRouteImport.update({
+  id: '/_public/reports/',
   path: '/reports/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JobsIndexRoute = JobsIndexRouteImport.update({
-  id: '/jobs/',
+const PublicJobsIndexRoute = PublicJobsIndexRouteImport.update({
+  id: '/_public/jobs/',
   path: '/jobs/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CapabilitiesIndexRoute = CapabilitiesIndexRouteImport.update({
-  id: '/capabilities/',
+const PublicCapabilitiesIndexRoute = PublicCapabilitiesIndexRouteImport.update({
+  id: '/_public/capabilities/',
   path: '/capabilities/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CapabilitiesSlugIndexRoute = CapabilitiesSlugIndexRouteImport.update({
-  id: '/capabilities/$slug/',
-  path: '/capabilities/$slug/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedDashboardIndexRoute = AuthedDashboardIndexRouteImport.update({
@@ -101,148 +96,155 @@ const AuthedDashboardIndexRoute = AuthedDashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => AuthedRouteRoute,
 } as any)
-const CapabilitiesSlugSubslugRoute = CapabilitiesSlugSubslugRouteImport.update({
-  id: '/capabilities/$slug/$subslug',
-  path: '/capabilities/$slug/$subslug',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PublicCapabilitiesSlugIndexRoute =
+  PublicCapabilitiesSlugIndexRouteImport.update({
+    id: '/_public/capabilities/$slug/',
+    path: '/capabilities/$slug/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PublicCapabilitiesSlugSubslugRoute =
+  PublicCapabilitiesSlugSubslugRouteImport.update({
+    id: '/_public/capabilities/$slug/$subslug',
+    path: '/capabilities/$slug/$subslug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/': typeof PublicIndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
-  '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
-  '/capabilities/': typeof CapabilitiesIndexRoute
-  '/jobs/': typeof JobsIndexRoute
-  '/reports/': typeof ReportsIndexRoute
-  '/technologies/': typeof TechnologiesIndexRoute
+  '/about': typeof PublicAboutRoute
+  '/privacy': typeof PublicPrivacyRoute
+  '/terms': typeof PublicTermsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/capabilities/$slug/$subslug': typeof CapabilitiesSlugSubslugRoute
   '/dashboard/': typeof AuthedDashboardIndexRoute
-  '/capabilities/$slug/': typeof CapabilitiesSlugIndexRoute
+  '/capabilities/': typeof PublicCapabilitiesIndexRoute
+  '/jobs/': typeof PublicJobsIndexRoute
+  '/reports/': typeof PublicReportsIndexRoute
+  '/technologies/': typeof PublicTechnologiesIndexRoute
+  '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
+  '/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/': typeof PublicIndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
-  '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
-  '/capabilities': typeof CapabilitiesIndexRoute
-  '/jobs': typeof JobsIndexRoute
-  '/reports': typeof ReportsIndexRoute
-  '/technologies': typeof TechnologiesIndexRoute
+  '/about': typeof PublicAboutRoute
+  '/privacy': typeof PublicPrivacyRoute
+  '/terms': typeof PublicTermsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/capabilities/$slug/$subslug': typeof CapabilitiesSlugSubslugRoute
   '/dashboard': typeof AuthedDashboardIndexRoute
-  '/capabilities/$slug': typeof CapabilitiesSlugIndexRoute
+  '/capabilities': typeof PublicCapabilitiesIndexRoute
+  '/jobs': typeof PublicJobsIndexRoute
+  '/reports': typeof PublicReportsIndexRoute
+  '/technologies': typeof PublicTechnologiesIndexRoute
+  '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
+  '/capabilities/$slug': typeof PublicCapabilitiesSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteRouteWithChildren
-  '/about': typeof AboutRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
-  '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
-  '/capabilities/': typeof CapabilitiesIndexRoute
-  '/jobs/': typeof JobsIndexRoute
-  '/reports/': typeof ReportsIndexRoute
-  '/technologies/': typeof TechnologiesIndexRoute
+  '/_public/about': typeof PublicAboutRoute
+  '/_public/privacy': typeof PublicPrivacyRoute
+  '/_public/terms': typeof PublicTermsRoute
+  '/_public/': typeof PublicIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/capabilities/$slug/$subslug': typeof CapabilitiesSlugSubslugRoute
   '/_authed/dashboard/': typeof AuthedDashboardIndexRoute
-  '/capabilities/$slug/': typeof CapabilitiesSlugIndexRoute
+  '/_public/capabilities/': typeof PublicCapabilitiesIndexRoute
+  '/_public/jobs/': typeof PublicJobsIndexRoute
+  '/_public/reports/': typeof PublicReportsIndexRoute
+  '/_public/technologies/': typeof PublicTechnologiesIndexRoute
+  '/_public/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
+  '/_public/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/about'
     | '/forgot-password'
     | '/login'
-    | '/privacy'
     | '/signup'
-    | '/terms'
     | '/verify-email'
+    | '/about'
+    | '/privacy'
+    | '/terms'
+    | '/api/auth/$'
+    | '/dashboard/'
     | '/capabilities/'
     | '/jobs/'
     | '/reports/'
     | '/technologies/'
-    | '/api/auth/$'
     | '/capabilities/$slug/$subslug'
-    | '/dashboard/'
     | '/capabilities/$slug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/about'
     | '/forgot-password'
     | '/login'
-    | '/privacy'
     | '/signup'
-    | '/terms'
     | '/verify-email'
+    | '/about'
+    | '/privacy'
+    | '/terms'
+    | '/api/auth/$'
+    | '/dashboard'
     | '/capabilities'
     | '/jobs'
     | '/reports'
     | '/technologies'
-    | '/api/auth/$'
     | '/capabilities/$slug/$subslug'
-    | '/dashboard'
     | '/capabilities/$slug'
   id:
     | '__root__'
-    | '/'
     | '/_authed'
-    | '/about'
     | '/forgot-password'
     | '/login'
-    | '/privacy'
     | '/signup'
-    | '/terms'
     | '/verify-email'
-    | '/capabilities/'
-    | '/jobs/'
-    | '/reports/'
-    | '/technologies/'
+    | '/_public/about'
+    | '/_public/privacy'
+    | '/_public/terms'
+    | '/_public/'
     | '/api/auth/$'
-    | '/capabilities/$slug/$subslug'
     | '/_authed/dashboard/'
-    | '/capabilities/$slug/'
+    | '/_public/capabilities/'
+    | '/_public/jobs/'
+    | '/_public/reports/'
+    | '/_public/technologies/'
+    | '/_public/capabilities/$slug/$subslug'
+    | '/_public/capabilities/$slug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
-  AboutRoute: typeof AboutRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
-  PrivacyRoute: typeof PrivacyRoute
   SignupRoute: typeof SignupRoute
-  TermsRoute: typeof TermsRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
-  CapabilitiesIndexRoute: typeof CapabilitiesIndexRoute
-  JobsIndexRoute: typeof JobsIndexRoute
-  ReportsIndexRoute: typeof ReportsIndexRoute
-  TechnologiesIndexRoute: typeof TechnologiesIndexRoute
+  PublicAboutRoute: typeof PublicAboutRoute
+  PublicPrivacyRoute: typeof PublicPrivacyRoute
+  PublicTermsRoute: typeof PublicTermsRoute
+  PublicIndexRoute: typeof PublicIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  CapabilitiesSlugSubslugRoute: typeof CapabilitiesSlugSubslugRoute
-  CapabilitiesSlugIndexRoute: typeof CapabilitiesSlugIndexRoute
+  PublicCapabilitiesIndexRoute: typeof PublicCapabilitiesIndexRoute
+  PublicJobsIndexRoute: typeof PublicJobsIndexRoute
+  PublicReportsIndexRoute: typeof PublicReportsIndexRoute
+  PublicTechnologiesIndexRoute: typeof PublicTechnologiesIndexRoute
+  PublicCapabilitiesSlugSubslugRoute: typeof PublicCapabilitiesSlugSubslugRoute
+  PublicCapabilitiesSlugIndexRoute: typeof PublicCapabilitiesSlugIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -254,25 +256,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/signup': {
       id: '/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -289,13 +277,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authed': {
       id: '/_authed'
       path: ''
@@ -303,46 +284,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_public/': {
+      id: '/_public/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/technologies/': {
-      id: '/technologies/'
+    '/_public/terms': {
+      id: '/_public/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof PublicTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/privacy': {
+      id: '/_public/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PublicPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/about': {
+      id: '/_public/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof PublicAboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/technologies/': {
+      id: '/_public/technologies/'
       path: '/technologies'
       fullPath: '/technologies/'
-      preLoaderRoute: typeof TechnologiesIndexRouteImport
+      preLoaderRoute: typeof PublicTechnologiesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reports/': {
-      id: '/reports/'
+    '/_public/reports/': {
+      id: '/_public/reports/'
       path: '/reports'
       fullPath: '/reports/'
-      preLoaderRoute: typeof ReportsIndexRouteImport
+      preLoaderRoute: typeof PublicReportsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/jobs/': {
-      id: '/jobs/'
+    '/_public/jobs/': {
+      id: '/_public/jobs/'
       path: '/jobs'
       fullPath: '/jobs/'
-      preLoaderRoute: typeof JobsIndexRouteImport
+      preLoaderRoute: typeof PublicJobsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/capabilities/': {
-      id: '/capabilities/'
+    '/_public/capabilities/': {
+      id: '/_public/capabilities/'
       path: '/capabilities'
       fullPath: '/capabilities/'
-      preLoaderRoute: typeof CapabilitiesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/capabilities/$slug/': {
-      id: '/capabilities/$slug/'
-      path: '/capabilities/$slug'
-      fullPath: '/capabilities/$slug/'
-      preLoaderRoute: typeof CapabilitiesSlugIndexRouteImport
+      preLoaderRoute: typeof PublicCapabilitiesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed/dashboard/': {
@@ -352,18 +347,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardIndexRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
-    '/capabilities/$slug/$subslug': {
-      id: '/capabilities/$slug/$subslug'
-      path: '/capabilities/$slug/$subslug'
-      fullPath: '/capabilities/$slug/$subslug'
-      preLoaderRoute: typeof CapabilitiesSlugSubslugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/capabilities/$slug/': {
+      id: '/_public/capabilities/$slug/'
+      path: '/capabilities/$slug'
+      fullPath: '/capabilities/$slug/'
+      preLoaderRoute: typeof PublicCapabilitiesSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/capabilities/$slug/$subslug': {
+      id: '/_public/capabilities/$slug/$subslug'
+      path: '/capabilities/$slug/$subslug'
+      fullPath: '/capabilities/$slug/$subslug'
+      preLoaderRoute: typeof PublicCapabilitiesSlugSubslugRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -382,22 +384,22 @@ const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AuthedRouteRoute: AuthedRouteRouteWithChildren,
-  AboutRoute: AboutRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
-  PrivacyRoute: PrivacyRoute,
   SignupRoute: SignupRoute,
-  TermsRoute: TermsRoute,
   VerifyEmailRoute: VerifyEmailRoute,
-  CapabilitiesIndexRoute: CapabilitiesIndexRoute,
-  JobsIndexRoute: JobsIndexRoute,
-  ReportsIndexRoute: ReportsIndexRoute,
-  TechnologiesIndexRoute: TechnologiesIndexRoute,
+  PublicAboutRoute: PublicAboutRoute,
+  PublicPrivacyRoute: PublicPrivacyRoute,
+  PublicTermsRoute: PublicTermsRoute,
+  PublicIndexRoute: PublicIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  CapabilitiesSlugSubslugRoute: CapabilitiesSlugSubslugRoute,
-  CapabilitiesSlugIndexRoute: CapabilitiesSlugIndexRoute,
+  PublicCapabilitiesIndexRoute: PublicCapabilitiesIndexRoute,
+  PublicJobsIndexRoute: PublicJobsIndexRoute,
+  PublicReportsIndexRoute: PublicReportsIndexRoute,
+  PublicTechnologiesIndexRoute: PublicTechnologiesIndexRoute,
+  PublicCapabilitiesSlugSubslugRoute: PublicCapabilitiesSlugSubslugRoute,
+  PublicCapabilitiesSlugIndexRoute: PublicCapabilitiesSlugIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

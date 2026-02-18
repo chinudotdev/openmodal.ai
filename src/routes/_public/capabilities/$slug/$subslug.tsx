@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { getSubtypeBySlugFn } from '@/actions/capabilities'
 
-export const Route = createFileRoute('/capabilities/$slug/$subslug')({
+export const Route = createFileRoute('/_public/capabilities/$slug/$subslug')({
   component: CapabilitySubtypePage,
   loader: async ({ params }) => {
     const result = await getSubtypeBySlugFn({ data: { slug: params.subslug } })
