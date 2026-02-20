@@ -29,6 +29,7 @@ import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashb
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminCapabilitiesAddRouteImport } from './routes/admin/capabilities/add'
 import { Route as AdminCapabilitiesSlugIndexRouteImport } from './routes/admin/capabilities/$slug/index'
+import { Route as PublicJobsSlugIndexRouteImport } from './routes/_public/jobs/$slug/index'
 import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
 import { Route as AdminCapabilitiesSlugEditRouteImport } from './routes/admin/capabilities/$slug/edit'
 import { Route as AdminCapabilitiesSlugAddRouteImport } from './routes/admin/capabilities/$slug/add'
@@ -134,6 +135,11 @@ const AdminCapabilitiesSlugIndexRoute =
     path: '/capabilities/$slug/',
     getParentRoute: () => AdminRouteRoute,
   } as any)
+const PublicJobsSlugIndexRoute = PublicJobsSlugIndexRouteImport.update({
+  id: '/jobs/$slug/',
+  path: '/jobs/$slug/',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
 const PublicCapabilitiesSlugIndexRoute =
   PublicCapabilitiesSlugIndexRouteImport.update({
     id: '/capabilities/$slug/',
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
+  '/jobs/$slug/': typeof PublicJobsSlugIndexRoute
   '/admin/capabilities/$slug/': typeof AdminCapabilitiesSlugIndexRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
 }
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/capabilities/$slug': typeof PublicCapabilitiesSlugIndexRoute
+  '/jobs/$slug': typeof PublicJobsSlugIndexRoute
   '/admin/capabilities/$slug': typeof AdminCapabilitiesSlugIndexRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
 }
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/_public/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
+  '/_public/jobs/$slug/': typeof PublicJobsSlugIndexRoute
   '/admin/capabilities/$slug/': typeof AdminCapabilitiesSlugIndexRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
 }
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
     | '/capabilities/$slug/'
+    | '/jobs/$slug/'
     | '/admin/capabilities/$slug/'
     | '/admin/capabilities/$slug/$subslug/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -290,6 +300,7 @@ export interface FileRouteTypes {
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
     | '/capabilities/$slug'
+    | '/jobs/$slug'
     | '/admin/capabilities/$slug'
     | '/admin/capabilities/$slug/$subslug/edit'
   id:
@@ -317,6 +328,7 @@ export interface FileRouteTypes {
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
     | '/_public/capabilities/$slug/'
+    | '/_public/jobs/$slug/'
     | '/admin/capabilities/$slug/'
     | '/admin/capabilities/$slug/$subslug/edit'
   fileRoutesById: FileRoutesById
@@ -473,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCapabilitiesSlugIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/_public/jobs/$slug/': {
+      id: '/_public/jobs/$slug/'
+      path: '/jobs/$slug'
+      fullPath: '/jobs/$slug/'
+      preLoaderRoute: typeof PublicJobsSlugIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
     '/_public/capabilities/$slug/': {
       id: '/_public/capabilities/$slug/'
       path: '/capabilities/$slug'
@@ -534,6 +553,7 @@ interface PublicRouteRouteChildren {
   PublicTechnologiesIndexRoute: typeof PublicTechnologiesIndexRoute
   PublicCapabilitiesSlugSubslugRoute: typeof PublicCapabilitiesSlugSubslugRoute
   PublicCapabilitiesSlugIndexRoute: typeof PublicCapabilitiesSlugIndexRoute
+  PublicJobsSlugIndexRoute: typeof PublicJobsSlugIndexRoute
 }
 
 const PublicRouteRouteChildren: PublicRouteRouteChildren = {
@@ -547,6 +567,7 @@ const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicTechnologiesIndexRoute: PublicTechnologiesIndexRoute,
   PublicCapabilitiesSlugSubslugRoute: PublicCapabilitiesSlugSubslugRoute,
   PublicCapabilitiesSlugIndexRoute: PublicCapabilitiesSlugIndexRoute,
+  PublicJobsSlugIndexRoute: PublicJobsSlugIndexRoute,
 }
 
 const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
