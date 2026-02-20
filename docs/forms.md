@@ -23,6 +23,7 @@ Create the data layer function for database access:
 ```typescript
 // src/data-layer/users.ts
 import { eq } from 'drizzle-orm'
+
 import { db } from '@/db'
 import { user } from '@/db/schema'
 
@@ -44,9 +45,10 @@ Create the server action that handles validation and business logic:
 ```typescript
 // src/actions/my-form.ts
 import { createServerFn } from '@tanstack/react-start'
-import { authMiddleware } from '@/middleware/server'
 import z from 'zod'
+
 import { updateUser } from '@/data-layer/users'
+import { authMiddleware } from '@/middleware/server'
 
 export const submitMyFormFn = createServerFn({ method: 'POST' })
   .inputValidator(

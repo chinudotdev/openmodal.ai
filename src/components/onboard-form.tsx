@@ -1,8 +1,11 @@
 import { useForm } from '@tanstack/react-form'
 import { AlertCircle } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
 import z from 'zod'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
+
+import { completeOnboardingFn } from '@/actions/onboarding'
+import { checkUsernameAvailabilityFn } from '@/actions/user'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -19,8 +22,6 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
-import { completeOnboardingFn } from '@/actions/onboarding'
-import { checkUsernameAvailabilityFn } from '@/actions/user'
 import { cn } from '@/lib/utils'
 
 const formSchema = z.object({

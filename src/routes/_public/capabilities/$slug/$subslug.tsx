@@ -1,9 +1,10 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+
+import { getSubtypeBySlugFn } from '@/actions/capabilities'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { getSubtypeBySlugFn } from '@/actions/capabilities'
 
 export const Route = createFileRoute('/_public/capabilities/$slug/$subslug')({
   component: CapabilitySubtypePage,

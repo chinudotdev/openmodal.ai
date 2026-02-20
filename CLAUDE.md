@@ -105,9 +105,10 @@ Server actions use `createServerFn` and follow the layered architecture:
 ```typescript
 // src/actions/example.ts
 import { createServerFn } from '@tanstack/react-start'
-import { authMiddleware, rateLimitMiddleware } from '@/middleware/server'
 import z from 'zod'
+
 import { myDataFunction } from '@/data-layer/example'
+import { authMiddleware, rateLimitMiddleware } from '@/middleware/server'
 
 export const myActionFn = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -182,6 +183,7 @@ Data layer functions in `src/data-layer/` contain **pure database queries only**
 ```typescript
 // src/data-layer/users.ts
 import { eq } from 'drizzle-orm'
+
 import { db } from '@/db'
 import { user } from '@/db/schema'
 
@@ -263,6 +265,7 @@ export function MyForm() {
 ```typescript
 // src/routes/_authed/route.tsx
 import { createFileRoute, redirect } from '@tanstack/react-router'
+
 import { getSessionFn } from '@/actions/session'
 
 export const Route = createFileRoute('/_authed')({

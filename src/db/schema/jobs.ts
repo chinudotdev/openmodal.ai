@@ -1,4 +1,5 @@
 import { integer, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+
 import { capabilitySubtype } from './capabilities'
 
 // ============================================

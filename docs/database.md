@@ -53,8 +53,8 @@ See [architecture.md](architecture.md) for the full architecture overview.
 ```typescript
 // src/db/index.ts
 import { neon } from '@neondatabase/serverless'
-import { drizzle } from 'drizzle-orm/neon-http'
 import { env } from 'cloudflare:workers'
+import { drizzle } from 'drizzle-orm/neon-http'
 
 const sql = neon(env.DATABASE_URL)
 export const db = drizzle(sql)
@@ -120,6 +120,7 @@ src/data-layer/
 ```typescript
 // src/data-layer/users.ts
 import { eq } from 'drizzle-orm'
+
 import { db } from '@/db'
 import { user } from '@/db/schema'
 
@@ -184,7 +185,8 @@ export async function deleteUser(userId: string) {
 
 ```typescript
 // src/data-layer/reports.ts
-import { desc, and } from 'drizzle-orm'
+import { and, desc } from 'drizzle-orm'
+
 import { db } from '@/db'
 import { report } from '@/db/schema'
 
@@ -222,7 +224,8 @@ export async function getReports(options: {
 ```typescript
 // src/data-layer/reports.ts
 import { eq } from 'drizzle-orm'
-import { report, user, reportEnrichment } from '@/db/schema'
+
+import { report, reportEnrichment, user } from '@/db/schema'
 
 export async function getReportWithUser(reportId: string) {
   const [result] = await db
@@ -258,9 +261,10 @@ export async function getReportWithEnrichments(reportId: string) {
 
 ```typescript
 // src/data-layer/users.ts
-import { count, sql, eq } from 'drizzle-orm'
+import { count, eq, sql } from 'drizzle-orm'
+
 import { db } from '@/db'
-import { user, report } from '@/db/schema'
+import { report, user } from '@/db/schema'
 
 export async function getUserReportCount(userId: string) {
   const [result] = await db
@@ -317,8 +321,9 @@ Actions use data-layer functions and add business logic:
 // src/actions/reports.ts
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { authMiddleware } from '@/middleware/server'
+
 import { createReport, getRecentReportByUser } from '@/data-layer/reports'
+import { authMiddleware } from '@/middleware/server'
 
 export const submitReportFn = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -395,17 +400,17 @@ export default defineConfig({
 
 ```typescript
 import {
-  eq,
   and,
-  or, // Equality / Logic
-  like,
-  ilike, // Pattern matching
-  inArray, // IN clause
-  isNull,
-  isNotNull, // NULL checks
-  desc,
   asc, // Ordering
   count,
+  desc,
+  eq,
+  ilike, // Pattern matching
+  inArray, // IN clause
+  isNotNull, // NULL checks
+  isNull,
+  like,
+  or, // Equality / Logic
   sql, // Aggregation
 } from 'drizzle-orm'
 ```

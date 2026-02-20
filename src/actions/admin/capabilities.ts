@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import z from 'zod'
-import { adminMiddleware } from '@/middleware/server'
+
 import {
   createCapability,
   createCapabilitySubtype,
@@ -14,6 +14,7 @@ import {
   updateCapability,
   updateCapabilitySubtype,
 } from '@/data-layer/capabilities'
+import { adminMiddleware } from '@/middleware/server'
 
 // ============================================
 // ADMIN CAPABILITY ACTIONS

@@ -1,6 +1,9 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+
 import { getAllCapabilitiesForAdminFn } from '@/actions/admin/capabilities'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import {
   Table,
   TableBody,
@@ -9,8 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Spinner } from '@/components/ui/spinner'
 
 export const Route = createFileRoute('/admin/capabilities/')({
   component: AdminCapabilitiesPage,

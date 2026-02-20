@@ -1,7 +1,8 @@
 import { useState } from 'react'
+
 import { Button } from '@/components/ui/button'
-import { authClient } from '@/lib/auth-client'
 import { Spinner } from '@/components/ui/spinner'
+import { authClient } from '@/lib/auth-client'
 
 export const GoogleLogin = ({ callbackURL }: { callbackURL: string }) => {
   const [loading, setLoading] = useState(false)

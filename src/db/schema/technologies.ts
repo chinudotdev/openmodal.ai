@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { integer, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+
 import { user } from './auth'
 import { capabilitySubtype } from './capabilities'
 import { organization } from './organizations'

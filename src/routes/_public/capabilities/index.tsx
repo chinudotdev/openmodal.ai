@@ -1,12 +1,13 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
+
 import {
   getAllCapabilitiesFn,
   getOverallProgressFn,
 } from '@/actions/capabilities'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 
 export const Route = createFileRoute('/_public/capabilities/')({
   component: CapabilitiesPage,

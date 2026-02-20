@@ -8,6 +8,8 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 import appCss from '../styles.css?url'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+
 
 export const Route = createRootRoute({
   head: () => ({
@@ -33,7 +35,16 @@ export const Route = createRootRoute({
 
   shellComponent: RootDocument,
   notFoundComponent: NotFound,
+  pendingComponent: GlobalLoading,
 })
+
+function GlobalLoading() {
+  return (
+    <div className="flex min-h-svh w-full items-center justify-center">
+      <Spinner className="size-8" />
+    </div>
+  )
+}
 
 function NotFound() {
   return (

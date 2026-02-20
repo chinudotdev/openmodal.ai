@@ -1,13 +1,14 @@
 import { asc, desc, eq, ilike } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
+
 import { db } from '@/db'
 import { capability, capabilitySubtype } from '@/db/schema/capabilities'
 import { job, task, taskCapabilitySubtype } from '@/db/schema/jobs'
+import { organization } from '@/db/schema/organizations'
 import {
   technology,
   technologyCapabilitySubtype,
 } from '@/db/schema/technologies'
-import { organization } from '@/db/schema/organizations'
 
 // ============================================
 // CAPABILITY QUERIES

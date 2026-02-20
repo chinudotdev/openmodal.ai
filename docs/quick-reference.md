@@ -49,16 +49,21 @@ import { authMiddleware } from '@/middleware/server'
 ### Database
 
 ```typescript
+import { and, eq, or } from 'drizzle-orm'
+
 import { db } from '@/db'
-import { user, post } from '@/db/schema'
-import { eq, and, or } from 'drizzle-orm'
+import { post, user } from '@/db/schema'
 ```
 
 ### Router
 
 ```typescript
-import { createFileRoute, redirect, Link } from '@tanstack/react-router'
-import { useRouter } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useRouter,
+} from '@tanstack/react-router'
 ```
 
 ### Forms
@@ -72,14 +77,14 @@ import z from 'zod'
 
 ```typescript
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Field,
-  FieldLabel,
   FieldError,
   FieldGroup,
+  FieldLabel,
 } from '@/components/ui/field'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 ```
 
 ## Server Action Template
@@ -87,9 +92,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 ```typescript
 // src/actions/example.ts
 import { createServerFn } from '@tanstack/react-start'
-import { authMiddleware, rateLimitMiddleware } from '@/middleware/server'
 import z from 'zod'
+
 import { myDataLayerFunction } from '@/data-layer/example'
+import { authMiddleware, rateLimitMiddleware } from '@/middleware/server'
 
 export const myActionFn = createServerFn({ method: 'POST' })
   .inputValidator(
@@ -118,6 +124,7 @@ export const myActionFn = createServerFn({ method: 'POST' })
 
 ```typescript
 import { createFileRoute, redirect } from '@tanstack/react-router'
+
 import { getSessionFn } from '@/actions/session'
 
 export const Route = createFileRoute('/_authed/mypage')({
@@ -136,9 +143,10 @@ export const Route = createFileRoute('/_authed/mypage')({
 
 ```typescript
 // src/data-layer/users.ts
+import { eq } from 'drizzle-orm'
+
 import { db } from '@/db'
 import { user } from '@/db/schema'
-import { eq } from 'drizzle-orm'
 
 export async function getUserById(userId: string) {
   const [result] = await db
@@ -155,6 +163,7 @@ export async function getUserById(userId: string) {
 
 ```typescript
 import { useForm } from '@tanstack/react-form'
+
 import { myActionFn } from '@/actions/myaction'
 
 const form = useForm({
@@ -172,16 +181,16 @@ const form = useForm({
 
 ```typescript
 import {
-  eq,
   and,
-  or,
-  like,
+  asc,
+  desc,
+  eq,
   ilike,
   inArray,
-  isNull,
   isNotNull,
-  desc,
-  asc,
+  isNull,
+  like,
+  or,
 } from 'drizzle-orm'
 
 eq(column, value) // column = value
@@ -284,6 +293,7 @@ if (!result.success) {
 ```typescript
 // src/data-layer/users.ts
 import { eq } from 'drizzle-orm'
+
 import { db } from '@/db'
 import { user } from '@/db/schema'
 
@@ -313,8 +323,9 @@ export async function getUserByUsername(username: string) {
 ```typescript
 // src/actions/user.ts
 import { createServerFn } from '@tanstack/react-start'
-import { authMiddleware } from '@/middleware/server'
+
 import { getUserById, getUserByUsername } from '@/data-layer/users'
+import { authMiddleware } from '@/middleware/server'
 
 export const checkUsernameAvailabilityFn = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ username: z.string().min(4) }))
@@ -329,8 +340,9 @@ export const checkUsernameAvailabilityFn = createServerFn({ method: 'POST' })
 
 ```typescript
 // src/middleware/server.ts
-import { auth } from '@/lib/auth'
 import { createMiddleware } from '@tanstack/react-start'
+
+import { auth } from '@/lib/auth'
 
 export const authMiddleware = createMiddleware({ type: 'function' }).server(
   async ({ next }) => {

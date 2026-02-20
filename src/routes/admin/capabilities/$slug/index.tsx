@@ -1,15 +1,11 @@
-import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
+import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
+
 import {
   deleteCapabilityFn,
   deleteCapabilitySubtypeFn,
   getCapabilityBySlugForAdminFn,
 } from '@/actions/admin/capabilities'
-import { Spinner } from '@/components/ui/spinner'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +17,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Spinner } from '@/components/ui/spinner'
 
 export const Route = createFileRoute('/admin/capabilities/$slug/')({
   component: CapabilityDetailPage,

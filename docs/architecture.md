@@ -100,9 +100,10 @@ function DashboardPage() {
 // src/actions/reports.ts
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { authMiddleware, rateLimitMiddleware } from '@/middleware/server'
+
 import { createReport, getReportById } from '@/data-layer/reports'
 import { getUserReputation } from '@/data-layer/users'
+import { authMiddleware, rateLimitMiddleware } from '@/middleware/server'
 
 export const submitReportFn = createServerFn({ method: 'POST' })
   // Validation
@@ -176,9 +177,10 @@ export const submitReportFn = createServerFn({ method: 'POST' })
 
 ```typescript
 // src/middleware/server.ts
-import { auth } from '@/lib/auth'
 import { createMiddleware } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
+
+import { auth } from '@/lib/auth'
 
 // Auth middleware - ensures user is authenticated
 export const authMiddleware = createMiddleware({ type: 'function' }).server(
@@ -280,9 +282,10 @@ export const requireRoleMiddleware = (allowedRoles: string[]) => {
 
 ```typescript
 // src/data-layer/reports.ts
+import { and, desc, eq } from 'drizzle-orm'
+
 import { db } from '@/db'
 import { report, reportEnrichment } from '@/db/schema'
-import { eq, desc, and } from 'drizzle-orm'
 
 export async function createReport(data: {
   userId: string

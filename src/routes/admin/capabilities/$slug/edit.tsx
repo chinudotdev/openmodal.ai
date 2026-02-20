@@ -1,11 +1,12 @@
+import { useForm } from '@tanstack/react-form'
+import z from 'zod'
 import {
   Link,
   createFileRoute,
   notFound,
   useRouter,
 } from '@tanstack/react-router'
-import { useForm } from '@tanstack/react-form'
-import z from 'zod'
+
 import {
   getCapabilityBySlugForAdminFn,
   updateCapabilityFn,
@@ -13,8 +14,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Spinner } from '@/components/ui/spinner'
+import { Textarea } from '@/components/ui/textarea'
 
 const formSchema = z.object({
   name: z.string().min(1).max(100),

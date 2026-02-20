@@ -1,11 +1,11 @@
 import { useForm } from '@tanstack/react-form'
-import { Link, useRouter, useSearch } from '@tanstack/react-router'
 import { AlertCircle } from 'lucide-react'
-import { useState } from 'react'
 import z from 'zod'
+import { useState } from 'react'
+import { Link, useRouter, useSearch } from '@tanstack/react-router'
 
 import { GoogleLogin } from './google-login'
-
+import { loginOrSignupFn } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -24,8 +24,8 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
-import { loginOrSignupFn } from '@/actions/auth'
 import { cn } from '@/lib/utils'
+
 
 const formSchema = z.object({
   email: z.email(),

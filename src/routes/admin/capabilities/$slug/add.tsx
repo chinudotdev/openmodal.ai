@@ -1,7 +1,8 @@
-import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
-import { useRef } from 'react'
 import z from 'zod'
+import { useRef } from 'react'
+import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
+
 import {
   createCapabilitySubtypeFn,
   getAllCapabilitiesForAdminFn,
@@ -9,8 +10,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Spinner } from '@/components/ui/spinner'
 import {
   Select,
   SelectContent,
@@ -18,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Spinner } from '@/components/ui/spinner'
+import { Textarea } from '@/components/ui/textarea'
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),

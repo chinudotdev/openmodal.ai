@@ -1,9 +1,10 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+
+import { getCapabilityBySlugFn } from '@/actions/capabilities'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { getCapabilityBySlugFn } from '@/actions/capabilities'
 
 export const Route = createFileRoute('/_public/capabilities/$slug/')({
   component: CapabilityPage,

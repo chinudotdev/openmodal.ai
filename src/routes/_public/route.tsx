@@ -1,4 +1,5 @@
 import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
+
 import { PublicNav } from '@/components/public-nav'
 
 export const Route = createFileRoute('/_public')({

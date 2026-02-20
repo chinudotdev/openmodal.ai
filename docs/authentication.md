@@ -9,8 +9,9 @@ Better Auth is configured in `src/lib/auth.ts`:
 ```typescript
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { admin, customSession, username } from 'better-auth/plugins'
+import { tanstackStartCookies } from 'better-auth/tanstack-start'
+
 import { db } from '@/db'
 import { authSchema } from '@/db/schema'
 
@@ -70,8 +71,9 @@ export const auth = betterAuth({
 ### Server-Side (Actions/Loaders)
 
 ```typescript
-import { auth } from '@/lib/auth'
 import { getRequestHeaders } from '@tanstack/react-start/server'
+
+import { auth } from '@/lib/auth'
 
 const session = await auth.api.getSession({ headers: getRequestHeaders() })
 ```
@@ -149,8 +151,9 @@ await auth.api.signInSocial({
 The callback is handled by `src/routes/api/auth/$.ts`:
 
 ```typescript
-import { auth } from '@/lib/auth'
 import { createFileRoute } from '@tanstack/react-router'
+
+import { auth } from '@/lib/auth'
 
 export const Route = createFileRoute('/api/auth/$')({
   middleware: [
@@ -187,6 +190,7 @@ Usernames must:
 // src/actions/user.ts
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
+
 import { db } from '@/db'
 import { user } from '@/db/schema'
 
@@ -302,6 +306,7 @@ await auth.api.signOut({
 ```typescript
 // src/components/login-form.tsx
 import { useForm } from '@tanstack/react-form'
+
 import { signInEmailFn } from '@/actions/auth'
 
 const form = useForm({

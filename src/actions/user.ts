@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
 import z from 'zod'
+
 import { db } from '@/db'
 import { user as userTable } from '@/db/schema'
 import { authMiddleware } from '@/middleware/server'

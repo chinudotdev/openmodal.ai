@@ -1,5 +1,6 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+
 import { VerifyEmailContent } from '@/components/verify-email'
 
 export const Route = createFileRoute('/verify-email')({

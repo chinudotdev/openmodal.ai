@@ -6,6 +6,7 @@ import {
   text,
   timestamp,
 } from 'drizzle-orm/pg-core'
+
 import { user } from './auth'
 import { technology } from './technologies'
 import { companySizeEnum } from './user-profile'

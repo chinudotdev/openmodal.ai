@@ -1,7 +1,7 @@
 // import "server-only";
 
-import { Resend } from 'resend'
 import { env } from 'cloudflare:workers'
+import { Resend } from 'resend'
 
 export const sendEmail = async ({
   to,
