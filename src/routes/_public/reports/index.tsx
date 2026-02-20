@@ -105,7 +105,7 @@ function ReportsPage() {
             >
               Sign In
             </Link>
-            <Link to="/signup">
+            <Link to="/login">
               <Button size="sm">Sign Up</Button>
             </Link>
           </nav>
@@ -125,7 +125,7 @@ function ReportsPage() {
                 reports from the community and contribute your own insights.
               </p>
               <div className="flex items-center gap-4">
-                <Link to="/signup">
+                <Link to="/login">
                   <Button>📝 Submit Report</Button>
                 </Link>
                 <Link to="/login">
@@ -191,7 +191,7 @@ function ReportsPage() {
               insights and help others understand what AI can really do.
             </p>
             <div className="flex items-center justify-center gap-4">
-              <Link to="/signup">
+              <Link to="/login">
                 <Button>📝 Submit Report</Button>
               </Link>
             </div>

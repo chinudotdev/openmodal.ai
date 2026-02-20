@@ -92,7 +92,7 @@ function JobsPage() {
             >
               Sign In
             </Link>
-            <Link to="/signup">
+            <Link to="/login">
               <Button size="sm">Sign Up</Button>
             </Link>
           </nav>
@@ -182,7 +182,7 @@ function JobsPage() {
               personalized insights and recommendations.
             </p>
             <div className="flex items-center justify-center gap-4">
-              <Link to="/signup">
+              <Link to="/login">
                 <Button>📝 Get Started</Button>
               </Link>
               <Link to="/login">

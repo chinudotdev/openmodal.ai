@@ -50,7 +50,7 @@ function RouteComponent() {
             >
               Sign In
             </Link>
-            <Link to="/signup">
+            <Link to="/login">
               <Button size="sm">Sign Up</Button>
             </Link>
           </nav>
@@ -83,7 +83,7 @@ function RouteComponent() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-              <Link to="/signup">
+              <Link to="/login">
                 <Button size="lg" className="w-full sm:w-auto min-w-[200px]">
                   Join Waitlist
                 </Button>
@@ -178,7 +178,7 @@ function RouteComponent() {
                 Be among the first to access our platform. Help us build the
                 most comprehensive database of AI's real-world impact.
               </p>
-              <Link to="/signup">
+              <Link to="/login">
                 <Button size="lg" className="min-w-[200px]">
                   Get Early Access
                 </Button>

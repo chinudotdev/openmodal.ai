@@ -1,5 +1,5 @@
 import { useForm } from '@tanstack/react-form'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouter, useSearch } from '@tanstack/react-router'
 import { AlertCircle } from 'lucide-react'
 import { useState } from 'react'
 import z from 'zod'
@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
-import { authClient } from '@/lib/auth-client'
+import { loginOrSignupFn } from '@/actions/auth'
 import { cn } from '@/lib/utils'
 
 const formSchema = z.object({
@@ -37,6 +37,8 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<'div'>) {
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+  const search = useSearch({ from: '/login' })
 
   const form = useForm({
     defaultValues: {
@@ -48,25 +50,24 @@ export function LoginForm({
     },
     onSubmit: async ({ value }) => {
       setError(null)
-      try {
-        const result = await authClient.signIn.email({
-          email: value.email, // required
-          password: value.password, // required
-          rememberMe: true,
-          callbackURL: '/',
-        })
+      const result = await loginOrSignupFn({ data: value })
 
-        if (result.error) {
-          if (result.error.code === 'EMAIL_NOT_VERIFIED') {
-            setError(
-              'Email not verified. Please check your email for a verification link.',
-            )
-          } else {
-            setError('Invalid email or password')
-          }
+      if (result.success) {
+        // If new user, redirect to verify email
+        if (!result.existingUser && result.email) {
+          await router.navigate({
+            to: '/verify-email',
+            search: { email: result.email },
+          })
+          return
         }
-      } catch (_) {
-        setError('An unknown error occurred')
+
+        // If existing user, invalidate and redirect
+        await router.invalidate()
+        const redirectTo = search.redirect || '/dashboard'
+        await router.navigate({ to: redirectTo })
+      } else {
+        setError(result.message)
       }
     },
   })
@@ -74,9 +75,9 @@ export function LoginForm({
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome back</CardTitle>
+          <CardTitle className="text-xl">Welcome to OpenModal.ai</CardTitle>
           <CardDescription>
-            Login with your Apple or Google account
+            Enter your email to sign in or create an account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -174,12 +175,16 @@ export function LoginForm({
                       disabled={!canSubmit}
                       form="login-form"
                     >
-                      {isSubmitting ? <Spinner className="w-4 h-4" /> : 'Login'}
+                      {isSubmitting ? (
+                        <Spinner className="w-4 h-4" />
+                      ) : (
+                        'Continue'
+                      )}
                     </Button>
                   )}
                 </form.Subscribe>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <Link to="/signup">Sign up</Link>
+                  We&apos;ll create an account if you don&apos;t have one
                 </FieldDescription>
               </Field>
             </FieldGroup>

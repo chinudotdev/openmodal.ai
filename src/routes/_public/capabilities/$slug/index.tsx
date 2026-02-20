@@ -101,7 +101,7 @@ function CapabilityPage() {
             >
               Sign In
             </Link>
-            <Link to="/signup">
+            <Link to="/login">
               <Button size="sm">Sign Up</Button>
             </Link>
           </nav>
@@ -330,7 +330,7 @@ function CapabilityPage() {
                 your experience with the community.
               </p>
               <div className="flex items-center justify-center gap-4">
-                <Link to="/signup">
+                <Link to="/login">
                   <Button>📝 Share Your Story</Button>
                 </Link>
                 <Link to="/login">

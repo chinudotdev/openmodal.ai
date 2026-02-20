@@ -156,7 +156,7 @@ function CapabilityDetailPage() {
                 {subtypes.map((subtype) => (
                   <div key={subtype.id}>
                     <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-muted-foreground truncate max-w-[200px]">
+                      <span className="text-muted-foreground truncate max-w-50">
                         {subtype.name}
                       </span>
                       <span className="font-medium">

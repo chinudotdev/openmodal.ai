@@ -11,7 +11,7 @@ export const Route = createFileRoute('/verify-email')({
   loader: ({ deps }) => {
     if (!deps.email) {
       throw redirect({
-        to: '/signup',
+        to: '/login',
       })
     }
     return {

@@ -50,7 +50,7 @@ function RouteComponent() {
             >
               Sign In
             </Link>
-            <Link to="/signup">
+            <Link to="/login">
               <Button size="sm">Sign Up</Button>
             </Link>
           </nav>
@@ -166,7 +166,7 @@ function RouteComponent() {
                 help us build the most comprehensive database of AI's real-world
                 impact.
               </p>
-              <Link to="/signup">
+              <Link to="/login">
                 <Button size="lg">Join Waitlist</Button>
               </Link>
             </div>

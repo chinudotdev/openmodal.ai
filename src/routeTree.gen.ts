@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
-import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
@@ -38,11 +37,6 @@ import { Route as AdminCapabilitiesSlugSubslugEditRouteImport } from './routes/a
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
   path: '/verify-email',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -171,7 +165,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
   '/about': typeof PublicAboutRoute
   '/privacy': typeof PublicPrivacyRoute
@@ -196,7 +189,6 @@ export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
   '/about': typeof PublicAboutRoute
   '/privacy': typeof PublicPrivacyRoute
@@ -223,7 +215,6 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
   '/_public/about': typeof PublicAboutRoute
   '/_public/privacy': typeof PublicPrivacyRoute
@@ -252,7 +243,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/forgot-password'
     | '/login'
-    | '/signup'
     | '/verify-email'
     | '/about'
     | '/privacy'
@@ -277,7 +267,6 @@ export interface FileRouteTypes {
     | '/'
     | '/forgot-password'
     | '/login'
-    | '/signup'
     | '/verify-email'
     | '/about'
     | '/privacy'
@@ -303,7 +292,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/forgot-password'
     | '/login'
-    | '/signup'
     | '/verify-email'
     | '/_public/about'
     | '/_public/privacy'
@@ -331,7 +319,6 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
-  SignupRoute: typeof SignupRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
   PublicAboutRoute: typeof PublicAboutRoute
   PublicPrivacyRoute: typeof PublicPrivacyRoute
@@ -353,13 +340,6 @@ declare module '@tanstack/react-router' {
       path: '/verify-email'
       fullPath: '/verify-email'
       preLoaderRoute: typeof VerifyEmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -567,7 +547,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
-  SignupRoute: SignupRoute,
   VerifyEmailRoute: VerifyEmailRoute,
   PublicAboutRoute: PublicAboutRoute,
   PublicPrivacyRoute: PublicPrivacyRoute,

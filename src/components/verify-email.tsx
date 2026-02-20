@@ -1,4 +1,4 @@
-import { ArrowRight, Mail } from 'lucide-react'
+import { Mail } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import {
@@ -46,19 +46,11 @@ export function VerifyEmailContent({ email }: { email: string | undefined }) {
 
           <div className="border-t pt-4">
             <p className="text-center text-sm text-muted-foreground mb-4">
-              Didn't receive the email? Check your spam folder or
+              Didn't receive the email? Check your spam folder
             </p>
-            <div className="flex flex-col gap-2">
-              <Button variant="outline" asChild>
-                <Link to="/signup">
-                  Try signing up again
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button variant="ghost" asChild>
-                <Link to="/login">Back to login</Link>
-              </Button>
-            </div>
+            <Button variant="outline" asChild className="w-full">
+              <Link to="/login">Back to login</Link>
+            </Button>
           </div>
         </CardContent>
       </Card>
