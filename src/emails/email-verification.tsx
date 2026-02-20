@@ -15,14 +15,14 @@ const EmailVerification = ({ url }: { url: string }) => {
     <Html lang="en" dir="ltr">
       <Tailwind>
         <Head />
-        <Body className="bg-gray-100 font-sans py-[40px]">
-          <Container className="bg-white rounded-[8px] shadow-sm max-w-[600px] mx-auto p-[40px]">
+        <Body className="bg-gray-100 font-sans py-10">
+          <Container className="bg-white `rounded-xl shadow-sm max-w-150 mx-auto p-10">
             <Section>
-              <Text className="text-[24px] font-bold text-gray-900 mb-[16px] text-center">
+              <Text className="text-[24px] font-bold text-gray-900 mb-4 text-center">
                 Verify Your Email Address
               </Text>
 
-              <Text className="text-[16px] text-gray-700 mb-[24px] leading-[24px]">
+              <Text className="text-[16px] text-gray-700 `mb-6 leading-[24px]">
                 Hi there! Thanks for signing up. To complete your registration
                 and secure your account, please verify your email address by
                 clicking the button below.
