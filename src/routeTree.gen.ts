@@ -13,6 +13,7 @@ import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
+import { Route as PublicRouteRouteImport } from './routes/_public/route'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
@@ -54,6 +55,10 @@ const AdminRouteRoute = AdminRouteRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PublicRouteRoute = PublicRouteRouteImport.update({
+  id: '/_public',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthedRouteRoute = AuthedRouteRouteImport.update({
   id: '/_authed',
   getParentRoute: () => rootRouteImport,
@@ -64,24 +69,24 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
-  id: '/_public/',
+  id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => PublicRouteRoute,
 } as any)
 const PublicTermsRoute = PublicTermsRouteImport.update({
-  id: '/_public/terms',
+  id: '/terms',
   path: '/terms',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => PublicRouteRoute,
 } as any)
 const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
-  id: '/_public/privacy',
+  id: '/privacy',
   path: '/privacy',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => PublicRouteRoute,
 } as any)
 const PublicAboutRoute = PublicAboutRouteImport.update({
-  id: '/_public/about',
+  id: '/about',
   path: '/about',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => PublicRouteRoute,
 } as any)
 const AdminCapabilitiesIndexRoute = AdminCapabilitiesIndexRouteImport.update({
   id: '/capabilities/',
@@ -89,24 +94,24 @@ const AdminCapabilitiesIndexRoute = AdminCapabilitiesIndexRouteImport.update({
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const PublicTechnologiesIndexRoute = PublicTechnologiesIndexRouteImport.update({
-  id: '/_public/technologies/',
+  id: '/technologies/',
   path: '/technologies/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => PublicRouteRoute,
 } as any)
 const PublicReportsIndexRoute = PublicReportsIndexRouteImport.update({
-  id: '/_public/reports/',
+  id: '/reports/',
   path: '/reports/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => PublicRouteRoute,
 } as any)
 const PublicJobsIndexRoute = PublicJobsIndexRouteImport.update({
-  id: '/_public/jobs/',
+  id: '/jobs/',
   path: '/jobs/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => PublicRouteRoute,
 } as any)
 const PublicCapabilitiesIndexRoute = PublicCapabilitiesIndexRouteImport.update({
-  id: '/_public/capabilities/',
+  id: '/capabilities/',
   path: '/capabilities/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => PublicRouteRoute,
 } as any)
 const AuthedDashboardIndexRoute = AuthedDashboardIndexRouteImport.update({
   id: '/dashboard/',
@@ -131,9 +136,9 @@ const AdminCapabilitiesSlugIndexRoute =
   } as any)
 const PublicCapabilitiesSlugIndexRoute =
   PublicCapabilitiesSlugIndexRouteImport.update({
-    id: '/_public/capabilities/$slug/',
+    id: '/capabilities/$slug/',
     path: '/capabilities/$slug/',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => PublicRouteRoute,
   } as any)
 const AdminCapabilitiesSlugEditRoute =
   AdminCapabilitiesSlugEditRouteImport.update({
@@ -149,9 +154,9 @@ const AdminCapabilitiesSlugAddRoute =
   } as any)
 const PublicCapabilitiesSlugSubslugRoute =
   PublicCapabilitiesSlugSubslugRouteImport.update({
-    id: '/_public/capabilities/$slug/$subslug',
+    id: '/capabilities/$slug/$subslug',
     path: '/capabilities/$slug/$subslug',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => PublicRouteRoute,
   } as any)
 const AdminCapabilitiesSlugSubslugEditRoute =
   AdminCapabilitiesSlugSubslugEditRouteImport.update({
@@ -212,6 +217,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authed': typeof AuthedRouteRouteWithChildren
+  '/_public': typeof PublicRouteRouteWithChildren
   '/admin': typeof AdminRouteRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -289,6 +295,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_authed'
+    | '/_public'
     | '/admin'
     | '/forgot-password'
     | '/login'
@@ -316,21 +323,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
+  PublicRouteRoute: typeof PublicRouteRouteWithChildren
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
-  PublicAboutRoute: typeof PublicAboutRoute
-  PublicPrivacyRoute: typeof PublicPrivacyRoute
-  PublicTermsRoute: typeof PublicTermsRoute
-  PublicIndexRoute: typeof PublicIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  PublicCapabilitiesIndexRoute: typeof PublicCapabilitiesIndexRoute
-  PublicJobsIndexRoute: typeof PublicJobsIndexRoute
-  PublicReportsIndexRoute: typeof PublicReportsIndexRoute
-  PublicTechnologiesIndexRoute: typeof PublicTechnologiesIndexRoute
-  PublicCapabilitiesSlugSubslugRoute: typeof PublicCapabilitiesSlugSubslugRoute
-  PublicCapabilitiesSlugIndexRoute: typeof PublicCapabilitiesSlugIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -363,6 +361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_public': {
+      id: '/_public'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof PublicRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authed': {
       id: '/_authed'
       path: ''
@@ -382,28 +387,28 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof PublicIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/_public/terms': {
       id: '/_public/terms'
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof PublicTermsRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/_public/privacy': {
       id: '/_public/privacy'
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PublicPrivacyRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/_public/about': {
       id: '/_public/about'
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof PublicAboutRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/admin/capabilities/': {
       id: '/admin/capabilities/'
@@ -417,28 +422,28 @@ declare module '@tanstack/react-router' {
       path: '/technologies'
       fullPath: '/technologies/'
       preLoaderRoute: typeof PublicTechnologiesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/_public/reports/': {
       id: '/_public/reports/'
       path: '/reports'
       fullPath: '/reports/'
       preLoaderRoute: typeof PublicReportsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/_public/jobs/': {
       id: '/_public/jobs/'
       path: '/jobs'
       fullPath: '/jobs/'
       preLoaderRoute: typeof PublicJobsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/_public/capabilities/': {
       id: '/_public/capabilities/'
       path: '/capabilities'
       fullPath: '/capabilities/'
       preLoaderRoute: typeof PublicCapabilitiesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/_authed/dashboard/': {
       id: '/_authed/dashboard/'
@@ -473,7 +478,7 @@ declare module '@tanstack/react-router' {
       path: '/capabilities/$slug'
       fullPath: '/capabilities/$slug/'
       preLoaderRoute: typeof PublicCapabilitiesSlugIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/admin/capabilities/$slug/edit': {
       id: '/admin/capabilities/$slug/edit'
@@ -494,7 +499,7 @@ declare module '@tanstack/react-router' {
       path: '/capabilities/$slug/$subslug'
       fullPath: '/capabilities/$slug/$subslug'
       preLoaderRoute: typeof PublicCapabilitiesSlugSubslugRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/admin/capabilities/$slug/$subslug/edit': {
       id: '/admin/capabilities/$slug/$subslug/edit'
@@ -516,6 +521,36 @@ const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
 
 const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
   AuthedRouteRouteChildren,
+)
+
+interface PublicRouteRouteChildren {
+  PublicAboutRoute: typeof PublicAboutRoute
+  PublicPrivacyRoute: typeof PublicPrivacyRoute
+  PublicTermsRoute: typeof PublicTermsRoute
+  PublicIndexRoute: typeof PublicIndexRoute
+  PublicCapabilitiesIndexRoute: typeof PublicCapabilitiesIndexRoute
+  PublicJobsIndexRoute: typeof PublicJobsIndexRoute
+  PublicReportsIndexRoute: typeof PublicReportsIndexRoute
+  PublicTechnologiesIndexRoute: typeof PublicTechnologiesIndexRoute
+  PublicCapabilitiesSlugSubslugRoute: typeof PublicCapabilitiesSlugSubslugRoute
+  PublicCapabilitiesSlugIndexRoute: typeof PublicCapabilitiesSlugIndexRoute
+}
+
+const PublicRouteRouteChildren: PublicRouteRouteChildren = {
+  PublicAboutRoute: PublicAboutRoute,
+  PublicPrivacyRoute: PublicPrivacyRoute,
+  PublicTermsRoute: PublicTermsRoute,
+  PublicIndexRoute: PublicIndexRoute,
+  PublicCapabilitiesIndexRoute: PublicCapabilitiesIndexRoute,
+  PublicJobsIndexRoute: PublicJobsIndexRoute,
+  PublicReportsIndexRoute: PublicReportsIndexRoute,
+  PublicTechnologiesIndexRoute: PublicTechnologiesIndexRoute,
+  PublicCapabilitiesSlugSubslugRoute: PublicCapabilitiesSlugSubslugRoute,
+  PublicCapabilitiesSlugIndexRoute: PublicCapabilitiesSlugIndexRoute,
+}
+
+const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
+  PublicRouteRouteChildren,
 )
 
 interface AdminRouteRouteChildren {
@@ -544,21 +579,12 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   AuthedRouteRoute: AuthedRouteRouteWithChildren,
+  PublicRouteRoute: PublicRouteRouteWithChildren,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   VerifyEmailRoute: VerifyEmailRoute,
-  PublicAboutRoute: PublicAboutRoute,
-  PublicPrivacyRoute: PublicPrivacyRoute,
-  PublicTermsRoute: PublicTermsRoute,
-  PublicIndexRoute: PublicIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  PublicCapabilitiesIndexRoute: PublicCapabilitiesIndexRoute,
-  PublicJobsIndexRoute: PublicJobsIndexRoute,
-  PublicReportsIndexRoute: PublicReportsIndexRoute,
-  PublicTechnologiesIndexRoute: PublicTechnologiesIndexRoute,
-  PublicCapabilitiesSlugSubslugRoute: PublicCapabilitiesSlugSubslugRoute,
-  PublicCapabilitiesSlugIndexRoute: PublicCapabilitiesSlugIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
