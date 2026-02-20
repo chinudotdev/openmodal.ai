@@ -28,9 +28,12 @@ import { Route as PublicCapabilitiesIndexRouteImport } from './routes/_public/ca
 import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminCapabilitiesAddRouteImport } from './routes/admin/capabilities/add'
+import { Route as AdminCapabilitiesSlugIndexRouteImport } from './routes/admin/capabilities/$slug/index'
 import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
-import { Route as AdminCapabilitiesIdEditRouteImport } from './routes/admin/capabilities/$id/edit'
+import { Route as AdminCapabilitiesSlugEditRouteImport } from './routes/admin/capabilities/$slug/edit'
+import { Route as AdminCapabilitiesSlugAddRouteImport } from './routes/admin/capabilities/$slug/add'
 import { Route as PublicCapabilitiesSlugSubslugRouteImport } from './routes/_public/capabilities/$slug/$subslug'
+import { Route as AdminCapabilitiesSlugSubslugEditRouteImport } from './routes/admin/capabilities/$slug/$subslug/edit'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -126,22 +129,41 @@ const AdminCapabilitiesAddRoute = AdminCapabilitiesAddRouteImport.update({
   path: '/capabilities/add',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminCapabilitiesSlugIndexRoute =
+  AdminCapabilitiesSlugIndexRouteImport.update({
+    id: '/capabilities/$slug/',
+    path: '/capabilities/$slug/',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 const PublicCapabilitiesSlugIndexRoute =
   PublicCapabilitiesSlugIndexRouteImport.update({
     id: '/_public/capabilities/$slug/',
     path: '/capabilities/$slug/',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AdminCapabilitiesIdEditRoute = AdminCapabilitiesIdEditRouteImport.update({
-  id: '/capabilities/$id/edit',
-  path: '/capabilities/$id/edit',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
+const AdminCapabilitiesSlugEditRoute =
+  AdminCapabilitiesSlugEditRouteImport.update({
+    id: '/capabilities/$slug/edit',
+    path: '/capabilities/$slug/edit',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
+const AdminCapabilitiesSlugAddRoute =
+  AdminCapabilitiesSlugAddRouteImport.update({
+    id: '/capabilities/$slug/add',
+    path: '/capabilities/$slug/add',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 const PublicCapabilitiesSlugSubslugRoute =
   PublicCapabilitiesSlugSubslugRouteImport.update({
     id: '/_public/capabilities/$slug/$subslug',
     path: '/capabilities/$slug/$subslug',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const AdminCapabilitiesSlugSubslugEditRoute =
+  AdminCapabilitiesSlugSubslugEditRouteImport.update({
+    id: '/capabilities/$slug/$subslug/edit',
+    path: '/capabilities/$slug/$subslug/edit',
+    getParentRoute: () => AdminRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -164,8 +186,11 @@ export interface FileRoutesByFullPath {
   '/technologies/': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities/': typeof AdminCapabilitiesIndexRoute
   '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
-  '/admin/capabilities/$id/edit': typeof AdminCapabilitiesIdEditRoute
+  '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
+  '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
+  '/admin/capabilities/$slug/': typeof AdminCapabilitiesSlugIndexRoute
+  '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -186,8 +211,11 @@ export interface FileRoutesByTo {
   '/technologies': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities': typeof AdminCapabilitiesIndexRoute
   '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
-  '/admin/capabilities/$id/edit': typeof AdminCapabilitiesIdEditRoute
+  '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
+  '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/capabilities/$slug': typeof PublicCapabilitiesSlugIndexRoute
+  '/admin/capabilities/$slug': typeof AdminCapabilitiesSlugIndexRoute
+  '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -211,8 +239,11 @@ export interface FileRoutesById {
   '/_public/technologies/': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities/': typeof AdminCapabilitiesIndexRoute
   '/_public/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
-  '/admin/capabilities/$id/edit': typeof AdminCapabilitiesIdEditRoute
+  '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
+  '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/_public/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
+  '/admin/capabilities/$slug/': typeof AdminCapabilitiesSlugIndexRoute
+  '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -236,8 +267,11 @@ export interface FileRouteTypes {
     | '/technologies/'
     | '/admin/capabilities/'
     | '/capabilities/$slug/$subslug'
-    | '/admin/capabilities/$id/edit'
+    | '/admin/capabilities/$slug/add'
+    | '/admin/capabilities/$slug/edit'
     | '/capabilities/$slug/'
+    | '/admin/capabilities/$slug/'
+    | '/admin/capabilities/$slug/$subslug/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -258,8 +292,11 @@ export interface FileRouteTypes {
     | '/technologies'
     | '/admin/capabilities'
     | '/capabilities/$slug/$subslug'
-    | '/admin/capabilities/$id/edit'
+    | '/admin/capabilities/$slug/add'
+    | '/admin/capabilities/$slug/edit'
     | '/capabilities/$slug'
+    | '/admin/capabilities/$slug'
+    | '/admin/capabilities/$slug/$subslug/edit'
   id:
     | '__root__'
     | '/_authed'
@@ -282,8 +319,11 @@ export interface FileRouteTypes {
     | '/_public/technologies/'
     | '/admin/capabilities/'
     | '/_public/capabilities/$slug/$subslug'
-    | '/admin/capabilities/$id/edit'
+    | '/admin/capabilities/$slug/add'
+    | '/admin/capabilities/$slug/edit'
     | '/_public/capabilities/$slug/'
+    | '/admin/capabilities/$slug/'
+    | '/admin/capabilities/$slug/$subslug/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -441,6 +481,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCapabilitiesAddRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/capabilities/$slug/': {
+      id: '/admin/capabilities/$slug/'
+      path: '/capabilities/$slug'
+      fullPath: '/admin/capabilities/$slug/'
+      preLoaderRoute: typeof AdminCapabilitiesSlugIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/_public/capabilities/$slug/': {
       id: '/_public/capabilities/$slug/'
       path: '/capabilities/$slug'
@@ -448,11 +495,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicCapabilitiesSlugIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/capabilities/$id/edit': {
-      id: '/admin/capabilities/$id/edit'
-      path: '/capabilities/$id/edit'
-      fullPath: '/admin/capabilities/$id/edit'
-      preLoaderRoute: typeof AdminCapabilitiesIdEditRouteImport
+    '/admin/capabilities/$slug/edit': {
+      id: '/admin/capabilities/$slug/edit'
+      path: '/capabilities/$slug/edit'
+      fullPath: '/admin/capabilities/$slug/edit'
+      preLoaderRoute: typeof AdminCapabilitiesSlugEditRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/capabilities/$slug/add': {
+      id: '/admin/capabilities/$slug/add'
+      path: '/capabilities/$slug/add'
+      fullPath: '/admin/capabilities/$slug/add'
+      preLoaderRoute: typeof AdminCapabilitiesSlugAddRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/_public/capabilities/$slug/$subslug': {
@@ -461,6 +515,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/capabilities/$slug/$subslug'
       preLoaderRoute: typeof PublicCapabilitiesSlugSubslugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/capabilities/$slug/$subslug/edit': {
+      id: '/admin/capabilities/$slug/$subslug/edit'
+      path: '/capabilities/$slug/$subslug/edit'
+      fullPath: '/admin/capabilities/$slug/$subslug/edit'
+      preLoaderRoute: typeof AdminCapabilitiesSlugSubslugEditRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
   }
 }
@@ -481,14 +542,20 @@ interface AdminRouteRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminCapabilitiesAddRoute: typeof AdminCapabilitiesAddRoute
   AdminCapabilitiesIndexRoute: typeof AdminCapabilitiesIndexRoute
-  AdminCapabilitiesIdEditRoute: typeof AdminCapabilitiesIdEditRoute
+  AdminCapabilitiesSlugAddRoute: typeof AdminCapabilitiesSlugAddRoute
+  AdminCapabilitiesSlugEditRoute: typeof AdminCapabilitiesSlugEditRoute
+  AdminCapabilitiesSlugIndexRoute: typeof AdminCapabilitiesSlugIndexRoute
+  AdminCapabilitiesSlugSubslugEditRoute: typeof AdminCapabilitiesSlugSubslugEditRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminCapabilitiesAddRoute: AdminCapabilitiesAddRoute,
   AdminCapabilitiesIndexRoute: AdminCapabilitiesIndexRoute,
-  AdminCapabilitiesIdEditRoute: AdminCapabilitiesIdEditRoute,
+  AdminCapabilitiesSlugAddRoute: AdminCapabilitiesSlugAddRoute,
+  AdminCapabilitiesSlugEditRoute: AdminCapabilitiesSlugEditRoute,
+  AdminCapabilitiesSlugIndexRoute: AdminCapabilitiesSlugIndexRoute,
+  AdminCapabilitiesSlugSubslugEditRoute: AdminCapabilitiesSlugSubslugEditRoute,
 }
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(

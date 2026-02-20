@@ -8,6 +8,9 @@ import {
   deleteCapabilitySubtype,
   getAllCapabilities,
   getAllSubtypes,
+  getCapabilityById,
+  getCapabilityBySlug,
+  getSubtypesByCapabilityId,
   updateCapability,
   updateCapabilitySubtype,
 } from '@/data-layer/capabilities'
@@ -164,6 +167,46 @@ export const getCapabilityForAdminFn = createServerFn({ method: 'POST' })
       return { success: true, data: capability }
     } catch (error) {
       console.error('Error fetching capability:', error)
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to fetch capability',
+      }
+    }
+  })
+
+/**
+ * Get a capability by slug with its subtypes
+ * Admin only - uses adminMiddleware
+ */
+export const getCapabilityBySlugForAdminFn = createServerFn({
+  method: 'POST',
+})
+  .inputValidator(
+    z.object({
+      slug: z.string().min(1, 'Slug is required'),
+    }),
+  )
+  .middleware([adminMiddleware])
+  .handler(async ({ data }) => {
+    try {
+      const capability = await getCapabilityBySlug(data.slug)
+      if (!capability) {
+        return { success: false, error: 'Capability not found' }
+      }
+
+      // Fetch subtypes for this capability
+      const subtypes = await getSubtypesByCapabilityId(capability.id)
+
+      return {
+        success: true,
+        data: {
+          ...capability,
+          subtypes,
+        },
+      }
+    } catch (error) {
+      console.error('Error fetching capability by slug:', error)
       return {
         success: false,
         error:

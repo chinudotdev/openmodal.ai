@@ -7,7 +7,7 @@ import {
 import { useForm } from '@tanstack/react-form'
 import z from 'zod'
 import {
-  getCapabilityForAdminFn,
+  getCapabilityBySlugForAdminFn,
   updateCapabilityFn,
 } from '@/actions/admin/capabilities'
 import { Button } from '@/components/ui/button'
@@ -27,10 +27,12 @@ const formSchema = z.object({
   icon: z.string(),
 })
 
-export const Route = createFileRoute('/admin/capabilities/$id/edit')({
+export const Route = createFileRoute('/admin/capabilities/$slug/edit')({
   component: EditCapabilityPage,
   loader: async ({ params }) => {
-    const result = await getCapabilityForAdminFn({ data: { id: params.id } })
+    const result = await getCapabilityBySlugForAdminFn({
+      data: { slug: params.slug },
+    })
     if (!result.success) {
       throw notFound()
     }
@@ -46,7 +48,6 @@ export const Route = createFileRoute('/admin/capabilities/$id/edit')({
 function EditCapabilityPage() {
   const { capability } = Route.useLoaderData()
   const router = useRouter()
-  const { id } = Route.useParams()
 
   const form = useForm({
     defaultValues: {
@@ -61,7 +62,7 @@ function EditCapabilityPage() {
     onSubmit: async ({ value }) => {
       const result = await updateCapabilityFn({
         data: {
-          id,
+          id: capability.id,
           name: value.name,
           slug: value.slug,
           description: value.description,

@@ -1,5 +1,6 @@
 import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
+import { useRef } from 'react'
 import z from 'zod'
 import { createCapabilityFn } from '@/actions/admin/capabilities'
 import { Button } from '@/components/ui/button'
@@ -31,6 +32,7 @@ export const Route = createFileRoute('/admin/capabilities/add')({
 
 function AddCapabilityPage() {
   const router = useRouter()
+  const slugManuallyEdited = useRef(false)
 
   const form = useForm({
     defaultValues: {
@@ -66,7 +68,8 @@ function AddCapabilityPage() {
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value
     form.setFieldValue('name', name)
-    if (!form.getFieldValue('slug')) {
+    // Only auto-generate slug if user hasn't manually edited it
+    if (!slugManuallyEdited.current) {
       const slug = name
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
@@ -75,6 +78,11 @@ function AddCapabilityPage() {
         .trim()
       form.setFieldValue('slug', slug)
     }
+  }
+
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    slugManuallyEdited.current = true
+    form.setFieldValue('slug', e.target.value)
   }
 
   return (
@@ -119,7 +127,7 @@ function AddCapabilityPage() {
               <FieldLabel>Slug</FieldLabel>
               <Input
                 value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
+                onChange={handleSlugChange}
                 placeholder="e.g., reasoning"
                 disabled={form.state.isSubmitting}
               />

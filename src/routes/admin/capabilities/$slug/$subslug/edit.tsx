@@ -1,7 +1,16 @@
-import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  notFound,
+  useRouter,
+} from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import z from 'zod'
-import { createCapabilitySubtypeFn, getAllCapabilitiesForAdminFn } from '@/actions/admin/capabilities'
+import {
+  getAllCapabilitiesForAdminFn,
+  getSubtypeForAdminFn,
+  updateCapabilitySubtypeFn,
+} from '@/actions/admin/capabilities'
 import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -16,68 +25,85 @@ import {
 } from '@/components/ui/select'
 
 const formSchema = z.object({
-  capabilityId: z.string().min(1, 'Capability is required'),
-  name: z.string().min(1, 'Name is required').max(100),
+  name: z.string().min(1).max(100),
   slug: z
     .string()
-    .min(1, 'Slug is required')
+    .min(1)
     .max(100)
-    .regex(
-      /^[a-z0-9-]+$/,
-      'Slug must contain only lowercase letters, numbers, and hyphens',
+    .regex(/^[a-z0-9-]+$/),
+  domain: z.string().min(1).max(50),
+  description: z.string().min(10).max(500),
+  progressPercentage: z.number().min(0).max(100),
+  status: z.enum(['solved', 'partial', 'unsolved']),
+  whatWorks: z.string(),
+  whatStruggles: z.string(),
+  whatDoesntWork: z.string(),
+})
+
+export const Route = createFileRoute('/admin/capabilities/$slug/$subslug/edit')(
+  {
+    component: EditSubtypePage,
+    loader: async ({ params }) => {
+      const [subtypeResult, capabilitiesResult] = await Promise.all([
+        getSubtypeForAdminFn({ data: { id: params.subslug } }),
+        getAllCapabilitiesForAdminFn(),
+      ])
+
+      if (!subtypeResult.success) {
+        throw notFound()
+      }
+
+      if (!capabilitiesResult.success) {
+        throw new Error(
+          capabilitiesResult.error || 'Failed to fetch capabilities',
+        )
+      }
+
+      const capability = capabilitiesResult.data.find(
+        (c) => c.slug === params.slug,
+      )
+
+      if (!capability) {
+        throw new Error('Capability not found')
+      }
+
+      return {
+        subtype: subtypeResult.data,
+        capability,
+      }
+    },
+    pendingComponent: () => (
+      <div className="flex items-center justify-center py-12">
+        <Spinner />
+      </div>
     ),
-  domain: z.string().min(1, 'Domain is required').max(50),
-  description: z
-    .string()
-    .min(10, 'Description must be at least 10 characters')
-    .max(500),
-  progressPercentage: z.number().min(0).max(100).default(0),
-  status: z.enum(['solved', 'partial', 'unsolved']).default('unsolved'),
-  whatWorks: z.string().optional(),
-  whatStruggles: z.string().optional(),
-  whatDoesntWork: z.string().optional(),
-})
-
-export const Route = createFileRoute('/admin/subtypes/add')({
-  component: AddSubtypePage,
-  loader: async () => {
-    const result = await getAllCapabilitiesForAdminFn()
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to fetch capabilities')
-    }
-    return { capabilities: result.data }
   },
-  pendingComponent: () => (
-    <div className="flex items-center justify-center py-12">
-      <Spinner />
-    </div>
-  ),
-})
+)
 
-function AddSubtypePage() {
+function EditSubtypePage() {
+  const { subtype, capability } = Route.useLoaderData()
   const router = useRouter()
-  const { capabilities } = Route.useLoaderData()
+  const { slug } = Route.useParams()
 
   const form = useForm({
     defaultValues: {
-      capabilityId: '',
-      name: '',
-      slug: '',
-      domain: '',
-      description: '',
-      progressPercentage: 0,
-      status: 'unsolved' as const,
-      whatWorks: '',
-      whatStruggles: '',
-      whatDoesntWork: '',
+      name: subtype.name,
+      slug: subtype.slug,
+      domain: subtype.domain,
+      description: subtype.description,
+      progressPercentage: subtype.progressPercentage,
+      status: subtype.status,
+      whatWorks: subtype.whatWorks.join('\n'),
+      whatStruggles: subtype.whatStruggles.join('\n'),
+      whatDoesntWork: subtype.whatDoesntWork.join('\n'),
     },
     validators: {
       onSubmit: formSchema,
     },
     onSubmit: async ({ value }) => {
-      const result = await createCapabilitySubtypeFn({
+      const result = await updateCapabilitySubtypeFn({
         data: {
-          capabilityId: value.capabilityId,
+          id: subtype.id,
           name: value.name,
           slug: value.slug,
           domain: value.domain,
@@ -98,41 +124,30 @@ function AddSubtypePage() {
 
       if (result.success) {
         await router.invalidate()
-        await router.navigate({ to: '/admin/subtypes' })
+        await router.navigate({
+          to: '/admin/capabilities/$slug',
+          params: { slug },
+        })
       } else {
-        console.error('Failed to create subtype:', result.error)
+        console.error('Failed to update subtype:', result.error)
       }
     },
   })
-
-  // Auto-generate slug from name
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value
-    form.setFieldValue('name', name)
-    if (!form.getFieldValue('slug')) {
-      const slug = name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim()
-      form.setFieldValue('slug', slug)
-    }
-  }
 
   return (
     <main className="container mx-auto px-6 py-8 max-w-2xl">
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-2">
-          <Link to="/admin/subtypes">
+          <Link to="/admin/capabilities/$slug" params={{ slug }}>
             <Button variant="ghost" size="sm">
               ← Back
             </Button>
           </Link>
-          <h1 className="text-3xl font-semibold">Add Capability Subtype</h1>
+          <span className="text-2xl">{capability.icon || '🔷'}</span>
+          <h1 className="text-3xl font-semibold">Edit Subtype</h1>
         </div>
         <p className="text-muted-foreground">
-          Create a new AI capability subtype
+          Update "{subtype.name}" under {capability.name}
         </p>
       </div>
 
@@ -143,31 +158,13 @@ function AddSubtypePage() {
         }}
         className="space-y-6"
       >
-        <form.Field name="capabilityId">
-          {(field) => (
-            <Field>
-              <FieldLabel>Parent Capability</FieldLabel>
-              <Select
-                value={field.state.value}
-                onValueChange={(value) => field.handleChange(value)}
-                disabled={form.state.isSubmitting}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a capability" />
-                </SelectTrigger>
-                <SelectContent>
-                  {capabilities.map((capability) => (
-                    <SelectItem key={capability.id} value={capability.id}>
-                      {capability.icon && <span className="mr-2">{capability.icon}</span>}
-                      {capability.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FieldError errors={field.state.meta.errors} />
-            </Field>
-          )}
-        </form.Field>
+        <Field>
+          <FieldLabel>Parent Capability</FieldLabel>
+          <div className="flex items-center gap-2 text-sm border rounded-md px-3 py-2 bg-muted">
+            <span>{capability.icon}</span>
+            <span>{capability.name}</span>
+          </div>
+        </Field>
 
         <form.Field name="name">
           {(field) => (
@@ -175,7 +172,7 @@ function AddSubtypePage() {
               <FieldLabel>Name</FieldLabel>
               <Input
                 value={field.state.value}
-                onChange={handleNameChange}
+                onChange={(e) => field.handleChange(e.target.value)}
                 placeholder="e.g., Mathematical Reasoning"
                 disabled={form.state.isSubmitting}
               />
@@ -332,9 +329,9 @@ function AddSubtypePage() {
               <>
                 <Button type="submit" disabled={!canSubmit || isSubmitting}>
                   {isSubmitting ? <Spinner className="mr-2 h-4 w-4" /> : null}
-                  {isSubmitting ? 'Creating...' : 'Create Subtype'}
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
                 </Button>
-                <Link to="/admin/subtypes">
+                <Link to="/admin/capabilities/$slug" params={{ slug }}>
                   <Button
                     type="button"
                     variant="outline"

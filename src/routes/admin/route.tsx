@@ -55,12 +55,6 @@ function AdminLayout() {
               >
                 Capabilities
               </Link>
-              <Link
-                to="/admin/subtypes"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Subtypes
-              </Link>
             </nav>
           </div>
           <div className="flex items-center gap-4">

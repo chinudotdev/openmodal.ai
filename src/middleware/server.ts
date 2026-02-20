@@ -23,11 +23,11 @@ export const authMiddleware = createMiddleware({ type: 'function' }).server(
  * Admin middleware - chains authMiddleware and checks for admin role
  * Use this for server actions that require admin privileges
  */
-export const adminMiddleware = createMiddleware()
+export const adminMiddleware = createMiddleware({ type: 'function' })
   .middleware([authMiddleware])
   .server(async ({ next, context }) => {
     // Check if user has admin role (authMiddleware already validated user exists)
-    if (context.user?.role !== 'admin') {
+    if (context.user.role !== 'admin') {
       throw new Error('Forbidden: Admin role required')
     }
 

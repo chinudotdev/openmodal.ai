@@ -1,9 +1,5 @@
-import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
-import { useState } from 'react'
-import {
-  deleteCapabilityFn,
-  getAllCapabilitiesForAdminFn,
-} from '@/actions/admin/capabilities'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { getAllCapabilitiesForAdminFn } from '@/actions/admin/capabilities'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -14,17 +10,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 import { Spinner } from '@/components/ui/spinner'
 
 export const Route = createFileRoute('/admin/capabilities/')({
@@ -45,20 +30,6 @@ export const Route = createFileRoute('/admin/capabilities/')({
 
 function AdminCapabilitiesPage() {
   const { capabilities } = Route.useLoaderData()
-  const router = useRouter()
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-
-  const handleDelete = async (id: string) => {
-    setDeletingId(id)
-    try {
-      const result = await deleteCapabilityFn({ data: { id } })
-      if (result.success) {
-        await router.invalidate()
-      }
-    } finally {
-      setDeletingId(null)
-    }
-  }
 
   return (
     <main className="container mx-auto px-6 py-8">
@@ -113,52 +84,14 @@ function AdminCapabilitiesPage() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <Link
-                      to="/admin/capabilities/$id/edit"
-                      params={{ id: capability.id }}
-                    >
-                      <Button variant="ghost" size="sm">
-                        Edit
-                      </Button>
-                    </Link>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          disabled={deletingId === capability.id}
-                        >
-                          {deletingId === capability.id ? (
-                            <Spinner className="h-4 w-4" />
-                          ) : (
-                            'Delete'
-                          )}
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Delete Capability?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete "{capability.name}" and
-                            all its subtypes. This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(capability.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
+                  <Link
+                    to="/admin/capabilities/$slug"
+                    params={{ slug: capability.slug }}
+                  >
+                    <Button variant="ghost" size="sm">
+                      View
+                    </Button>
+                  </Link>
                 </TableCell>
               </TableRow>
             ))}

@@ -60,9 +60,7 @@
         "platform_settings_key_unique": {
           "name": "platform_settings_key_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "key"
-          ]
+          "columns": ["key"]
         }
       },
       "policies": {},
@@ -175,12 +173,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -273,12 +267,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -288,9 +278,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -398,16 +386,12 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "user_username_unique": {
           "name": "user_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "policies": {},
@@ -537,9 +521,7 @@
         "capability_slug_unique": {
           "name": "capability_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -642,12 +624,8 @@
           "name": "capability_subtype_capability_id_capability_id_fk",
           "tableFrom": "capability_subtype",
           "tableTo": "capability",
-          "columnsFrom": [
-            "capability_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["capability_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -657,9 +635,7 @@
         "capability_subtype_slug_unique": {
           "name": "capability_subtype_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -795,12 +771,8 @@
           "name": "discussion_parent_id_discussion_id_fk",
           "tableFrom": "discussion",
           "tableTo": "discussion",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -808,12 +780,8 @@
           "name": "discussion_user_id_user_id_fk",
           "tableFrom": "discussion",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -821,12 +789,8 @@
           "name": "discussion_deleted_by_user_id_fk",
           "tableFrom": "discussion",
           "tableTo": "user",
-          "columnsFrom": [
-            "deleted_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -926,12 +890,8 @@
           "name": "feedback_user_id_user_id_fk",
           "tableFrom": "feedback",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -939,12 +899,8 @@
           "name": "feedback_reviewed_by_user_id_fk",
           "tableFrom": "feedback",
           "tableTo": "user",
-          "columnsFrom": [
-            "reviewed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reviewed_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1046,9 +1002,7 @@
         "job_slug_unique": {
           "name": "job_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1117,12 +1071,8 @@
           "name": "task_job_id_job_id_fk",
           "tableFrom": "task",
           "tableTo": "job",
-          "columnsFrom": [
-            "job_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["job_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1189,12 +1139,8 @@
           "name": "task_capability_subtype_task_id_task_id_fk",
           "tableFrom": "task_capability_subtype",
           "tableTo": "task",
-          "columnsFrom": [
-            "task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["task_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1202,12 +1148,8 @@
           "name": "task_capability_subtype_capability_subtype_id_capability_subtype_id_fk",
           "tableFrom": "task_capability_subtype",
           "tableTo": "capability_subtype",
-          "columnsFrom": [
-            "capability_subtype_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["capability_subtype_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1298,12 +1240,8 @@
           "name": "notification_user_id_user_id_fk",
           "tableFrom": "notification",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1372,12 +1310,8 @@
           "name": "notification_preference_user_id_user_id_fk",
           "tableFrom": "notification_preference",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1387,10 +1321,7 @@
         "notification_preference_user_id_notification_type_unique": {
           "name": "notification_preference_user_id_notification_type_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "notification_type"
-          ]
+          "columns": ["user_id", "notification_type"]
         }
       },
       "policies": {},
@@ -1501,9 +1432,7 @@
         "organization_slug_unique": {
           "name": "organization_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1670,12 +1599,8 @@
           "name": "impact_report_technology_id_technology_id_fk",
           "tableFrom": "impact_report",
           "tableTo": "technology",
-          "columnsFrom": [
-            "technology_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["technology_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1683,12 +1608,8 @@
           "name": "impact_report_submitted_by_user_id_fk",
           "tableFrom": "impact_report",
           "tableTo": "user",
-          "columnsFrom": [
-            "submitted_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["submitted_by"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1781,12 +1702,8 @@
           "name": "report_enrichment_report_id_impact_report_id_fk",
           "tableFrom": "report_enrichment",
           "tableTo": "impact_report",
-          "columnsFrom": [
-            "report_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["report_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1794,12 +1711,8 @@
           "name": "report_enrichment_user_id_user_id_fk",
           "tableFrom": "report_enrichment",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1859,12 +1772,8 @@
           "name": "report_flag_report_id_impact_report_id_fk",
           "tableFrom": "report_flag",
           "tableTo": "impact_report",
-          "columnsFrom": [
-            "report_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["report_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1872,12 +1781,8 @@
           "name": "report_flag_user_id_user_id_fk",
           "tableFrom": "report_flag",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1982,12 +1887,8 @@
           "name": "suggestion_user_id_user_id_fk",
           "tableFrom": "suggestion",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1995,12 +1896,8 @@
           "name": "suggestion_reviewed_by_user_id_fk",
           "tableFrom": "suggestion",
           "tableTo": "user",
-          "columnsFrom": [
-            "reviewed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reviewed_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2150,12 +2047,8 @@
           "name": "technology_organization_id_organization_id_fk",
           "tableFrom": "technology",
           "tableTo": "organization",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2163,12 +2056,8 @@
           "name": "technology_submitted_by_user_id_fk",
           "tableFrom": "technology",
           "tableTo": "user",
-          "columnsFrom": [
-            "submitted_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["submitted_by"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2176,12 +2065,8 @@
           "name": "technology_reviewed_by_user_id_fk",
           "tableFrom": "technology",
           "tableTo": "user",
-          "columnsFrom": [
-            "reviewed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reviewed_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -2189,12 +2074,8 @@
           "name": "technology_merged_into_id_technology_id_fk",
           "tableFrom": "technology",
           "tableTo": "technology",
-          "columnsFrom": [
-            "merged_into_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["merged_into_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2204,9 +2085,7 @@
         "technology_slug_unique": {
           "name": "technology_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -2255,12 +2134,8 @@
           "name": "technology_capability_subtype_technology_id_technology_id_fk",
           "tableFrom": "technology_capability_subtype",
           "tableTo": "technology",
-          "columnsFrom": [
-            "technology_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["technology_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2268,12 +2143,8 @@
           "name": "technology_capability_subtype_capability_subtype_id_capability_subtype_id_fk",
           "tableFrom": "technology_capability_subtype",
           "tableTo": "capability_subtype",
-          "columnsFrom": [
-            "capability_subtype_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["capability_subtype_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2340,12 +2211,8 @@
           "name": "activity_log_user_id_user_id_fk",
           "tableFrom": "activity_log",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2426,12 +2293,8 @@
           "name": "expert_application_user_id_user_id_fk",
           "tableFrom": "expert_application",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2441,9 +2304,7 @@
         "expert_application_user_id_unique": {
           "name": "expert_application_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -2532,12 +2393,8 @@
           "name": "moderator_nomination_candidate_id_user_id_fk",
           "tableFrom": "moderator_nomination",
           "tableTo": "user",
-          "columnsFrom": [
-            "candidate_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["candidate_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2545,12 +2402,8 @@
           "name": "moderator_nomination_nominated_by_user_id_fk",
           "tableFrom": "moderator_nomination",
           "tableTo": "user",
-          "columnsFrom": [
-            "nominated_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["nominated_by"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2558,12 +2411,8 @@
           "name": "moderator_nomination_reviewed_by_user_id_fk",
           "tableFrom": "moderator_nomination",
           "tableTo": "user",
-          "columnsFrom": [
-            "reviewed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reviewed_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2681,12 +2530,8 @@
           "name": "moderator_strike_moderator_id_user_id_fk",
           "tableFrom": "moderator_strike",
           "tableTo": "user",
-          "columnsFrom": [
-            "moderator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["moderator_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2694,12 +2539,8 @@
           "name": "moderator_strike_issued_by_user_id_fk",
           "tableFrom": "moderator_strike",
           "tableTo": "user",
-          "columnsFrom": [
-            "issued_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["issued_by"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -2707,12 +2548,8 @@
           "name": "moderator_strike_appeal_reviewed_by_user_id_fk",
           "tableFrom": "moderator_strike",
           "tableTo": "user",
-          "columnsFrom": [
-            "appeal_reviewed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["appeal_reviewed_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2777,12 +2614,8 @@
           "name": "reputation_history_user_id_user_id_fk",
           "tableFrom": "reputation_history",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2872,12 +2705,8 @@
           "name": "user_badge_user_id_user_id_fk",
           "tableFrom": "user_badge",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3032,12 +2861,8 @@
           "name": "user_profile_user_id_user_id_fk",
           "tableFrom": "user_profile",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3047,9 +2872,7 @@
         "user_profile_user_id_unique": {
           "name": "user_profile_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -3108,12 +2931,8 @@
           "name": "user_reputation_user_id_user_id_fk",
           "tableFrom": "user_reputation",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3123,9 +2942,7 @@
         "user_reputation_user_id_unique": {
           "name": "user_reputation_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -3196,12 +3013,8 @@
           "name": "user_streak_user_id_user_id_fk",
           "tableFrom": "user_streak",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3211,10 +3024,7 @@
         "user_streak_user_id_streak_type_unique": {
           "name": "user_streak_user_id_streak_type_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "streak_type"
-          ]
+          "columns": ["user_id", "streak_type"]
         }
       },
       "policies": {},
@@ -3226,11 +3036,7 @@
     "public.capability_status": {
       "name": "capability_status",
       "schema": "public",
-      "values": [
-        "solved",
-        "partial",
-        "unsolved"
-      ]
+      "values": ["solved", "partial", "unsolved"]
     },
     "public.entity_type": {
       "name": "entity_type",
@@ -3247,50 +3053,27 @@
     "public.feedback_rating": {
       "name": "feedback_rating",
       "schema": "public",
-      "values": [
-        "1",
-        "2",
-        "3",
-        "4",
-        "5"
-      ]
+      "values": ["1", "2", "3", "4", "5"]
     },
     "public.feedback_type": {
       "name": "feedback_type",
       "schema": "public",
-      "values": [
-        "general",
-        "bug",
-        "feature",
-        "improvement"
-      ]
+      "values": ["general", "bug", "feature", "improvement"]
     },
     "public.automatable": {
       "name": "automatable",
       "schema": "public",
-      "values": [
-        "yes",
-        "partial",
-        "no"
-      ]
+      "values": ["yes", "partial", "no"]
     },
     "public.confidence": {
       "name": "confidence",
       "schema": "public",
-      "values": [
-        "low",
-        "medium",
-        "high"
-      ]
+      "values": ["low", "medium", "high"]
     },
     "public.importance_level": {
       "name": "importance_level",
       "schema": "public",
-      "values": [
-        "critical",
-        "important",
-        "minor"
-      ]
+      "values": ["critical", "important", "minor"]
     },
     "public.job_category": {
       "name": "job_category",
@@ -3311,12 +3094,7 @@
     "public.risk_level": {
       "name": "risk_level",
       "schema": "public",
-      "values": [
-        "low",
-        "medium",
-        "high",
-        "critical"
-      ]
+      "values": ["low", "medium", "high", "critical"]
     },
     "public.notification_type": {
       "name": "notification_type",
@@ -3341,21 +3119,12 @@
     "public.sponsor_tier": {
       "name": "sponsor_tier",
       "schema": "public",
-      "values": [
-        "none",
-        "bronze",
-        "silver",
-        "gold"
-      ]
+      "values": ["none", "bronze", "silver", "gold"]
     },
     "public.enrichment_confidence": {
       "name": "enrichment_confidence",
       "schema": "public",
-      "values": [
-        "certain",
-        "likely",
-        "guess"
-      ]
+      "values": ["certain", "likely", "guess"]
     },
     "public.enrichment_type": {
       "name": "enrichment_type",
@@ -3370,13 +3139,7 @@
     "public.flag_reason": {
       "name": "flag_reason",
       "schema": "public",
-      "values": [
-        "spam",
-        "fake",
-        "duplicate",
-        "inappropriate",
-        "other"
-      ]
+      "values": ["spam", "fake", "duplicate", "inappropriate", "other"]
     },
     "public.impact_type": {
       "name": "impact_type",
@@ -3393,11 +3156,7 @@
     "public.report_status": {
       "name": "report_status",
       "schema": "public",
-      "values": [
-        "published",
-        "flagged",
-        "removed"
-      ]
+      "values": ["published", "flagged", "removed"]
     },
     "public.reporter_relationship": {
       "name": "reporter_relationship",
@@ -3414,11 +3173,7 @@
     "public.suggestion_status": {
       "name": "suggestion_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "accepted",
-        "rejected"
-      ]
+      "values": ["pending", "accepted", "rejected"]
     },
     "public.suggestion_type": {
       "name": "suggestion_type",
@@ -3434,32 +3189,17 @@
     "public.submission_status": {
       "name": "submission_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "approved",
-        "rejected"
-      ]
+      "values": ["pending", "approved", "rejected"]
     },
     "public.technology_stage": {
       "name": "technology_stage",
       "schema": "public",
-      "values": [
-        "research",
-        "pilot",
-        "deployed",
-        "discontinued"
-      ]
+      "values": ["research", "pilot", "deployed", "discontinued"]
     },
     "public.technology_type": {
       "name": "technology_type",
       "schema": "public",
-      "values": [
-        "ai_model",
-        "robot",
-        "software",
-        "hardware",
-        "api"
-      ]
+      "values": ["ai_model", "robot", "software", "hardware", "api"]
     },
     "public.activity_type": {
       "name": "activity_type",
@@ -3475,45 +3215,22 @@
     "public.age_range": {
       "name": "age_range",
       "schema": "public",
-      "values": [
-        "18-24",
-        "25-34",
-        "35-44",
-        "45-54",
-        "55-64",
-        "65+"
-      ]
+      "values": ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
     },
     "public.application_status": {
       "name": "application_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "approved",
-        "rejected",
-        "withdrawn"
-      ]
+      "values": ["pending", "approved", "rejected", "withdrawn"]
     },
     "public.automation_type": {
       "name": "automation_type",
       "schema": "public",
-      "values": [
-        "ai_ml_software",
-        "rpa",
-        "physical_robots",
-        "other"
-      ]
+      "values": ["ai_ml_software", "rpa", "physical_robots", "other"]
     },
     "public.company_size": {
       "name": "company_size",
       "schema": "public",
-      "values": [
-        "1-10",
-        "11-50",
-        "51-200",
-        "201-1000",
-        "1000+"
-      ]
+      "values": ["1-10", "11-50", "51-200", "201-1000", "1000+"]
     },
     "public.education_level": {
       "name": "education_level",
@@ -3542,59 +3259,32 @@
     "public.experience_years": {
       "name": "experience_years",
       "schema": "public",
-      "values": [
-        "0-1",
-        "2-5",
-        "6-10",
-        "11-15",
-        "16-20",
-        "20+"
-      ]
+      "values": ["0-1", "2-5", "6-10", "11-15", "16-20", "20+"]
     },
     "public.nomination_status": {
       "name": "nomination_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "approved",
-        "rejected"
-      ]
+      "values": ["pending", "approved", "rejected"]
     },
     "public.reputation_tier": {
       "name": "reputation_tier",
       "schema": "public",
-      "values": [
-        "observer",
-        "contributor",
-        "trusted",
-        "expert"
-      ]
+      "values": ["observer", "contributor", "trusted", "expert"]
     },
     "public.streak_type": {
       "name": "streak_type",
       "schema": "public",
-      "values": [
-        "activity",
-        "verification"
-      ]
+      "values": ["activity", "verification"]
     },
     "public.strike_status": {
       "name": "strike_status",
       "schema": "public",
-      "values": [
-        "active",
-        "appealed",
-        "overturned",
-        "expired"
-      ]
+      "values": ["active", "appealed", "overturned", "expired"]
     },
     "public.strike_type": {
       "name": "strike_type",
       "schema": "public",
-      "values": [
-        "yellow",
-        "red"
-      ]
+      "values": ["yellow", "red"]
     }
   },
   "schemas": {},
