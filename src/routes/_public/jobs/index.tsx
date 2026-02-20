@@ -234,7 +234,9 @@ function JobsPage() {
           </div>
 
           {/* Active filters */}
-          {(search.category !== 'all' || search.riskLevel !== 'all' || search.search) && (
+          {(search.category !== 'all' ||
+            search.riskLevel !== 'all' ||
+            search.search) && (
             <div className="flex items-center gap-2 mt-4">
               <span className="text-sm text-muted-foreground">
                 Active filters:
@@ -305,7 +307,7 @@ function JobsPage() {
 
       {/* Jobs List */}
       <section className="container mx-auto px-6 pb-12">
-        {jobs && jobs.length > 0 ? (
+        {jobs.length > 0 ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {jobs.map((job: any) => (
@@ -418,7 +420,9 @@ function JobsPage() {
         ) : (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No jobs found.</p>
-            {(search.category !== 'all' || search.riskLevel !== 'all' || search.search) && (
+            {(search.category !== 'all' ||
+              search.riskLevel !== 'all' ||
+              search.search) && (
               <Button
                 variant="outline"
                 className="mt-4"

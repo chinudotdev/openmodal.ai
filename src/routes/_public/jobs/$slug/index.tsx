@@ -403,12 +403,12 @@ function JobPage() {
                         new Set(
                           tasks.flatMap((t: any) =>
                             t.capabilityRequirements
-                              ?.filter(
+                              .filter(
                                 (r: any) =>
                                   r.capabilitySubtype?.progressPercentage < 70,
                               )
                               .map((r: any) => r.capabilitySubtype),
-                          ) || [],
+                          ),
                         ),
                       ).map((subtype: any, idx: number) => (
                         <div

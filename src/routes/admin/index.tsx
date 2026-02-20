@@ -38,23 +38,25 @@ function AdminDashboard() {
           </Card>
         </Link>
 
-        {/* Jobs Card - Coming Soon */}
-        <Card className="opacity-50 h-full">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <span className="text-2xl">💼</span>
-              Jobs
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Manage job categories and automation risk data
-            </p>
-            <Button variant="outline" size="sm" disabled className="w-full">
-              Coming Soon
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Jobs Card */}
+        <Link to="/admin/jobs">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <span className="text-2xl">💼</span>
+                Jobs
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Manage job listings, automation risk data, and tasks
+              </p>
+              <Button variant="outline" size="sm" className="w-full">
+                Manage →
+              </Button>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Technologies Card - Coming Soon */}
         <Card className="opacity-50 h-full">

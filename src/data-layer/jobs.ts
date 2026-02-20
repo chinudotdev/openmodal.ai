@@ -411,10 +411,6 @@ export interface CreateJobInput {
   category: string
   description: string
   icon?: string
-  automationRiskPercentage: number
-  riskLevel: string
-  timelineEstimate?: string
-  confidence: string
 }
 
 export async function createJob(input: CreateJobInput) {
@@ -429,10 +425,10 @@ export async function createJob(input: CreateJobInput) {
         category: input.category as any,
         description: input.description,
         icon: input.icon,
-        automationRiskPercentage: input.automationRiskPercentage,
-        riskLevel: input.riskLevel as any,
-        timelineEstimate: input.timelineEstimate,
-        confidence: input.confidence as any,
+        automationRiskPercentage: 0, // Inferred from tasks
+        riskLevel: 'low' as any, // Inferred from tasks
+        timelineEstimate: undefined, // Inferred from tasks
+        confidence: 'medium' as any, // Inferred/default
       })
       .returning()
 
@@ -450,10 +446,6 @@ export interface UpdateJobInput {
   category?: string
   description?: string
   icon?: string
-  automationRiskPercentage?: number
-  riskLevel?: string
-  timelineEstimate?: string
-  confidence?: string
 }
 
 export async function updateJob(input: UpdateJobInput) {
