@@ -185,9 +185,7 @@ function AddJobPage() {
               <FieldLabel>Category</FieldLabel>
               <Select
                 value={field.state.value}
-                onValueChange={(value) =>
-                  field.handleChange(value)
-                }
+                onValueChange={(value) => field.handleChange(value)}
                 disabled={form.state.isSubmitting}
               >
                 <SelectTrigger>

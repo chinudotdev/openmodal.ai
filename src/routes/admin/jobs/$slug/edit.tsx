@@ -82,17 +82,7 @@ function EditJobPage() {
           id: job.id,
           name: value.name,
           slug: value.slug,
-          category: value.category as
-            | 'healthcare'
-            | 'technology'
-            | 'trades'
-            | 'service'
-            | 'creative'
-            | 'finance'
-            | 'education'
-            | 'legal'
-            | 'manufacturing'
-            | 'other',
+          category: value.category,
           description: value.description,
         },
       })
