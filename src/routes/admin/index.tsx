@@ -58,23 +58,25 @@ function AdminDashboard() {
           </Card>
         </Link>
 
-        {/* Technologies Card - Coming Soon */}
-        <Card className="opacity-50 h-full">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <span className="text-2xl">🤖</span>
-              Technologies
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Manage AI technologies and organizations
-            </p>
-            <Button variant="outline" size="sm" disabled className="w-full">
-              Coming Soon
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Organizations Card */}
+        <Link to="/admin/organizations">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <span className="text-2xl">🏢</span>
+                Organizations
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Manage AI companies, labs, and sponsors
+              </p>
+              <Button variant="outline" size="sm" className="w-full">
+                Manage →
+              </Button>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Reports Card - Coming Soon */}
         <Card className="opacity-50 h-full">

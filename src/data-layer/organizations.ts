@@ -140,7 +140,7 @@ export async function getAllOrganizations(filters: OrganizationFilters = {}) {
         eq(organization.id, sql`tech_counts.organization_id`),
       )
       .leftJoin(
-        sql`(SELECT o.organization_id, COUNT(*) as count FROM impact_report ir JOIN technology t ON ir.technology_id = t.id JOIN organization o ON t.organization_id = o.id WHERE ir.technology_id IS NOT NULL GROUP BY o.organization_id) as report_counts`,
+        sql`(SELECT o.id as organization_id, COUNT(*) as count FROM impact_report ir JOIN technology t ON ir.technology_id = t.id JOIN organization o ON t.organization_id = o.id WHERE ir.technology_id IS NOT NULL GROUP BY o.id) as report_counts`,
         eq(organization.id, sql`report_counts.organization_id`),
       )
       .where(conditions.length > 0 ? and(...conditions) : undefined)
@@ -205,7 +205,7 @@ export async function getOrganizationBySlug(
         eq(organization.id, sql`tech_counts.organization_id`),
       )
       .leftJoin(
-        sql`(SELECT o.organization_id, COUNT(*) as count FROM impact_report ir JOIN technology t ON ir.technology_id = t.id JOIN organization o ON t.organization_id = o.id WHERE ir.technology_id IS NOT NULL GROUP BY o.organization_id) as report_counts`,
+        sql`(SELECT o.id as organization_id, COUNT(*) as count FROM impact_report ir JOIN technology t ON ir.technology_id = t.id JOIN organization o ON t.organization_id = o.id WHERE ir.technology_id IS NOT NULL GROUP BY o.id) as report_counts`,
         eq(organization.id, sql`report_counts.organization_id`),
       )
       .where(eq(organization.slug, slug))
@@ -325,7 +325,7 @@ export async function getSponsorOrganizations(tier: SponsorTier) {
         eq(organization.id, sql`tech_counts.organization_id`),
       )
       .leftJoin(
-        sql`(SELECT o.organization_id, COUNT(*) as count FROM impact_report ir JOIN technology t ON ir.technology_id = t.id JOIN organization o ON t.organization_id = o.id WHERE ir.technology_id IS NOT NULL GROUP BY o.organization_id) as report_counts`,
+        sql`(SELECT o.id as organization_id, COUNT(*) as count FROM impact_report ir JOIN technology t ON ir.technology_id = t.id JOIN organization o ON t.organization_id = o.id WHERE ir.technology_id IS NOT NULL GROUP BY o.id) as report_counts`,
         eq(organization.id, sql`report_counts.organization_id`),
       )
       .where(
@@ -424,4 +424,131 @@ export function getOrganizationTypes() {
  */
 export function getSponsorTiers() {
   return ['none', 'bronze', 'silver', 'gold'] as const
+}
+
+// ============================================
+// ADMIN FUNCTIONS
+// ============================================
+
+/**
+ * Get organization by ID for admin
+ */
+export async function getOrganizationById(id: string) {
+  try {
+    const results = await db
+      .select()
+      .from(organization)
+      .where(eq(organization.id, id))
+      .limit(1)
+
+    return results[0] ?? null
+  } catch (error) {
+    console.error('Error fetching organization by ID:', error)
+    return null
+  }
+}
+
+/**
+ * Create a new organization
+ */
+export async function createOrganization(data: {
+  name: string
+  slug: string
+  types: Array<OrganizationType>
+  description: string
+  website?: string
+  logo?: string
+  foundedYear?: number
+  isSponsor?: boolean
+  sponsorTier?: SponsorTier
+  isClaimed?: boolean
+  verifiedBadge?: boolean
+}) {
+  try {
+    const id = crypto.randomUUID()
+
+    const [result] = await db
+      .insert(organization)
+      .values({
+        id,
+        slug: data.slug,
+        name: data.name,
+        types: data.types,
+        description: data.description,
+        website: data.website || null,
+        logo: data.logo || null,
+        foundedYear: data.foundedYear || null,
+        isSponsor: data.isSponsor || false,
+        sponsorTier: data.sponsorTier || 'none',
+        isClaimed: data.isClaimed || false,
+        verifiedBadge: data.verifiedBadge || false,
+      })
+      .returning()
+
+    return result
+  } catch (error) {
+    console.error('Error creating organization:', error)
+    throw error
+  }
+}
+
+/**
+ * Update an existing organization
+ */
+export async function updateOrganization(data: {
+  id: string
+  name?: string
+  slug?: string
+  types?: Array<OrganizationType>
+  description?: string
+  website?: string
+  logo?: string
+  foundedYear?: number
+  isSponsor?: boolean
+  sponsorTier?: SponsorTier
+  isClaimed?: boolean
+  verifiedBadge?: boolean
+}) {
+  try {
+    const updateData: Record<string, unknown> = {}
+
+    if (data.name !== undefined) updateData.name = data.name
+    if (data.slug !== undefined) updateData.slug = data.slug
+    if (data.types !== undefined) updateData.types = data.types
+    if (data.description !== undefined)
+      updateData.description = data.description
+    if (data.website !== undefined) updateData.website = data.website
+    if (data.logo !== undefined) updateData.logo = data.logo
+    if (data.foundedYear !== undefined)
+      updateData.foundedYear = data.foundedYear
+    if (data.isSponsor !== undefined) updateData.isSponsor = data.isSponsor
+    if (data.sponsorTier !== undefined)
+      updateData.sponsorTier = data.sponsorTier
+    if (data.isClaimed !== undefined) updateData.isClaimed = data.isClaimed
+    if (data.verifiedBadge !== undefined)
+      updateData.verifiedBadge = data.verifiedBadge
+
+    const [result] = await db
+      .update(organization)
+      .set(updateData)
+      .where(eq(organization.id, data.id))
+      .returning()
+
+    return result
+  } catch (error) {
+    console.error('Error updating organization:', error)
+    throw error
+  }
+}
+
+/**
+ * Delete an organization
+ */
+export async function deleteOrganization(id: string) {
+  try {
+    await db.delete(organization).where(eq(organization.id, id))
+  } catch (error) {
+    console.error('Error deleting organization:', error)
+    throw error
+  }
 }
