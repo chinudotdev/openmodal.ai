@@ -32,6 +32,17 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxGroup,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxLabel,
+  ComboboxList,
+  ComboboxTrigger,
+} from '@/components/ui/combobox'
+import {
   Dialog,
   DialogClose,
   DialogContent,
@@ -51,10 +62,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
 import { Spinner } from '@/components/ui/spinner'
 
 const taskFormSchema = z.object({
   name: z.string().min(1, 'Task name is required').max(200),
+  percentageOfJob: z
+    .number()
+    .min(0, 'Percentage must be at least 0')
+    .max(100, 'Percentage must be at most 100'),
   reason: z.string().max(500),
 })
 
@@ -179,21 +195,18 @@ function AdminJobDetailPage() {
   const taskForm = useForm({
     defaultValues: {
       name: '',
+      percentageOfJob: 10,
       reason: '',
     },
     validators: {
       onSubmit: taskFormSchema,
     },
     onSubmit: async ({ value }) => {
-      // Infer percentageOfJob: evenly distribute among all tasks
-      const newTaskCount = tasks.length + 1
-      const inferredPercentage = Math.round(100 / newTaskCount)
-
       const result = await createTaskFn({
         data: {
           jobId: job.id,
           name: value.name,
-          percentageOfJob: inferredPercentage,
+          percentageOfJob: value.percentageOfJob,
           automatable: 'partial',
           reason: value.reason || undefined,
         },
@@ -444,6 +457,29 @@ function AdminJobDetailPage() {
                 )}
               </taskForm.Field>
 
+              <taskForm.Field name="percentageOfJob">
+                {(field) => (
+                  <Field>
+                    <div className="flex items-center justify-between mb-2">
+                      <FieldLabel>% of Job</FieldLabel>
+                      <span className="text-sm font-medium">
+                        {field.state.value}%
+                      </span>
+                    </div>
+                    <Slider
+                      value={[field.state.value]}
+                      onValueChange={(values) => field.handleChange(values[0])}
+                      min={0}
+                      max={100}
+                      step={1}
+                      disabled={taskForm.state.isSubmitting}
+                      className="w-full"
+                    />
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              </taskForm.Field>
+
               <taskForm.Field name="reason">
                 {(field) => (
                   <Field>
@@ -458,11 +494,6 @@ function AdminJobDetailPage() {
                   </Field>
                 )}
               </taskForm.Field>
-
-              <p className="text-sm text-muted-foreground">
-                Automation status and percentage will be calculated based on
-                capability requirements.
-              </p>
 
               <div className="flex justify-end">
                 <taskForm.Subscribe
@@ -496,13 +527,23 @@ function AdminJobDetailPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-semibold">{task.name}</h3>
-                        <Badge
-                          variant="outline"
-                          className={getAutomatableColor(task.automatable)}
-                        >
-                          {getAutomatableIcon(task.automatable)}{' '}
-                          {getAutomatableLabel(task.automatable)}
-                        </Badge>
+                        {!task.capabilityRequirements ||
+                        task.capabilityRequirements.length === 0 ? (
+                          <Badge
+                            variant="outline"
+                            className="bg-gray-500/10 text-gray-500 dark:text-gray-400 border-gray-500/20"
+                          >
+                            📋 Not Assessed
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className={getAutomatableColor(task.automatable)}
+                          >
+                            {getAutomatableIcon(task.automatable)}{' '}
+                            {getAutomatableLabel(task.automatable)}
+                          </Badge>
+                        )}
                         <span className="text-sm text-muted-foreground">
                           {task.percentageOfJob}% of job
                         </span>
@@ -559,25 +600,12 @@ function AdminJobDetailPage() {
                                 }}
                                 className="space-y-4"
                               >
-                                {/* Search */}
-                                <div>
-                                  <FieldLabel>Search Capabilities</FieldLabel>
-                                  <Input
-                                    value={capabilitySearch}
-                                    onChange={(e) =>
-                                      setCapabilitySearch(e.target.value)
-                                    }
-                                    placeholder="Search by name..."
-                                    disabled={isLoadingSubtypes}
-                                  />
-                                </div>
-
-                                {/* Capability Subtype Select */}
+                                {/* Capability Subtype Combobox with Search */}
                                 <capabilityForm.Field name="capabilitySubtypeId">
                                   {(field) => (
                                     <Field>
                                       <FieldLabel>Capability</FieldLabel>
-                                      <Select
+                                      <Combobox
                                         value={field.state.value}
                                         onValueChange={(value) =>
                                           field.handleChange(value)
@@ -587,58 +615,70 @@ function AdminJobDetailPage() {
                                           capabilityForm.state.isSubmitting
                                         }
                                       >
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Select a capability" />
-                                        </SelectTrigger>
-                                        <SelectContent>
+                                        <ComboboxInput
+                                          placeholder="Search capabilities..."
+                                          onChange={(e) =>
+                                            setCapabilitySearch(e.target.value)
+                                          }
+                                          disabled={
+                                            isLoadingSubtypes ||
+                                            capabilityForm.state.isSubmitting
+                                          }
+                                        />
+                                        <ComboboxContent>
                                           {isLoadingSubtypes ? (
                                             <div className="flex items-center justify-center py-2">
                                               <Spinner className="h-4 w-4" />
                                             </div>
-                                          ) : filteredSubtypes.length === 0 ? (
-                                            <div className="py-2 text-center text-sm text-muted-foreground">
-                                              No capabilities found. Try a
-                                              different search.
-                                            </div>
                                           ) : (
-                                            Object.entries(groupedSubtypes).map(
-                                              ([
-                                                capabilityName,
-                                                subtypesList,
-                                              ]) => (
-                                                <div
-                                                  key={capabilityName}
-                                                  className="p-1"
-                                                >
-                                                  <div className="text-xs font-medium text-muted-foreground px-2">
-                                                    {capabilityName}
-                                                  </div>
-                                                  {subtypesList.map(
-                                                    (subtype: any) => (
-                                                      <SelectItem
-                                                        key={subtype.id}
-                                                        value={subtype.id}
-                                                      >
-                                                        <div className="flex items-center gap-2">
-                                                          <span className="flex-1">
-                                                            {subtype.name}
-                                                          </span>
-                                                          <span className="text-xs text-muted-foreground">
-                                                            {
-                                                              subtype.progressPercentage
-                                                            }
-                                                            %
-                                                          </span>
-                                                        </div>
-                                                      </SelectItem>
-                                                    ),
-                                                  )}
-                                                </div>
-                                              ),
-                                            )
+                                            <ComboboxList>
+                                              {filteredSubtypes.length === 0 ? (
+                                                <ComboboxEmpty>
+                                                  No capabilities found. Try a
+                                                  different search.
+                                                </ComboboxEmpty>
+                                              ) : (
+                                                Object.entries(
+                                                  groupedSubtypes,
+                                                ).map(
+                                                  ([
+                                                    capabilityName,
+                                                    subtypesList,
+                                                  ]) => (
+                                                    <ComboboxGroup
+                                                      key={capabilityName}
+                                                    >
+                                                      <ComboboxLabel>
+                                                        {capabilityName}
+                                                      </ComboboxLabel>
+                                                      {subtypesList.map(
+                                                        (subtype: any) => (
+                                                          <ComboboxItem
+                                                            key={subtype.id}
+                                                            value={subtype.id}
+                                                          >
+                                                            <div className="flex items-center gap-2">
+                                                              <span className="flex-1">
+                                                                {subtype.name}
+                                                              </span>
+                                                              <span className="text-xs text-muted-foreground">
+                                                                {
+                                                                  subtype.progressPercentage
+                                                                }
+                                                                %
+                                                              </span>
+                                                            </div>
+                                                          </ComboboxItem>
+                                                        ),
+                                                      )}
+                                                    </ComboboxGroup>
+                                                  ),
+                                                )
+                                              )}
+                                            </ComboboxList>
                                           )}
-                                        </SelectContent>
-                                      </Select>
+                                        </ComboboxContent>
+                                      </Combobox>
                                       <FieldError
                                         errors={field.state.meta.errors}
                                       />
