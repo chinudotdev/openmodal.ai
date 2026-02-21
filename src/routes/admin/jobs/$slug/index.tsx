@@ -373,6 +373,22 @@ function AdminJobDetailPage() {
                 <p className="font-medium">{categoryLabel(jobData.category)}</p>
               </div>
 
+              {/* Automation Risk */}
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Automation Risk
+                </p>
+                <div className="flex items-center gap-2">
+                  <Progress
+                    value={jobData.automationRiskPercentage}
+                    className="w-24 h-2"
+                  />
+                  <span className="font-medium">
+                    {jobData.automationRiskPercentage}%
+                  </span>
+                </div>
+              </div>
+
               {/* Risk Level */}
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Risk Level</p>
@@ -384,6 +400,14 @@ function AdminJobDetailPage() {
                     jobData.riskLevel.slice(1)}
                 </Badge>
               </div>
+
+              {/* Timeline */}
+              {jobData.timelineEstimate && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Timeline</p>
+                  <p className="font-medium">{jobData.timelineEstimate}</p>
+                </div>
+              )}
 
               {/* Confidence */}
               <div>
