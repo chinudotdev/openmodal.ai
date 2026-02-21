@@ -15,7 +15,7 @@ export const submitFeedbackFn = createServerFn({ method: 'POST' })
       content: z.string().min(1),
       type: z.enum(['general', 'bug', 'feature', 'improvement']).optional(),
       rating: z.enum(['1', '2', '3', '4', '5']).optional(),
-      email: z.email().optional(),
+      email: z.string().email().optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -46,56 +46,44 @@ export const submitFeedbackFn = createServerFn({ method: 'POST' })
     }
   })
 
-// Get all feedbacks with filters
-export const getFeedbacksFn = createServerFn({ method: 'GET' })
+// Get all feedbacks with filters (admin only)
+export const getFeedbacksFn = createServerFn({ method: 'POST' })
   .inputValidator(
     z.object({
       search: z.string().optional(),
-      type: z.enum(['general', 'bug', 'feature', 'improvement']).optional(),
-      rating: z.enum(['1', '2', '3', '4', '5']).optional(),
+      type: z
+        .array(z.enum(['general', 'bug', 'feature', 'improvement']))
+        .optional(),
       reviewed: z.enum(['true', 'false']).optional(),
-      sortBy: z.enum(['recent', 'oldest']).optional(),
-      page: z.number().optional(),
-      limit: z.number().optional(),
+      sortBy: z.enum(['recent', 'oldest']).optional().default('recent'),
+      limit: z.number().optional().default(50),
     }),
   )
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
     const session = await auth.api.getSession({ headers })
 
-    // Check if user is admin
-    // TODO: Add proper admin check
-    if (!session?.user) {
-      return {
-        success: false,
-        error: 'Unauthorized',
-      }
+    if (!session || session.user.role !== 'admin') {
+      throw new Error('Unauthorized: Admin access required')
     }
-
-    const page = data.page || 1
-    const limit = data.limit || 50
-    const offset = (page - 1) * limit
 
     // Build conditions
     const conditions = []
 
     if (data.search) {
+      const searchTerm = `%${data.search}%`
       conditions.push(
         or(
-          ilike(feedback.content, `%${data.search}%`),
-          ilike(user.name, `%${data.search}%`),
-          ilike(user.email, `%${data.search}%`),
-          ilike(feedback.email, `%${data.search}%`),
+          ilike(feedback.content, searchTerm),
+          ilike(user.name, searchTerm),
+          ilike(user.email, searchTerm),
+          ilike(feedback.email, searchTerm),
         ),
       )
     }
 
-    if (data.type) {
-      conditions.push(eq(feedback.type, data.type))
-    }
-
-    if (data.rating) {
-      conditions.push(eq(feedback.rating, data.rating))
+    if (data.type && data.type.length > 0) {
+      conditions.push(eq(feedback.type, data.type[0]))
     }
 
     if (data.reviewed) {
@@ -130,8 +118,7 @@ export const getFeedbacksFn = createServerFn({ method: 'GET' })
       .leftJoin(user, eq(feedback.userId, user.id))
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(orderBy)
-      .limit(limit)
-      .offset(offset)
+      .limit(data.limit)
 
     // Get total count
     const totalCount = await db
@@ -141,22 +128,17 @@ export const getFeedbacksFn = createServerFn({ method: 'GET' })
       .where(conditions.length > 0 ? and(...conditions) : undefined)
 
     return {
-      success: true,
       feedbacks,
-      pagination: {
-        page,
-        limit,
-        total: Number(totalCount[0]?.count || 0),
-        totalPages: Math.ceil(Number(totalCount[0]?.count || 0) / limit),
-      },
+      total: Number(totalCount[0]?.count || 0),
     }
   })
 
-// Mark feedback as reviewed
+// Mark feedback as reviewed (admin only)
 export const markFeedbackReviewedFn = createServerFn({ method: 'POST' })
   .inputValidator(
     z.object({
-      feedbackId: z.string().min(1),
+      id: z.string().min(1),
+      reviewed: z.enum(['true', 'false']).optional(),
       notes: z.string().optional(),
     }),
   )
@@ -164,24 +146,22 @@ export const markFeedbackReviewedFn = createServerFn({ method: 'POST' })
     const headers = getRequestHeaders()
     const session = await auth.api.getSession({ headers })
 
-    // Check if user is admin
-    // TODO: Add proper admin check
-    if (!session?.user) {
+    if (!session || session.user.role !== 'admin') {
       return {
         success: false,
-        error: 'Unauthorized',
+        error: 'Unauthorized: Admin access required',
       }
     }
 
     await db
       .update(feedback)
       .set({
-        reviewed: 'true',
+        reviewed: data.reviewed || 'true',
         reviewedBy: session.user.id,
         reviewedAt: new Date(),
         adminNotes: data.notes,
       })
-      .where(eq(feedback.id, data.feedbackId))
+      .where(eq(feedback.id, data.id))
 
     return {
       success: true,

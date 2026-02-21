@@ -22,6 +22,7 @@ import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as AdminSuggestionsIndexRouteImport } from './routes/admin/suggestions/index'
 import { Route as AdminJobsIndexRouteImport } from './routes/admin/jobs/index'
+import { Route as AdminFeedbackIndexRouteImport } from './routes/admin/feedback/index'
 import { Route as AdminCapabilitiesIndexRouteImport } from './routes/admin/capabilities/index'
 import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/technologies/index'
 import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
@@ -36,6 +37,7 @@ import { Route as AdminCapabilitiesSlugIndexRouteImport } from './routes/admin/c
 import { Route as PublicJobsSlugIndexRouteImport } from './routes/_public/jobs/$slug/index'
 import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
 import { Route as AuthedDashboardSuggestionsIndexRouteImport } from './routes/_authed/dashboard/suggestions/index'
+import { Route as AuthedDashboardFeedbackIndexRouteImport } from './routes/_authed/dashboard/feedback/index'
 import { Route as AdminJobsSlugEditRouteImport } from './routes/admin/jobs/$slug/edit'
 import { Route as AdminCapabilitiesSlugEditRouteImport } from './routes/admin/capabilities/$slug/edit'
 import { Route as AdminCapabilitiesSlugAddRouteImport } from './routes/admin/capabilities/$slug/add'
@@ -103,6 +105,11 @@ const AdminSuggestionsIndexRoute = AdminSuggestionsIndexRouteImport.update({
 const AdminJobsIndexRoute = AdminJobsIndexRouteImport.update({
   id: '/jobs/',
   path: '/jobs/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminFeedbackIndexRoute = AdminFeedbackIndexRouteImport.update({
+  id: '/feedback/',
+  path: '/feedback/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminCapabilitiesIndexRoute = AdminCapabilitiesIndexRouteImport.update({
@@ -178,6 +185,12 @@ const AuthedDashboardSuggestionsIndexRoute =
     path: '/dashboard/suggestions/',
     getParentRoute: () => AuthedRouteRoute,
   } as any)
+const AuthedDashboardFeedbackIndexRoute =
+  AuthedDashboardFeedbackIndexRouteImport.update({
+    id: '/dashboard/feedback/',
+    path: '/dashboard/feedback/',
+    getParentRoute: () => AuthedRouteRoute,
+  } as any)
 const AdminJobsSlugEditRoute = AdminJobsSlugEditRouteImport.update({
   id: '/jobs/$slug/edit',
   path: '/jobs/$slug/edit',
@@ -227,12 +240,14 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof PublicReportsIndexRoute
   '/technologies/': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities/': typeof AdminCapabilitiesIndexRoute
+  '/admin/feedback/': typeof AdminFeedbackIndexRoute
   '/admin/jobs/': typeof AdminJobsIndexRoute
   '/admin/suggestions/': typeof AdminSuggestionsIndexRoute
   '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/admin/jobs/$slug/edit': typeof AdminJobsSlugEditRoute
+  '/dashboard/feedback/': typeof AuthedDashboardFeedbackIndexRoute
   '/dashboard/suggestions/': typeof AuthedDashboardSuggestionsIndexRoute
   '/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
   '/jobs/$slug/': typeof PublicJobsSlugIndexRoute
@@ -258,12 +273,14 @@ export interface FileRoutesByTo {
   '/reports': typeof PublicReportsIndexRoute
   '/technologies': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities': typeof AdminCapabilitiesIndexRoute
+  '/admin/feedback': typeof AdminFeedbackIndexRoute
   '/admin/jobs': typeof AdminJobsIndexRoute
   '/admin/suggestions': typeof AdminSuggestionsIndexRoute
   '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/admin/jobs/$slug/edit': typeof AdminJobsSlugEditRoute
+  '/dashboard/feedback': typeof AuthedDashboardFeedbackIndexRoute
   '/dashboard/suggestions': typeof AuthedDashboardSuggestionsIndexRoute
   '/capabilities/$slug': typeof PublicCapabilitiesSlugIndexRoute
   '/jobs/$slug': typeof PublicJobsSlugIndexRoute
@@ -293,12 +310,14 @@ export interface FileRoutesById {
   '/_public/reports/': typeof PublicReportsIndexRoute
   '/_public/technologies/': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities/': typeof AdminCapabilitiesIndexRoute
+  '/admin/feedback/': typeof AdminFeedbackIndexRoute
   '/admin/jobs/': typeof AdminJobsIndexRoute
   '/admin/suggestions/': typeof AdminSuggestionsIndexRoute
   '/_public/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/admin/jobs/$slug/edit': typeof AdminJobsSlugEditRoute
+  '/_authed/dashboard/feedback/': typeof AuthedDashboardFeedbackIndexRoute
   '/_authed/dashboard/suggestions/': typeof AuthedDashboardSuggestionsIndexRoute
   '/_public/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
   '/_public/jobs/$slug/': typeof PublicJobsSlugIndexRoute
@@ -327,12 +346,14 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/technologies/'
     | '/admin/capabilities/'
+    | '/admin/feedback/'
     | '/admin/jobs/'
     | '/admin/suggestions/'
     | '/capabilities/$slug/$subslug'
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
     | '/admin/jobs/$slug/edit'
+    | '/dashboard/feedback/'
     | '/dashboard/suggestions/'
     | '/capabilities/$slug/'
     | '/jobs/$slug/'
@@ -358,12 +379,14 @@ export interface FileRouteTypes {
     | '/reports'
     | '/technologies'
     | '/admin/capabilities'
+    | '/admin/feedback'
     | '/admin/jobs'
     | '/admin/suggestions'
     | '/capabilities/$slug/$subslug'
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
     | '/admin/jobs/$slug/edit'
+    | '/dashboard/feedback'
     | '/dashboard/suggestions'
     | '/capabilities/$slug'
     | '/jobs/$slug'
@@ -392,12 +415,14 @@ export interface FileRouteTypes {
     | '/_public/reports/'
     | '/_public/technologies/'
     | '/admin/capabilities/'
+    | '/admin/feedback/'
     | '/admin/jobs/'
     | '/admin/suggestions/'
     | '/_public/capabilities/$slug/$subslug'
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
     | '/admin/jobs/$slug/edit'
+    | '/_authed/dashboard/feedback/'
     | '/_authed/dashboard/suggestions/'
     | '/_public/capabilities/$slug/'
     | '/_public/jobs/$slug/'
@@ -509,6 +534,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminJobsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/feedback/': {
+      id: '/admin/feedback/'
+      path: '/feedback'
+      fullPath: '/admin/feedback/'
+      preLoaderRoute: typeof AdminFeedbackIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/capabilities/': {
       id: '/admin/capabilities/'
       path: '/capabilities'
@@ -607,6 +639,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardSuggestionsIndexRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
+    '/_authed/dashboard/feedback/': {
+      id: '/_authed/dashboard/feedback/'
+      path: '/dashboard/feedback'
+      fullPath: '/dashboard/feedback/'
+      preLoaderRoute: typeof AuthedDashboardFeedbackIndexRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
     '/admin/jobs/$slug/edit': {
       id: '/admin/jobs/$slug/edit'
       path: '/jobs/$slug/edit'
@@ -647,11 +686,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthedRouteRouteChildren {
   AuthedDashboardIndexRoute: typeof AuthedDashboardIndexRoute
+  AuthedDashboardFeedbackIndexRoute: typeof AuthedDashboardFeedbackIndexRoute
   AuthedDashboardSuggestionsIndexRoute: typeof AuthedDashboardSuggestionsIndexRoute
 }
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedDashboardIndexRoute: AuthedDashboardIndexRoute,
+  AuthedDashboardFeedbackIndexRoute: AuthedDashboardFeedbackIndexRoute,
   AuthedDashboardSuggestionsIndexRoute: AuthedDashboardSuggestionsIndexRoute,
 }
 
@@ -696,6 +737,7 @@ interface AdminRouteRouteChildren {
   AdminCapabilitiesAddRoute: typeof AdminCapabilitiesAddRoute
   AdminJobsAddRoute: typeof AdminJobsAddRoute
   AdminCapabilitiesIndexRoute: typeof AdminCapabilitiesIndexRoute
+  AdminFeedbackIndexRoute: typeof AdminFeedbackIndexRoute
   AdminJobsIndexRoute: typeof AdminJobsIndexRoute
   AdminSuggestionsIndexRoute: typeof AdminSuggestionsIndexRoute
   AdminCapabilitiesSlugAddRoute: typeof AdminCapabilitiesSlugAddRoute
@@ -711,6 +753,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminCapabilitiesAddRoute: AdminCapabilitiesAddRoute,
   AdminJobsAddRoute: AdminJobsAddRoute,
   AdminCapabilitiesIndexRoute: AdminCapabilitiesIndexRoute,
+  AdminFeedbackIndexRoute: AdminFeedbackIndexRoute,
   AdminJobsIndexRoute: AdminJobsIndexRoute,
   AdminSuggestionsIndexRoute: AdminSuggestionsIndexRoute,
   AdminCapabilitiesSlugAddRoute: AdminCapabilitiesSlugAddRoute,

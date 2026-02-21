@@ -111,9 +111,11 @@ function App() {
                     Share your thoughts and suggestions
                   </div>
                 </div>
-                <Button variant="outline" size="sm">
-                  Submit
-                </Button>
+                <Link to="/dashboard/feedback">
+                  <Button variant="outline" size="sm">
+                    Submit
+                  </Button>
+                </Link>
               </li>
 
               <li className="flex items-center justify-between py-2 border-b">
@@ -123,9 +125,11 @@ function App() {
                     Report issues or unexpected behavior
                   </div>
                 </div>
-                <Button variant="outline" size="sm">
-                  Report
-                </Button>
+                <Link to="/dashboard/feedback">
+                  <Button variant="outline" size="sm">
+                    Report
+                  </Button>
+                </Link>
               </li>
             </ul>
           </div>
