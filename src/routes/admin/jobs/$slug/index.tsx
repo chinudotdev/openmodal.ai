@@ -40,7 +40,6 @@ import {
   ComboboxItem,
   ComboboxLabel,
   ComboboxList,
-  ComboboxTrigger,
 } from '@/components/ui/combobox'
 import {
   Dialog,
@@ -608,7 +607,7 @@ function AdminJobDetailPage() {
                                       <Combobox
                                         value={field.state.value}
                                         onValueChange={(value) =>
-                                          field.handleChange(value)
+                                          field.handleChange(value ?? '')
                                         }
                                         disabled={
                                           isLoadingSubtypes ||
@@ -618,7 +617,9 @@ function AdminJobDetailPage() {
                                         <ComboboxInput
                                           placeholder="Search capabilities..."
                                           onChange={(e) =>
-                                            setCapabilitySearch(e.target.value)
+                                            setCapabilitySearch(
+                                              e.target.value ?? '',
+                                            )
                                           }
                                           disabled={
                                             isLoadingSubtypes ||
