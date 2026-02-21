@@ -477,7 +477,7 @@ function TechnologyDetailPage() {
                 <p className="text-sm text-muted-foreground mb-4">
                   Used {technology.name} in your work? Share your impact story.
                 </p>
-                <Link to="/reports">
+                <Link to="/dashboard">
                   <Button size="sm" className="w-full">
                     📝 Share Story
                   </Button>

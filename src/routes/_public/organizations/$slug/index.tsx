@@ -409,7 +409,7 @@ function OrganizationDetailPage() {
                   Work with {organization.name} technologies? Share your impact
                   story.
                 </p>
-                <Link to="/reports">
+                <Link to="/dashboard">
                   <Button size="sm" className="w-full">
                     📝 Share Story
                   </Button>

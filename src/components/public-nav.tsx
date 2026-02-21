@@ -30,7 +30,7 @@ export function PublicNav() {
             {link.label}
           </Link>
         ))}
-        <Link to="/login">
+        <Link to="/dashboard">
           <Button size="sm">Contribute</Button>
         </Link>
       </nav>
@@ -56,7 +56,7 @@ export function PublicNav() {
               {link.label}
             </Link>
           ))}
-          <Link to="/login" onClick={() => setOpen(false)}>
+          <Link to="/dashboard" onClick={() => setOpen(false)}>
             <Button size="sm" className="w-full">
               Contribute
             </Button>

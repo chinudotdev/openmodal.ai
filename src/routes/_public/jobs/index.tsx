@@ -460,7 +460,7 @@ function JobsPage() {
               personalized insights and recommendations.
             </p>
             <div className="flex items-center justify-center gap-4">
-              <Link to="/login">
+              <Link to="/dashboard">
                 <Button>📝 Get Started</Button>
               </Link>
               <Link to="/login">

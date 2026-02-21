@@ -162,7 +162,7 @@ function TechnologiesPage() {
             Compare performance and find the right tools for your needs.
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Link to="/login">
+            <Link to="/dashboard">
               <Button>📝 Get Started</Button>
             </Link>
             <Link to="/">

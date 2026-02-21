@@ -180,7 +180,7 @@ function EditOrganizationPage() {
                   >
                     <Checkbox
                       checked={field.state.value.includes(type.value as any)}
-                      onChange={() => handleTypeToggle(type.value)}
+                      onCheckedChange={() => handleTypeToggle(type.value)}
                       disabled={form.state.isSubmitting}
                     />
                     <span className="text-sm">{type.label}</span>
