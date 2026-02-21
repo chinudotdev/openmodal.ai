@@ -55,11 +55,6 @@ import { Spinner } from '@/components/ui/spinner'
 
 const taskFormSchema = z.object({
   name: z.string().min(1, 'Task name is required').max(200),
-  percentageOfJob: z
-    .number()
-    .min(1, 'Percentage must be at least 1')
-    .max(100, 'Percentage must be at most 100'),
-  automatable: z.enum(['yes', 'partial', 'no']),
   reason: z.string().max(500),
 })
 
@@ -184,20 +179,22 @@ function AdminJobDetailPage() {
   const taskForm = useForm({
     defaultValues: {
       name: '',
-      percentageOfJob: 10,
-      automatable: 'partial',
       reason: '',
     },
     validators: {
       onSubmit: taskFormSchema,
     },
     onSubmit: async ({ value }) => {
+      // Infer percentageOfJob: evenly distribute among all tasks
+      const newTaskCount = tasks.length + 1
+      const inferredPercentage = Math.round(100 / newTaskCount)
+
       const result = await createTaskFn({
         data: {
           jobId: job.id,
           name: value.name,
-          percentageOfJob: value.percentageOfJob,
-          automatable: value.automatable as 'yes' | 'partial' | 'no',
+          percentageOfJob: inferredPercentage,
+          automatable: 'partial',
           reason: value.reason || undefined,
         },
       })
@@ -279,12 +276,6 @@ function AdminJobDetailPage() {
         return ''
     }
   }
-
-  const automatableOptions = [
-    { value: 'yes', label: 'Yes - Can be fully automated' },
-    { value: 'partial', label: 'Partial - Can be partially automated' },
-    { value: 'no', label: 'No - Cannot be automated' },
-  ]
 
   const importanceOptions = [
     { value: 'critical', label: 'Critical' },
@@ -439,85 +430,40 @@ function AdminJobDetailPage() {
               }}
               className="space-y-4"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <taskForm.Field name="name">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel>Task Name</FieldLabel>
-                      <Input
-                        value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="e.g., Writing code"
-                        disabled={taskForm.state.isSubmitting}
-                      />
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
-                  )}
-                </taskForm.Field>
+              <taskForm.Field name="name">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Task Name</FieldLabel>
+                    <Input
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      placeholder="e.g., Writing code"
+                      disabled={taskForm.state.isSubmitting}
+                    />
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              </taskForm.Field>
 
-                <taskForm.Field name="percentageOfJob">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel>% of Job</FieldLabel>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={100}
-                        value={field.state.value}
-                        onChange={(e) =>
-                          field.handleChange(
-                            Number.parseInt(e.target.value) || 0,
-                          )
-                        }
-                        disabled={taskForm.state.isSubmitting}
-                      />
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
-                  )}
-                </taskForm.Field>
-              </div>
+              <taskForm.Field name="reason">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Reason (optional)</FieldLabel>
+                    <Input
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      placeholder="Additional context about this task..."
+                      disabled={taskForm.state.isSubmitting}
+                    />
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              </taskForm.Field>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <taskForm.Field name="automatable">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel>Can this be automated?</FieldLabel>
-                      <Select
-                        value={field.state.value}
-                        onValueChange={(value) => field.handleChange(value)}
-                        disabled={taskForm.state.isSubmitting}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select option" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {automatableOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
-                  )}
-                </taskForm.Field>
-
-                <taskForm.Field name="reason">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel>Reason (optional)</FieldLabel>
-                      <Input
-                        value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="Why or why not?"
-                        disabled={taskForm.state.isSubmitting}
-                      />
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
-                  )}
-                </taskForm.Field>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Automation status and percentage will be calculated based on
+                capability requirements.
+              </p>
 
               <div className="flex justify-end">
                 <taskForm.Subscribe
