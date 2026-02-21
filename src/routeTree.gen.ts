@@ -26,6 +26,7 @@ import { Route as AdminFeedbackIndexRouteImport } from './routes/admin/feedback/
 import { Route as AdminCapabilitiesIndexRouteImport } from './routes/admin/capabilities/index'
 import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/technologies/index'
 import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
+import { Route as PublicOrganizationsIndexRouteImport } from './routes/_public/organizations/index'
 import { Route as PublicJobsIndexRouteImport } from './routes/_public/jobs/index'
 import { Route as PublicCapabilitiesIndexRouteImport } from './routes/_public/capabilities/index'
 import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
@@ -34,6 +35,8 @@ import { Route as AdminJobsAddRouteImport } from './routes/admin/jobs/add'
 import { Route as AdminCapabilitiesAddRouteImport } from './routes/admin/capabilities/add'
 import { Route as AdminJobsSlugIndexRouteImport } from './routes/admin/jobs/$slug/index'
 import { Route as AdminCapabilitiesSlugIndexRouteImport } from './routes/admin/capabilities/$slug/index'
+import { Route as PublicTechnologiesSlugIndexRouteImport } from './routes/_public/technologies/$slug/index'
+import { Route as PublicOrganizationsSlugIndexRouteImport } from './routes/_public/organizations/$slug/index'
 import { Route as PublicJobsSlugIndexRouteImport } from './routes/_public/jobs/$slug/index'
 import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
 import { Route as AuthedDashboardSuggestionsIndexRouteImport } from './routes/_authed/dashboard/suggestions/index'
@@ -127,6 +130,12 @@ const PublicReportsIndexRoute = PublicReportsIndexRouteImport.update({
   path: '/reports/',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PublicOrganizationsIndexRoute =
+  PublicOrganizationsIndexRouteImport.update({
+    id: '/organizations/',
+    path: '/organizations/',
+    getParentRoute: () => PublicRouteRoute,
+  } as any)
 const PublicJobsIndexRoute = PublicJobsIndexRouteImport.update({
   id: '/jobs/',
   path: '/jobs/',
@@ -167,6 +176,18 @@ const AdminCapabilitiesSlugIndexRoute =
     id: '/capabilities/$slug/',
     path: '/capabilities/$slug/',
     getParentRoute: () => AdminRouteRoute,
+  } as any)
+const PublicTechnologiesSlugIndexRoute =
+  PublicTechnologiesSlugIndexRouteImport.update({
+    id: '/technologies/$slug/',
+    path: '/technologies/$slug/',
+    getParentRoute: () => PublicRouteRoute,
+  } as any)
+const PublicOrganizationsSlugIndexRoute =
+  PublicOrganizationsSlugIndexRouteImport.update({
+    id: '/organizations/$slug/',
+    path: '/organizations/$slug/',
+    getParentRoute: () => PublicRouteRoute,
   } as any)
 const PublicJobsSlugIndexRoute = PublicJobsSlugIndexRouteImport.update({
   id: '/jobs/$slug/',
@@ -237,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof AuthedDashboardIndexRoute
   '/capabilities/': typeof PublicCapabilitiesIndexRoute
   '/jobs/': typeof PublicJobsIndexRoute
+  '/organizations/': typeof PublicOrganizationsIndexRoute
   '/reports/': typeof PublicReportsIndexRoute
   '/technologies/': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities/': typeof AdminCapabilitiesIndexRoute
@@ -251,6 +273,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/suggestions/': typeof AuthedDashboardSuggestionsIndexRoute
   '/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
   '/jobs/$slug/': typeof PublicJobsSlugIndexRoute
+  '/organizations/$slug/': typeof PublicOrganizationsSlugIndexRoute
+  '/technologies/$slug/': typeof PublicTechnologiesSlugIndexRoute
   '/admin/capabilities/$slug/': typeof AdminCapabilitiesSlugIndexRoute
   '/admin/jobs/$slug/': typeof AdminJobsSlugIndexRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
@@ -270,6 +294,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthedDashboardIndexRoute
   '/capabilities': typeof PublicCapabilitiesIndexRoute
   '/jobs': typeof PublicJobsIndexRoute
+  '/organizations': typeof PublicOrganizationsIndexRoute
   '/reports': typeof PublicReportsIndexRoute
   '/technologies': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities': typeof AdminCapabilitiesIndexRoute
@@ -284,6 +309,8 @@ export interface FileRoutesByTo {
   '/dashboard/suggestions': typeof AuthedDashboardSuggestionsIndexRoute
   '/capabilities/$slug': typeof PublicCapabilitiesSlugIndexRoute
   '/jobs/$slug': typeof PublicJobsSlugIndexRoute
+  '/organizations/$slug': typeof PublicOrganizationsSlugIndexRoute
+  '/technologies/$slug': typeof PublicTechnologiesSlugIndexRoute
   '/admin/capabilities/$slug': typeof AdminCapabilitiesSlugIndexRoute
   '/admin/jobs/$slug': typeof AdminJobsSlugIndexRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
@@ -307,6 +334,7 @@ export interface FileRoutesById {
   '/_authed/dashboard/': typeof AuthedDashboardIndexRoute
   '/_public/capabilities/': typeof PublicCapabilitiesIndexRoute
   '/_public/jobs/': typeof PublicJobsIndexRoute
+  '/_public/organizations/': typeof PublicOrganizationsIndexRoute
   '/_public/reports/': typeof PublicReportsIndexRoute
   '/_public/technologies/': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities/': typeof AdminCapabilitiesIndexRoute
@@ -321,6 +349,8 @@ export interface FileRoutesById {
   '/_authed/dashboard/suggestions/': typeof AuthedDashboardSuggestionsIndexRoute
   '/_public/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
   '/_public/jobs/$slug/': typeof PublicJobsSlugIndexRoute
+  '/_public/organizations/$slug/': typeof PublicOrganizationsSlugIndexRoute
+  '/_public/technologies/$slug/': typeof PublicTechnologiesSlugIndexRoute
   '/admin/capabilities/$slug/': typeof AdminCapabilitiesSlugIndexRoute
   '/admin/jobs/$slug/': typeof AdminJobsSlugIndexRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
@@ -343,6 +373,7 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/capabilities/'
     | '/jobs/'
+    | '/organizations/'
     | '/reports/'
     | '/technologies/'
     | '/admin/capabilities/'
@@ -357,6 +388,8 @@ export interface FileRouteTypes {
     | '/dashboard/suggestions/'
     | '/capabilities/$slug/'
     | '/jobs/$slug/'
+    | '/organizations/$slug/'
+    | '/technologies/$slug/'
     | '/admin/capabilities/$slug/'
     | '/admin/jobs/$slug/'
     | '/admin/capabilities/$slug/$subslug/edit'
@@ -376,6 +409,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/capabilities'
     | '/jobs'
+    | '/organizations'
     | '/reports'
     | '/technologies'
     | '/admin/capabilities'
@@ -390,6 +424,8 @@ export interface FileRouteTypes {
     | '/dashboard/suggestions'
     | '/capabilities/$slug'
     | '/jobs/$slug'
+    | '/organizations/$slug'
+    | '/technologies/$slug'
     | '/admin/capabilities/$slug'
     | '/admin/jobs/$slug'
     | '/admin/capabilities/$slug/$subslug/edit'
@@ -412,6 +448,7 @@ export interface FileRouteTypes {
     | '/_authed/dashboard/'
     | '/_public/capabilities/'
     | '/_public/jobs/'
+    | '/_public/organizations/'
     | '/_public/reports/'
     | '/_public/technologies/'
     | '/admin/capabilities/'
@@ -426,6 +463,8 @@ export interface FileRouteTypes {
     | '/_authed/dashboard/suggestions/'
     | '/_public/capabilities/$slug/'
     | '/_public/jobs/$slug/'
+    | '/_public/organizations/$slug/'
+    | '/_public/technologies/$slug/'
     | '/admin/capabilities/$slug/'
     | '/admin/jobs/$slug/'
     | '/admin/capabilities/$slug/$subslug/edit'
@@ -562,6 +601,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicReportsIndexRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_public/organizations/': {
+      id: '/_public/organizations/'
+      path: '/organizations'
+      fullPath: '/organizations/'
+      preLoaderRoute: typeof PublicOrganizationsIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
     '/_public/jobs/': {
       id: '/_public/jobs/'
       path: '/jobs'
@@ -617,6 +663,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/capabilities/$slug/'
       preLoaderRoute: typeof AdminCapabilitiesSlugIndexRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/_public/technologies/$slug/': {
+      id: '/_public/technologies/$slug/'
+      path: '/technologies/$slug'
+      fullPath: '/technologies/$slug/'
+      preLoaderRoute: typeof PublicTechnologiesSlugIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/organizations/$slug/': {
+      id: '/_public/organizations/$slug/'
+      path: '/organizations/$slug'
+      fullPath: '/organizations/$slug/'
+      preLoaderRoute: typeof PublicOrganizationsSlugIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/_public/jobs/$slug/': {
       id: '/_public/jobs/$slug/'
@@ -707,11 +767,14 @@ interface PublicRouteRouteChildren {
   PublicIndexRoute: typeof PublicIndexRoute
   PublicCapabilitiesIndexRoute: typeof PublicCapabilitiesIndexRoute
   PublicJobsIndexRoute: typeof PublicJobsIndexRoute
+  PublicOrganizationsIndexRoute: typeof PublicOrganizationsIndexRoute
   PublicReportsIndexRoute: typeof PublicReportsIndexRoute
   PublicTechnologiesIndexRoute: typeof PublicTechnologiesIndexRoute
   PublicCapabilitiesSlugSubslugRoute: typeof PublicCapabilitiesSlugSubslugRoute
   PublicCapabilitiesSlugIndexRoute: typeof PublicCapabilitiesSlugIndexRoute
   PublicJobsSlugIndexRoute: typeof PublicJobsSlugIndexRoute
+  PublicOrganizationsSlugIndexRoute: typeof PublicOrganizationsSlugIndexRoute
+  PublicTechnologiesSlugIndexRoute: typeof PublicTechnologiesSlugIndexRoute
 }
 
 const PublicRouteRouteChildren: PublicRouteRouteChildren = {
@@ -721,11 +784,14 @@ const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicIndexRoute: PublicIndexRoute,
   PublicCapabilitiesIndexRoute: PublicCapabilitiesIndexRoute,
   PublicJobsIndexRoute: PublicJobsIndexRoute,
+  PublicOrganizationsIndexRoute: PublicOrganizationsIndexRoute,
   PublicReportsIndexRoute: PublicReportsIndexRoute,
   PublicTechnologiesIndexRoute: PublicTechnologiesIndexRoute,
   PublicCapabilitiesSlugSubslugRoute: PublicCapabilitiesSlugSubslugRoute,
   PublicCapabilitiesSlugIndexRoute: PublicCapabilitiesSlugIndexRoute,
   PublicJobsSlugIndexRoute: PublicJobsSlugIndexRoute,
+  PublicOrganizationsSlugIndexRoute: PublicOrganizationsSlugIndexRoute,
+  PublicTechnologiesSlugIndexRoute: PublicTechnologiesSlugIndexRoute,
 }
 
 const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(

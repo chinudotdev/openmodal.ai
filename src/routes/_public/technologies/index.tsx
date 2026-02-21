@@ -1,10 +1,15 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 
+import { getAllTechnologiesFn } from '@/actions/technologies'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const Route = createFileRoute('/_public/technologies/')({
+  loader: async () => {
+    const { technologies } = await getAllTechnologiesFn({ data: {} })
+    return { technologies }
+  },
   component: TechnologiesPage,
   pendingComponent: () => (
     <div className="min-h-svh flex items-center justify-center">
@@ -17,53 +22,39 @@ export const Route = createFileRoute('/_public/technologies/')({
 })
 
 function TechnologiesPage() {
-  // Mock data - TODO: Replace with real data fetching
-  const technologies = [
-    {
-      id: '1',
-      slug: 'gpt-4',
-      name: 'GPT-4',
-      type: 'Language Model',
-      organization: 'OpenAI',
-      stage: 'Production',
-      icon: '🤖',
-    },
-    {
-      id: '2',
-      slug: 'claude',
-      name: 'Claude',
-      type: 'Language Model',
-      organization: 'Anthropic',
-      stage: 'Production',
-      icon: '🧠',
-    },
-    {
-      id: '3',
-      slug: 'dall-e',
-      name: 'DALL-E',
-      type: 'Image Generation',
-      organization: 'OpenAI',
-      stage: 'Production',
-      icon: '🎨',
-    },
-  ]
+  const { technologies } = Route.useLoaderData()
 
   const getStageColor = (stage: string) => {
     switch (stage) {
-      case 'Production':
+      case 'deployed':
         return 'bg-green-500/10 text-green-500 dark:text-green-400 border-green-500/20'
-      case 'Beta':
+      case 'pilot':
         return 'bg-yellow-500/10 text-yellow-500 dark:text-yellow-400 border-yellow-500/20'
-      case 'Research':
+      case 'research':
         return 'bg-blue-500/10 text-blue-500 dark:text-blue-400 border-blue-500/20'
+      case 'discontinued':
+        return 'bg-gray-500/10 text-gray-500 dark:text-gray-400 border-gray-500/20'
       default:
         return ''
     }
   }
 
+  const formatType = (type: string) => {
+    return type
+      .split('_')
+      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
+
+  const formatStage = (stage: string) => {
+    return stage
+      .split('_')
+      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
+
   return (
     <>
-      {/* Hero Section */}
       {/* Hero Section */}
       <section className="border-b border-border/40 bg-muted/30">
         <div className="container mx-auto px-6 py-16">
@@ -75,50 +66,91 @@ function TechnologiesPage() {
               Explore the AI systems and models powering today's capabilities.
               Track their development and compare their performance.
             </p>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              <span>{technologies.length} technologies tracked</span>
+              <span>•</span>
+              <span>Real-world impact reports</span>
+              <span>•</span>
+              <span>Capability performance data</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Technologies List */}
       <section className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {technologies.map((tech) => (
-            <Link key={tech.id} to="/technologies" className="group">
-              <Card className="h-full transition-all hover:shadow-lg hover:border-primary/50">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{tech.icon}</span>
-                      <div>
-                        <h3 className="font-semibold group-hover:text-primary transition-colors">
-                          {tech.name}
-                        </h3>
-                        <p className="text-xs text-muted-foreground">
-                          {tech.organization}
-                        </p>
+        {technologies.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-6">No technologies found.</p>
+            <Link to="/">
+              <Button>Back Home</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {technologies.map((tech: any) => (
+              <Link
+                key={tech.id}
+                to="/technologies/$slug"
+                params={{ slug: tech.slug }}
+                className="group"
+              >
+                <Card className="h-full transition-all hover:shadow-lg hover:border-primary/50">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {tech.image ? (
+                          <img
+                            src={tech.image}
+                            alt={tech.name}
+                            className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center text-2xl flex-shrink-0">
+                            🤖
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold group-hover:text-primary transition-colors truncate">
+                            {tech.name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {tech.organization.name}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={
+                          getStageColor(tech.stage) + ' flex-shrink-0 ml-2'
+                        }
+                      >
+                        {formatStage(tech.stage)}
+                      </Badge>
+                    </div>
+
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                      {tech.description}
+                    </p>
+
+                    <div className="space-y-2">
+                      <p className="text-sm">
+                        Type:{' '}
+                        <span className="font-medium">
+                          {formatType(tech.type)}
+                        </span>
+                      </p>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/40">
+                        <span>{tech._count.reports} reports</span>
+                        <span>View details →</span>
                       </div>
                     </div>
-                    <Badge
-                      variant="outline"
-                      className={getStageColor(tech.stage)}
-                    >
-                      {tech.stage}
-                    </Badge>
-                  </div>
-
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      Type: {tech.type}
-                    </p>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/40">
-                      <span>View details →</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* CTA */}
@@ -133,7 +165,7 @@ function TechnologiesPage() {
             <Link to="/login">
               <Button>📝 Get Started</Button>
             </Link>
-            <Link to="/login">
+            <Link to="/">
               <Button variant="outline">🔍 Explore</Button>
             </Link>
           </div>
