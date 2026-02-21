@@ -8,41 +8,39 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import type { createStart } from '@tanstack/react-start'
-
-import type { getRouter } from './router.tsx'
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
-import { Route as AuthedDashboardSuggestionsIndexRouteImport } from './routes/_authed/dashboard/suggestions/index'
-import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
-import { Route as PublicAboutRouteImport } from './routes/_public/about'
-import { Route as PublicCapabilitiesSlugSubslugRouteImport } from './routes/_public/capabilities/$slug/$subslug'
-import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
-import { Route as PublicCapabilitiesIndexRouteImport } from './routes/_public/capabilities/index'
-import { Route as PublicIndexRouteImport } from './routes/_public/index'
-import { Route as PublicJobsSlugIndexRouteImport } from './routes/_public/jobs/$slug/index'
-import { Route as PublicJobsIndexRouteImport } from './routes/_public/jobs/index'
-import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
-import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
-import { Route as PublicRouteRouteImport } from './routes/_public/route'
-import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/technologies/index'
-import { Route as PublicTermsRouteImport } from './routes/_public/terms'
-import { Route as AdminCapabilitiesSlugSubslugEditRouteImport } from './routes/admin/capabilities/$slug/$subslug/edit'
-import { Route as AdminCapabilitiesSlugAddRouteImport } from './routes/admin/capabilities/$slug/add'
-import { Route as AdminCapabilitiesSlugEditRouteImport } from './routes/admin/capabilities/$slug/edit'
-import { Route as AdminCapabilitiesSlugIndexRouteImport } from './routes/admin/capabilities/$slug/index'
-import { Route as AdminCapabilitiesAddRouteImport } from './routes/admin/capabilities/add'
-import { Route as AdminCapabilitiesIndexRouteImport } from './routes/admin/capabilities/index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as AdminJobsSlugEditRouteImport } from './routes/admin/jobs/$slug/edit'
-import { Route as AdminJobsSlugIndexRouteImport } from './routes/admin/jobs/$slug/index'
-import { Route as AdminJobsAddRouteImport } from './routes/admin/jobs/add'
-import { Route as AdminJobsIndexRouteImport } from './routes/admin/jobs/index'
-import { Route as AdminRouteRouteImport } from './routes/admin/route'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
+import { Route as PublicRouteRouteImport } from './routes/_public/route'
+import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as PublicTermsRouteImport } from './routes/_public/terms'
+import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
+import { Route as PublicAboutRouteImport } from './routes/_public/about'
+import { Route as AdminSuggestionsIndexRouteImport } from './routes/admin/suggestions/index'
+import { Route as AdminJobsIndexRouteImport } from './routes/admin/jobs/index'
+import { Route as AdminCapabilitiesIndexRouteImport } from './routes/admin/capabilities/index'
+import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/technologies/index'
+import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
+import { Route as PublicJobsIndexRouteImport } from './routes/_public/jobs/index'
+import { Route as PublicCapabilitiesIndexRouteImport } from './routes/_public/capabilities/index'
+import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AdminJobsAddRouteImport } from './routes/admin/jobs/add'
+import { Route as AdminCapabilitiesAddRouteImport } from './routes/admin/capabilities/add'
+import { Route as AdminJobsSlugIndexRouteImport } from './routes/admin/jobs/$slug/index'
+import { Route as AdminCapabilitiesSlugIndexRouteImport } from './routes/admin/capabilities/$slug/index'
+import { Route as PublicJobsSlugIndexRouteImport } from './routes/_public/jobs/$slug/index'
+import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
+import { Route as AuthedDashboardSuggestionsIndexRouteImport } from './routes/_authed/dashboard/suggestions/index'
+import { Route as AdminJobsSlugEditRouteImport } from './routes/admin/jobs/$slug/edit'
+import { Route as AdminCapabilitiesSlugEditRouteImport } from './routes/admin/capabilities/$slug/edit'
+import { Route as AdminCapabilitiesSlugAddRouteImport } from './routes/admin/capabilities/$slug/add'
+import { Route as PublicCapabilitiesSlugSubslugRouteImport } from './routes/_public/capabilities/$slug/$subslug'
+import { Route as AdminCapabilitiesSlugSubslugEditRouteImport } from './routes/admin/capabilities/$slug/$subslug/edit'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -96,6 +94,11 @@ const PublicAboutRoute = PublicAboutRouteImport.update({
   id: '/about',
   path: '/about',
   getParentRoute: () => PublicRouteRoute,
+} as any)
+const AdminSuggestionsIndexRoute = AdminSuggestionsIndexRouteImport.update({
+  id: '/suggestions/',
+  path: '/suggestions/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminJobsIndexRoute = AdminJobsIndexRouteImport.update({
   id: '/jobs/',
@@ -225,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/technologies/': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities/': typeof AdminCapabilitiesIndexRoute
   '/admin/jobs/': typeof AdminJobsIndexRoute
+  '/admin/suggestions/': typeof AdminSuggestionsIndexRoute
   '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
@@ -255,6 +259,7 @@ export interface FileRoutesByTo {
   '/technologies': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities': typeof AdminCapabilitiesIndexRoute
   '/admin/jobs': typeof AdminJobsIndexRoute
+  '/admin/suggestions': typeof AdminSuggestionsIndexRoute
   '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
@@ -289,6 +294,7 @@ export interface FileRoutesById {
   '/_public/technologies/': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities/': typeof AdminCapabilitiesIndexRoute
   '/admin/jobs/': typeof AdminJobsIndexRoute
+  '/admin/suggestions/': typeof AdminSuggestionsIndexRoute
   '/_public/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
@@ -322,6 +328,7 @@ export interface FileRouteTypes {
     | '/technologies/'
     | '/admin/capabilities/'
     | '/admin/jobs/'
+    | '/admin/suggestions/'
     | '/capabilities/$slug/$subslug'
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
@@ -352,6 +359,7 @@ export interface FileRouteTypes {
     | '/technologies'
     | '/admin/capabilities'
     | '/admin/jobs'
+    | '/admin/suggestions'
     | '/capabilities/$slug/$subslug'
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
@@ -385,6 +393,7 @@ export interface FileRouteTypes {
     | '/_public/technologies/'
     | '/admin/capabilities/'
     | '/admin/jobs/'
+    | '/admin/suggestions/'
     | '/_public/capabilities/$slug/$subslug'
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
@@ -485,6 +494,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/about'
       preLoaderRoute: typeof PublicAboutRouteImport
       parentRoute: typeof PublicRouteRoute
+    }
+    '/admin/suggestions/': {
+      id: '/admin/suggestions/'
+      path: '/suggestions'
+      fullPath: '/admin/suggestions/'
+      preLoaderRoute: typeof AdminSuggestionsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/admin/jobs/': {
       id: '/admin/jobs/'
@@ -681,6 +697,7 @@ interface AdminRouteRouteChildren {
   AdminJobsAddRoute: typeof AdminJobsAddRoute
   AdminCapabilitiesIndexRoute: typeof AdminCapabilitiesIndexRoute
   AdminJobsIndexRoute: typeof AdminJobsIndexRoute
+  AdminSuggestionsIndexRoute: typeof AdminSuggestionsIndexRoute
   AdminCapabilitiesSlugAddRoute: typeof AdminCapabilitiesSlugAddRoute
   AdminCapabilitiesSlugEditRoute: typeof AdminCapabilitiesSlugEditRoute
   AdminJobsSlugEditRoute: typeof AdminJobsSlugEditRoute
@@ -695,6 +712,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminJobsAddRoute: AdminJobsAddRoute,
   AdminCapabilitiesIndexRoute: AdminCapabilitiesIndexRoute,
   AdminJobsIndexRoute: AdminJobsIndexRoute,
+  AdminSuggestionsIndexRoute: AdminSuggestionsIndexRoute,
   AdminCapabilitiesSlugAddRoute: AdminCapabilitiesSlugAddRoute,
   AdminCapabilitiesSlugEditRoute: AdminCapabilitiesSlugEditRoute,
   AdminJobsSlugEditRoute: AdminJobsSlugEditRoute,
@@ -720,6 +738,8 @@ export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true

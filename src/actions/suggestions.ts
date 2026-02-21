@@ -134,12 +134,12 @@ export const getSuggestionsFn = createServerFn({ method: 'POST' })
 
     // Filter by type
     if (data.type && data.type.length > 0) {
-      conditions.push(ilike(suggestion.type, data.type[0]))
+      conditions.push(eq(suggestion.type, data.type[0]))
     }
 
     // Filter by status
     if (data.status && data.status.length > 0) {
-      conditions.push(ilike(suggestion.status, data.status[0]))
+      conditions.push(eq(suggestion.status, data.status[0]))
     }
 
     // Search in content
