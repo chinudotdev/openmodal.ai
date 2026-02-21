@@ -354,70 +354,60 @@ function AdminJobDetailPage() {
       {/* Job Details */}
       <Card className="mb-8">
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-            {/* Left Column - Description (60%) */}
-            <div className="md:col-span-3">
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                Description
-              </h3>
-              <p className="text-foreground/80 leading-relaxed">
-                {jobData.description}
+          {/* First Row - Metadata */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+            {/* Category */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Category</p>
+              <p className="font-medium">{categoryLabel(jobData.category)}</p>
+            </div>
+
+            {/* Automation Risk */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">
+                Automation Risk
+              </p>
+              <div className="flex items-center gap-2">
+                <Progress
+                  value={jobData.automationRiskPercentage}
+                  className="w-20 h-2"
+                />
+                <span className="font-medium">
+                  {jobData.automationRiskPercentage}%
+                </span>
+              </div>
+            </div>
+
+            {/* Risk Level */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Risk Level</p>
+              <Badge
+                variant="outline"
+                className={getRiskColor(jobData.riskLevel)}
+              >
+                {jobData.riskLevel.charAt(0).toUpperCase() +
+                  jobData.riskLevel.slice(1)}
+              </Badge>
+            </div>
+
+            {/* Confidence */}
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Confidence</p>
+              <p className="font-medium">
+                {jobData.confidence.charAt(0).toUpperCase() +
+                  jobData.confidence.slice(1)}
               </p>
             </div>
+          </div>
 
-            {/* Right Column - Metadata (40%) */}
-            <div className="md:col-span-2 space-y-6">
-              {/* Category */}
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Category</p>
-                <p className="font-medium">{categoryLabel(jobData.category)}</p>
-              </div>
-
-              {/* Automation Risk */}
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">
-                  Automation Risk
-                </p>
-                <div className="flex items-center gap-2">
-                  <Progress
-                    value={jobData.automationRiskPercentage}
-                    className="w-24 h-2"
-                  />
-                  <span className="font-medium">
-                    {jobData.automationRiskPercentage}%
-                  </span>
-                </div>
-              </div>
-
-              {/* Risk Level */}
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Risk Level</p>
-                <Badge
-                  variant="outline"
-                  className={getRiskColor(jobData.riskLevel)}
-                >
-                  {jobData.riskLevel.charAt(0).toUpperCase() +
-                    jobData.riskLevel.slice(1)}
-                </Badge>
-              </div>
-
-              {/* Timeline */}
-              {jobData.timelineEstimate && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Timeline</p>
-                  <p className="font-medium">{jobData.timelineEstimate}</p>
-                </div>
-              )}
-
-              {/* Confidence */}
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Confidence</p>
-                <p className="font-medium">
-                  {jobData.confidence.charAt(0).toUpperCase() +
-                    jobData.confidence.slice(1)}
-                </p>
-              </div>
-            </div>
+          {/* Second Row - Description */}
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">
+              Description
+            </h3>
+            <p className="text-foreground/80 leading-relaxed">
+              {jobData.description}
+            </p>
           </div>
         </CardContent>
       </Card>
