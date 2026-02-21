@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 
 import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/auth-client'
@@ -41,7 +41,14 @@ function App() {
                   Track what AI can and can't do
                 </div>
               </div>
-              <div className="flex gap-2">suggestions...TODO</div>
+              <Link
+                to="/dashboard/suggestions"
+                search={{ type: 'capability', mode: 'new', name: '', id: '' }}
+              >
+                <Button variant="outline" size="sm">
+                  Suggest New
+                </Button>
+              </Link>
             </li>
 
             <li className="flex items-center justify-between py-2 border-b">
@@ -51,7 +58,14 @@ function App() {
                   Explore occupations and their automation risk
                 </div>
               </div>
-              <div className="flex gap-2">suggestions...TODO</div>
+              <Link
+                to="/dashboard/suggestions"
+                search={{ type: 'job', mode: 'new', name: '', id: '' }}
+              >
+                <Button variant="outline" size="sm">
+                  Suggest New
+                </Button>
+              </Link>
             </li>
 
             <li className="flex items-center justify-between py-2 border-b">

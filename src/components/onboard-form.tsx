@@ -1,8 +1,9 @@
 import { useForm } from '@tanstack/react-form'
-import { AlertCircle } from 'lucide-react'
-import z from 'zod'
-import { useEffect, useRef, useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
+
+import { AlertCircle } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import z from 'zod'
 
 import { completeOnboardingFn } from '@/actions/onboarding'
 import { checkUsernameAvailabilityFn } from '@/actions/user'

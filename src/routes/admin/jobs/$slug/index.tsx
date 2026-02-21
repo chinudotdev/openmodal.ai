@@ -1,12 +1,13 @@
 import { useForm } from '@tanstack/react-form'
-import { z } from 'zod'
-import { useState } from 'react'
 import {
   Link,
   createFileRoute,
   notFound,
   useRouter,
 } from '@tanstack/react-router'
+import { useState } from 'react'
+
+import { z } from 'zod'
 
 import {
   createTaskCapabilitySubtypeFn,
@@ -617,9 +618,7 @@ function AdminJobDetailPage() {
                                         <ComboboxInput
                                           placeholder="Search capabilities..."
                                           onChange={(e) =>
-                                            setCapabilitySearch(
-                                              e.target.value ?? '',
-                                            )
+                                            setCapabilitySearch(e.target.value)
                                           }
                                           disabled={
                                             isLoadingSubtypes ||

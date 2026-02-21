@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
+
 import z from 'zod'
 
 import { getAllSubtypes } from '@/data-layer/capabilities'

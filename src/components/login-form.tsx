@@ -1,8 +1,9 @@
 import { useForm } from '@tanstack/react-form'
-import { AlertCircle } from 'lucide-react'
-import z from 'zod'
-import { useState } from 'react'
 import { Link, useRouter, useSearch } from '@tanstack/react-router'
+
+import { AlertCircle } from 'lucide-react'
+import { useState } from 'react'
+import z from 'zod'
 
 import { GoogleLogin } from './google-login'
 import { loginOrSignupFn } from '@/actions/auth'

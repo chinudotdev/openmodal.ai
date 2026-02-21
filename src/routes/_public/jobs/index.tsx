@@ -1,6 +1,7 @@
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+
 import { Search } from 'lucide-react'
 import { useCallback } from 'react'
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 
 import { getJobsPaginatedFn } from '@/actions/jobs'
 import { Badge } from '@/components/ui/badge'

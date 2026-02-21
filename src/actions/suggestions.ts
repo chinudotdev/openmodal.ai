@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
+
 import { desc, eq, ilike, or } from 'drizzle-orm'
 import z from 'zod'
 
@@ -63,7 +64,7 @@ export const submitSuggestionsFn = createServerFn({ method: 'POST' })
       suggestedName: z.string().min(1),
       reason: z.string().min(1),
       additionalInfo: z.string().optional(),
-      email: z.email().optional(),
+      email: z.string().email().optional(),
     }),
   )
   .handler(async ({ data }) => {

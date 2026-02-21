@@ -53,6 +53,7 @@ See [architecture.md](architecture.md) for the full architecture overview.
 ```typescript
 // src/db/index.ts
 import { neon } from '@neondatabase/serverless'
+
 import { env } from 'cloudflare:workers'
 import { drizzle } from 'drizzle-orm/neon-http'
 
@@ -320,6 +321,7 @@ Actions use data-layer functions and add business logic:
 ```typescript
 // src/actions/reports.ts
 import { createServerFn } from '@tanstack/react-start'
+
 import { z } from 'zod'
 
 import { createReport, getRecentReportByUser } from '@/data-layer/reports'

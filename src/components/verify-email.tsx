@@ -1,5 +1,6 @@
-import { Mail } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
+
+import { Mail } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {

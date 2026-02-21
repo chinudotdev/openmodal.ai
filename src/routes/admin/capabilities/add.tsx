@@ -1,7 +1,8 @@
 import { useForm } from '@tanstack/react-form'
-import z from 'zod'
-import { useRef } from 'react'
 import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
+import { useRef } from 'react'
+
+import z from 'zod'
 
 import { createCapabilityFn } from '@/actions/admin/capabilities'
 import { Button } from '@/components/ui/button'

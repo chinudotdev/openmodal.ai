@@ -1,6 +1,7 @@
+import { Link } from '@tanstack/react-router'
+
 import { Menu } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
 
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
