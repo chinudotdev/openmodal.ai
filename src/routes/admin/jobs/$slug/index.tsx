@@ -112,7 +112,7 @@ function AdminJobDetailPage() {
   const capabilityForm = useForm({
     defaultValues: {
       capabilitySubtypeId: '',
-      importance: 'important' as const,
+      importance: 'important' as 'critical' | 'important' | 'minor',
       minimumLevelRequired: 50,
       notes: '',
     },
@@ -126,7 +126,7 @@ function AdminJobDetailPage() {
         data: {
           taskId: selectedTaskId,
           capabilitySubtypeId: value.capabilitySubtypeId,
-          importance: value.importance as 'critical' | 'important' | 'minor',
+          importance: value.importance,
           minimumLevelRequired: value.minimumLevelRequired,
           notes: value.notes || undefined,
         },
