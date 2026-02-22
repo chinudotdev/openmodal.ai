@@ -45,10 +45,13 @@ import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_publi
 import { Route as AuthedDashboardSuggestionsIndexRouteImport } from './routes/_authed/dashboard/suggestions/index'
 import { Route as AuthedDashboardFeedbackIndexRouteImport } from './routes/_authed/dashboard/feedback/index'
 import { Route as AdminOrganizationsSlugEditRouteImport } from './routes/admin/organizations/$slug/edit'
+import { Route as AdminOrganizationsSlugAddRouteImport } from './routes/admin/organizations/$slug/add'
 import { Route as AdminJobsSlugEditRouteImport } from './routes/admin/jobs/$slug/edit'
 import { Route as AdminCapabilitiesSlugEditRouteImport } from './routes/admin/capabilities/$slug/edit'
 import { Route as AdminCapabilitiesSlugAddRouteImport } from './routes/admin/capabilities/$slug/add'
 import { Route as PublicCapabilitiesSlugSubslugRouteImport } from './routes/_public/capabilities/$slug/$subslug'
+import { Route as AdminOrganizationsSlugTechnologiesIndexRouteImport } from './routes/admin/organizations/$slug/$technologies/index'
+import { Route as AdminOrganizationsSlugTechnologiesEditRouteImport } from './routes/admin/organizations/$slug/$technologies/edit'
 import { Route as AdminCapabilitiesSlugSubslugEditRouteImport } from './routes/admin/capabilities/$slug/$subslug/edit'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
@@ -238,6 +241,12 @@ const AdminOrganizationsSlugEditRoute =
     path: '/organizations/$slug/edit',
     getParentRoute: () => AdminRouteRoute,
   } as any)
+const AdminOrganizationsSlugAddRoute =
+  AdminOrganizationsSlugAddRouteImport.update({
+    id: '/organizations/$slug/add',
+    path: '/organizations/$slug/add',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 const AdminJobsSlugEditRoute = AdminJobsSlugEditRouteImport.update({
   id: '/jobs/$slug/edit',
   path: '/jobs/$slug/edit',
@@ -260,6 +269,18 @@ const PublicCapabilitiesSlugSubslugRoute =
     id: '/capabilities/$slug/$subslug',
     path: '/capabilities/$slug/$subslug',
     getParentRoute: () => PublicRouteRoute,
+  } as any)
+const AdminOrganizationsSlugTechnologiesIndexRoute =
+  AdminOrganizationsSlugTechnologiesIndexRouteImport.update({
+    id: '/organizations/$slug/$technologies/',
+    path: '/organizations/$slug/$technologies/',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
+const AdminOrganizationsSlugTechnologiesEditRoute =
+  AdminOrganizationsSlugTechnologiesEditRouteImport.update({
+    id: '/organizations/$slug/$technologies/edit',
+    path: '/organizations/$slug/$technologies/edit',
+    getParentRoute: () => AdminRouteRoute,
   } as any)
 const AdminCapabilitiesSlugSubslugEditRoute =
   AdminCapabilitiesSlugSubslugEditRouteImport.update({
@@ -297,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/admin/jobs/$slug/edit': typeof AdminJobsSlugEditRoute
+  '/admin/organizations/$slug/add': typeof AdminOrganizationsSlugAddRoute
   '/admin/organizations/$slug/edit': typeof AdminOrganizationsSlugEditRoute
   '/dashboard/feedback/': typeof AuthedDashboardFeedbackIndexRoute
   '/dashboard/suggestions/': typeof AuthedDashboardSuggestionsIndexRoute
@@ -308,6 +330,8 @@ export interface FileRoutesByFullPath {
   '/admin/jobs/$slug/': typeof AdminJobsSlugIndexRoute
   '/admin/organizations/$slug/': typeof AdminOrganizationsSlugIndexRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
+  '/admin/organizations/$slug/$technologies/edit': typeof AdminOrganizationsSlugTechnologiesEditRoute
+  '/admin/organizations/$slug/$technologies/': typeof AdminOrganizationsSlugTechnologiesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -337,6 +361,7 @@ export interface FileRoutesByTo {
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/admin/jobs/$slug/edit': typeof AdminJobsSlugEditRoute
+  '/admin/organizations/$slug/add': typeof AdminOrganizationsSlugAddRoute
   '/admin/organizations/$slug/edit': typeof AdminOrganizationsSlugEditRoute
   '/dashboard/feedback': typeof AuthedDashboardFeedbackIndexRoute
   '/dashboard/suggestions': typeof AuthedDashboardSuggestionsIndexRoute
@@ -348,6 +373,8 @@ export interface FileRoutesByTo {
   '/admin/jobs/$slug': typeof AdminJobsSlugIndexRoute
   '/admin/organizations/$slug': typeof AdminOrganizationsSlugIndexRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
+  '/admin/organizations/$slug/$technologies/edit': typeof AdminOrganizationsSlugTechnologiesEditRoute
+  '/admin/organizations/$slug/$technologies': typeof AdminOrganizationsSlugTechnologiesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -381,6 +408,7 @@ export interface FileRoutesById {
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/admin/jobs/$slug/edit': typeof AdminJobsSlugEditRoute
+  '/admin/organizations/$slug/add': typeof AdminOrganizationsSlugAddRoute
   '/admin/organizations/$slug/edit': typeof AdminOrganizationsSlugEditRoute
   '/_authed/dashboard/feedback/': typeof AuthedDashboardFeedbackIndexRoute
   '/_authed/dashboard/suggestions/': typeof AuthedDashboardSuggestionsIndexRoute
@@ -392,6 +420,8 @@ export interface FileRoutesById {
   '/admin/jobs/$slug/': typeof AdminJobsSlugIndexRoute
   '/admin/organizations/$slug/': typeof AdminOrganizationsSlugIndexRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
+  '/admin/organizations/$slug/$technologies/edit': typeof AdminOrganizationsSlugTechnologiesEditRoute
+  '/admin/organizations/$slug/$technologies/': typeof AdminOrganizationsSlugTechnologiesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -424,6 +454,7 @@ export interface FileRouteTypes {
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
     | '/admin/jobs/$slug/edit'
+    | '/admin/organizations/$slug/add'
     | '/admin/organizations/$slug/edit'
     | '/dashboard/feedback/'
     | '/dashboard/suggestions/'
@@ -435,6 +466,8 @@ export interface FileRouteTypes {
     | '/admin/jobs/$slug/'
     | '/admin/organizations/$slug/'
     | '/admin/capabilities/$slug/$subslug/edit'
+    | '/admin/organizations/$slug/$technologies/edit'
+    | '/admin/organizations/$slug/$technologies/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -464,6 +497,7 @@ export interface FileRouteTypes {
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
     | '/admin/jobs/$slug/edit'
+    | '/admin/organizations/$slug/add'
     | '/admin/organizations/$slug/edit'
     | '/dashboard/feedback'
     | '/dashboard/suggestions'
@@ -475,6 +509,8 @@ export interface FileRouteTypes {
     | '/admin/jobs/$slug'
     | '/admin/organizations/$slug'
     | '/admin/capabilities/$slug/$subslug/edit'
+    | '/admin/organizations/$slug/$technologies/edit'
+    | '/admin/organizations/$slug/$technologies'
   id:
     | '__root__'
     | '/_authed'
@@ -507,6 +543,7 @@ export interface FileRouteTypes {
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
     | '/admin/jobs/$slug/edit'
+    | '/admin/organizations/$slug/add'
     | '/admin/organizations/$slug/edit'
     | '/_authed/dashboard/feedback/'
     | '/_authed/dashboard/suggestions/'
@@ -518,6 +555,8 @@ export interface FileRouteTypes {
     | '/admin/jobs/$slug/'
     | '/admin/organizations/$slug/'
     | '/admin/capabilities/$slug/$subslug/edit'
+    | '/admin/organizations/$slug/$technologies/edit'
+    | '/admin/organizations/$slug/$technologies/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -784,6 +823,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrganizationsSlugEditRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/organizations/$slug/add': {
+      id: '/admin/organizations/$slug/add'
+      path: '/organizations/$slug/add'
+      fullPath: '/admin/organizations/$slug/add'
+      preLoaderRoute: typeof AdminOrganizationsSlugAddRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/jobs/$slug/edit': {
       id: '/admin/jobs/$slug/edit'
       path: '/jobs/$slug/edit'
@@ -811,6 +857,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/capabilities/$slug/$subslug'
       preLoaderRoute: typeof PublicCapabilitiesSlugSubslugRouteImport
       parentRoute: typeof PublicRouteRoute
+    }
+    '/admin/organizations/$slug/$technologies/': {
+      id: '/admin/organizations/$slug/$technologies/'
+      path: '/organizations/$slug/$technologies'
+      fullPath: '/admin/organizations/$slug/$technologies/'
+      preLoaderRoute: typeof AdminOrganizationsSlugTechnologiesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/organizations/$slug/$technologies/edit': {
+      id: '/admin/organizations/$slug/$technologies/edit'
+      path: '/organizations/$slug/$technologies/edit'
+      fullPath: '/admin/organizations/$slug/$technologies/edit'
+      preLoaderRoute: typeof AdminOrganizationsSlugTechnologiesEditRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/admin/capabilities/$slug/$subslug/edit': {
       id: '/admin/capabilities/$slug/$subslug/edit'
@@ -889,11 +949,14 @@ interface AdminRouteRouteChildren {
   AdminCapabilitiesSlugAddRoute: typeof AdminCapabilitiesSlugAddRoute
   AdminCapabilitiesSlugEditRoute: typeof AdminCapabilitiesSlugEditRoute
   AdminJobsSlugEditRoute: typeof AdminJobsSlugEditRoute
+  AdminOrganizationsSlugAddRoute: typeof AdminOrganizationsSlugAddRoute
   AdminOrganizationsSlugEditRoute: typeof AdminOrganizationsSlugEditRoute
   AdminCapabilitiesSlugIndexRoute: typeof AdminCapabilitiesSlugIndexRoute
   AdminJobsSlugIndexRoute: typeof AdminJobsSlugIndexRoute
   AdminOrganizationsSlugIndexRoute: typeof AdminOrganizationsSlugIndexRoute
   AdminCapabilitiesSlugSubslugEditRoute: typeof AdminCapabilitiesSlugSubslugEditRoute
+  AdminOrganizationsSlugTechnologiesEditRoute: typeof AdminOrganizationsSlugTechnologiesEditRoute
+  AdminOrganizationsSlugTechnologiesIndexRoute: typeof AdminOrganizationsSlugTechnologiesIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
@@ -909,11 +972,16 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminCapabilitiesSlugAddRoute: AdminCapabilitiesSlugAddRoute,
   AdminCapabilitiesSlugEditRoute: AdminCapabilitiesSlugEditRoute,
   AdminJobsSlugEditRoute: AdminJobsSlugEditRoute,
+  AdminOrganizationsSlugAddRoute: AdminOrganizationsSlugAddRoute,
   AdminOrganizationsSlugEditRoute: AdminOrganizationsSlugEditRoute,
   AdminCapabilitiesSlugIndexRoute: AdminCapabilitiesSlugIndexRoute,
   AdminJobsSlugIndexRoute: AdminJobsSlugIndexRoute,
   AdminOrganizationsSlugIndexRoute: AdminOrganizationsSlugIndexRoute,
   AdminCapabilitiesSlugSubslugEditRoute: AdminCapabilitiesSlugSubslugEditRoute,
+  AdminOrganizationsSlugTechnologiesEditRoute:
+    AdminOrganizationsSlugTechnologiesEditRoute,
+  AdminOrganizationsSlugTechnologiesIndexRoute:
+    AdminOrganizationsSlugTechnologiesIndexRoute,
 }
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(

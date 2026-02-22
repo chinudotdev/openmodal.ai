@@ -266,8 +266,8 @@ function TechnologyDetailPage() {
                         />
                       )}
                       <Link
-                        to="/capabilities/$slug"
-                        params={{ slug: cap.slug }}
+                        to="/capabilities/$slug/$subslug"
+                        params={{ slug: cap.capabilitySlug, subslug: cap.slug }}
                       >
                         <Button
                           variant="ghost"

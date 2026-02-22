@@ -173,9 +173,17 @@ function AdminOrganizationDetailPage() {
             {/* Technologies Card */}
             <Card>
               <CardHeader>
-                <CardTitle>
-                  🤖 Technologies ({organization._count.technologies})
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>
+                    🤖 Technologies ({organization._count.technologies})
+                  </CardTitle>
+                  <Link
+                    to="/admin/organizations/$slug/add"
+                    params={{ slug: organization.slug }}
+                  >
+                    <Button size="sm">Add Technology</Button>
+                  </Link>
+                </div>
               </CardHeader>
               <CardContent>
                 {organization.technologies.length === 0 ? (
@@ -187,8 +195,11 @@ function AdminOrganizationDetailPage() {
                     {organization.technologies.map((tech: any) => (
                       <Link
                         key={tech.id}
-                        to="/technologies/$slug"
-                        params={{ slug: tech.slug }}
+                        to="/admin/organizations/$slug/$technologies"
+                        params={{
+                          slug: organization.slug,
+                          technologies: tech.slug,
+                        }}
                         className="group"
                       >
                         <Card className="transition-all hover:shadow-md hover:border-primary/50">

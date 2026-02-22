@@ -7,6 +7,7 @@ import type {
 } from '@/db/schema/technologies'
 import { db } from '@/db'
 import {
+  capability,
   capabilitySubtype,
   impactReport,
   organization,
@@ -230,6 +231,10 @@ export async function getTechnologyBySlug(
         slug: capabilitySubtype.slug,
         performanceScore: technologyCapabilitySubtype.performanceScore,
         status: capabilitySubtype.status,
+        // Parent capability info
+        capabilityId: capability.id,
+        capabilityName: capability.name,
+        capabilitySlug: capability.slug,
       })
       .from(technologyCapabilitySubtype)
       .innerJoin(
@@ -239,6 +244,7 @@ export async function getTechnologyBySlug(
           capabilitySubtype.id,
         ),
       )
+      .innerJoin(capability, eq(capabilitySubtype.capabilityId, capability.id))
       .where(eq(technologyCapabilitySubtype.technologyId, techResult.id))
 
     // Get similar technologies (same type, different id)
@@ -455,4 +461,243 @@ export function getTechnologyTypes() {
  */
 export function getTechnologyStages() {
   return ['research', 'pilot', 'deployed', 'discontinued'] as const
+}
+
+// ============================================
+// CRUD OPERATIONS
+// ============================================
+
+/**
+ * Create a new technology
+ */
+export async function createTechnology(data: {
+  id: string
+  slug: string
+  name: string
+  type: TechnologyType
+  description: string
+  image?: string | null
+  website?: string | null
+  organizationId: string
+  stage: TechnologyStage
+  releaseDate?: Date | null
+  status: SubmissionStatus
+  submittedBy: string
+}) {
+  try {
+    const [newTech] = await db
+      .insert(technology)
+      .values({
+        id: data.id,
+        slug: data.slug,
+        name: data.name,
+        type: data.type,
+        description: data.description,
+        image: data.image || null,
+        website: data.website || null,
+        organizationId: data.organizationId,
+        stage: data.stage,
+        releaseDate: data.releaseDate || null,
+        status: data.status,
+        submittedBy: data.submittedBy,
+      })
+      .returning()
+
+    return newTech
+  } catch (error) {
+    console.error('Error creating technology:', error)
+    throw new Error('Failed to create technology')
+  }
+}
+
+/**
+ * Update an existing technology
+ */
+export async function updateTechnology(
+  id: string,
+  data: {
+    name?: string
+    slug?: string
+    type?: TechnologyType
+    description?: string
+    image?: string | null
+    website?: string | null
+    stage?: TechnologyStage
+    releaseDate?: Date | null
+    status?: SubmissionStatus
+  },
+) {
+  try {
+    const [updatedTech] = await db
+      .update(technology)
+      .set({
+        ...(data.name && { name: data.name }),
+        ...(data.slug && { slug: data.slug }),
+        ...(data.type && { type: data.type }),
+        ...(data.description && { description: data.description }),
+        ...(data.image !== undefined && { image: data.image }),
+        ...(data.website !== undefined && { website: data.website }),
+        ...(data.stage && { stage: data.stage }),
+        ...(data.releaseDate !== undefined && {
+          releaseDate: data.releaseDate,
+        }),
+        ...(data.status && { status: data.status }),
+      })
+      .where(eq(technology.id, id))
+      .returning()
+
+    return updatedTech
+  } catch (error) {
+    console.error('Error updating technology:', error)
+    throw new Error('Failed to update technology')
+  }
+}
+
+/**
+ * Delete a technology
+ */
+export async function deleteTechnology(id: string) {
+  try {
+    await db.delete(technology).where(eq(technology.id, id))
+  } catch (error) {
+    console.error('Error deleting technology:', error)
+    throw new Error('Failed to delete technology')
+  }
+}
+
+/**
+ * Get technology by ID
+ */
+export async function getTechnologyById(id: string) {
+  try {
+    const result = await db
+      .select()
+      .from(technology)
+      .where(eq(technology.id, id))
+      .limit(1)
+
+    return result[0] || null
+  } catch (error) {
+    console.error('Error fetching technology by ID:', error)
+    return null
+  }
+}
+
+/**
+ * Get all technologies for an organization (admin view - includes all statuses)
+ */
+export async function getTechnologiesByOrganizationForAdmin(
+  organizationId: string,
+) {
+  try {
+    const results = await db
+      .select({
+        id: technology.id,
+        slug: technology.slug,
+        name: technology.name,
+        type: technology.type,
+        description: technology.description,
+        image: technology.image,
+        website: technology.website,
+        organizationId: technology.organizationId,
+        stage: technology.stage,
+        releaseDate: technology.releaseDate,
+        status: technology.status,
+        createdAt: technology.createdAt,
+        updatedAt: technology.updatedAt,
+        reportCount: sql<number>`COALESCE(report_counts.count, 0)`,
+      })
+      .from(technology)
+      .leftJoin(
+        sql`(SELECT technology_id, COUNT(*) as count FROM impact_report WHERE technology_id IS NOT NULL GROUP BY technology_id) as report_counts`,
+        eq(technology.id, sql`report_counts.technology_id`),
+      )
+      .where(eq(technology.organizationId, organizationId))
+      .orderBy(desc(technology.createdAt))
+
+    return results.map((r) => ({
+      ...r,
+      _count: { reports: r.reportCount },
+    }))
+  } catch (error) {
+    console.error('Error fetching technologies by organization:', error)
+    return []
+  }
+}
+
+/**
+ * Get capability subtypes mapped to a technology
+ */
+export async function getTechnologyCapabilityMappings(technologyId: string) {
+  try {
+    const mappings = await db
+      .select({
+        id: technologyCapabilitySubtype.id,
+        capabilitySubtypeId: technologyCapabilitySubtype.capabilitySubtypeId,
+        performanceScore: technologyCapabilitySubtype.performanceScore,
+        subtype: {
+          id: capabilitySubtype.id,
+          name: capabilitySubtype.name,
+          slug: capabilitySubtype.slug,
+          domain: capabilitySubtype.domain,
+        },
+        // Parent capability info
+        capability: {
+          id: capability.id,
+          name: capability.name,
+          slug: capability.slug,
+          icon: capability.icon,
+        },
+      })
+      .from(technologyCapabilitySubtype)
+      .innerJoin(
+        capabilitySubtype,
+        eq(
+          technologyCapabilitySubtype.capabilitySubtypeId,
+          capabilitySubtype.id,
+        ),
+      )
+      .innerJoin(capability, eq(capabilitySubtype.capabilityId, capability.id))
+      .where(eq(technologyCapabilitySubtype.technologyId, technologyId))
+
+    return mappings
+  } catch (error) {
+    console.error('Error fetching technology capability mappings:', error)
+    return []
+  }
+}
+
+/**
+ * Create or update capability subtype mappings for a technology
+ */
+export async function updateTechnologyCapabilityMappings(
+  technologyId: string,
+  mappings: Array<{
+    capabilitySubtypeId: string
+    performanceScore?: number | null
+  }>,
+) {
+  try {
+    // Delete existing mappings
+    await db
+      .delete(technologyCapabilitySubtype)
+      .where(eq(technologyCapabilitySubtype.technologyId, technologyId))
+
+    // Insert new mappings
+    if (mappings.length > 0) {
+      await db.insert(technologyCapabilitySubtype).values(
+        mappings.map((m) => ({
+          id: crypto.randomUUID(),
+          technologyId,
+          capabilitySubtypeId: m.capabilitySubtypeId,
+          performanceScore: m.performanceScore ?? null,
+        })),
+      )
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating technology capability mappings:', error)
+    throw new Error('Failed to update capability mappings')
+  }
 }
