@@ -5,15 +5,15 @@ import { desc, eq, ilike, or } from 'drizzle-orm'
 import z from 'zod'
 
 import { db } from '@/db'
-import { capability, job, suggestion, user } from '@/db/schema'
+import { capability, job, suggestion, technology, user } from '@/db/schema'
 import { auth } from '@/lib/auth'
 
-// Search capabilities and jobs
+// Search capabilities, jobs, and technologies
 export const searchCapabilitiesAndJobsFn = createServerFn({ method: 'POST' })
   .inputValidator(
     z.object({
       query: z.string().min(1),
-      type: z.enum(['capability', 'job']).optional(),
+      type: z.enum(['capability', 'job', 'technology']).optional(),
     }),
   )
   .handler(async ({ data: { query, type } }) => {
@@ -22,7 +22,7 @@ export const searchCapabilitiesAndJobsFn = createServerFn({ method: 'POST' })
     const results: Array<{
       id: string
       name: string
-      type: 'capability' | 'job'
+      type: 'capability' | 'job' | 'technology'
     }> = []
 
     if (!type || type === 'capability') {
@@ -51,6 +51,21 @@ export const searchCapabilitiesAndJobsFn = createServerFn({ method: 'POST' })
         .limit(10)
 
       results.push(...jobs.map((j) => ({ ...j, type: 'job' as const })))
+    }
+
+    if (!type || type === 'technology') {
+      const technologies = await db
+        .select({
+          id: technology.id,
+          name: technology.name,
+        })
+        .from(technology)
+        .where(ilike(technology.name, searchTerm))
+        .limit(10)
+
+      results.push(
+        ...technologies.map((t) => ({ ...t, type: 'technology' as const })),
+      )
     }
 
     return results

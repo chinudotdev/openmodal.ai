@@ -73,14 +73,16 @@ function App() {
                 <div className="font-medium">Technologies</div>
                 <div className="text-sm text-muted-foreground">
                   Discover specific AI products, models, and robots
-                  <span className="text-xs text-muted-foreground/70 ml-1">
-                    • User contributions coming soon
-                  </span>
                 </div>
               </div>
-              <Button variant="outline" size="sm">
-                Join Waitlist
-              </Button>
+              <Link
+                to="/dashboard/suggestions"
+                search={{ type: 'technology', mode: 'new', name: '', id: '' }}
+              >
+                <Button variant="outline" size="sm">
+                  Suggest New
+                </Button>
+              </Link>
             </li>
 
             <li className="flex items-center justify-between py-2 border-b">

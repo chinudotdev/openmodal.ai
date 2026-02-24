@@ -36,7 +36,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 
 const formSchema = z.object({
-  type: z.enum(['job', 'capability']),
+  type: z.enum(['job', 'capability', 'technology']),
   mode: z.enum(['new', 'existing']),
   existingId: z.string().optional(),
   newName: z.string().optional(),
@@ -47,11 +47,11 @@ const formSchema = z.object({
 interface SearchResult {
   id: string
   name: string
-  type: 'capability' | 'job'
+  type: 'capability' | 'job' | 'technology'
 }
 
 interface SuggestionFormProps {
-  defaultType?: 'job' | 'capability'
+  defaultType?: 'job' | 'capability' | 'technology'
   defaultMode?: 'new' | 'existing'
   defaultName?: string
   defaultExistingId?: string
@@ -188,7 +188,7 @@ export function SuggestionForm({
     }
   }, [])
 
-  const handleTypeChange = (newType: 'job' | 'capability') => {
+  const handleTypeChange = (newType: 'job' | 'capability' | 'technology') => {
     form.setFieldValue('type', newType)
     // Reset mode-dependent fields when type changes
     form.setFieldValue('existingId', '')
@@ -243,8 +243,8 @@ export function SuggestionForm({
           <CardHeader>
             <CardTitle>Submit a Suggestion</CardTitle>
             <CardDescription>
-              Help us improve our database by suggesting new jobs or
-              capabilities to track
+              Help us improve our database by suggesting new jobs, capabilities,
+              or technologies to track
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -292,6 +292,17 @@ export function SuggestionForm({
                             className="w-4 h-4"
                           />
                           <span>Capability</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="type"
+                            value="technology"
+                            checked={field.state.value === 'technology'}
+                            onChange={() => handleTypeChange('technology')}
+                            className="w-4 h-4"
+                          />
+                          <span>Technology</span>
                         </label>
                       </div>
                     </Field>
@@ -344,7 +355,9 @@ export function SuggestionForm({
                           <FieldLabel htmlFor={field.name}>
                             {form.state.values.type === 'job'
                               ? 'Job'
-                              : 'Capability'}{' '}
+                              : form.state.values.type === 'capability'
+                                ? 'Capability'
+                                : 'Technology'}{' '}
                             Name
                           </FieldLabel>
                           <Input
@@ -373,7 +386,9 @@ export function SuggestionForm({
                       Search{' '}
                       {form.state.values.type === 'job'
                         ? 'Jobs'
-                        : 'Capabilities'}
+                        : form.state.values.type === 'capability'
+                          ? 'Capabilities'
+                          : 'Technologies'}
                     </FieldLabel>
                     <Combobox
                       value={form.state.values.existingId}
@@ -433,7 +448,11 @@ export function SuggestionForm({
                   <span>Suggesting:</span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
                     {form.state.values.mode === 'new' ? 'New' : 'Existing'}{' '}
-                    {form.state.values.type === 'job' ? 'Job' : 'Capability'}
+                    {form.state.values.type === 'job'
+                      ? 'Job'
+                      : form.state.values.type === 'capability'
+                        ? 'Capability'
+                        : 'Technology'}
                     <ChevronRightIcon className="h-3 w-3" />
                   </span>
                 </div>

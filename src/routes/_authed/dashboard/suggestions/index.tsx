@@ -14,7 +14,7 @@ export const Route = createFileRoute('/_authed/dashboard/suggestions/')({
   validateSearch: (
     search: Record<string, unknown>,
   ): {
-    type: 'job' | 'capability'
+    type: 'job' | 'capability' | 'technology'
     mode: 'new' | 'existing'
     name: string
     id: string
@@ -22,7 +22,9 @@ export const Route = createFileRoute('/_authed/dashboard/suggestions/')({
     return {
       type:
         typeof search.type === 'string' &&
-        (search.type === 'job' || search.type === 'capability')
+        (search.type === 'job' ||
+          search.type === 'capability' ||
+          search.type === 'technology')
           ? search.type
           : searchSchema.type,
       mode:
