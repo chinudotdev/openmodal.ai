@@ -87,18 +87,22 @@ function App() {
 
             <li className="flex items-center justify-between py-2 border-b">
               <div>
-                <div className="font-medium">Reports</div>
+                <div className="font-medium">Impact Reports</div>
                 <div className="text-sm text-muted-foreground">
-                  Real-world evidence of AI deployment
+                  Real-world evidence of AI's impact on jobs
                 </div>
               </div>
               <div className="flex gap-2">
-                {/* <Link to="/dashboard/reports">
+                <Link to="/dashboard/reports">
                   <Button variant="outline" size="sm">
-                    View Reports
+                    View My Reports
                   </Button>
-                </Link>*/}
-                TODO: reports...
+                </Link>
+                <Link to="/dashboard/reports/submit">
+                  <Button variant="outline" size="sm">
+                    Submit
+                  </Button>
+                </Link>
               </div>
             </li>
           </ul>

@@ -8,54 +8,54 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import type { createStart } from '@tanstack/react-start'
-
-import type { getRouter } from './router.tsx'
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthedDashboardFeedbackIndexRouteImport } from './routes/_authed/dashboard/feedback/index'
-import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
-import { Route as AuthedDashboardSuggestionsIndexRouteImport } from './routes/_authed/dashboard/suggestions/index'
-import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
-import { Route as PublicAboutRouteImport } from './routes/_public/about'
-import { Route as PublicCapabilitiesSlugSubslugRouteImport } from './routes/_public/capabilities/$slug/$subslug'
-import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
-import { Route as PublicCapabilitiesIndexRouteImport } from './routes/_public/capabilities/index'
-import { Route as PublicIndexRouteImport } from './routes/_public/index'
-import { Route as PublicJobsSlugIndexRouteImport } from './routes/_public/jobs/$slug/index'
-import { Route as PublicJobsIndexRouteImport } from './routes/_public/jobs/index'
-import { Route as PublicOrganizationsSlugIndexRouteImport } from './routes/_public/organizations/$slug/index'
-import { Route as PublicOrganizationsIndexRouteImport } from './routes/_public/organizations/index'
-import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
-import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
-import { Route as PublicRouteRouteImport } from './routes/_public/route'
-import { Route as PublicTechnologiesSlugIndexRouteImport } from './routes/_public/technologies/$slug/index'
-import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/technologies/index'
-import { Route as PublicTermsRouteImport } from './routes/_public/terms'
-import { Route as AdminCapabilitiesSlugSubslugEditRouteImport } from './routes/admin/capabilities/$slug/$subslug/edit'
-import { Route as AdminCapabilitiesSlugAddRouteImport } from './routes/admin/capabilities/$slug/add'
-import { Route as AdminCapabilitiesSlugEditRouteImport } from './routes/admin/capabilities/$slug/edit'
-import { Route as AdminCapabilitiesSlugIndexRouteImport } from './routes/admin/capabilities/$slug/index'
-import { Route as AdminCapabilitiesAddRouteImport } from './routes/admin/capabilities/add'
-import { Route as AdminCapabilitiesIndexRouteImport } from './routes/admin/capabilities/index'
-import { Route as AdminFeedbackIndexRouteImport } from './routes/admin/feedback/index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as AdminJobsSlugEditRouteImport } from './routes/admin/jobs/$slug/edit'
-import { Route as AdminJobsSlugIndexRouteImport } from './routes/admin/jobs/$slug/index'
-import { Route as AdminJobsAddRouteImport } from './routes/admin/jobs/add'
-import { Route as AdminJobsIndexRouteImport } from './routes/admin/jobs/index'
-import { Route as AdminOrganizationsSlugTechnologiesEditRouteImport } from './routes/admin/organizations/$slug/$technologies/edit'
-import { Route as AdminOrganizationsSlugTechnologiesIndexRouteImport } from './routes/admin/organizations/$slug/$technologies/index'
-import { Route as AdminOrganizationsSlugAddRouteImport } from './routes/admin/organizations/$slug/add'
-import { Route as AdminOrganizationsSlugEditRouteImport } from './routes/admin/organizations/$slug/edit'
-import { Route as AdminOrganizationsSlugIndexRouteImport } from './routes/admin/organizations/$slug/index'
-import { Route as AdminOrganizationsAddRouteImport } from './routes/admin/organizations/add'
-import { Route as AdminOrganizationsIndexRouteImport } from './routes/admin/organizations/index'
-import { Route as AdminRouteRouteImport } from './routes/admin/route'
-import { Route as AdminSuggestionsIndexRouteImport } from './routes/admin/suggestions/index'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
+import { Route as PublicRouteRouteImport } from './routes/_public/route'
+import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as PublicTermsRouteImport } from './routes/_public/terms'
+import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
+import { Route as PublicAboutRouteImport } from './routes/_public/about'
+import { Route as AdminSuggestionsIndexRouteImport } from './routes/admin/suggestions/index'
+import { Route as AdminOrganizationsIndexRouteImport } from './routes/admin/organizations/index'
+import { Route as AdminJobsIndexRouteImport } from './routes/admin/jobs/index'
+import { Route as AdminFeedbackIndexRouteImport } from './routes/admin/feedback/index'
+import { Route as AdminCapabilitiesIndexRouteImport } from './routes/admin/capabilities/index'
+import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/technologies/index'
+import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
+import { Route as PublicOrganizationsIndexRouteImport } from './routes/_public/organizations/index'
+import { Route as PublicJobsIndexRouteImport } from './routes/_public/jobs/index'
+import { Route as PublicCapabilitiesIndexRouteImport } from './routes/_public/capabilities/index'
+import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AdminOrganizationsAddRouteImport } from './routes/admin/organizations/add'
+import { Route as AdminJobsAddRouteImport } from './routes/admin/jobs/add'
+import { Route as AdminCapabilitiesAddRouteImport } from './routes/admin/capabilities/add'
+import { Route as AdminOrganizationsSlugIndexRouteImport } from './routes/admin/organizations/$slug/index'
+import { Route as AdminJobsSlugIndexRouteImport } from './routes/admin/jobs/$slug/index'
+import { Route as AdminCapabilitiesSlugIndexRouteImport } from './routes/admin/capabilities/$slug/index'
+import { Route as PublicTechnologiesSlugIndexRouteImport } from './routes/_public/technologies/$slug/index'
+import { Route as PublicReportsIdIndexRouteImport } from './routes/_public/reports/$id/index'
+import { Route as PublicOrganizationsSlugIndexRouteImport } from './routes/_public/organizations/$slug/index'
+import { Route as PublicJobsSlugIndexRouteImport } from './routes/_public/jobs/$slug/index'
+import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
+import { Route as AuthedDashboardSuggestionsIndexRouteImport } from './routes/_authed/dashboard/suggestions/index'
+import { Route as AuthedDashboardReportsIndexRouteImport } from './routes/_authed/dashboard/reports/index'
+import { Route as AuthedDashboardFeedbackIndexRouteImport } from './routes/_authed/dashboard/feedback/index'
+import { Route as AdminOrganizationsSlugEditRouteImport } from './routes/admin/organizations/$slug/edit'
+import { Route as AdminOrganizationsSlugAddRouteImport } from './routes/admin/organizations/$slug/add'
+import { Route as AdminJobsSlugEditRouteImport } from './routes/admin/jobs/$slug/edit'
+import { Route as AdminCapabilitiesSlugEditRouteImport } from './routes/admin/capabilities/$slug/edit'
+import { Route as AdminCapabilitiesSlugAddRouteImport } from './routes/admin/capabilities/$slug/add'
+import { Route as PublicCapabilitiesSlugSubslugRouteImport } from './routes/_public/capabilities/$slug/$subslug'
+import { Route as AdminOrganizationsSlugTechnologiesIndexRouteImport } from './routes/admin/organizations/$slug/$technologies/index'
+import { Route as AuthedDashboardReportsSubmitIndexRouteImport } from './routes/_authed/dashboard/reports/submit/index'
+import { Route as AdminOrganizationsSlugTechnologiesEditRouteImport } from './routes/admin/organizations/$slug/$technologies/edit'
+import { Route as AdminCapabilitiesSlugSubslugEditRouteImport } from './routes/admin/capabilities/$slug/$subslug/edit'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -209,6 +209,11 @@ const PublicTechnologiesSlugIndexRoute =
     path: '/technologies/$slug/',
     getParentRoute: () => PublicRouteRoute,
   } as any)
+const PublicReportsIdIndexRoute = PublicReportsIdIndexRouteImport.update({
+  id: '/reports/$id/',
+  path: '/reports/$id/',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
 const PublicOrganizationsSlugIndexRoute =
   PublicOrganizationsSlugIndexRouteImport.update({
     id: '/organizations/$slug/',
@@ -230,6 +235,12 @@ const AuthedDashboardSuggestionsIndexRoute =
   AuthedDashboardSuggestionsIndexRouteImport.update({
     id: '/dashboard/suggestions/',
     path: '/dashboard/suggestions/',
+    getParentRoute: () => AuthedRouteRoute,
+  } as any)
+const AuthedDashboardReportsIndexRoute =
+  AuthedDashboardReportsIndexRouteImport.update({
+    id: '/dashboard/reports/',
+    path: '/dashboard/reports/',
     getParentRoute: () => AuthedRouteRoute,
   } as any)
 const AuthedDashboardFeedbackIndexRoute =
@@ -279,6 +290,12 @@ const AdminOrganizationsSlugTechnologiesIndexRoute =
     path: '/organizations/$slug/$technologies/',
     getParentRoute: () => AdminRouteRoute,
   } as any)
+const AuthedDashboardReportsSubmitIndexRoute =
+  AuthedDashboardReportsSubmitIndexRouteImport.update({
+    id: '/dashboard/reports/submit/',
+    path: '/dashboard/reports/submit/',
+    getParentRoute: () => AuthedRouteRoute,
+  } as any)
 const AdminOrganizationsSlugTechnologiesEditRoute =
   AdminOrganizationsSlugTechnologiesEditRouteImport.update({
     id: '/organizations/$slug/$technologies/edit',
@@ -324,16 +341,19 @@ export interface FileRoutesByFullPath {
   '/admin/organizations/$slug/add': typeof AdminOrganizationsSlugAddRoute
   '/admin/organizations/$slug/edit': typeof AdminOrganizationsSlugEditRoute
   '/dashboard/feedback/': typeof AuthedDashboardFeedbackIndexRoute
+  '/dashboard/reports/': typeof AuthedDashboardReportsIndexRoute
   '/dashboard/suggestions/': typeof AuthedDashboardSuggestionsIndexRoute
   '/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
   '/jobs/$slug/': typeof PublicJobsSlugIndexRoute
   '/organizations/$slug/': typeof PublicOrganizationsSlugIndexRoute
+  '/reports/$id/': typeof PublicReportsIdIndexRoute
   '/technologies/$slug/': typeof PublicTechnologiesSlugIndexRoute
   '/admin/capabilities/$slug/': typeof AdminCapabilitiesSlugIndexRoute
   '/admin/jobs/$slug/': typeof AdminJobsSlugIndexRoute
   '/admin/organizations/$slug/': typeof AdminOrganizationsSlugIndexRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
   '/admin/organizations/$slug/$technologies/edit': typeof AdminOrganizationsSlugTechnologiesEditRoute
+  '/dashboard/reports/submit/': typeof AuthedDashboardReportsSubmitIndexRoute
   '/admin/organizations/$slug/$technologies/': typeof AdminOrganizationsSlugTechnologiesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -367,16 +387,19 @@ export interface FileRoutesByTo {
   '/admin/organizations/$slug/add': typeof AdminOrganizationsSlugAddRoute
   '/admin/organizations/$slug/edit': typeof AdminOrganizationsSlugEditRoute
   '/dashboard/feedback': typeof AuthedDashboardFeedbackIndexRoute
+  '/dashboard/reports': typeof AuthedDashboardReportsIndexRoute
   '/dashboard/suggestions': typeof AuthedDashboardSuggestionsIndexRoute
   '/capabilities/$slug': typeof PublicCapabilitiesSlugIndexRoute
   '/jobs/$slug': typeof PublicJobsSlugIndexRoute
   '/organizations/$slug': typeof PublicOrganizationsSlugIndexRoute
+  '/reports/$id': typeof PublicReportsIdIndexRoute
   '/technologies/$slug': typeof PublicTechnologiesSlugIndexRoute
   '/admin/capabilities/$slug': typeof AdminCapabilitiesSlugIndexRoute
   '/admin/jobs/$slug': typeof AdminJobsSlugIndexRoute
   '/admin/organizations/$slug': typeof AdminOrganizationsSlugIndexRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
   '/admin/organizations/$slug/$technologies/edit': typeof AdminOrganizationsSlugTechnologiesEditRoute
+  '/dashboard/reports/submit': typeof AuthedDashboardReportsSubmitIndexRoute
   '/admin/organizations/$slug/$technologies': typeof AdminOrganizationsSlugTechnologiesIndexRoute
 }
 export interface FileRoutesById {
@@ -414,16 +437,19 @@ export interface FileRoutesById {
   '/admin/organizations/$slug/add': typeof AdminOrganizationsSlugAddRoute
   '/admin/organizations/$slug/edit': typeof AdminOrganizationsSlugEditRoute
   '/_authed/dashboard/feedback/': typeof AuthedDashboardFeedbackIndexRoute
+  '/_authed/dashboard/reports/': typeof AuthedDashboardReportsIndexRoute
   '/_authed/dashboard/suggestions/': typeof AuthedDashboardSuggestionsIndexRoute
   '/_public/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
   '/_public/jobs/$slug/': typeof PublicJobsSlugIndexRoute
   '/_public/organizations/$slug/': typeof PublicOrganizationsSlugIndexRoute
+  '/_public/reports/$id/': typeof PublicReportsIdIndexRoute
   '/_public/technologies/$slug/': typeof PublicTechnologiesSlugIndexRoute
   '/admin/capabilities/$slug/': typeof AdminCapabilitiesSlugIndexRoute
   '/admin/jobs/$slug/': typeof AdminJobsSlugIndexRoute
   '/admin/organizations/$slug/': typeof AdminOrganizationsSlugIndexRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
   '/admin/organizations/$slug/$technologies/edit': typeof AdminOrganizationsSlugTechnologiesEditRoute
+  '/_authed/dashboard/reports/submit/': typeof AuthedDashboardReportsSubmitIndexRoute
   '/admin/organizations/$slug/$technologies/': typeof AdminOrganizationsSlugTechnologiesIndexRoute
 }
 export interface FileRouteTypes {
@@ -460,16 +486,19 @@ export interface FileRouteTypes {
     | '/admin/organizations/$slug/add'
     | '/admin/organizations/$slug/edit'
     | '/dashboard/feedback/'
+    | '/dashboard/reports/'
     | '/dashboard/suggestions/'
     | '/capabilities/$slug/'
     | '/jobs/$slug/'
     | '/organizations/$slug/'
+    | '/reports/$id/'
     | '/technologies/$slug/'
     | '/admin/capabilities/$slug/'
     | '/admin/jobs/$slug/'
     | '/admin/organizations/$slug/'
     | '/admin/capabilities/$slug/$subslug/edit'
     | '/admin/organizations/$slug/$technologies/edit'
+    | '/dashboard/reports/submit/'
     | '/admin/organizations/$slug/$technologies/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -503,16 +532,19 @@ export interface FileRouteTypes {
     | '/admin/organizations/$slug/add'
     | '/admin/organizations/$slug/edit'
     | '/dashboard/feedback'
+    | '/dashboard/reports'
     | '/dashboard/suggestions'
     | '/capabilities/$slug'
     | '/jobs/$slug'
     | '/organizations/$slug'
+    | '/reports/$id'
     | '/technologies/$slug'
     | '/admin/capabilities/$slug'
     | '/admin/jobs/$slug'
     | '/admin/organizations/$slug'
     | '/admin/capabilities/$slug/$subslug/edit'
     | '/admin/organizations/$slug/$technologies/edit'
+    | '/dashboard/reports/submit'
     | '/admin/organizations/$slug/$technologies'
   id:
     | '__root__'
@@ -549,16 +581,19 @@ export interface FileRouteTypes {
     | '/admin/organizations/$slug/add'
     | '/admin/organizations/$slug/edit'
     | '/_authed/dashboard/feedback/'
+    | '/_authed/dashboard/reports/'
     | '/_authed/dashboard/suggestions/'
     | '/_public/capabilities/$slug/'
     | '/_public/jobs/$slug/'
     | '/_public/organizations/$slug/'
+    | '/_public/reports/$id/'
     | '/_public/technologies/$slug/'
     | '/admin/capabilities/$slug/'
     | '/admin/jobs/$slug/'
     | '/admin/organizations/$slug/'
     | '/admin/capabilities/$slug/$subslug/edit'
     | '/admin/organizations/$slug/$technologies/edit'
+    | '/_authed/dashboard/reports/submit/'
     | '/admin/organizations/$slug/$technologies/'
   fileRoutesById: FileRoutesById
 }
@@ -784,6 +819,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicTechnologiesSlugIndexRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_public/reports/$id/': {
+      id: '/_public/reports/$id/'
+      path: '/reports/$id'
+      fullPath: '/reports/$id/'
+      preLoaderRoute: typeof PublicReportsIdIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
     '/_public/organizations/$slug/': {
       id: '/_public/organizations/$slug/'
       path: '/organizations/$slug'
@@ -810,6 +852,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/suggestions'
       fullPath: '/dashboard/suggestions/'
       preLoaderRoute: typeof AuthedDashboardSuggestionsIndexRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/dashboard/reports/': {
+      id: '/_authed/dashboard/reports/'
+      path: '/dashboard/reports'
+      fullPath: '/dashboard/reports/'
+      preLoaderRoute: typeof AuthedDashboardReportsIndexRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
     '/_authed/dashboard/feedback/': {
@@ -868,6 +917,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrganizationsSlugTechnologiesIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/_authed/dashboard/reports/submit/': {
+      id: '/_authed/dashboard/reports/submit/'
+      path: '/dashboard/reports/submit'
+      fullPath: '/dashboard/reports/submit/'
+      preLoaderRoute: typeof AuthedDashboardReportsSubmitIndexRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
     '/admin/organizations/$slug/$technologies/edit': {
       id: '/admin/organizations/$slug/$technologies/edit'
       path: '/organizations/$slug/$technologies/edit'
@@ -888,13 +944,18 @@ declare module '@tanstack/react-router' {
 interface AuthedRouteRouteChildren {
   AuthedDashboardIndexRoute: typeof AuthedDashboardIndexRoute
   AuthedDashboardFeedbackIndexRoute: typeof AuthedDashboardFeedbackIndexRoute
+  AuthedDashboardReportsIndexRoute: typeof AuthedDashboardReportsIndexRoute
   AuthedDashboardSuggestionsIndexRoute: typeof AuthedDashboardSuggestionsIndexRoute
+  AuthedDashboardReportsSubmitIndexRoute: typeof AuthedDashboardReportsSubmitIndexRoute
 }
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedDashboardIndexRoute: AuthedDashboardIndexRoute,
   AuthedDashboardFeedbackIndexRoute: AuthedDashboardFeedbackIndexRoute,
+  AuthedDashboardReportsIndexRoute: AuthedDashboardReportsIndexRoute,
   AuthedDashboardSuggestionsIndexRoute: AuthedDashboardSuggestionsIndexRoute,
+  AuthedDashboardReportsSubmitIndexRoute:
+    AuthedDashboardReportsSubmitIndexRoute,
 }
 
 const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
@@ -915,6 +976,7 @@ interface PublicRouteRouteChildren {
   PublicCapabilitiesSlugIndexRoute: typeof PublicCapabilitiesSlugIndexRoute
   PublicJobsSlugIndexRoute: typeof PublicJobsSlugIndexRoute
   PublicOrganizationsSlugIndexRoute: typeof PublicOrganizationsSlugIndexRoute
+  PublicReportsIdIndexRoute: typeof PublicReportsIdIndexRoute
   PublicTechnologiesSlugIndexRoute: typeof PublicTechnologiesSlugIndexRoute
 }
 
@@ -932,6 +994,7 @@ const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicCapabilitiesSlugIndexRoute: PublicCapabilitiesSlugIndexRoute,
   PublicJobsSlugIndexRoute: PublicJobsSlugIndexRoute,
   PublicOrganizationsSlugIndexRoute: PublicOrganizationsSlugIndexRoute,
+  PublicReportsIdIndexRoute: PublicReportsIdIndexRoute,
   PublicTechnologiesSlugIndexRoute: PublicTechnologiesSlugIndexRoute,
 }
 
@@ -1004,6 +1067,8 @@ export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
