@@ -1,4 +1,5 @@
 import { useForm } from '@tanstack/react-form'
+import { Link } from '@tanstack/react-router'
 
 import {
   addEnrichmentFn,
@@ -229,6 +230,11 @@ export function ReportDetail({ report, session }: ReportDetailProps) {
               >
                 <span className="mr-1">👎</span>
               </Button>
+              <Link to="/reports/$id/discussion" params={{ id: report.id }}>
+                <Button variant="outline" size="sm">
+                  💬 Discussion
+                </Button>
+              </Link>
             </div>
 
             <div className="flex items-center gap-2">

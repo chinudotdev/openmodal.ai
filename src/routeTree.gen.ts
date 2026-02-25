@@ -29,6 +29,7 @@ import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/te
 import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
 import { Route as PublicOrganizationsIndexRouteImport } from './routes/_public/organizations/index'
 import { Route as PublicJobsIndexRouteImport } from './routes/_public/jobs/index'
+import { Route as PublicDiscussionsIndexRouteImport } from './routes/_public/discussions/index'
 import { Route as PublicCapabilitiesIndexRouteImport } from './routes/_public/capabilities/index'
 import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -42,6 +43,7 @@ import { Route as PublicTechnologiesSlugIndexRouteImport } from './routes/_publi
 import { Route as PublicReportsIdIndexRouteImport } from './routes/_public/reports/$id/index'
 import { Route as PublicOrganizationsSlugIndexRouteImport } from './routes/_public/organizations/$slug/index'
 import { Route as PublicJobsSlugIndexRouteImport } from './routes/_public/jobs/$slug/index'
+import { Route as PublicDiscussionsIdIndexRouteImport } from './routes/_public/discussions/$id/index'
 import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
 import { Route as AuthedDashboardSuggestionsIndexRouteImport } from './routes/_authed/dashboard/suggestions/index'
 import { Route as AuthedDashboardReportsIndexRouteImport } from './routes/_authed/dashboard/reports/index'
@@ -51,11 +53,17 @@ import { Route as AdminOrganizationsSlugAddRouteImport } from './routes/admin/or
 import { Route as AdminJobsSlugEditRouteImport } from './routes/admin/jobs/$slug/edit'
 import { Route as AdminCapabilitiesSlugEditRouteImport } from './routes/admin/capabilities/$slug/edit'
 import { Route as AdminCapabilitiesSlugAddRouteImport } from './routes/admin/capabilities/$slug/add'
-import { Route as PublicCapabilitiesSlugSubslugRouteImport } from './routes/_public/capabilities/$slug/$subslug'
+import { Route as PublicTechnologiesSlugDiscussionRouteImport } from './routes/_public/technologies/$slug/discussion'
+import { Route as PublicReportsIdDiscussionRouteImport } from './routes/_public/reports/$id/discussion'
+import { Route as PublicOrganizationsSlugDiscussionRouteImport } from './routes/_public/organizations/$slug/discussion'
+import { Route as PublicJobsSlugDiscussionRouteImport } from './routes/_public/jobs/$slug/discussion'
+import { Route as PublicCapabilitiesSlugDiscussionRouteImport } from './routes/_public/capabilities/$slug/discussion'
 import { Route as AdminOrganizationsSlugTechnologiesIndexRouteImport } from './routes/admin/organizations/$slug/$technologies/index'
+import { Route as PublicCapabilitiesSlugSubslugIndexRouteImport } from './routes/_public/capabilities/$slug/$subslug/index'
 import { Route as AuthedDashboardReportsSubmitIndexRouteImport } from './routes/_authed/dashboard/reports/submit/index'
 import { Route as AdminOrganizationsSlugTechnologiesEditRouteImport } from './routes/admin/organizations/$slug/$technologies/edit'
 import { Route as AdminCapabilitiesSlugSubslugEditRouteImport } from './routes/admin/capabilities/$slug/$subslug/edit'
+import { Route as PublicCapabilitiesSlugSubslugDiscussionRouteImport } from './routes/_public/capabilities/$slug/$subslug/discussion'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -156,6 +164,11 @@ const PublicJobsIndexRoute = PublicJobsIndexRouteImport.update({
   path: '/jobs/',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PublicDiscussionsIndexRoute = PublicDiscussionsIndexRouteImport.update({
+  id: '/discussions/',
+  path: '/discussions/',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
 const PublicCapabilitiesIndexRoute = PublicCapabilitiesIndexRouteImport.update({
   id: '/capabilities/',
   path: '/capabilities/',
@@ -225,6 +238,12 @@ const PublicJobsSlugIndexRoute = PublicJobsSlugIndexRouteImport.update({
   path: '/jobs/$slug/',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PublicDiscussionsIdIndexRoute =
+  PublicDiscussionsIdIndexRouteImport.update({
+    id: '/discussions/$id/',
+    path: '/discussions/$id/',
+    getParentRoute: () => PublicRouteRoute,
+  } as any)
 const PublicCapabilitiesSlugIndexRoute =
   PublicCapabilitiesSlugIndexRouteImport.update({
     id: '/capabilities/$slug/',
@@ -278,10 +297,34 @@ const AdminCapabilitiesSlugAddRoute =
     path: '/capabilities/$slug/add',
     getParentRoute: () => AdminRouteRoute,
   } as any)
-const PublicCapabilitiesSlugSubslugRoute =
-  PublicCapabilitiesSlugSubslugRouteImport.update({
-    id: '/capabilities/$slug/$subslug',
-    path: '/capabilities/$slug/$subslug',
+const PublicTechnologiesSlugDiscussionRoute =
+  PublicTechnologiesSlugDiscussionRouteImport.update({
+    id: '/technologies/$slug/discussion',
+    path: '/technologies/$slug/discussion',
+    getParentRoute: () => PublicRouteRoute,
+  } as any)
+const PublicReportsIdDiscussionRoute =
+  PublicReportsIdDiscussionRouteImport.update({
+    id: '/reports/$id/discussion',
+    path: '/reports/$id/discussion',
+    getParentRoute: () => PublicRouteRoute,
+  } as any)
+const PublicOrganizationsSlugDiscussionRoute =
+  PublicOrganizationsSlugDiscussionRouteImport.update({
+    id: '/organizations/$slug/discussion',
+    path: '/organizations/$slug/discussion',
+    getParentRoute: () => PublicRouteRoute,
+  } as any)
+const PublicJobsSlugDiscussionRoute =
+  PublicJobsSlugDiscussionRouteImport.update({
+    id: '/jobs/$slug/discussion',
+    path: '/jobs/$slug/discussion',
+    getParentRoute: () => PublicRouteRoute,
+  } as any)
+const PublicCapabilitiesSlugDiscussionRoute =
+  PublicCapabilitiesSlugDiscussionRouteImport.update({
+    id: '/capabilities/$slug/discussion',
+    path: '/capabilities/$slug/discussion',
     getParentRoute: () => PublicRouteRoute,
   } as any)
 const AdminOrganizationsSlugTechnologiesIndexRoute =
@@ -289,6 +332,12 @@ const AdminOrganizationsSlugTechnologiesIndexRoute =
     id: '/organizations/$slug/$technologies/',
     path: '/organizations/$slug/$technologies/',
     getParentRoute: () => AdminRouteRoute,
+  } as any)
+const PublicCapabilitiesSlugSubslugIndexRoute =
+  PublicCapabilitiesSlugSubslugIndexRouteImport.update({
+    id: '/capabilities/$slug/$subslug/',
+    path: '/capabilities/$slug/$subslug/',
+    getParentRoute: () => PublicRouteRoute,
   } as any)
 const AuthedDashboardReportsSubmitIndexRoute =
   AuthedDashboardReportsSubmitIndexRouteImport.update({
@@ -308,6 +357,12 @@ const AdminCapabilitiesSlugSubslugEditRoute =
     path: '/capabilities/$slug/$subslug/edit',
     getParentRoute: () => AdminRouteRoute,
   } as any)
+const PublicCapabilitiesSlugSubslugDiscussionRoute =
+  PublicCapabilitiesSlugSubslugDiscussionRouteImport.update({
+    id: '/capabilities/$slug/$subslug/discussion',
+    path: '/capabilities/$slug/$subslug/discussion',
+    getParentRoute: () => PublicRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -325,6 +380,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard/': typeof AuthedDashboardIndexRoute
   '/capabilities/': typeof PublicCapabilitiesIndexRoute
+  '/discussions/': typeof PublicDiscussionsIndexRoute
   '/jobs/': typeof PublicJobsIndexRoute
   '/organizations/': typeof PublicOrganizationsIndexRoute
   '/reports/': typeof PublicReportsIndexRoute
@@ -334,7 +390,11 @@ export interface FileRoutesByFullPath {
   '/admin/jobs/': typeof AdminJobsIndexRoute
   '/admin/organizations/': typeof AdminOrganizationsIndexRoute
   '/admin/suggestions/': typeof AdminSuggestionsIndexRoute
-  '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
+  '/capabilities/$slug/discussion': typeof PublicCapabilitiesSlugDiscussionRoute
+  '/jobs/$slug/discussion': typeof PublicJobsSlugDiscussionRoute
+  '/organizations/$slug/discussion': typeof PublicOrganizationsSlugDiscussionRoute
+  '/reports/$id/discussion': typeof PublicReportsIdDiscussionRoute
+  '/technologies/$slug/discussion': typeof PublicTechnologiesSlugDiscussionRoute
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/admin/jobs/$slug/edit': typeof AdminJobsSlugEditRoute
@@ -344,6 +404,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/reports/': typeof AuthedDashboardReportsIndexRoute
   '/dashboard/suggestions/': typeof AuthedDashboardSuggestionsIndexRoute
   '/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
+  '/discussions/$id/': typeof PublicDiscussionsIdIndexRoute
   '/jobs/$slug/': typeof PublicJobsSlugIndexRoute
   '/organizations/$slug/': typeof PublicOrganizationsSlugIndexRoute
   '/reports/$id/': typeof PublicReportsIdIndexRoute
@@ -351,9 +412,11 @@ export interface FileRoutesByFullPath {
   '/admin/capabilities/$slug/': typeof AdminCapabilitiesSlugIndexRoute
   '/admin/jobs/$slug/': typeof AdminJobsSlugIndexRoute
   '/admin/organizations/$slug/': typeof AdminOrganizationsSlugIndexRoute
+  '/capabilities/$slug/$subslug/discussion': typeof PublicCapabilitiesSlugSubslugDiscussionRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
   '/admin/organizations/$slug/$technologies/edit': typeof AdminOrganizationsSlugTechnologiesEditRoute
   '/dashboard/reports/submit/': typeof AuthedDashboardReportsSubmitIndexRoute
+  '/capabilities/$slug/$subslug/': typeof PublicCapabilitiesSlugSubslugIndexRoute
   '/admin/organizations/$slug/$technologies/': typeof AdminOrganizationsSlugTechnologiesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -371,6 +434,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard': typeof AuthedDashboardIndexRoute
   '/capabilities': typeof PublicCapabilitiesIndexRoute
+  '/discussions': typeof PublicDiscussionsIndexRoute
   '/jobs': typeof PublicJobsIndexRoute
   '/organizations': typeof PublicOrganizationsIndexRoute
   '/reports': typeof PublicReportsIndexRoute
@@ -380,7 +444,11 @@ export interface FileRoutesByTo {
   '/admin/jobs': typeof AdminJobsIndexRoute
   '/admin/organizations': typeof AdminOrganizationsIndexRoute
   '/admin/suggestions': typeof AdminSuggestionsIndexRoute
-  '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
+  '/capabilities/$slug/discussion': typeof PublicCapabilitiesSlugDiscussionRoute
+  '/jobs/$slug/discussion': typeof PublicJobsSlugDiscussionRoute
+  '/organizations/$slug/discussion': typeof PublicOrganizationsSlugDiscussionRoute
+  '/reports/$id/discussion': typeof PublicReportsIdDiscussionRoute
+  '/technologies/$slug/discussion': typeof PublicTechnologiesSlugDiscussionRoute
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/admin/jobs/$slug/edit': typeof AdminJobsSlugEditRoute
@@ -390,6 +458,7 @@ export interface FileRoutesByTo {
   '/dashboard/reports': typeof AuthedDashboardReportsIndexRoute
   '/dashboard/suggestions': typeof AuthedDashboardSuggestionsIndexRoute
   '/capabilities/$slug': typeof PublicCapabilitiesSlugIndexRoute
+  '/discussions/$id': typeof PublicDiscussionsIdIndexRoute
   '/jobs/$slug': typeof PublicJobsSlugIndexRoute
   '/organizations/$slug': typeof PublicOrganizationsSlugIndexRoute
   '/reports/$id': typeof PublicReportsIdIndexRoute
@@ -397,9 +466,11 @@ export interface FileRoutesByTo {
   '/admin/capabilities/$slug': typeof AdminCapabilitiesSlugIndexRoute
   '/admin/jobs/$slug': typeof AdminJobsSlugIndexRoute
   '/admin/organizations/$slug': typeof AdminOrganizationsSlugIndexRoute
+  '/capabilities/$slug/$subslug/discussion': typeof PublicCapabilitiesSlugSubslugDiscussionRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
   '/admin/organizations/$slug/$technologies/edit': typeof AdminOrganizationsSlugTechnologiesEditRoute
   '/dashboard/reports/submit': typeof AuthedDashboardReportsSubmitIndexRoute
+  '/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugIndexRoute
   '/admin/organizations/$slug/$technologies': typeof AdminOrganizationsSlugTechnologiesIndexRoute
 }
 export interface FileRoutesById {
@@ -421,6 +492,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authed/dashboard/': typeof AuthedDashboardIndexRoute
   '/_public/capabilities/': typeof PublicCapabilitiesIndexRoute
+  '/_public/discussions/': typeof PublicDiscussionsIndexRoute
   '/_public/jobs/': typeof PublicJobsIndexRoute
   '/_public/organizations/': typeof PublicOrganizationsIndexRoute
   '/_public/reports/': typeof PublicReportsIndexRoute
@@ -430,7 +502,11 @@ export interface FileRoutesById {
   '/admin/jobs/': typeof AdminJobsIndexRoute
   '/admin/organizations/': typeof AdminOrganizationsIndexRoute
   '/admin/suggestions/': typeof AdminSuggestionsIndexRoute
-  '/_public/capabilities/$slug/$subslug': typeof PublicCapabilitiesSlugSubslugRoute
+  '/_public/capabilities/$slug/discussion': typeof PublicCapabilitiesSlugDiscussionRoute
+  '/_public/jobs/$slug/discussion': typeof PublicJobsSlugDiscussionRoute
+  '/_public/organizations/$slug/discussion': typeof PublicOrganizationsSlugDiscussionRoute
+  '/_public/reports/$id/discussion': typeof PublicReportsIdDiscussionRoute
+  '/_public/technologies/$slug/discussion': typeof PublicTechnologiesSlugDiscussionRoute
   '/admin/capabilities/$slug/add': typeof AdminCapabilitiesSlugAddRoute
   '/admin/capabilities/$slug/edit': typeof AdminCapabilitiesSlugEditRoute
   '/admin/jobs/$slug/edit': typeof AdminJobsSlugEditRoute
@@ -440,6 +516,7 @@ export interface FileRoutesById {
   '/_authed/dashboard/reports/': typeof AuthedDashboardReportsIndexRoute
   '/_authed/dashboard/suggestions/': typeof AuthedDashboardSuggestionsIndexRoute
   '/_public/capabilities/$slug/': typeof PublicCapabilitiesSlugIndexRoute
+  '/_public/discussions/$id/': typeof PublicDiscussionsIdIndexRoute
   '/_public/jobs/$slug/': typeof PublicJobsSlugIndexRoute
   '/_public/organizations/$slug/': typeof PublicOrganizationsSlugIndexRoute
   '/_public/reports/$id/': typeof PublicReportsIdIndexRoute
@@ -447,9 +524,11 @@ export interface FileRoutesById {
   '/admin/capabilities/$slug/': typeof AdminCapabilitiesSlugIndexRoute
   '/admin/jobs/$slug/': typeof AdminJobsSlugIndexRoute
   '/admin/organizations/$slug/': typeof AdminOrganizationsSlugIndexRoute
+  '/_public/capabilities/$slug/$subslug/discussion': typeof PublicCapabilitiesSlugSubslugDiscussionRoute
   '/admin/capabilities/$slug/$subslug/edit': typeof AdminCapabilitiesSlugSubslugEditRoute
   '/admin/organizations/$slug/$technologies/edit': typeof AdminOrganizationsSlugTechnologiesEditRoute
   '/_authed/dashboard/reports/submit/': typeof AuthedDashboardReportsSubmitIndexRoute
+  '/_public/capabilities/$slug/$subslug/': typeof PublicCapabilitiesSlugSubslugIndexRoute
   '/admin/organizations/$slug/$technologies/': typeof AdminOrganizationsSlugTechnologiesIndexRoute
 }
 export interface FileRouteTypes {
@@ -470,6 +549,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/dashboard/'
     | '/capabilities/'
+    | '/discussions/'
     | '/jobs/'
     | '/organizations/'
     | '/reports/'
@@ -479,7 +559,11 @@ export interface FileRouteTypes {
     | '/admin/jobs/'
     | '/admin/organizations/'
     | '/admin/suggestions/'
-    | '/capabilities/$slug/$subslug'
+    | '/capabilities/$slug/discussion'
+    | '/jobs/$slug/discussion'
+    | '/organizations/$slug/discussion'
+    | '/reports/$id/discussion'
+    | '/technologies/$slug/discussion'
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
     | '/admin/jobs/$slug/edit'
@@ -489,6 +573,7 @@ export interface FileRouteTypes {
     | '/dashboard/reports/'
     | '/dashboard/suggestions/'
     | '/capabilities/$slug/'
+    | '/discussions/$id/'
     | '/jobs/$slug/'
     | '/organizations/$slug/'
     | '/reports/$id/'
@@ -496,9 +581,11 @@ export interface FileRouteTypes {
     | '/admin/capabilities/$slug/'
     | '/admin/jobs/$slug/'
     | '/admin/organizations/$slug/'
+    | '/capabilities/$slug/$subslug/discussion'
     | '/admin/capabilities/$slug/$subslug/edit'
     | '/admin/organizations/$slug/$technologies/edit'
     | '/dashboard/reports/submit/'
+    | '/capabilities/$slug/$subslug/'
     | '/admin/organizations/$slug/$technologies/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -516,6 +603,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/dashboard'
     | '/capabilities'
+    | '/discussions'
     | '/jobs'
     | '/organizations'
     | '/reports'
@@ -525,7 +613,11 @@ export interface FileRouteTypes {
     | '/admin/jobs'
     | '/admin/organizations'
     | '/admin/suggestions'
-    | '/capabilities/$slug/$subslug'
+    | '/capabilities/$slug/discussion'
+    | '/jobs/$slug/discussion'
+    | '/organizations/$slug/discussion'
+    | '/reports/$id/discussion'
+    | '/technologies/$slug/discussion'
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
     | '/admin/jobs/$slug/edit'
@@ -535,6 +627,7 @@ export interface FileRouteTypes {
     | '/dashboard/reports'
     | '/dashboard/suggestions'
     | '/capabilities/$slug'
+    | '/discussions/$id'
     | '/jobs/$slug'
     | '/organizations/$slug'
     | '/reports/$id'
@@ -542,9 +635,11 @@ export interface FileRouteTypes {
     | '/admin/capabilities/$slug'
     | '/admin/jobs/$slug'
     | '/admin/organizations/$slug'
+    | '/capabilities/$slug/$subslug/discussion'
     | '/admin/capabilities/$slug/$subslug/edit'
     | '/admin/organizations/$slug/$technologies/edit'
     | '/dashboard/reports/submit'
+    | '/capabilities/$slug/$subslug'
     | '/admin/organizations/$slug/$technologies'
   id:
     | '__root__'
@@ -565,6 +660,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/_authed/dashboard/'
     | '/_public/capabilities/'
+    | '/_public/discussions/'
     | '/_public/jobs/'
     | '/_public/organizations/'
     | '/_public/reports/'
@@ -574,7 +670,11 @@ export interface FileRouteTypes {
     | '/admin/jobs/'
     | '/admin/organizations/'
     | '/admin/suggestions/'
-    | '/_public/capabilities/$slug/$subslug'
+    | '/_public/capabilities/$slug/discussion'
+    | '/_public/jobs/$slug/discussion'
+    | '/_public/organizations/$slug/discussion'
+    | '/_public/reports/$id/discussion'
+    | '/_public/technologies/$slug/discussion'
     | '/admin/capabilities/$slug/add'
     | '/admin/capabilities/$slug/edit'
     | '/admin/jobs/$slug/edit'
@@ -584,6 +684,7 @@ export interface FileRouteTypes {
     | '/_authed/dashboard/reports/'
     | '/_authed/dashboard/suggestions/'
     | '/_public/capabilities/$slug/'
+    | '/_public/discussions/$id/'
     | '/_public/jobs/$slug/'
     | '/_public/organizations/$slug/'
     | '/_public/reports/$id/'
@@ -591,9 +692,11 @@ export interface FileRouteTypes {
     | '/admin/capabilities/$slug/'
     | '/admin/jobs/$slug/'
     | '/admin/organizations/$slug/'
+    | '/_public/capabilities/$slug/$subslug/discussion'
     | '/admin/capabilities/$slug/$subslug/edit'
     | '/admin/organizations/$slug/$technologies/edit'
     | '/_authed/dashboard/reports/submit/'
+    | '/_public/capabilities/$slug/$subslug/'
     | '/admin/organizations/$slug/$technologies/'
   fileRoutesById: FileRoutesById
 }
@@ -749,6 +852,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicJobsIndexRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_public/discussions/': {
+      id: '/_public/discussions/'
+      path: '/discussions'
+      fullPath: '/discussions/'
+      preLoaderRoute: typeof PublicDiscussionsIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
     '/_public/capabilities/': {
       id: '/_public/capabilities/'
       path: '/capabilities'
@@ -840,6 +950,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicJobsSlugIndexRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_public/discussions/$id/': {
+      id: '/_public/discussions/$id/'
+      path: '/discussions/$id'
+      fullPath: '/discussions/$id/'
+      preLoaderRoute: typeof PublicDiscussionsIdIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
     '/_public/capabilities/$slug/': {
       id: '/_public/capabilities/$slug/'
       path: '/capabilities/$slug'
@@ -903,11 +1020,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCapabilitiesSlugAddRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/_public/capabilities/$slug/$subslug': {
-      id: '/_public/capabilities/$slug/$subslug'
-      path: '/capabilities/$slug/$subslug'
-      fullPath: '/capabilities/$slug/$subslug'
-      preLoaderRoute: typeof PublicCapabilitiesSlugSubslugRouteImport
+    '/_public/technologies/$slug/discussion': {
+      id: '/_public/technologies/$slug/discussion'
+      path: '/technologies/$slug/discussion'
+      fullPath: '/technologies/$slug/discussion'
+      preLoaderRoute: typeof PublicTechnologiesSlugDiscussionRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/reports/$id/discussion': {
+      id: '/_public/reports/$id/discussion'
+      path: '/reports/$id/discussion'
+      fullPath: '/reports/$id/discussion'
+      preLoaderRoute: typeof PublicReportsIdDiscussionRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/organizations/$slug/discussion': {
+      id: '/_public/organizations/$slug/discussion'
+      path: '/organizations/$slug/discussion'
+      fullPath: '/organizations/$slug/discussion'
+      preLoaderRoute: typeof PublicOrganizationsSlugDiscussionRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/jobs/$slug/discussion': {
+      id: '/_public/jobs/$slug/discussion'
+      path: '/jobs/$slug/discussion'
+      fullPath: '/jobs/$slug/discussion'
+      preLoaderRoute: typeof PublicJobsSlugDiscussionRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/capabilities/$slug/discussion': {
+      id: '/_public/capabilities/$slug/discussion'
+      path: '/capabilities/$slug/discussion'
+      fullPath: '/capabilities/$slug/discussion'
+      preLoaderRoute: typeof PublicCapabilitiesSlugDiscussionRouteImport
       parentRoute: typeof PublicRouteRoute
     }
     '/admin/organizations/$slug/$technologies/': {
@@ -916,6 +1061,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/organizations/$slug/$technologies/'
       preLoaderRoute: typeof AdminOrganizationsSlugTechnologiesIndexRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/_public/capabilities/$slug/$subslug/': {
+      id: '/_public/capabilities/$slug/$subslug/'
+      path: '/capabilities/$slug/$subslug'
+      fullPath: '/capabilities/$slug/$subslug/'
+      preLoaderRoute: typeof PublicCapabilitiesSlugSubslugIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/_authed/dashboard/reports/submit/': {
       id: '/_authed/dashboard/reports/submit/'
@@ -937,6 +1089,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/capabilities/$slug/$subslug/edit'
       preLoaderRoute: typeof AdminCapabilitiesSlugSubslugEditRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/_public/capabilities/$slug/$subslug/discussion': {
+      id: '/_public/capabilities/$slug/$subslug/discussion'
+      path: '/capabilities/$slug/$subslug/discussion'
+      fullPath: '/capabilities/$slug/$subslug/discussion'
+      preLoaderRoute: typeof PublicCapabilitiesSlugSubslugDiscussionRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
   }
 }
@@ -968,16 +1127,24 @@ interface PublicRouteRouteChildren {
   PublicTermsRoute: typeof PublicTermsRoute
   PublicIndexRoute: typeof PublicIndexRoute
   PublicCapabilitiesIndexRoute: typeof PublicCapabilitiesIndexRoute
+  PublicDiscussionsIndexRoute: typeof PublicDiscussionsIndexRoute
   PublicJobsIndexRoute: typeof PublicJobsIndexRoute
   PublicOrganizationsIndexRoute: typeof PublicOrganizationsIndexRoute
   PublicReportsIndexRoute: typeof PublicReportsIndexRoute
   PublicTechnologiesIndexRoute: typeof PublicTechnologiesIndexRoute
-  PublicCapabilitiesSlugSubslugRoute: typeof PublicCapabilitiesSlugSubslugRoute
+  PublicCapabilitiesSlugDiscussionRoute: typeof PublicCapabilitiesSlugDiscussionRoute
+  PublicJobsSlugDiscussionRoute: typeof PublicJobsSlugDiscussionRoute
+  PublicOrganizationsSlugDiscussionRoute: typeof PublicOrganizationsSlugDiscussionRoute
+  PublicReportsIdDiscussionRoute: typeof PublicReportsIdDiscussionRoute
+  PublicTechnologiesSlugDiscussionRoute: typeof PublicTechnologiesSlugDiscussionRoute
   PublicCapabilitiesSlugIndexRoute: typeof PublicCapabilitiesSlugIndexRoute
+  PublicDiscussionsIdIndexRoute: typeof PublicDiscussionsIdIndexRoute
   PublicJobsSlugIndexRoute: typeof PublicJobsSlugIndexRoute
   PublicOrganizationsSlugIndexRoute: typeof PublicOrganizationsSlugIndexRoute
   PublicReportsIdIndexRoute: typeof PublicReportsIdIndexRoute
   PublicTechnologiesSlugIndexRoute: typeof PublicTechnologiesSlugIndexRoute
+  PublicCapabilitiesSlugSubslugDiscussionRoute: typeof PublicCapabilitiesSlugSubslugDiscussionRoute
+  PublicCapabilitiesSlugSubslugIndexRoute: typeof PublicCapabilitiesSlugSubslugIndexRoute
 }
 
 const PublicRouteRouteChildren: PublicRouteRouteChildren = {
@@ -986,16 +1153,27 @@ const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicTermsRoute: PublicTermsRoute,
   PublicIndexRoute: PublicIndexRoute,
   PublicCapabilitiesIndexRoute: PublicCapabilitiesIndexRoute,
+  PublicDiscussionsIndexRoute: PublicDiscussionsIndexRoute,
   PublicJobsIndexRoute: PublicJobsIndexRoute,
   PublicOrganizationsIndexRoute: PublicOrganizationsIndexRoute,
   PublicReportsIndexRoute: PublicReportsIndexRoute,
   PublicTechnologiesIndexRoute: PublicTechnologiesIndexRoute,
-  PublicCapabilitiesSlugSubslugRoute: PublicCapabilitiesSlugSubslugRoute,
+  PublicCapabilitiesSlugDiscussionRoute: PublicCapabilitiesSlugDiscussionRoute,
+  PublicJobsSlugDiscussionRoute: PublicJobsSlugDiscussionRoute,
+  PublicOrganizationsSlugDiscussionRoute:
+    PublicOrganizationsSlugDiscussionRoute,
+  PublicReportsIdDiscussionRoute: PublicReportsIdDiscussionRoute,
+  PublicTechnologiesSlugDiscussionRoute: PublicTechnologiesSlugDiscussionRoute,
   PublicCapabilitiesSlugIndexRoute: PublicCapabilitiesSlugIndexRoute,
+  PublicDiscussionsIdIndexRoute: PublicDiscussionsIdIndexRoute,
   PublicJobsSlugIndexRoute: PublicJobsSlugIndexRoute,
   PublicOrganizationsSlugIndexRoute: PublicOrganizationsSlugIndexRoute,
   PublicReportsIdIndexRoute: PublicReportsIdIndexRoute,
   PublicTechnologiesSlugIndexRoute: PublicTechnologiesSlugIndexRoute,
+  PublicCapabilitiesSlugSubslugDiscussionRoute:
+    PublicCapabilitiesSlugSubslugDiscussionRoute,
+  PublicCapabilitiesSlugSubslugIndexRoute:
+    PublicCapabilitiesSlugSubslugIndexRoute,
 }
 
 const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
