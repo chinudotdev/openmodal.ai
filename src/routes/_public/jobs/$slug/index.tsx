@@ -327,11 +327,13 @@ function JobPage() {
                   <CardContent className="p-6">
                     <div className="text-center py-8">
                       <p className="text-muted-foreground mb-4">
-                        Discussions coming soon. Be the first to start a
-                        conversation about {job.name}!
+                        Join the conversation about {job.name}!
                       </p>
-                      <Link to="/login">
-                        <Button variant="outline">📝 Start a Discussion</Button>
+                      <Link
+                        to="/jobs/$slug/discussion"
+                        params={{ slug: job.slug }}
+                      >
+                        <Button variant="outline">💬 Join Discussion</Button>
                       </Link>
                     </div>
                   </CardContent>
@@ -487,7 +489,7 @@ function JobPage() {
                 <Link to="/login">
                   <Button>📝 Share Your Story</Button>
                 </Link>
-                <Link to="/login">
+                <Link to="/jobs/$slug/discussion" params={{ slug: job.slug }}>
                   <Button variant="outline">💬 Join Discussion</Button>
                 </Link>
               </div>

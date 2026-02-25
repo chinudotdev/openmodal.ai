@@ -219,6 +219,14 @@ function TechnologyDetailPage() {
                   📚 View Organization
                 </Button>
               </Link>
+              <Link
+                to="/technologies/$slug/discussion"
+                params={{ slug: technology.slug }}
+              >
+                <Button variant="outline" size="sm">
+                  💬 Discussion
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

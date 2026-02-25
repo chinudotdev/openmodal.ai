@@ -303,7 +303,10 @@ function CapabilityPage() {
                 <Link to="/login">
                   <Button>📝 Share Your Story</Button>
                 </Link>
-                <Link to="/login">
+                <Link
+                  to="/capabilities/$slug/discussion"
+                  params={{ slug: capability.slug }}
+                >
                   <Button variant="outline">💬 Join Discussion</Button>
                 </Link>
               </div>
