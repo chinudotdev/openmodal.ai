@@ -1,6 +1,15 @@
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  notFound,
+  useRouter,
+} from '@tanstack/react-router'
 
-import { getDiscussionByEntityFn } from '@/actions/discussions'
+import {
+  createDiscussionFn,
+  createReplyFn,
+  getDiscussionByEntityFn,
+} from '@/actions/discussions'
 import { getReportByIdFn } from '@/actions/reports'
 import {
   CreateDiscussionForm,
@@ -48,22 +57,35 @@ export const Route = createFileRoute('/_public/reports/$id/discussion')({
 function ReportDiscussionPage() {
   const { report, discussion, replies, exists } = Route.useLoaderData()
   const navigate = Route.useNavigate()
+  const router = useRouter()
 
   const reportTitle = report.title || report.jobTitle
 
-  const handleCreateDiscussion = (data: { title: string; body: string }) => {
-    // TODO: Implement create discussion
-    console.log('Create discussion:', data)
+  const handleCreateDiscussion = async (data: {
+    title: string
+    body: string
+  }) => {
+    const result = await createDiscussionFn({
+      data: {
+        title: data.title,
+        body: data.body,
+        entityType: 'impact_report',
+        entityId: report.id,
+        isAnonymous: false,
+      },
+    })
+    if (result.success) {
+      // Invalidate the route to refresh the discussion
+      await router.invalidate()
+    }
   }
 
-  const handleVote = (_id: string, _voteType: 'upvote' | 'downvote') => {
-    // TODO: Implement voting
-    console.log('Vote:', _id, _voteType)
-  }
-
-  const handleReply = (_parentId: string, _body: string) => {
-    // TODO: Implement reply
-    console.log('Reply:', _parentId, _body)
+  const handleReply = async (parentId: string, body: string) => {
+    await createReplyFn({
+      data: { parentId, body, isAnonymous: false },
+    })
+    // Invalidate to show the new reply
+    await router.invalidate()
   }
 
   return (
@@ -134,7 +156,6 @@ function ReportDiscussionPage() {
           <DiscussionThread
             discussion={discussion}
             replies={replies}
-            onVote={handleVote}
             onReply={handleReply}
           />
         ) : (

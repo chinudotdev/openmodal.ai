@@ -4,6 +4,7 @@ export { DiscussionList } from './discussion-list'
 export { DiscussionThread } from './discussion-thread'
 export { CreateDiscussionForm } from './create-discussion-form'
 export { CreateReplyForm } from './create-reply-form'
+export { StartDiscussionDialog } from './start-discussion-dialog'
 
 export type { DiscussionCardProps } from './discussion-card'
 export type { DiscussionFiltersValues } from './discussion-filters'

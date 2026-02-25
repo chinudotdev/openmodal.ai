@@ -404,14 +404,16 @@ function OrganizationDetailPage() {
             {/* Contribute CTA */}
             <Card className="bg-primary/5 border-primary/20">
               <CardContent className="p-6 text-center space-y-3">
-                <p className="font-medium mb-2">🚀 Share Your Experience</p>
+                <p className="font-medium mb-2">
+                  Contribute to the Knowledge Base
+                </p>
                 <p className="text-sm text-muted-foreground mb-4">
                   Work with {organization.name} technologies? Share your impact
                   story.
                 </p>
                 <Link to="/dashboard">
                   <Button size="sm" className="w-full">
-                    📝 Share Story
+                    📝 Contribute
                   </Button>
                 </Link>
                 <Link
@@ -419,7 +421,7 @@ function OrganizationDetailPage() {
                   params={{ slug: organization.slug }}
                 >
                   <Button size="sm" variant="outline" className="w-full">
-                    💬 Discussion
+                    💬 Join Discussion
                   </Button>
                 </Link>
               </CardContent>

@@ -6,7 +6,6 @@ import { CreateReplyForm } from './create-reply-form'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { cn } from '@/lib/utils'
 
 
 // ============================================
@@ -19,8 +18,6 @@ export type DiscussionReply = {
   depth: number
   userId: string
   isAnonymous: boolean
-  upvotes: number
-  downvotes: number
   replyCount: number
   createdAt: Date
   updatedAt: Date
@@ -45,15 +42,12 @@ export interface DiscussionThreadProps {
       role: string | null
     } | null
     isAnonymous: boolean
-    upvotes: number
-    downvotes: number
     replyCount: number
     createdAt: Date
     updatedAt: Date
   }
   replies?: Array<DiscussionReply>
   onReply?: (parentId: string, body: string) => void
-  onVote?: (id: string, voteType: 'upvote' | 'downvote') => void
   isLoading?: boolean
 }
 
@@ -65,10 +59,8 @@ export function DiscussionThread({
   discussion,
   replies = [],
   onReply,
-  onVote,
   isLoading = false,
 }: DiscussionThreadProps) {
-  const score = discussion.upvotes - discussion.downvotes
   const timeAgo = getTimeAgo(discussion.createdAt)
 
   // Get author display
@@ -84,80 +76,45 @@ export function DiscussionThread({
     <div className="space-y-6">
       {/* Main Discussion */}
       <div className="bg-card border rounded-lg p-6">
-        <div className="flex gap-6">
-          {/* Voting */}
-          <div className="flex flex-col items-center gap-1 min-w-[70px]">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-10 w-10 p-0 text-lg"
-              disabled={!onVote || isLoading}
-              onClick={() => onVote?.(discussion.id, 'upvote')}
-            >
-              ▲
-            </Button>
-            <span
-              className={cn(
-                'text-lg font-bold',
-                score > 0 ? 'text-green-600' : score < 0 ? 'text-red-600' : '',
-              )}
-            >
-              {score > 0 ? '+' : ''}
-              {score}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-10 w-10 p-0 text-lg"
-              disabled={!onVote || isLoading}
-              onClick={() => onVote?.(discussion.id, 'downvote')}
-            >
-              ▼
-            </Button>
+        {/* Content */}
+        <div className="flex-1">
+          {/* Title */}
+          {discussion.title && (
+            <h1 className="text-2xl font-bold mb-4">{discussion.title}</h1>
+          )}
+
+          {/* Metadata */}
+          <div className="flex flex-wrap items-center gap-2 mb-4 text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">{authorDisplay}</span>
+            {authorBadge && <Badge variant="secondary">{authorBadge}</Badge>}
+            <span>•</span>
+            <span>{timeAgo}</span>
+            {discussion.updatedAt.getTime() !==
+              discussion.createdAt.getTime() && (
+              <>
+                <span>•</span>
+                <span>Edited {getTimeAgo(discussion.updatedAt)}</span>
+              </>
+            )}
           </div>
 
-          {/* Content */}
-          <div className="flex-1">
-            {/* Title */}
-            {discussion.title && (
-              <h1 className="text-2xl font-bold mb-4">{discussion.title}</h1>
-            )}
+          {/* Body */}
+          <div className="prose prose-sm max-w-none mb-6 whitespace-pre-wrap">
+            {discussion.body}
+          </div>
 
-            {/* Metadata */}
-            <div className="flex flex-wrap items-center gap-2 mb-4 text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">
-                {authorDisplay}
-              </span>
-              {authorBadge && <Badge variant="secondary">{authorBadge}</Badge>}
-              <span>•</span>
-              <span>{timeAgo}</span>
-              {discussion.updatedAt.getTime() !==
-                discussion.createdAt.getTime() && (
-                <>
-                  <span>•</span>
-                  <span>Edited {getTimeAgo(discussion.updatedAt)}</span>
-                </>
-              )}
-            </div>
-
-            {/* Body */}
-            <div className="prose prose-sm max-w-none mb-6 whitespace-pre-wrap">
-              {discussion.body}
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm">
-                💬 Reply{' '}
-                {discussion.replyCount > 0 && `(${discussion.replyCount})`}
-              </Button>
-              <Button variant="ghost" size="sm">
-                Share
-              </Button>
-              <Button variant="ghost" size="sm">
-                Flag
-              </Button>
-            </div>
+          {/* Actions */}
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm">
+              💬 Reply{' '}
+              {discussion.replyCount > 0 && `(${discussion.replyCount})`}
+            </Button>
+            <Button variant="ghost" size="sm">
+              Share
+            </Button>
+            <Button variant="ghost" size="sm">
+              Flag
+            </Button>
           </div>
         </div>
       </div>
@@ -173,7 +130,6 @@ export function DiscussionThread({
                 key={reply.id}
                 reply={reply}
                 onReply={onReply}
-                onVote={onVote}
                 isLoading={isLoading}
               />
             ))}
@@ -203,12 +159,10 @@ export function DiscussionThread({
 interface ReplyItemProps {
   reply: DiscussionReply
   onReply?: (parentId: string, body: string) => void
-  onVote?: (id: string, voteType: 'upvote' | 'downvote') => void
   isLoading?: boolean
 }
 
-function ReplyItem({ reply, onReply, onVote, isLoading }: ReplyItemProps) {
-  const score = reply.upvotes - reply.downvotes
+function ReplyItem({ reply, onReply, isLoading }: ReplyItemProps) {
   const timeAgo = getTimeAgo(reply.createdAt)
   const canReply = reply.depth < 2 // Max 3 levels (0, 1, 2)
 
@@ -220,83 +174,47 @@ function ReplyItem({ reply, onReply, onVote, isLoading }: ReplyItemProps) {
     !reply.isAnonymous && reply.author?.role ? reply.author.role : null
 
   return (
-    <div
-      className={cn('bg-card border rounded-lg p-4', reply.depth > 0 && 'ml-8')}
-    >
-      <div className="flex gap-4">
-        {/* Voting */}
-        <div className="flex flex-col items-center gap-1 min-w-[50px]">
+    <div className={'bg-card border rounded-lg p-4'}>
+      {/* Content */}
+      <div className="flex-1">
+        {/* Metadata */}
+        <div className="flex flex-wrap items-center gap-2 mb-2 text-xs text-muted-foreground">
+          <span className="font-medium text-foreground">{authorDisplay}</span>
+          {authorBadge && <Badge variant="secondary">{authorBadge}</Badge>}
+          <span>•</span>
+          <span>{timeAgo}</span>
+        </div>
+
+        {/* Body */}
+        <div className="text-sm whitespace-pre-wrap mb-3">{reply.body}</div>
+
+        {/* Actions */}
+        {canReply && onReply && (
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 text-sm"
-            disabled={!onVote || isLoading}
-            onClick={() => onVote?.(reply.id, 'upvote')}
+            className="h-7 text-xs"
+            onClick={() => {
+              // Focus reply form for this parent
+              const form = document.querySelector(
+                `[data-reply-parent="${reply.id}"]`,
+              ) as HTMLElement
+              form.focus()
+            }}
           >
-            ▲
+            💬 Reply
           </Button>
-          <span
-            className={cn(
-              'text-sm font-medium',
-              score > 0 ? 'text-green-600' : score < 0 ? 'text-red-600' : '',
-            )}
-          >
-            {score > 0 ? '+' : ''}
-            {score}
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 text-sm"
-            disabled={!onVote || isLoading}
-            onClick={() => onVote?.(reply.id, 'downvote')}
-          >
-            ▼
-          </Button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1">
-          {/* Metadata */}
-          <div className="flex flex-wrap items-center gap-2 mb-2 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">{authorDisplay}</span>
-            {authorBadge && <Badge variant="secondary">{authorBadge}</Badge>}
-            <span>•</span>
-            <span>{timeAgo}</span>
-          </div>
-
-          {/* Body */}
-          <div className="text-sm whitespace-pre-wrap mb-3">{reply.body}</div>
-
-          {/* Actions */}
-          {canReply && onReply && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs"
-              onClick={() => {
-                // Focus reply form for this parent
-                const form = document.querySelector(
-                  `[data-reply-parent="${reply.id}"]`,
-                ) as HTMLElement
-                form.focus()
-              }}
-            >
-              💬 Reply
-            </Button>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Nested Replies */}
       {reply.replies.length > 0 && (
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 space-y-3 ml-4">
           {reply.replies.map((nestedReply) => (
             <ReplyItem
               key={nestedReply.id}
               reply={nestedReply}
               onReply={onReply}
-              onVote={onVote}
               isLoading={isLoading}
             />
           ))}
@@ -305,7 +223,7 @@ function ReplyItem({ reply, onReply, onVote, isLoading }: ReplyItemProps) {
 
       {/* Inline Reply Form for this level */}
       {canReply && onReply && (
-        <div className="mt-4 ml-[50px]">
+        <div className="mt-4">
           <InlineReplyForm
             parentId={reply.id}
             onSubmit={(data) => onReply(reply.id, data.body)}

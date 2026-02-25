@@ -1,6 +1,7 @@
 import { Link, Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 
 import { getSessionFn } from '@/actions/session'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/admin')({
@@ -41,6 +42,9 @@ function AdminLayout() {
                 </span>
               </div>
               <span className="font-semibold text-lg">OpenModal</span>
+              <Badge variant="secondary" className="text-xs">
+                Beta
+              </Badge>
             </Link>
             <div className="h-6 w-px bg-border/40" />
             <nav className="flex items-center gap-4">

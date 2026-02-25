@@ -156,17 +156,20 @@ function TechnologiesPage() {
       {/* CTA */}
       <section className="container mx-auto px-6 py-12">
         <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-2xl font-semibold mb-4">Track AI Development</h2>
+          <h2 className="text-2xl font-semibold mb-4">
+            Contribute to the Knowledge Base
+          </h2>
           <p className="text-muted-foreground mb-6">
-            Stay updated on the latest AI technologies and their capabilities.
-            Compare performance and find the right tools for your needs.
+            Have experience with AI technologies? Share your insights and help
+            build the most comprehensive database of AI tools and their
+            capabilities.
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Link to="/dashboard">
-              <Button>📝 Get Started</Button>
-            </Link>
-            <Link to="/">
-              <Button variant="outline">🔍 Explore</Button>
+            <Link
+              to="/dashboard/suggestions"
+              search={{ type: 'technology', mode: 'new', name: '', id: '' }}
+            >
+              <Button>📝 Contribute</Button>
             </Link>
           </div>
         </div>

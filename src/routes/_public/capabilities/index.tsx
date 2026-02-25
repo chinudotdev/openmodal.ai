@@ -194,19 +194,19 @@ function CapabilitiesPage() {
       <section className="container mx-auto px-6 py-12">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl font-semibold mb-4">
-            Contribute Your Knowledge
+            Contribute to the Knowledge Base
           </h2>
           <p className="text-muted-foreground mb-6">
-            Have firsthand experience with AI capabilities in your field? Share
-            your story and help build the most comprehensive database of AI's
-            real-world impact.
+            Have firsthand experience with AI capabilities? Share your insights
+            and help build the most comprehensive database of AI's real-world
+            impact.
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Link to="/login">
-              <Button>📝 Share Your Story</Button>
-            </Link>
-            <Link to="/login">
-              <Button variant="outline">📄 View Reports</Button>
+            <Link
+              to="/dashboard/suggestions"
+              search={{ type: 'capability', mode: 'new', name: '', id: '' }}
+            >
+              <Button>📝 Contribute</Button>
             </Link>
           </div>
         </div>

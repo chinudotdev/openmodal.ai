@@ -1,6 +1,15 @@
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  notFound,
+  useRouter,
+} from '@tanstack/react-router'
 
-import { getDiscussionByEntityFn } from '@/actions/discussions'
+import {
+  createDiscussionFn,
+  createReplyFn,
+  getDiscussionByEntityFn,
+} from '@/actions/discussions'
 import { getTechnologyBySlugFn } from '@/actions/technologies'
 import {
   CreateDiscussionForm,
@@ -13,20 +22,23 @@ import { Separator } from '@/components/ui/separator'
 export const Route = createFileRoute('/_public/technologies/$slug/discussion')({
   component: TechnologyDiscussionPage,
   loader: async ({ params }) => {
-    const [technologyResult, discussionResult] = await Promise.all([
-      getTechnologyBySlugFn({ data: { slug: params.slug } }),
-      getDiscussionByEntityFn({
-        data: {
-          entityType: 'technology',
-          entityId: params.slug,
-          includeReplies: true,
-        },
-      }),
-    ])
+    // First fetch the technology to get its ID
+    const technologyResult = await getTechnologyBySlugFn({
+      data: { slug: params.slug },
+    })
 
     if (!technologyResult.technology) {
       throw notFound()
     }
+
+    // Then fetch discussions using the actual technology ID
+    const discussionResult = await getDiscussionByEntityFn({
+      data: {
+        entityType: 'technology',
+        entityId: technologyResult.technology.id,
+        includeReplies: true,
+      },
+    })
 
     return {
       technology: technologyResult.technology,
@@ -48,20 +60,33 @@ export const Route = createFileRoute('/_public/technologies/$slug/discussion')({
 function TechnologyDiscussionPage() {
   const { technology, discussion, replies, exists } = Route.useLoaderData()
   const navigate = Route.useNavigate()
+  const router = useRouter()
 
-  const handleCreateDiscussion = (data: { title: string; body: string }) => {
-    // TODO: Implement create discussion
-    console.log('Create discussion:', data)
+  const handleCreateDiscussion = async (data: {
+    title: string
+    body: string
+  }) => {
+    const result = await createDiscussionFn({
+      data: {
+        title: data.title,
+        body: data.body,
+        entityType: 'technology',
+        entityId: technology.id,
+        isAnonymous: false,
+      },
+    })
+    if (result.success) {
+      // Invalidate the route to refresh the discussion
+      await router.invalidate()
+    }
   }
 
-  const handleVote = (_id: string, _voteType: 'upvote' | 'downvote') => {
-    // TODO: Implement voting
-    console.log('Vote:', _id, _voteType)
-  }
-
-  const handleReply = (_parentId: string, _body: string) => {
-    // TODO: Implement reply
-    console.log('Reply:', _parentId, _body)
+  const handleReply = async (parentId: string, body: string) => {
+    await createReplyFn({
+      data: { parentId, body, isAnonymous: false },
+    })
+    // Invalidate to show the new reply
+    await router.invalidate()
   }
 
   return (
@@ -125,7 +150,6 @@ function TechnologyDiscussionPage() {
           <DiscussionThread
             discussion={discussion}
             replies={replies}
-            onVote={handleVote}
             onReply={handleReply}
           />
         ) : (

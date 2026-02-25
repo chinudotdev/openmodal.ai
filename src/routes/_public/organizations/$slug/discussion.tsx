@@ -1,6 +1,15 @@
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  notFound,
+  useRouter,
+} from '@tanstack/react-router'
 
-import { getDiscussionByEntityFn } from '@/actions/discussions'
+import {
+  createDiscussionFn,
+  createReplyFn,
+  getDiscussionByEntityFn,
+} from '@/actions/discussions'
 import { getOrganizationBySlugFn } from '@/actions/organizations'
 import {
   CreateDiscussionForm,
@@ -14,20 +23,23 @@ export const Route = createFileRoute('/_public/organizations/$slug/discussion')(
   {
     component: OrganizationDiscussionPage,
     loader: async ({ params }) => {
-      const [organizationResult, discussionResult] = await Promise.all([
-        getOrganizationBySlugFn({ data: { slug: params.slug } }),
-        getDiscussionByEntityFn({
-          data: {
-            entityType: 'organization',
-            entityId: params.slug,
-            includeReplies: true,
-          },
-        }),
-      ])
+      // First fetch the organization to get its ID
+      const organizationResult = await getOrganizationBySlugFn({
+        data: { slug: params.slug },
+      })
 
       if (!organizationResult.organization) {
         throw notFound()
       }
+
+      // Then fetch discussions using the actual organization ID
+      const discussionResult = await getDiscussionByEntityFn({
+        data: {
+          entityType: 'organization',
+          entityId: organizationResult.organization.id,
+          includeReplies: true,
+        },
+      })
 
       return {
         organization: organizationResult.organization,
@@ -50,20 +62,33 @@ export const Route = createFileRoute('/_public/organizations/$slug/discussion')(
 function OrganizationDiscussionPage() {
   const { organization, discussion, replies, exists } = Route.useLoaderData()
   const navigate = Route.useNavigate()
+  const router = useRouter()
 
-  const handleCreateDiscussion = (data: { title: string; body: string }) => {
-    // TODO: Implement create discussion
-    console.log('Create discussion:', data)
+  const handleCreateDiscussion = async (data: {
+    title: string
+    body: string
+  }) => {
+    const result = await createDiscussionFn({
+      data: {
+        title: data.title,
+        body: data.body,
+        entityType: 'organization',
+        entityId: organization.id,
+        isAnonymous: false,
+      },
+    })
+    if (result.success) {
+      // Invalidate the route to refresh the discussion
+      await router.invalidate()
+    }
   }
 
-  const handleVote = (_id: string, _voteType: 'upvote' | 'downvote') => {
-    // TODO: Implement voting
-    console.log('Vote:', _id, _voteType)
-  }
-
-  const handleReply = (_parentId: string, _body: string) => {
-    // TODO: Implement reply
-    console.log('Reply:', _parentId, _body)
+  const handleReply = async (parentId: string, body: string) => {
+    await createReplyFn({
+      data: { parentId, body, isAnonymous: false },
+    })
+    // Invalidate to show the new reply
+    await router.invalidate()
   }
 
   return (
@@ -130,7 +155,6 @@ function OrganizationDiscussionPage() {
           <DiscussionThread
             discussion={discussion}
             replies={replies}
-            onVote={handleVote}
             onReply={handleReply}
           />
         ) : (

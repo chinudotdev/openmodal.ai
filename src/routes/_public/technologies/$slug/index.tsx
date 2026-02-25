@@ -481,15 +481,35 @@ function TechnologyDetailPage() {
             {/* Contribute CTA */}
             <Card className="bg-primary/5 border-primary/20">
               <CardContent className="p-6 text-center">
-                <p className="font-medium mb-2">🚀 Share Your Experience</p>
+                <p className="font-medium mb-2">
+                  Contribute to the Knowledge Base
+                </p>
                 <p className="text-sm text-muted-foreground mb-4">
                   Used {technology.name} in your work? Share your impact story.
                 </p>
-                <Link to="/dashboard">
-                  <Button size="sm" className="w-full">
-                    📝 Share Story
-                  </Button>
-                </Link>
+                <div className="flex flex-col gap-2">
+                  <Link
+                    to="/dashboard/suggestions"
+                    search={{
+                      type: 'technology',
+                      mode: 'existing',
+                      name: technology.name,
+                      id: technology.id,
+                    }}
+                  >
+                    <Button size="sm" className="w-full">
+                      📝 Contribute
+                    </Button>
+                  </Link>
+                  <Link
+                    to="/technologies/$slug/discussion"
+                    params={{ slug: technology.slug }}
+                  >
+                    <Button size="sm" variant="outline" className="w-full">
+                      💬 Join Discussion
+                    </Button>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           </div>

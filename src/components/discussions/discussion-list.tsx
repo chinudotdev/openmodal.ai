@@ -19,14 +19,6 @@ export interface DiscussionListProps {
     body: string
     entityType: string
     entityId: string
-    author?: {
-      username: string
-      name: string | null
-      role: string | null
-    } | null
-    isAnonymous: boolean
-    upvotes: number
-    downvotes: number
     replyCount: number
     createdAt: Date
     updatedAt: Date

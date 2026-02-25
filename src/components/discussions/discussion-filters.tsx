@@ -20,14 +20,14 @@ import {
 export interface DiscussionFiltersValues {
   entityType?: string
   searchTerm?: string
-  sort: 'recent' | 'upvotes' | 'hot'
+  sort: 'recent' | 'hot'
   timeRange?: 'today' | 'week' | 'month' | 'all'
 }
 
 const filterSchema = z.object({
   entityType: z.string(),
   searchTerm: z.string(),
-  sort: z.enum(['recent', 'upvotes', 'hot']),
+  sort: z.enum(['recent', 'hot']),
   timeRange: z.enum(['today', 'week', 'month', 'all']),
 })
 
@@ -135,7 +135,7 @@ export function DiscussionFilters({
               <Select
                 value={field.state.value}
                 onValueChange={(value) =>
-                  field.handleChange(value as 'recent' | 'upvotes' | 'hot')
+                  field.handleChange(value as 'recent' | 'hot')
                 }
               >
                 <SelectTrigger>
@@ -144,7 +144,6 @@ export function DiscussionFilters({
                 <SelectContent>
                   <SelectItem value="hot">🔥 Hot</SelectItem>
                   <SelectItem value="recent">✨ Recent</SelectItem>
-                  <SelectItem value="upvotes">🏆 Top</SelectItem>
                 </SelectContent>
               </Select>
               <FieldError errors={field.state.meta.errors} />

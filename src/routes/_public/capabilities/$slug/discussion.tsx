@@ -1,7 +1,16 @@
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  notFound,
+  useRouter,
+} from '@tanstack/react-router'
 
 import { getCapabilityBySlugFn } from '@/actions/capabilities'
-import { getDiscussionByEntityFn } from '@/actions/discussions'
+import {
+  createDiscussionFn,
+  createReplyFn,
+  getDiscussionByEntityFn,
+} from '@/actions/discussions'
 import {
   CreateDiscussionForm,
   DiscussionThread,
@@ -13,20 +22,23 @@ import { Separator } from '@/components/ui/separator'
 export const Route = createFileRoute('/_public/capabilities/$slug/discussion')({
   component: CapabilityDiscussionPage,
   loader: async ({ params }) => {
-    const [capabilityResult, discussionResult] = await Promise.all([
-      getCapabilityBySlugFn({ data: { slug: params.slug } }),
-      getDiscussionByEntityFn({
-        data: {
-          entityType: 'capability',
-          entityId: params.slug,
-          includeReplies: true,
-        },
-      }),
-    ])
+    // First fetch the capability to get its ID
+    const capabilityResult = await getCapabilityBySlugFn({
+      data: { slug: params.slug },
+    })
 
     if (!capabilityResult) {
       throw notFound()
     }
+
+    // Then fetch discussions using the actual capability ID
+    const discussionResult = await getDiscussionByEntityFn({
+      data: {
+        entityType: 'capability',
+        entityId: capabilityResult.id,
+        includeReplies: true,
+      },
+    })
 
     return {
       capability: capabilityResult,
@@ -48,20 +60,33 @@ export const Route = createFileRoute('/_public/capabilities/$slug/discussion')({
 function CapabilityDiscussionPage() {
   const { capability, discussion, replies, exists } = Route.useLoaderData()
   const navigate = Route.useNavigate()
+  const router = useRouter()
 
-  const handleCreateDiscussion = (data: { title: string; body: string }) => {
-    // TODO: Implement create discussion
-    console.log('Create discussion:', data)
+  const handleCreateDiscussion = async (data: {
+    title: string
+    body: string
+  }) => {
+    const result = await createDiscussionFn({
+      data: {
+        title: data.title,
+        body: data.body,
+        entityType: 'capability',
+        entityId: capability.id,
+        isAnonymous: false,
+      },
+    })
+    if (result.success) {
+      // Invalidate the route to refresh the discussion
+      await router.invalidate()
+    }
   }
 
-  const handleVote = (_id: string, _voteType: 'upvote' | 'downvote') => {
-    // TODO: Implement voting
-    console.log('Vote:', _id, _voteType)
-  }
-
-  const handleReply = (_parentId: string, _body: string) => {
-    // TODO: Implement reply
-    console.log('Reply:', _parentId, _body)
+  const handleReply = async (parentId: string, body: string) => {
+    await createReplyFn({
+      data: { parentId, body, isAnonymous: false },
+    })
+    // Invalidate to show the new reply
+    await router.invalidate()
   }
 
   return (
@@ -125,7 +150,6 @@ function CapabilityDiscussionPage() {
           <DiscussionThread
             discussion={discussion}
             replies={replies}
-            onVote={handleVote}
             onReply={handleReply}
           />
         ) : (

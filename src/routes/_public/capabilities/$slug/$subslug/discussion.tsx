@@ -1,7 +1,16 @@
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  notFound,
+  useRouter,
+} from '@tanstack/react-router'
 
 import { getSubtypeBySlugFn } from '@/actions/capabilities'
-import { getDiscussionByEntityFn } from '@/actions/discussions'
+import {
+  createDiscussionFn,
+  createReplyFn,
+  getDiscussionByEntityFn,
+} from '@/actions/discussions'
 import {
   CreateDiscussionForm,
   DiscussionThread,
@@ -15,20 +24,23 @@ export const Route = createFileRoute(
 )({
   component: CapabilitySubtypeDiscussionPage,
   loader: async ({ params }) => {
-    const [subtypeResult, discussionResult] = await Promise.all([
-      getSubtypeBySlugFn({ data: { slug: params.subslug } }),
-      getDiscussionByEntityFn({
-        data: {
-          entityType: 'capability_subtype',
-          entityId: params.subslug,
-          includeReplies: true,
-        },
-      }),
-    ])
+    // First fetch the subtype to get its ID
+    const subtypeResult = await getSubtypeBySlugFn({
+      data: { slug: params.subslug },
+    })
 
     if (!subtypeResult) {
       throw notFound()
     }
+
+    // Then fetch discussions using the actual subtype ID
+    const discussionResult = await getDiscussionByEntityFn({
+      data: {
+        entityType: 'capability_subtype',
+        entityId: subtypeResult.id,
+        includeReplies: true,
+      },
+    })
 
     return {
       subtype: subtypeResult,
@@ -50,20 +62,33 @@ export const Route = createFileRoute(
 function CapabilitySubtypeDiscussionPage() {
   const { subtype, discussion, replies, exists } = Route.useLoaderData()
   const navigate = Route.useNavigate()
+  const router = useRouter()
 
-  const handleCreateDiscussion = (data: { title: string; body: string }) => {
-    // TODO: Implement create discussion
-    console.log('Create discussion:', data)
+  const handleCreateDiscussion = async (data: {
+    title: string
+    body: string
+  }) => {
+    const result = await createDiscussionFn({
+      data: {
+        title: data.title,
+        body: data.body,
+        entityType: 'capability_subtype',
+        entityId: subtype.id,
+        isAnonymous: false,
+      },
+    })
+    if (result.success) {
+      // Invalidate the route to refresh the discussion
+      await router.invalidate()
+    }
   }
 
-  const handleVote = (_id: string, _voteType: 'upvote' | 'downvote') => {
-    // TODO: Implement voting
-    console.log('Vote:', _id, _voteType)
-  }
-
-  const handleReply = (_parentId: string, _body: string) => {
-    // TODO: Implement reply
-    console.log('Reply:', _parentId, _body)
+  const handleReply = async (parentId: string, body: string) => {
+    await createReplyFn({
+      data: { parentId, body, isAnonymous: false },
+    })
+    // Invalidate to show the new reply
+    await router.invalidate()
   }
 
   const getStatusColor = (status: string) => {
@@ -158,7 +183,6 @@ function CapabilitySubtypeDiscussionPage() {
           <DiscussionThread
             discussion={discussion}
             replies={replies}
-            onVote={handleVote}
             onReply={handleReply}
           />
         ) : (

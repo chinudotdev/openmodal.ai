@@ -453,18 +453,18 @@ function JobsPage() {
         <div className="container mx-auto px-6">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-2xl font-semibold mb-4">
-              Track Your Job's Future
+              Contribute to the Knowledge Base
             </h2>
             <p className="text-muted-foreground mb-6">
-              Stay informed about how AI is affecting your profession. Get
-              personalized insights and recommendations.
+              Have firsthand experience with how AI is affecting your job? Share
+              your insights and help others understand the real-world impact.
             </p>
             <div className="flex items-center justify-center gap-4">
-              <Link to="/dashboard">
-                <Button>📝 Get Started</Button>
-              </Link>
-              <Link to="/login">
-                <Button variant="outline">💼 Sign In</Button>
+              <Link
+                to="/dashboard/suggestions"
+                search={{ type: 'job', mode: 'new', name: '', id: '' }}
+              >
+                <Button>📝 Contribute</Button>
               </Link>
             </div>
           </div>

@@ -294,14 +294,24 @@ function CapabilityPage() {
         <section className="bg-muted/30 py-12">
           <div className="container mx-auto px-6">
             <div className="max-w-2xl mx-auto text-center">
-              <h2 className="text-2xl font-semibold mb-4">🚀 Contribute</h2>
+              <h2 className="text-2xl font-semibold mb-4">
+                Contribute to the Knowledge Base
+              </h2>
               <p className="text-muted-foreground mb-6">
                 See AI {capability.name.toLowerCase()} in action at work? Share
                 your experience with the community.
               </p>
               <div className="flex items-center justify-center gap-4">
-                <Link to="/login">
-                  <Button>📝 Share Your Story</Button>
+                <Link
+                  to="/dashboard/suggestions"
+                  search={{
+                    type: 'capability',
+                    mode: 'existing',
+                    name: capability.name,
+                    id: capability.id,
+                  }}
+                >
+                  <Button>📝 Contribute</Button>
                 </Link>
                 <Link
                   to="/capabilities/$slug/discussion"

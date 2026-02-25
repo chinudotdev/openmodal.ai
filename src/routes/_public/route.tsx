@@ -1,6 +1,8 @@
 import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
 
+import { BetaWelcomeModal } from '@/components/beta-welcome-modal'
 import { PublicNav } from '@/components/public-nav'
+import { Badge } from '@/components/ui/badge'
 
 export const Route = createFileRoute('/_public')({
   component: PublicLayout,
@@ -19,6 +21,9 @@ function PublicLayout() {
               </span>
             </div>
             <span className="font-semibold text-lg">OpenModal</span>
+            <Badge variant="secondary" className="text-xs">
+              Beta
+            </Badge>
           </Link>
 
           <PublicNav />
@@ -41,8 +46,11 @@ function PublicLayout() {
                 </span>
               </div>
               <span className="text-sm text-muted-foreground">OpenModal</span>
+              <Badge variant="secondary" className="text-xs">
+                Beta
+              </Badge>
             </div>
-            <nav className="flex items-center gap-6">
+            <nav className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
               <Link
                 to="/"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -55,6 +63,22 @@ function PublicLayout() {
               >
                 About
               </Link>
+              <a
+                href="https://discord.gg/bBsF3MjA9"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Join Us
+              </a>
+              <a
+                href="https://github.com/chinudotdev/openmodal.ai/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Report a Bug
+              </a>
               <Link
                 to="/privacy"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -69,8 +93,16 @@ function PublicLayout() {
               </Link>
             </nav>
           </div>
+          <p className="text-center text-xs text-muted-foreground mt-6">
+            OpenModal is a community-driven platform tracking AI&apos;s
+            real-world impact. Help us build the most comprehensive database by
+            contributing your knowledge.
+          </p>
         </div>
       </footer>
+
+      {/* Beta Welcome Modal */}
+      <BetaWelcomeModal />
     </div>
   )
 }

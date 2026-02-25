@@ -479,15 +479,23 @@ function JobPage() {
           <div className="container mx-auto px-6">
             <div className="max-w-2xl mx-auto text-center">
               <h2 className="text-2xl font-semibold mb-4">
-                🚀 Contribute Your Experience
+                Contribute to the Knowledge Base
               </h2>
               <p className="text-muted-foreground mb-6">
                 Work in {job.name.toLowerCase()}? Share what you're seeing with
                 the community.
               </p>
               <div className="flex items-center justify-center gap-4">
-                <Link to="/login">
-                  <Button>📝 Share Your Story</Button>
+                <Link
+                  to="/dashboard/suggestions"
+                  search={{
+                    type: 'job',
+                    mode: 'existing',
+                    name: job.name,
+                    id: job.id,
+                  }}
+                >
+                  <Button>📝 Contribute</Button>
                 </Link>
                 <Link to="/jobs/$slug/discussion" params={{ slug: job.slug }}>
                   <Button variant="outline">💬 Join Discussion</Button>

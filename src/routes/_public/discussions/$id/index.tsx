@@ -44,6 +44,7 @@ export const Route = createFileRoute('/_public/discussions/$id/')({
             search: undefined,
             sort: 'recent',
             timeRange: undefined,
+            page: 1,
           }}
         >
           <Button>Back to Discussions</Button>
@@ -57,11 +58,6 @@ function DiscussionDetailPage() {
   const { discussion, replies, entityInfo } = Route.useLoaderData()
   const navigate = Route.useNavigate()
 
-  const handleVote = (_id: string, _voteType: 'upvote' | 'downvote') => {
-    // TODO: Implement voting
-    console.log('Vote:', _id, _voteType)
-  }
-
   const handleReply = (_parentId: string, _body: string) => {
     // TODO: Implement reply
     console.log('Reply:', _parentId, _body)
@@ -69,13 +65,11 @@ function DiscussionDetailPage() {
 
   // Get entity info for display
   const entityInfoDisplay = getEntityDisplay(discussion.entityType)
-  const score = discussion.upvotes - discussion.downvotes
 
   // Calculate stats
   const uniqueUsers = new Set([discussion.userId]).size
   const expertCount = 0 // TODO: Count from replies
   const avgDepth = '2.3' // TODO: Calculate from replies
-  const mostUpvoted = replies[0] ?? undefined // TODO: Find actual most upvoted
 
   return (
     <>
@@ -94,6 +88,7 @@ function DiscussionDetailPage() {
                 search: undefined,
                 sort: 'recent',
                 timeRange: undefined,
+                page: 1,
               }}
               className="hover:text-primary"
             >
@@ -138,7 +133,6 @@ function DiscussionDetailPage() {
             <DiscussionThread
               discussion={discussion}
               replies={replies}
-              onVote={handleVote}
               onReply={handleReply}
             />
           </div>
@@ -154,13 +148,6 @@ function DiscussionDetailPage() {
                   <span className="font-medium">{discussion.replyCount}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Score</span>
-                  <span className="font-medium">
-                    {score > 0 ? '+' : ''}
-                    {score}
-                  </span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-muted-foreground">Unique users</span>
                   <span className="font-medium">{uniqueUsers}</span>
                 </div>
@@ -173,18 +160,6 @@ function DiscussionDetailPage() {
                   <span className="text-muted-foreground">Avg depth</span>
                   <span className="font-medium">{avgDepth} levels</span>
                 </div>
-                {replies.length > 0 && (
-                  <>
-                    <Separator className="my-2" />
-                    <div>
-                      <p className="text-muted-foreground mb-1">Most upvoted</p>
-                      <p className="font-medium">
-                        @{mostUpvoted.author?.username} ({mostUpvoted.upvotes}{' '}
-                        ⬆️)
-                      </p>
-                    </div>
-                  </>
-                )}
               </div>
             </div>
 
@@ -215,6 +190,7 @@ function DiscussionDetailPage() {
                   search: undefined,
                   sort: 'recent',
                   timeRange: undefined,
+                  page: 1,
                 }}
                 className="text-sm text-primary hover:underline mt-4 inline-block"
               >
