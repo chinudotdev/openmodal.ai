@@ -1,5 +1,17 @@
 import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
+import { useState } from 'react'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/auth-client'
 
@@ -8,10 +20,12 @@ export const Route = createFileRoute('/_authed/dashboard/')({ component: App })
 function App() {
   const { session } = Route.useRouteContext()
   const router = useRouter()
+  const [logoutOpen, setLogoutOpen] = useState(false)
 
   const handleLogout = async () => {
     await authClient.signOut()
     await router.invalidate()
+    setLogoutOpen(false)
   }
 
   return (
@@ -28,9 +42,28 @@ function App() {
                 the following features. Give us feedback as we continue to grow.
               </p>
             </div>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              Logout
-            </Button>
+            <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  Logout
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to log out? You'll need to sign in
+                    again to access your account.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLogout}>
+                    Logout
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
           <ul className="space-y-4">

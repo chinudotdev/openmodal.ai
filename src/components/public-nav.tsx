@@ -11,6 +11,7 @@ const navLinks = [
   { to: '/capabilities', label: 'Capabilities' },
   { to: '/jobs', label: 'Jobs' },
   { to: '/technologies', label: 'Technologies' },
+  { to: '/discussions', label: 'Discussions' },
   { to: '/reports', label: 'Reports' },
 ]
 
@@ -25,6 +26,17 @@ export function PublicNav() {
           <Link
             key={link.to}
             to={link.to}
+            search={
+              link.to === '/discussions'
+                ? {
+                    entityType: undefined,
+                    search: undefined,
+                    sort: 'recent',
+                    timeRange: undefined,
+                    page: 1,
+                  }
+                : undefined
+            }
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             {link.label}
@@ -45,22 +57,36 @@ export function PublicNav() {
         </Button>
       </SheetTrigger>
       <SheetContent side="right">
-        <nav className="flex flex-col gap-4 mt-8">
+        <nav className="flex flex-col gap-4 mt-8 px-2">
           {navLinks.map((link) => (
-            <Link
+            <Button
               key={link.to}
-              to={link.to}
-              className="text-lg text-muted-foreground hover:text-foreground transition-colors"
+              asChild
+              variant="ghost"
+              className="justify-start text-lg"
               onClick={() => setOpen(false)}
             >
-              {link.label}
-            </Link>
-          ))}
-          <Link to="/dashboard" onClick={() => setOpen(false)}>
-            <Button size="sm" className="w-full">
-              Contribute
+              <Link
+                to={link.to}
+                search={
+                  link.to === '/discussions'
+                    ? {
+                        entityType: undefined,
+                        search: undefined,
+                        sort: 'recent',
+                        timeRange: undefined,
+                        page: 1,
+                      }
+                    : undefined
+                }
+              >
+                {link.label}
+              </Link>
             </Button>
-          </Link>
+          ))}
+          <Button asChild onClick={() => setOpen(false)} className="pt-2">
+            <Link to="/dashboard">Contribute</Link>
+          </Button>
         </nav>
       </SheetContent>
     </Sheet>
