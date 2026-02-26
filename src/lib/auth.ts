@@ -1,18 +1,20 @@
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { nextCookies } from "better-auth/next-js";
-import { admin, customSession, username } from "better-auth/plugins";
-import { getOnboardingStatus } from "@/actions/onboarding";
-import { db } from "@/db";
-import { authSchema } from "@/db/schema";
-import { sendEmailVerification } from "@/emails";
+import { betterAuth } from 'better-auth'
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { admin, customSession, username } from 'better-auth/plugins'
+import { tanstackStartCookies } from 'better-auth/tanstack-start'
+import { env } from 'cloudflare:workers'
 
-import { ac, roles } from "@/lib/permissions";
+import { getOnboardingStatus } from '@/data-layer/onboarding'
+import { db } from '@/db'
+import { authSchema } from '@/db/schema'
+import { sendEmailVerification } from '@/emails'
+import { ac, roles } from '@/lib/permissions'
 
 export const auth = betterAuth({
+  secret: env.BETTER_AUTH_SECRET,
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
-      await sendEmailVerification({ to: user.email, url });
+      await sendEmailVerification({ to: user.email, url })
     },
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
@@ -22,42 +24,51 @@ export const auth = betterAuth({
     requireEmailVerification: true,
   },
   database: drizzleAdapter(db, {
-    provider: "pg",
+    provider: 'pg',
     schema: authSchema,
   }),
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+    },
+  },
+  user: {
+    modelName: 'user',
+    additionalFields: {
+      onboardingCompleted: {
+        type: 'boolean',
+        defaultValue: false,
+      },
     },
   },
   plugins: [
     username({
       minUsernameLength: 3,
       maxUsernameLength: 20,
-      usernameValidator: (username) => {
+      usernameValidator: (usernameValue) => {
         // Allow only alphanumeric characters and underscores
-        return /^[a-zA-Z0-9_]+$/.test(username);
+        return /^[a-zA-Z0-9_]+$/.test(usernameValue)
       },
     }),
     customSession(async ({ user, session }) => {
       // Get onboarding status for the user
-      const onboardingStatus = await getOnboardingStatus(user.id);
+      const onboardingStatus = await getOnboardingStatus(user.id)
       return {
         user: {
           ...user,
-          onboardingCompleted: onboardingStatus.completed,
-          role: onboardingStatus.role,
+          onboardingCompleted: onboardingStatus.completed as boolean,
+          role: onboardingStatus.role as 'admin' | 'observer',
         },
         session,
-      };
+      }
     }),
     admin({
       ac,
       roles,
-      defaultRole: "observer",
-      adminRoles: ["admin"],
+      defaultRole: 'observer',
+      adminRoles: ['admin'],
     }),
-    nextCookies(),
+    tanstackStartCookies(),
   ],
-});
+})

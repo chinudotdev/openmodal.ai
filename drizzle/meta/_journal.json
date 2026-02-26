@@ -5,64 +5,29 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1762398531821,
-      "tag": "0000_chubby_kabuki",
+      "when": 1769012037023,
+      "tag": "0000_complete_blue_marvel",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1762405888015,
-      "tag": "0001_workable_justice",
+      "when": 1770276565006,
+      "tag": "0001_secret_silhouette",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1762434606371,
-      "tag": "0002_familiar_lizard",
+      "when": 1770294566752,
+      "tag": "0002_mean_tony_stark",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1762493388529,
-      "tag": "0003_grey_silverclaw",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1762495752061,
-      "tag": "0004_wide_skrulls",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1762537792374,
-      "tag": "0005_majestic_virginia_dare",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1762833078686,
-      "tag": "0006_worthless_purple_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1762874087760,
-      "tag": "0007_nasty_dark_phoenix",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1762926847898,
-      "tag": "0008_previous_prism",
+      "when": 1771413387164,
+      "tag": "0003_public_amazoness",
       "breakpoints": true
     }
   ]

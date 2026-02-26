@@ -8,15 +8,15 @@ import {
   Section,
   Tailwind,
   Text,
-} from "@react-email/components";
+} from '@react-email/components'
 
 interface ReportVerifiedEmailProps {
-  userName: string;
-  reportTitle: string;
-  verifierName: string;
-  reportUrl: string;
-  pointsAwarded: number;
-  totalPoints: number;
+  userName: string
+  reportTitle: string
+  verifierName: string
+  reportUrl: string
+  pointsAwarded: number
+  totalPoints: number
 }
 
 export const ReportVerifiedEmail = ({
@@ -100,7 +100,7 @@ export const ReportVerifiedEmail = ({
         </Body>
       </Tailwind>
     </Html>
-  );
-};
+  )
+}
 
-export default ReportVerifiedEmail;
+export default ReportVerifiedEmail

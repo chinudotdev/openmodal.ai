@@ -1,23 +1,24 @@
-import { sendEmail } from "@/lib/email";
-import CommentReplyEmail from "./comment-reply";
-import EmailVerification from "./email-verification";
-import ReportStatusEmail from "./report-status";
-import ReportVerifiedEmail from "./report-verified";
-import ReputationMilestoneEmail from "./reputation-milestone";
+
+import CommentReplyEmail from './comment-reply'
+import EmailVerification from './email-verification'
+import ReportStatusEmail from './report-status'
+import ReportVerifiedEmail from './report-verified'
+import ReputationMilestoneEmail from './reputation-milestone'
+import { sendEmail } from '@/lib/email'
 
 export const sendEmailVerification = async ({
   to,
   url,
 }: {
-  to: string;
-  url: string;
+  to: string
+  url: string
 }) => {
   await sendEmail({
     to,
-    subject: "Verify your email address",
+    subject: 'Verify your email address',
     react: <EmailVerification url={url} />,
-  });
-};
+  })
+}
 
 export const sendReportVerifiedEmail = async ({
   to,
@@ -28,17 +29,17 @@ export const sendReportVerifiedEmail = async ({
   pointsAwarded,
   totalPoints,
 }: {
-  to: string;
-  userName: string;
-  reportTitle: string;
-  verifierName: string;
-  reportUrl: string;
-  pointsAwarded: number;
-  totalPoints: number;
+  to: string
+  userName: string
+  reportTitle: string
+  verifierName: string
+  reportUrl: string
+  pointsAwarded: number
+  totalPoints: number
 }) => {
   await sendEmail({
     to,
-    subject: "✅ Your report was verified!",
+    subject: '✅ Your report was verified!',
     react: (
       <ReportVerifiedEmail
         userName={userName}
@@ -49,8 +50,8 @@ export const sendReportVerifiedEmail = async ({
         totalPoints={totalPoints}
       />
     ),
-  });
-};
+  })
+}
 
 export const sendCommentReplyEmail = async ({
   to,
@@ -60,12 +61,12 @@ export const sendCommentReplyEmail = async ({
   commentPreview,
   reportUrl,
 }: {
-  to: string;
-  userName: string;
-  replierName: string;
-  reportTitle: string;
-  commentPreview: string;
-  reportUrl: string;
+  to: string
+  userName: string
+  replierName: string
+  reportTitle: string
+  commentPreview: string
+  reportUrl: string
 }) => {
   await sendEmail({
     to,
@@ -79,8 +80,8 @@ export const sendCommentReplyEmail = async ({
         reportUrl={reportUrl}
       />
     ),
-  });
-};
+  })
+}
 
 export const sendReputationMilestoneEmail = async ({
   to,
@@ -90,16 +91,16 @@ export const sendReputationMilestoneEmail = async ({
   dashboardUrl,
   benefits,
 }: {
-  to: string;
-  userName: string;
-  newTier: string;
-  totalPoints: number;
-  dashboardUrl: string;
-  benefits: string[];
+  to: string
+  userName: string
+  newTier: string
+  totalPoints: number
+  dashboardUrl: string
+  benefits: Array<string>
 }) => {
   await sendEmail({
     to,
-    subject: "🏆 Reputation milestone reached!",
+    subject: '🏆 Reputation milestone reached!',
     react: (
       <ReputationMilestoneEmail
         userName={userName}
@@ -109,8 +110,8 @@ export const sendReputationMilestoneEmail = async ({
         benefits={benefits}
       />
     ),
-  });
-};
+  })
+}
 
 export const sendReportStatusEmail = async ({
   to,
@@ -122,20 +123,20 @@ export const sendReportStatusEmail = async ({
   pointsAwarded,
   totalPoints,
 }: {
-  to: string;
-  userName: string;
-  reportTitle: string;
-  status: "approved" | "rejected" | "changes_requested";
-  reportUrl: string;
-  moderationReason?: string;
-  pointsAwarded?: number;
-  totalPoints?: number;
+  to: string
+  userName: string
+  reportTitle: string
+  status: 'approved' | 'rejected' | 'changes_requested'
+  reportUrl: string
+  moderationReason?: string
+  pointsAwarded?: number
+  totalPoints?: number
 }) => {
   const config = {
-    approved: "✅ Report Approved!",
-    rejected: "❌ Report Rejected",
-    changes_requested: "✏️ Changes Requested",
-  };
+    approved: '✅ Report Approved!',
+    rejected: '❌ Report Rejected',
+    changes_requested: '✏️ Changes Requested',
+  }
 
   await sendEmail({
     to,
@@ -151,5 +152,5 @@ export const sendReportStatusEmail = async ({
         totalPoints={totalPoints}
       />
     ),
-  });
-};
+  })
+}
