@@ -71,14 +71,12 @@ function PublicLayout() {
               >
                 Join Us
               </a>
-              <a
-                href="https://github.com/chinudotdev/openmodal.ai/issues"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/dashboard/feedback"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Report a Bug
-              </a>
+              </Link>
               <Link
                 to="/privacy"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"

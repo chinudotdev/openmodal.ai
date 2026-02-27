@@ -32,6 +32,25 @@ function App() {
     <>
       <div className="min-h-svh w-full flex items-center justify-center p-8">
         <div className="max-w-2xl w-full space-y-8">
+          <Link
+            to="/"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-4 h-4 mr-1"
+            >
+              <path d="m12 19-7-7 7-7" />
+              <path d="M19 12H5" />
+            </svg>
+            Back to Home
+          </Link>
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
               <h1 className="text-2xl font-semibold">

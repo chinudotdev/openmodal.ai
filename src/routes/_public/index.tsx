@@ -189,10 +189,7 @@ function RouteComponent() {
               in your field.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                to="/dashboard/suggestions"
-                search={{ type: 'capability', mode: 'new', name: '', id: '' }}
-              >
+              <Link to="/dashboard">
                 <Button size="lg" className="min-w-[200px]">
                   📝 Contribute
                 </Button>
