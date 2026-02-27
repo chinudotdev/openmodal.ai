@@ -321,16 +321,13 @@ function JobsPage() {
                   <Card className="h-full transition-all hover:shadow-lg hover:border-primary/50">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{job.icon || '💼'}</span>
-                          <div>
-                            <h3 className="font-semibold group-hover:text-primary transition-colors">
-                              {job.name}
-                            </h3>
-                            <p className="text-xs text-muted-foreground">
-                              {categoryLabel(job.category)}
-                            </p>
-                          </div>
+                        <div>
+                          <h3 className="font-semibold group-hover:text-primary transition-colors">
+                            {job.name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground">
+                            {categoryLabel(job.category)}
+                          </p>
                         </div>
                         <Badge
                           variant="outline"

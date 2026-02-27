@@ -103,12 +103,9 @@ function CapabilityPage() {
         <section className="border-b border-border/40 bg-muted/30">
           <div className="container mx-auto px-6 py-12">
             <div className="max-w-3xl">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-4xl">{capability.icon || '🔷'}</span>
-                <h1 className="text-3xl md:text-4xl font-semibold">
-                  {capability.name}
-                </h1>
-              </div>
+              <h1 className="text-3xl md:text-4xl font-semibold mb-4">
+                {capability.name}
+              </h1>
 
               <div className="flex flex-wrap items-center gap-4 mb-6">
                 <div className="flex items-center gap-2">
