@@ -98,15 +98,10 @@ function CapabilitiesPage() {
               <Card className="h-full transition-all hover:shadow-lg hover:border-primary/50">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">
-                        {capability.icon || '🔷'}
-                      </span>
-                      <div>
-                        <h3 className="font-semibold group-hover:text-primary transition-colors">
-                          {capability.name}
-                        </h3>
-                      </div>
+                    <div>
+                      <h3 className="font-semibold group-hover:text-primary transition-colors">
+                        {capability.name}
+                      </h3>
                     </div>
                     <Badge
                       variant="outline"
@@ -163,7 +158,7 @@ function CapabilitiesPage() {
                     <div key={cap.slug}>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium">
-                          {cap.icon || '🔷'} {cap.name}
+                          {cap.name}
                         </span>
                         <span className="text-sm text-muted-foreground">
                           {cap.progress}%
