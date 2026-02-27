@@ -1,4 +1,5 @@
 import { useForm } from '@tanstack/react-form'
+import { Link } from '@tanstack/react-router'
 
 import { AlertCircle, ChevronRightIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -217,18 +218,39 @@ export function SuggestionForm({
         className={cn('flex w-full items-center justify-center p-6', className)}
         {...props}
       >
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center">Thank You!</CardTitle>
-            <CardDescription className="text-center">
-              Your suggestion has been submitted successfully. We'll review it
-              and consider it for inclusion in the platform.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center">
-            <Button onClick={() => setSuccess(false)}>Submit Another</Button>
-          </CardContent>
-        </Card>
+        <div className="w-full max-w-lg">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-4 h-4 mr-1"
+            >
+              <path d="m12 19-7-7 7-7" />
+              <path d="M19 12H5" />
+            </svg>
+            Back to Contribute
+          </Link>
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="text-center">Thank You!</CardTitle>
+              <CardDescription className="text-center">
+                Your suggestion has been submitted successfully. We'll review it
+                and consider it for inclusion in the platform.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center">
+              <Button onClick={() => setSuccess(false)}>Submit Another</Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     )
   }
@@ -239,6 +261,25 @@ export function SuggestionForm({
       {...props}
     >
       <div className="w-full max-w-lg">
+        <Link
+          to="/dashboard"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-4 h-4 mr-1"
+          >
+            <path d="m12 19-7-7 7-7" />
+            <path d="M19 12H5" />
+          </svg>
+          Back to Contribute
+        </Link>
         <Card className="w-full">
           <CardHeader>
             <CardTitle>Submit a Suggestion</CardTitle>

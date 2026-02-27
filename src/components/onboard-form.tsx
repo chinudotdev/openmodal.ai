@@ -265,7 +265,7 @@ export function OnboardForm({
                             checkUsernameAvailability(newValue)
                           }}
                           aria-invalid={isInvalid}
-                          placeholder="@username"
+                          placeholder="username"
                         />
                         {isCheckingUsername && (
                           <div className="text-sm text-muted-foreground">

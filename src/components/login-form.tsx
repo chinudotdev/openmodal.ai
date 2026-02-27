@@ -98,7 +98,7 @@ export function LoginForm({
             )}
             <FieldGroup>
               <Field>
-                <GoogleLogin callbackURL="/" />
+                <GoogleLogin callbackURL={search.redirect || '/dashboard'} />
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
