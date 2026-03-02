@@ -10,6 +10,73 @@ import {
 } from '@/db/schema/technologies'
 
 // ============================================
+// TASK CAPABILITY MAPPING QUERIES
+// ============================================
+
+/**
+ * Get task to sub-capability mappings for authorization
+ * Optionally filter by job ID
+ * Returns complete mapping with task, job, capability, and sub-capability details
+ */
+export async function getAllTaskCapabilityMappings(jobId?: string) {
+  try {
+    const mappings = await db
+      .select({
+        // Junction table fields
+        id: taskCapabilitySubtype.id,
+        importance: taskCapabilitySubtype.importance,
+        minimumLevelRequired: taskCapabilitySubtype.minimumLevelRequired,
+        notes: taskCapabilitySubtype.notes,
+        // Task fields
+        task: {
+          id: task.id,
+          name: task.name,
+          percentageOfJob: task.percentageOfJob,
+          automatable: task.automatable,
+        },
+        // Job fields
+        job: {
+          id: job.id,
+          slug: job.slug,
+          name: job.name,
+          category: job.category,
+        },
+        // Capability Subtype fields
+        capabilitySubtype: {
+          id: capabilitySubtype.id,
+          slug: capabilitySubtype.slug,
+          name: capabilitySubtype.name,
+          domain: capabilitySubtype.domain,
+          progressPercentage: capabilitySubtype.progressPercentage,
+          status: capabilitySubtype.status,
+        },
+        // Parent Capability fields
+        capability: {
+          id: capability.id,
+          slug: capability.slug,
+          name: capability.name,
+          icon: capability.icon,
+        },
+      })
+      .from(taskCapabilitySubtype)
+      .innerJoin(task, eq(taskCapabilitySubtype.taskId, task.id))
+      .innerJoin(job, eq(task.jobId, job.id))
+      .innerJoin(
+        capabilitySubtype,
+        eq(taskCapabilitySubtype.capabilitySubtypeId, capabilitySubtype.id),
+      )
+      .innerJoin(capability, eq(capabilitySubtype.capabilityId, capability.id))
+      .where(jobId ? eq(job.id, jobId) : undefined)
+      .orderBy(capability.name, taskCapabilitySubtype.importance)
+
+    return mappings
+  } catch (error) {
+    console.error('Error fetching task capability mappings:', error)
+    return []
+  }
+}
+
+// ============================================
 // JOB QUERIES
 // ============================================
 

@@ -32,6 +32,7 @@ import { Route as PublicJobsIndexRouteImport } from './routes/_public/jobs/index
 import { Route as PublicDiscussionsIndexRouteImport } from './routes/_public/discussions/index'
 import { Route as PublicCapabilitiesIndexRouteImport } from './routes/_public/capabilities/index'
 import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
+import { Route as ApiMcpSplatRouteImport } from './routes/api/mcp/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminOrganizationsAddRouteImport } from './routes/admin/organizations/add'
 import { Route as AdminJobsAddRouteImport } from './routes/admin/jobs/add'
@@ -178,6 +179,11 @@ const AuthedDashboardIndexRoute = AuthedDashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
   getParentRoute: () => AuthedRouteRoute,
+} as any)
+const ApiMcpSplatRoute = ApiMcpSplatRouteImport.update({
+  id: '/api/mcp/$',
+  path: '/api/mcp/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -378,6 +384,7 @@ export interface FileRoutesByFullPath {
   '/admin/jobs/add': typeof AdminJobsAddRoute
   '/admin/organizations/add': typeof AdminOrganizationsAddRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/mcp/$': typeof ApiMcpSplatRoute
   '/dashboard/': typeof AuthedDashboardIndexRoute
   '/capabilities/': typeof PublicCapabilitiesIndexRoute
   '/discussions/': typeof PublicDiscussionsIndexRoute
@@ -432,6 +439,7 @@ export interface FileRoutesByTo {
   '/admin/jobs/add': typeof AdminJobsAddRoute
   '/admin/organizations/add': typeof AdminOrganizationsAddRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/mcp/$': typeof ApiMcpSplatRoute
   '/dashboard': typeof AuthedDashboardIndexRoute
   '/capabilities': typeof PublicCapabilitiesIndexRoute
   '/discussions': typeof PublicDiscussionsIndexRoute
@@ -490,6 +498,7 @@ export interface FileRoutesById {
   '/admin/jobs/add': typeof AdminJobsAddRoute
   '/admin/organizations/add': typeof AdminOrganizationsAddRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/mcp/$': typeof ApiMcpSplatRoute
   '/_authed/dashboard/': typeof AuthedDashboardIndexRoute
   '/_public/capabilities/': typeof PublicCapabilitiesIndexRoute
   '/_public/discussions/': typeof PublicDiscussionsIndexRoute
@@ -547,6 +556,7 @@ export interface FileRouteTypes {
     | '/admin/jobs/add'
     | '/admin/organizations/add'
     | '/api/auth/$'
+    | '/api/mcp/$'
     | '/dashboard/'
     | '/capabilities/'
     | '/discussions/'
@@ -601,6 +611,7 @@ export interface FileRouteTypes {
     | '/admin/jobs/add'
     | '/admin/organizations/add'
     | '/api/auth/$'
+    | '/api/mcp/$'
     | '/dashboard'
     | '/capabilities'
     | '/discussions'
@@ -658,6 +669,7 @@ export interface FileRouteTypes {
     | '/admin/jobs/add'
     | '/admin/organizations/add'
     | '/api/auth/$'
+    | '/api/mcp/$'
     | '/_authed/dashboard/'
     | '/_public/capabilities/'
     | '/_public/discussions/'
@@ -708,6 +720,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiMcpSplatRoute: typeof ApiMcpSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -872,6 +885,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof AuthedDashboardIndexRouteImport
       parentRoute: typeof AuthedRouteRoute
+    }
+    '/api/mcp/$': {
+      id: '/api/mcp/$'
+      path: '/api/mcp/$'
+      fullPath: '/api/mcp/$'
+      preLoaderRoute: typeof ApiMcpSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -1240,6 +1260,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   VerifyEmailRoute: VerifyEmailRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiMcpSplatRoute: ApiMcpSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

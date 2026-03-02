@@ -9,6 +9,9 @@
       "invocation_logs": true,
     },
   },
+  "vars": {
+    "MCP_API_KEY": "your-static-api-key-here"
+  },
   "env": {
     "production": {
       "name": "openmodalai",
