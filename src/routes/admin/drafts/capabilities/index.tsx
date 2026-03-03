@@ -136,7 +136,7 @@ export const Route = createFileRoute('/admin/drafts/capabilities/')({
         sortBy: 'recent',
         limit: 50,
       },
-    })) as { draftChanges: any[]; total: number }
+    })) as { draftChanges: Array<any>; total: number }
     return { drafts: result.draftChanges, total: result.total }
   },
   pendingComponent: () => (
@@ -188,8 +188,8 @@ function AdminCapabilitiesDraftsPage() {
           sortBy: 'recent',
           limit: 50,
         },
-      })) as { draftChanges: any[]; total: number }
-      setDrafts(result.draftChanges || [])
+      })) as { draftChanges: Array<any>; total: number }
+      setDrafts(result.draftChanges)
       console.log('[capabilities page] Received drafts:', result.draftChanges)
       console.log(
         '[capabilities page] First draft entity type:',

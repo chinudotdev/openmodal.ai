@@ -29,8 +29,8 @@ function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Review and approve draft changes to capabilities, subtypes, and
-                jobs
+                Review and approve draft changes to capabilities, subtypes,
+                jobs, organizations, and technologies
               </p>
               <Button variant="outline" size="sm" className="w-full">
                 Review Drafts →

@@ -88,55 +88,53 @@ export const updateDraftChangeStatusFn = createServerFn({ method: 'POST' })
       }
     }
 
-    // If approving a create or update, apply the change to the target entity
-    if (data.status === 'approved') {
-      const draft = await getDraftChangeById(data.id)
-      if (!draft) {
-        return {
-          success: false,
-          error: 'Draft not found',
-        }
-      }
-
-      if (draft.operation === 'create' || draft.operation === 'update') {
-        try {
-          switch (draft.entityType) {
-            case 'capability':
-              await applyCapabilityChange(draft)
-              break
-            case 'capability_subtype':
-              await applyCapabilitySubtypeChange(draft)
-              break
-            case 'job':
-              await applyJobChange(draft)
-              break
-            case 'organization':
-              await applyOrganizationChange(draft)
-              break
-            case 'technology':
-              await applyTechnologyChange(draft)
-              break
-          }
-        } catch (error: any) {
-          console.error('Failed to apply draft change:', error)
-          return {
-            success: false,
-            error: error?.message || 'Failed to apply change to entity',
-          }
-        }
+    // Fetch the draft first to get the operation type
+    const draft = await getDraftChangeById(data.id)
+    if (!draft) {
+      return {
+        success: false,
+        error: 'Draft not found',
       }
     }
 
-    await db
-      .update(draftChange)
-      .set({
-        status: data.status,
-        response: data.response,
-        reviewedBy: session.user.id,
-        reviewedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(draftChange.id, data.id))
+    // Wrap both the entity change (if approved) and draft status update in a single transaction
+    await db.transaction(async (tx) => {
+      // If approving a create or update, apply the change to the target entity
+      if (
+        data.status === 'approved' &&
+        (draft.operation === 'create' || draft.operation === 'update')
+      ) {
+        switch (draft.entityType) {
+          case 'capability':
+            await applyCapabilityChange(draft, tx)
+            break
+          case 'capability_subtype':
+            await applyCapabilitySubtypeChange(draft, tx)
+            break
+          case 'job':
+            await applyJobChange(draft, tx)
+            break
+          case 'organization':
+            await applyOrganizationChange(draft, tx)
+            break
+          case 'technology':
+            await applyTechnologyChange(draft, tx)
+            break
+        }
+      }
+
+      // Update draft status after entity change succeeds
+      await tx
+        .update(draftChange)
+        .set({
+          status: data.status,
+          response: data.response,
+          reviewedBy: session.user.id,
+          reviewedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(draftChange.id, data.id))
+    })
 
     return {
       success: true,
@@ -144,7 +142,7 @@ export const updateDraftChangeStatusFn = createServerFn({ method: 'POST' })
   })
 
 // Helper function to apply capability changes
-async function applyCapabilityChange(draft: any) {
+async function applyCapabilityChange(draft: any, tx: any = db) {
   const data = draft.data as {
     slug: string
     name: string
@@ -153,8 +151,21 @@ async function applyCapabilityChange(draft: any) {
   }
 
   if (draft.operation === 'create') {
+    // Check if slug already exists
+    const existing = await tx
+      .select({ id: capability.id })
+      .from(capability)
+      .where(eq(capability.slug, data.slug))
+      .limit(1)
+
+    if (existing.length > 0) {
+      throw new Error(
+        `A capability with slug "${data.slug}" already exists. Use a unique slug or update the existing one instead.`,
+      )
+    }
+
     const id = crypto.randomUUID()
-    await db.insert(capability).values({
+    await tx.insert(capability).values({
       id,
       slug: data.slug,
       name: data.name,
@@ -162,7 +173,25 @@ async function applyCapabilityChange(draft: any) {
       icon: data.icon || null,
     })
   } else if (draft.operation === 'update' && draft.entityId) {
-    await db
+    // Check if slug changed and conflicts with existing (not self)
+    const existingSlugCheck = await tx
+      .select({ id: capability.id })
+      .from(capability)
+      .where(
+        and(
+          eq(capability.slug, data.slug),
+          sql`${capability.id} != ${draft.entityId}`,
+        ),
+      )
+      .limit(1)
+
+    if (existingSlugCheck.length > 0) {
+      throw new Error(
+        `A capability with slug "${data.slug}" already exists. Use a different slug.`,
+      )
+    }
+
+    await tx
       .update(capability)
       .set({
         slug: data.slug,
@@ -175,7 +204,7 @@ async function applyCapabilityChange(draft: any) {
 }
 
 // Helper function to apply capability subtype changes
-async function applyCapabilitySubtypeChange(draft: any) {
+async function applyCapabilitySubtypeChange(draft: any, tx: any = db) {
   const rawData = draft.data
 
   // Handle both camelCase and snake_case field names from drafts
@@ -206,7 +235,7 @@ async function applyCapabilitySubtypeChange(draft: any) {
 
   if (draft.operation === 'create') {
     // Check if slug already exists
-    const existing = await db
+    const existing = await tx
       .select({ id: capabilitySubtype.id })
       .from(capabilitySubtype)
       .where(eq(capabilitySubtype.slug, rawData.slug))
@@ -219,13 +248,13 @@ async function applyCapabilitySubtypeChange(draft: any) {
     }
 
     const id = crypto.randomUUID()
-    await db.insert(capabilitySubtype).values({
+    await tx.insert(capabilitySubtype).values({
       id,
       ...values,
     })
   } else if (draft.operation === 'update' && draft.entityId) {
     // If slug changed and conflicts with existing (not self), throw error
-    const existingSlugCheck = await db
+    const existingSlugCheck = await tx
       .select({ id: capabilitySubtype.id })
       .from(capabilitySubtype)
       .where(
@@ -242,7 +271,7 @@ async function applyCapabilitySubtypeChange(draft: any) {
       )
     }
 
-    await db
+    await tx
       .update(capabilitySubtype)
       .set(values)
       .where(eq(capabilitySubtype.id, draft.entityId))
@@ -250,7 +279,7 @@ async function applyCapabilitySubtypeChange(draft: any) {
 }
 
 // Helper function to apply job changes
-async function applyJobChange(draft: any) {
+async function applyJobChange(draft: any, tx: any = db) {
   const data = draft.data as {
     slug: string
     name: string
@@ -282,7 +311,7 @@ async function applyJobChange(draft: any) {
   if (draft.operation === 'create') {
     const id = crypto.randomUUID()
     jobId = id
-    await db.insert(job).values({
+    await tx.insert(job).values({
       id,
       slug: data.slug,
       name: data.name,
@@ -296,7 +325,7 @@ async function applyJobChange(draft: any) {
     })
   } else if (draft.operation === 'update' && draft.entityId) {
     jobId = draft.entityId
-    await db
+    await tx
       .update(job)
       .set({
         slug: data.slug,
@@ -323,7 +352,7 @@ async function applyJobChange(draft: any) {
       if (taskData.id) {
         // Update existing task
         taskId = taskData.id
-        await db
+        await tx
           .update(task)
           .set({
             name: taskData.name,
@@ -335,7 +364,7 @@ async function applyJobChange(draft: any) {
       } else {
         // Create new task
         taskId = crypto.randomUUID()
-        await db.insert(task).values({
+        await tx.insert(task).values({
           id: taskId,
           jobId,
           name: taskData.name,
@@ -353,7 +382,7 @@ async function applyJobChange(draft: any) {
         for (const mappingData of taskData.capabilityMappings) {
           if (mappingData.id) {
             // Update existing mapping
-            await db
+            await tx
               .update(taskCapabilitySubtype)
               .set({
                 capabilitySubtypeId: mappingData.capabilitySubtypeId,
@@ -364,7 +393,7 @@ async function applyJobChange(draft: any) {
               .where(eq(taskCapabilitySubtype.id, mappingData.id))
           } else {
             // Create new mapping
-            await db.insert(taskCapabilitySubtype).values({
+            await tx.insert(taskCapabilitySubtype).values({
               id: crypto.randomUUID(),
               taskId,
               capabilitySubtypeId: mappingData.capabilitySubtypeId,
@@ -380,7 +409,7 @@ async function applyJobChange(draft: any) {
 }
 
 // Helper function to apply organization changes
-async function applyOrganizationChange(draft: any) {
+async function applyOrganizationChange(draft: any, tx: any = db) {
   const rawData = draft.data
 
   // Handle both camelCase and snake_case field names from drafts
@@ -399,7 +428,7 @@ async function applyOrganizationChange(draft: any) {
 
   if (draft.operation === 'create') {
     // Check if slug already exists
-    const existing = await db
+    const existing = await tx
       .select({ id: organization.id })
       .from(organization)
       .where(eq(organization.slug, rawData.slug))
@@ -412,7 +441,7 @@ async function applyOrganizationChange(draft: any) {
     }
 
     const id = crypto.randomUUID()
-    await db.insert(organization).values({
+    await tx.insert(organization).values({
       id,
       ...values,
       // Set defaults for non-submitted fields
@@ -423,7 +452,7 @@ async function applyOrganizationChange(draft: any) {
     })
   } else if (draft.operation === 'update' && draft.entityId) {
     // Check if slug conflicts with another existing organization
-    const existingSlugCheck = await db
+    const existingSlugCheck = await tx
       .select({ id: organization.id })
       .from(organization)
       .where(
@@ -440,7 +469,7 @@ async function applyOrganizationChange(draft: any) {
       )
     }
 
-    await db
+    await tx
       .update(organization)
       .set(values)
       .where(eq(organization.id, draft.entityId))
@@ -448,7 +477,7 @@ async function applyOrganizationChange(draft: any) {
 }
 
 // Helper function to apply technology changes
-async function applyTechnologyChange(draft: any) {
+async function applyTechnologyChange(draft: any, tx: any = db) {
   const rawData = draft.data
 
   // Handle both camelCase and snake_case field names from drafts
@@ -461,7 +490,7 @@ async function applyTechnologyChange(draft: any) {
 
   if (draft.operation === 'create') {
     // Check if slug already exists
-    const existing = await db
+    const existing = await tx
       .select({ id: technology.id })
       .from(technology)
       .where(eq(technology.slug, rawData.slug))
@@ -474,24 +503,24 @@ async function applyTechnologyChange(draft: any) {
     }
 
     const id = crypto.randomUUID()
-    await db.insert(technology).values({
+    await tx.insert(technology).values({
       id,
       slug: rawData.slug,
       name: rawData.name,
-      type: rawData.type as any,
+      type: rawData.type,
       description: rawData.description,
       image: rawData.image || null,
       website: rawData.website || null,
       organizationId,
-      stage: (stage as any) || 'research',
+      stage: stage || 'research',
       releaseDate: rawData.releaseDate || null,
       status: 'approved' as const,
-      submittedBy: draft.submittedBy as string,
+      submittedBy: draft.submittedBy?.id as string,
       aliases: rawData.aliases || [],
     })
   } else if (draft.operation === 'update' && draft.entityId) {
     // Check if slug conflicts with another existing technology
-    const existingSlugCheck = await db
+    const existingSlugCheck = await tx
       .select({ id: technology.id })
       .from(technology)
       .where(
@@ -508,17 +537,17 @@ async function applyTechnologyChange(draft: any) {
       )
     }
 
-    await db
+    await tx
       .update(technology)
       .set({
         slug: rawData.slug,
         name: rawData.name,
-        type: rawData.type as any,
+        type: rawData.type,
         description: rawData.description,
         image: rawData.image || null,
         website: rawData.website || null,
         organizationId,
-        stage: (stage as any) || 'research',
+        stage: stage || 'research',
         releaseDate: rawData.releaseDate || null,
         aliases: rawData.aliases || [],
       })

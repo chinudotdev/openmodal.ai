@@ -136,7 +136,7 @@ export const Route = createFileRoute('/admin/drafts/capability-subtypes/')({
         sortBy: 'recent',
         limit: 50,
       },
-    })) as { draftChanges: any[]; total: number }
+    })) as { draftChanges: Array<any>; total: number }
     return { drafts: result.draftChanges, total: result.total }
   },
   pendingComponent: () => (
@@ -187,8 +187,8 @@ function AdminCapabilitySubtypesDraftsPage() {
           sortBy: 'recent',
           limit: 50,
         },
-      })) as { draftChanges: any[]; total: number }
-      setDrafts(result.draftChanges || [])
+      })) as { draftChanges: Array<any>; total: number }
+      setDrafts(result.draftChanges)
       console.log(
         '[capability-subtypes page] Received drafts:',
         result.draftChanges,

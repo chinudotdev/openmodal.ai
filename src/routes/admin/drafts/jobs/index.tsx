@@ -47,7 +47,7 @@ export const Route = createFileRoute('/admin/drafts/jobs/')({
         sortBy: 'recent',
         limit: 50,
       },
-    })) as { draftChanges: any[]; total: number }
+    })) as { draftChanges: Array<any>; total: number }
     return { drafts: result.draftChanges, total: result.total }
   },
   pendingComponent: () => (
@@ -98,13 +98,8 @@ function AdminJobsDraftsPage() {
           sortBy: 'recent',
           limit: 50,
         },
-      })) as { draftChanges: any[]; total: number }
-      setDrafts(result.draftChanges || [])
-      console.log('[jobs page] Received drafts:', result.draftChanges)
-      console.log(
-        '[jobs page] First draft entity type:',
-        result.draftChanges[0]?.entityType,
-      )
+      })) as { draftChanges: Array<any>; total: number }
+      setDrafts(result.draftChanges)
     } catch (error) {
       console.error('Failed to fetch drafts:', error)
     } finally {

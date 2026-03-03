@@ -108,7 +108,7 @@ function renderValue(value: any): React.ReactNode {
   if (typeof value === 'object') {
     const nestedEntries = Object.entries(value)
     if (nestedEntries.length === 0) {
-      return <span className="text-muted-foreground italic">{}</span>
+      return <span className="text-muted-foreground italic">{'{}'}</span>
     }
     return (
       <div className="space-y-1">
@@ -136,7 +136,7 @@ export const Route = createFileRoute('/admin/drafts/technologies/')({
         sortBy: 'recent',
         limit: 50,
       },
-    })) as { draftChanges: any[]; total: number }
+    })) as { draftChanges: Array<any>; total: number }
     return { drafts: result.draftChanges, total: result.total }
   },
   pendingComponent: () => (
@@ -188,8 +188,8 @@ function AdminTechnologiesDraftsPage() {
           sortBy: 'recent',
           limit: 50,
         },
-      })) as { draftChanges: any[]; total: number }
-      setDrafts(result.draftChanges || [])
+      })) as { draftChanges: Array<any>; total: number }
+      setDrafts(result.draftChanges)
       console.log('[technologies page] Received drafts:', result.draftChanges)
       console.log(
         '[technologies page] First draft entity type:',
