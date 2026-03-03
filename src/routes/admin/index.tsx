@@ -18,6 +18,27 @@ function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Drafts Card */}
+        <Link to="/admin/drafts">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <span className="text-2xl">📝</span>
+                Drafts
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Review and approve draft changes to capabilities, subtypes,
+                jobs, organizations, and technologies
+              </p>
+              <Button variant="outline" size="sm" className="w-full">
+                Review Drafts →
+              </Button>
+            </CardContent>
+          </Card>
+        </Link>
+
         {/* Capabilities Card */}
         <Link to="/admin/capabilities">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
@@ -82,7 +103,7 @@ function AdminDashboard() {
         <Card className="opacity-50 h-full">
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
-              <span className="text-2xl">📝</span>
+              <span className="text-2xl">📄</span>
               Reports
             </CardTitle>
           </CardHeader>
