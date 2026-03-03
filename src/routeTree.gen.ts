@@ -24,6 +24,7 @@ import { Route as AdminSuggestionsIndexRouteImport } from './routes/admin/sugges
 import { Route as AdminOrganizationsIndexRouteImport } from './routes/admin/organizations/index'
 import { Route as AdminJobsIndexRouteImport } from './routes/admin/jobs/index'
 import { Route as AdminFeedbackIndexRouteImport } from './routes/admin/feedback/index'
+import { Route as AdminDraftsIndexRouteImport } from './routes/admin/drafts/index'
 import { Route as AdminCapabilitiesIndexRouteImport } from './routes/admin/capabilities/index'
 import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/technologies/index'
 import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
@@ -38,6 +39,11 @@ import { Route as AdminJobsAddRouteImport } from './routes/admin/jobs/add'
 import { Route as AdminCapabilitiesAddRouteImport } from './routes/admin/capabilities/add'
 import { Route as AdminOrganizationsSlugIndexRouteImport } from './routes/admin/organizations/$slug/index'
 import { Route as AdminJobsSlugIndexRouteImport } from './routes/admin/jobs/$slug/index'
+import { Route as AdminDraftsTechnologiesIndexRouteImport } from './routes/admin/drafts/technologies/index'
+import { Route as AdminDraftsOrganizationsIndexRouteImport } from './routes/admin/drafts/organizations/index'
+import { Route as AdminDraftsJobsIndexRouteImport } from './routes/admin/drafts/jobs/index'
+import { Route as AdminDraftsCapabilitySubtypesIndexRouteImport } from './routes/admin/drafts/capability-subtypes/index'
+import { Route as AdminDraftsCapabilitiesIndexRouteImport } from './routes/admin/drafts/capabilities/index'
 import { Route as AdminCapabilitiesSlugIndexRouteImport } from './routes/admin/capabilities/$slug/index'
 import { Route as PublicTechnologiesSlugIndexRouteImport } from './routes/_public/technologies/$slug/index'
 import { Route as PublicReportsIdIndexRouteImport } from './routes/_public/reports/$id/index'
@@ -138,6 +144,11 @@ const AdminFeedbackIndexRoute = AdminFeedbackIndexRouteImport.update({
   path: '/feedback/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminDraftsIndexRoute = AdminDraftsIndexRouteImport.update({
+  id: '/drafts/',
+  path: '/drafts/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminCapabilitiesIndexRoute = AdminCapabilitiesIndexRouteImport.update({
   id: '/capabilities/',
   path: '/capabilities/',
@@ -210,6 +221,35 @@ const AdminJobsSlugIndexRoute = AdminJobsSlugIndexRouteImport.update({
   path: '/jobs/$slug/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminDraftsTechnologiesIndexRoute =
+  AdminDraftsTechnologiesIndexRouteImport.update({
+    id: '/drafts/technologies/',
+    path: '/drafts/technologies/',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
+const AdminDraftsOrganizationsIndexRoute =
+  AdminDraftsOrganizationsIndexRouteImport.update({
+    id: '/drafts/organizations/',
+    path: '/drafts/organizations/',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
+const AdminDraftsJobsIndexRoute = AdminDraftsJobsIndexRouteImport.update({
+  id: '/drafts/jobs/',
+  path: '/drafts/jobs/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminDraftsCapabilitySubtypesIndexRoute =
+  AdminDraftsCapabilitySubtypesIndexRouteImport.update({
+    id: '/drafts/capability-subtypes/',
+    path: '/drafts/capability-subtypes/',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
+const AdminDraftsCapabilitiesIndexRoute =
+  AdminDraftsCapabilitiesIndexRouteImport.update({
+    id: '/drafts/capabilities/',
+    path: '/drafts/capabilities/',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 const AdminCapabilitiesSlugIndexRoute =
   AdminCapabilitiesSlugIndexRouteImport.update({
     id: '/capabilities/$slug/',
@@ -386,6 +426,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof PublicReportsIndexRoute
   '/technologies/': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities/': typeof AdminCapabilitiesIndexRoute
+  '/admin/drafts/': typeof AdminDraftsIndexRoute
   '/admin/feedback/': typeof AdminFeedbackIndexRoute
   '/admin/jobs/': typeof AdminJobsIndexRoute
   '/admin/organizations/': typeof AdminOrganizationsIndexRoute
@@ -410,6 +451,11 @@ export interface FileRoutesByFullPath {
   '/reports/$id/': typeof PublicReportsIdIndexRoute
   '/technologies/$slug/': typeof PublicTechnologiesSlugIndexRoute
   '/admin/capabilities/$slug/': typeof AdminCapabilitiesSlugIndexRoute
+  '/admin/drafts/capabilities/': typeof AdminDraftsCapabilitiesIndexRoute
+  '/admin/drafts/capability-subtypes/': typeof AdminDraftsCapabilitySubtypesIndexRoute
+  '/admin/drafts/jobs/': typeof AdminDraftsJobsIndexRoute
+  '/admin/drafts/organizations/': typeof AdminDraftsOrganizationsIndexRoute
+  '/admin/drafts/technologies/': typeof AdminDraftsTechnologiesIndexRoute
   '/admin/jobs/$slug/': typeof AdminJobsSlugIndexRoute
   '/admin/organizations/$slug/': typeof AdminOrganizationsSlugIndexRoute
   '/capabilities/$slug/$subslug/discussion': typeof PublicCapabilitiesSlugSubslugDiscussionRoute
@@ -440,6 +486,7 @@ export interface FileRoutesByTo {
   '/reports': typeof PublicReportsIndexRoute
   '/technologies': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities': typeof AdminCapabilitiesIndexRoute
+  '/admin/drafts': typeof AdminDraftsIndexRoute
   '/admin/feedback': typeof AdminFeedbackIndexRoute
   '/admin/jobs': typeof AdminJobsIndexRoute
   '/admin/organizations': typeof AdminOrganizationsIndexRoute
@@ -464,6 +511,11 @@ export interface FileRoutesByTo {
   '/reports/$id': typeof PublicReportsIdIndexRoute
   '/technologies/$slug': typeof PublicTechnologiesSlugIndexRoute
   '/admin/capabilities/$slug': typeof AdminCapabilitiesSlugIndexRoute
+  '/admin/drafts/capabilities': typeof AdminDraftsCapabilitiesIndexRoute
+  '/admin/drafts/capability-subtypes': typeof AdminDraftsCapabilitySubtypesIndexRoute
+  '/admin/drafts/jobs': typeof AdminDraftsJobsIndexRoute
+  '/admin/drafts/organizations': typeof AdminDraftsOrganizationsIndexRoute
+  '/admin/drafts/technologies': typeof AdminDraftsTechnologiesIndexRoute
   '/admin/jobs/$slug': typeof AdminJobsSlugIndexRoute
   '/admin/organizations/$slug': typeof AdminOrganizationsSlugIndexRoute
   '/capabilities/$slug/$subslug/discussion': typeof PublicCapabilitiesSlugSubslugDiscussionRoute
@@ -498,6 +550,7 @@ export interface FileRoutesById {
   '/_public/reports/': typeof PublicReportsIndexRoute
   '/_public/technologies/': typeof PublicTechnologiesIndexRoute
   '/admin/capabilities/': typeof AdminCapabilitiesIndexRoute
+  '/admin/drafts/': typeof AdminDraftsIndexRoute
   '/admin/feedback/': typeof AdminFeedbackIndexRoute
   '/admin/jobs/': typeof AdminJobsIndexRoute
   '/admin/organizations/': typeof AdminOrganizationsIndexRoute
@@ -522,6 +575,11 @@ export interface FileRoutesById {
   '/_public/reports/$id/': typeof PublicReportsIdIndexRoute
   '/_public/technologies/$slug/': typeof PublicTechnologiesSlugIndexRoute
   '/admin/capabilities/$slug/': typeof AdminCapabilitiesSlugIndexRoute
+  '/admin/drafts/capabilities/': typeof AdminDraftsCapabilitiesIndexRoute
+  '/admin/drafts/capability-subtypes/': typeof AdminDraftsCapabilitySubtypesIndexRoute
+  '/admin/drafts/jobs/': typeof AdminDraftsJobsIndexRoute
+  '/admin/drafts/organizations/': typeof AdminDraftsOrganizationsIndexRoute
+  '/admin/drafts/technologies/': typeof AdminDraftsTechnologiesIndexRoute
   '/admin/jobs/$slug/': typeof AdminJobsSlugIndexRoute
   '/admin/organizations/$slug/': typeof AdminOrganizationsSlugIndexRoute
   '/_public/capabilities/$slug/$subslug/discussion': typeof PublicCapabilitiesSlugSubslugDiscussionRoute
@@ -555,6 +613,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/technologies/'
     | '/admin/capabilities/'
+    | '/admin/drafts/'
     | '/admin/feedback/'
     | '/admin/jobs/'
     | '/admin/organizations/'
@@ -579,6 +638,11 @@ export interface FileRouteTypes {
     | '/reports/$id/'
     | '/technologies/$slug/'
     | '/admin/capabilities/$slug/'
+    | '/admin/drafts/capabilities/'
+    | '/admin/drafts/capability-subtypes/'
+    | '/admin/drafts/jobs/'
+    | '/admin/drafts/organizations/'
+    | '/admin/drafts/technologies/'
     | '/admin/jobs/$slug/'
     | '/admin/organizations/$slug/'
     | '/capabilities/$slug/$subslug/discussion'
@@ -609,6 +673,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/technologies'
     | '/admin/capabilities'
+    | '/admin/drafts'
     | '/admin/feedback'
     | '/admin/jobs'
     | '/admin/organizations'
@@ -633,6 +698,11 @@ export interface FileRouteTypes {
     | '/reports/$id'
     | '/technologies/$slug'
     | '/admin/capabilities/$slug'
+    | '/admin/drafts/capabilities'
+    | '/admin/drafts/capability-subtypes'
+    | '/admin/drafts/jobs'
+    | '/admin/drafts/organizations'
+    | '/admin/drafts/technologies'
     | '/admin/jobs/$slug'
     | '/admin/organizations/$slug'
     | '/capabilities/$slug/$subslug/discussion'
@@ -666,6 +736,7 @@ export interface FileRouteTypes {
     | '/_public/reports/'
     | '/_public/technologies/'
     | '/admin/capabilities/'
+    | '/admin/drafts/'
     | '/admin/feedback/'
     | '/admin/jobs/'
     | '/admin/organizations/'
@@ -690,6 +761,11 @@ export interface FileRouteTypes {
     | '/_public/reports/$id/'
     | '/_public/technologies/$slug/'
     | '/admin/capabilities/$slug/'
+    | '/admin/drafts/capabilities/'
+    | '/admin/drafts/capability-subtypes/'
+    | '/admin/drafts/jobs/'
+    | '/admin/drafts/organizations/'
+    | '/admin/drafts/technologies/'
     | '/admin/jobs/$slug/'
     | '/admin/organizations/$slug/'
     | '/_public/capabilities/$slug/$subslug/discussion'
@@ -817,6 +893,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFeedbackIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/drafts/': {
+      id: '/admin/drafts/'
+      path: '/drafts'
+      fullPath: '/admin/drafts/'
+      preLoaderRoute: typeof AdminDraftsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/capabilities/': {
       id: '/admin/capabilities/'
       path: '/capabilities'
@@ -913,6 +996,41 @@ declare module '@tanstack/react-router' {
       path: '/jobs/$slug'
       fullPath: '/admin/jobs/$slug/'
       preLoaderRoute: typeof AdminJobsSlugIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/drafts/technologies/': {
+      id: '/admin/drafts/technologies/'
+      path: '/drafts/technologies'
+      fullPath: '/admin/drafts/technologies/'
+      preLoaderRoute: typeof AdminDraftsTechnologiesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/drafts/organizations/': {
+      id: '/admin/drafts/organizations/'
+      path: '/drafts/organizations'
+      fullPath: '/admin/drafts/organizations/'
+      preLoaderRoute: typeof AdminDraftsOrganizationsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/drafts/jobs/': {
+      id: '/admin/drafts/jobs/'
+      path: '/drafts/jobs'
+      fullPath: '/admin/drafts/jobs/'
+      preLoaderRoute: typeof AdminDraftsJobsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/drafts/capability-subtypes/': {
+      id: '/admin/drafts/capability-subtypes/'
+      path: '/drafts/capability-subtypes'
+      fullPath: '/admin/drafts/capability-subtypes/'
+      preLoaderRoute: typeof AdminDraftsCapabilitySubtypesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/drafts/capabilities/': {
+      id: '/admin/drafts/capabilities/'
+      path: '/drafts/capabilities'
+      fullPath: '/admin/drafts/capabilities/'
+      preLoaderRoute: typeof AdminDraftsCapabilitiesIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/capabilities/$slug/': {
@@ -1186,6 +1304,7 @@ interface AdminRouteRouteChildren {
   AdminJobsAddRoute: typeof AdminJobsAddRoute
   AdminOrganizationsAddRoute: typeof AdminOrganizationsAddRoute
   AdminCapabilitiesIndexRoute: typeof AdminCapabilitiesIndexRoute
+  AdminDraftsIndexRoute: typeof AdminDraftsIndexRoute
   AdminFeedbackIndexRoute: typeof AdminFeedbackIndexRoute
   AdminJobsIndexRoute: typeof AdminJobsIndexRoute
   AdminOrganizationsIndexRoute: typeof AdminOrganizationsIndexRoute
@@ -1196,6 +1315,11 @@ interface AdminRouteRouteChildren {
   AdminOrganizationsSlugAddRoute: typeof AdminOrganizationsSlugAddRoute
   AdminOrganizationsSlugEditRoute: typeof AdminOrganizationsSlugEditRoute
   AdminCapabilitiesSlugIndexRoute: typeof AdminCapabilitiesSlugIndexRoute
+  AdminDraftsCapabilitiesIndexRoute: typeof AdminDraftsCapabilitiesIndexRoute
+  AdminDraftsCapabilitySubtypesIndexRoute: typeof AdminDraftsCapabilitySubtypesIndexRoute
+  AdminDraftsJobsIndexRoute: typeof AdminDraftsJobsIndexRoute
+  AdminDraftsOrganizationsIndexRoute: typeof AdminDraftsOrganizationsIndexRoute
+  AdminDraftsTechnologiesIndexRoute: typeof AdminDraftsTechnologiesIndexRoute
   AdminJobsSlugIndexRoute: typeof AdminJobsSlugIndexRoute
   AdminOrganizationsSlugIndexRoute: typeof AdminOrganizationsSlugIndexRoute
   AdminCapabilitiesSlugSubslugEditRoute: typeof AdminCapabilitiesSlugSubslugEditRoute
@@ -1209,6 +1333,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminJobsAddRoute: AdminJobsAddRoute,
   AdminOrganizationsAddRoute: AdminOrganizationsAddRoute,
   AdminCapabilitiesIndexRoute: AdminCapabilitiesIndexRoute,
+  AdminDraftsIndexRoute: AdminDraftsIndexRoute,
   AdminFeedbackIndexRoute: AdminFeedbackIndexRoute,
   AdminJobsIndexRoute: AdminJobsIndexRoute,
   AdminOrganizationsIndexRoute: AdminOrganizationsIndexRoute,
@@ -1219,6 +1344,12 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminOrganizationsSlugAddRoute: AdminOrganizationsSlugAddRoute,
   AdminOrganizationsSlugEditRoute: AdminOrganizationsSlugEditRoute,
   AdminCapabilitiesSlugIndexRoute: AdminCapabilitiesSlugIndexRoute,
+  AdminDraftsCapabilitiesIndexRoute: AdminDraftsCapabilitiesIndexRoute,
+  AdminDraftsCapabilitySubtypesIndexRoute:
+    AdminDraftsCapabilitySubtypesIndexRoute,
+  AdminDraftsJobsIndexRoute: AdminDraftsJobsIndexRoute,
+  AdminDraftsOrganizationsIndexRoute: AdminDraftsOrganizationsIndexRoute,
+  AdminDraftsTechnologiesIndexRoute: AdminDraftsTechnologiesIndexRoute,
   AdminJobsSlugIndexRoute: AdminJobsSlugIndexRoute,
   AdminOrganizationsSlugIndexRoute: AdminOrganizationsSlugIndexRoute,
   AdminCapabilitiesSlugSubslugEditRoute: AdminCapabilitiesSlugSubslugEditRoute,

@@ -55,6 +55,12 @@ function AdminLayout() {
                 Dashboard
               </Link>
               <Link
+                to="/admin/drafts"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Drafts
+              </Link>
+              <Link
                 to="/admin/capabilities"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >

@@ -29,6 +29,34 @@
       "when": 1771413387164,
       "tag": "0003_public_amazoness",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1772469533772,
+      "tag": "0004_naive_ultron",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1772469564345,
+      "tag": "0005_cultured_bushwacker",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1772469636647,
+      "tag": "0006_mysterious_eddie_brock",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1772537367695,
+      "tag": "0007_spotty_caretaker",
+      "breakpoints": true
     }
   ]
 }

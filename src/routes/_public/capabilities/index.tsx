@@ -157,9 +157,7 @@ function CapabilitiesPage() {
                   {capabilitiesList.map((cap) => (
                     <div key={cap.slug}>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">
-                          {cap.name}
-                        </span>
+                        <span className="text-sm font-medium">{cap.name}</span>
                         <span className="text-sm text-muted-foreground">
                           {cap.progress}%
                         </span>
