@@ -5,7 +5,7 @@ import { Pool } from 'pg'
 export function dbClient() {
   console.log({ connection: env.HYPERDRIVE.connectionString })
   const pool = new Pool({
-    connectionString: env.HYPERDRIVE.connectionString,
+    connectionString: env.DATABASE_URL,
   })
   return drizzle({ client: pool })
 }
