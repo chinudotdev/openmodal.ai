@@ -1,6 +1,5 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 
-import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/_public/about')({
   component: RouteComponent,
@@ -114,9 +113,6 @@ function RouteComponent() {
               us build the most comprehensive database of AI's real-world
               impact.
             </p>
-            <Link to="/login">
-              <Button size="lg">Join Waitlist</Button>
-            </Link>
           </div>
         </div>
       </section>

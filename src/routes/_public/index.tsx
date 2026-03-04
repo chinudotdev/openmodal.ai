@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -47,11 +47,9 @@ function RouteComponent() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Link to="/capabilities" search={() => ({})}>
-              <Button size="lg" className="w-full sm:w-auto min-w-[200px]">
-                Explore Data
-              </Button>
-            </Link>
+            <Button size="lg" className="w-full sm:w-auto min-w-[200px]">
+              Explore Data
+            </Button>
             <a
               href="https://discord.gg/bBsF3MjA9"
               target="_blank"
@@ -111,66 +109,31 @@ function RouteComponent() {
               Help us build this knowledge base by contributing your experiences
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Link
-                to="/reports"
-                search={{
-                  impactType: undefined,
-                  country: undefined,
-                  companySize: undefined,
-                  search: undefined,
-                  sort: 'recent',
-                }}
-                className="bg-background rounded-xl p-6 border border-border/50 hover:border-primary/50 transition-colors"
-              >
+              <div className="bg-background rounded-xl p-6 border border-border/50 hover:border-primary/50 transition-colors">
                 <div className="font-semibold mb-2">📊 Impact Reports</div>
                 <p className="text-sm text-muted-foreground">
                   Real-world stories from workers about how AI is affecting
                   their jobs
                 </p>
-              </Link>
-              <Link
-                to="/capabilities"
-                search={() => ({})}
-                className="bg-background rounded-xl p-6 border border-border/50 hover:border-primary/50 transition-colors"
-              >
+              </div>
+              <div className="bg-background rounded-xl p-6 border border-border/50 hover:border-primary/50 transition-colors">
                 <div className="font-semibold mb-2">🏥 Capabilities</div>
                 <p className="text-sm text-muted-foreground">
                   Domain-specific tracking of what AI can and can't do
                 </p>
-              </Link>
-              <Link
-                to="/jobs"
-                search={{
-                  page: 1,
-                  limit: 12,
-                  category: 'all',
-                  riskLevel: 'all',
-                  search: '',
-                  sortBy: 'name',
-                }}
-                className="bg-background rounded-xl p-6 border border-border/50 hover:border-primary/50 transition-colors"
-              >
+              </div>
+              <div className="bg-background rounded-xl p-6 border border-border/50 hover:border-primary/50 transition-colors">
                 <div className="font-semibold mb-2">💼 Jobs</div>
                 <p className="text-sm text-muted-foreground">
                   Data-driven analysis of automation risk by occupation
                 </p>
-              </Link>
-              <Link
-                to="/discussions"
-                search={{
-                  entityType: undefined,
-                  search: undefined,
-                  sort: 'recent',
-                  timeRange: undefined,
-                  page: 1,
-                }}
-                className="bg-background rounded-xl p-6 border border-border/50 hover:border-primary/50 transition-colors"
-              >
+              </div>
+              <div className="bg-background rounded-xl p-6 border border-border/50 hover:border-primary/50 transition-colors">
                 <div className="font-semibold mb-2">💬 Discussions</div>
                 <p className="text-sm text-muted-foreground">
                   Community conversations on real-world AI deployments
                 </p>
-              </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -189,16 +152,12 @@ function RouteComponent() {
               in your field.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/dashboard">
-                <Button size="lg" className="min-w-[200px]">
-                  📝 Contribute
-                </Button>
-              </Link>
-              <Link to="/technologies" search={() => ({})}>
-                <Button size="lg" variant="outline" className="min-w-[200px]">
-                  Browse Technologies
-                </Button>
-              </Link>
+              <Button size="lg" className="min-w-[200px]">
+                📝 Contribute
+              </Button>
+              <Button size="lg" variant="outline" className="min-w-[200px]">
+                Browse Technologies
+              </Button>
             </div>
           </div>
         </div>
