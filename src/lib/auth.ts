@@ -1,12 +1,12 @@
 import { betterAuth } from 'better-auth'
-import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+// import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { admin, customSession, username } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { env } from 'cloudflare:workers'
 
 import { getOnboardingStatus } from '@/data-layer/onboarding'
-import { dbClient } from '@/db'
-import { authSchema } from '@/db/schema'
+// import { dbClient } from '@/db'
+// import { authSchema } from '@/db/schema'
 import { sendEmailVerification } from '@/emails'
 import { ac, roles } from '@/lib/permissions'
 
@@ -23,10 +23,10 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
   },
-  database: drizzleAdapter(dbClient(), {
-    provider: 'pg',
-    schema: authSchema,
-  }),
+  // database: drizzleAdapter(dbClient(), {
+  //   provider: 'pg',
+  //   schema: authSchema,
+  // }),
   socialProviders: {
     google: {
       clientId: env.GOOGLE_CLIENT_ID,
