@@ -18,7 +18,12 @@ import {
 } from '@/data-layer/reports'
 import { dbClient } from '@/db'
 import { impactReport, reportEnrichment, reportFlag } from '@/db/schema'
-import { authMiddleware, rateLimitMiddleware } from '@/middleware/server'
+import {
+  adminMiddleware,
+  authMiddleware,
+  moderatorMiddleware,
+  rateLimitMiddleware,
+} from '@/middleware/server'
 
 // ============================================
 // TYPES & VALIDATION
@@ -443,17 +448,15 @@ export const getMyReportsFn = createServerFn({ method: 'GET' })
  * Moderator: Update report status (e.g., remove flagged report)
  */
 export const updateReportStatusFn = createServerFn({ method: 'POST' })
-  .middleware([authMiddleware]) // In production, use moderator middleware
+  .middleware([moderatorMiddleware])
   .inputValidator(
     z.object({
       reportId: z.string(),
       status: z.enum(['published', 'flagged', 'removed']),
     }),
   )
-  .handler(async ({ data }) => {
-    // TODO: In production, check if user is moderator/admin
-    // For now, just require authentication
-    // const userId = context.user.id
+  .handler(async ({ data, context }) => {
+    const userId = context.user.id
 
     const db = dbClient()
     const updated = await db
@@ -476,7 +479,7 @@ export const updateReportStatusFn = createServerFn({ method: 'POST' })
  * Moderator: Get flagged reports for review
  */
 export const getFlaggedReportsFn = createServerFn({ method: 'GET' })
-  .middleware([authMiddleware]) // In production, use moderator middleware
+  .middleware([moderatorMiddleware])
   .inputValidator(
     z
       .object({
@@ -499,7 +502,7 @@ export const getFlaggedReportsFn = createServerFn({ method: 'GET' })
  * Admin: Get report statistics
  */
 export const getReportStatsFn = createServerFn({ method: 'GET' })
-  .middleware([authMiddleware]) // In production, use admin middleware
+  .middleware([adminMiddleware])
   .handler(async () => {
     const stats = await getReportStats()
 

@@ -1,5 +1,4 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getRequestHeaders } from '@tanstack/react-start/server'
 
 import { and, eq, sql } from 'drizzle-orm'
 import z from 'zod'
@@ -16,8 +15,11 @@ import {
   taskCapabilitySubtype,
   technology,
 } from '@/db/schema'
-import { getAuth } from '@/lib/auth'
-import { adminMiddleware } from '@/middleware/server'
+import {
+  adminMiddleware,
+  authMiddleware,
+  rateLimitMiddleware,
+} from '@/middleware/server'
 
 // Get draft changes (admin only)
 export const getDraftChangesFn = createServerFn({ method: 'POST' })
@@ -538,6 +540,10 @@ async function applyTechnologyChange(draft: any, tx: any = dbClient()) {
 
 // Create draft change
 export const createDraftChangeFn = createServerFn({ method: 'POST' })
+  .middleware([
+    authMiddleware,
+    rateLimitMiddleware({ max: 10, window: 3600 }), // 10 drafts per hour
+  ])
   .inputValidator(
     z.object({
       entityType: z.enum([
@@ -553,18 +559,7 @@ export const createDraftChangeFn = createServerFn({ method: 'POST' })
       reason: z.string().optional(),
     }),
   )
-  .handler(async ({ data }) => {
-    const headers = getRequestHeaders()
-    const auth = getAuth()
-    const session = await auth.api.getSession({ headers })
-
-    if (!session) {
-      return {
-        success: false,
-        error: 'Authentication required',
-      }
-    }
-
+  .handler(async ({ data, context }) => {
     const id = crypto.randomUUID()
     const db = dbClient()
     await db.insert(draftChange).values({
@@ -575,7 +570,7 @@ export const createDraftChangeFn = createServerFn({ method: 'POST' })
       data: data.data,
       reason: data.reason || null,
       status: 'pending',
-      submittedBy: session.user.id,
+      submittedBy: context.user.id,
     })
 
     return {

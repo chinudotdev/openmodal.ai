@@ -143,7 +143,7 @@ export const markFeedbackReviewedFn = createServerFn({ method: 'POST' })
   .middleware([adminMiddleware])
   .handler(async ({ data, context }) => {
     const db = dbClient()
-    await db
+    const updated = await db
       .update(feedback)
       .set({
         reviewed: data.reviewed || 'true',
@@ -152,8 +152,14 @@ export const markFeedbackReviewedFn = createServerFn({ method: 'POST' })
         adminNotes: data.notes,
       })
       .where(eq(feedback.id, data.id))
+      .returning()
+
+    if (updated.length === 0) {
+      return { success: false, error: 'Feedback not found' }
+    }
 
     return {
       success: true,
+      feedback: updated[0],
     }
   })

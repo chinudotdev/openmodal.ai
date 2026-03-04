@@ -25,6 +25,6 @@ export async function getOnboardingStatus(userId: string) {
     }
   } catch (error) {
     console.error('Error getting onboarding status:', error)
-    return { onboarded: false, role: null }
+    return { completed: false, role: null }
   }
 }
