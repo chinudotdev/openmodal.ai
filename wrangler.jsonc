@@ -12,9 +12,21 @@
   "env": {
     "production": {
       "name": "openmodalai",
+      "hyperdrive": [
+        {
+          "binding": "HYPERDRIVE",
+          "id": "1cf296419607460e92b773b0885b814b",
+        },
+      ],
     },
     "dev": {
       "name": "openmodalai-dev",
+      "hyperdrive": [
+        {
+          "binding": "HYPERDRIVE",
+          "id": "76272bee44f94c80a200d202591ecb94",
+        },
+      ],
     },
   },
 }
