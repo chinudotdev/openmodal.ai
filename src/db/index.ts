@@ -8,5 +8,5 @@ export function dbClient() {
   // const pool = new Pool({
   //   connectionString: env.DATABASE_URL,
   // })
-  return drizzle(env.DATABASE_URL)
+  return drizzle(env.HYPERDRIVE.connectionString)
 }
