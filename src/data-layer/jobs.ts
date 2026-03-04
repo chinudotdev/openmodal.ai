@@ -1,7 +1,7 @@
 import { and, asc, count, desc, eq, ilike, or } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 
-import { db } from '@/db'
+import { dbClient } from '@/db'
 import { capability, capabilitySubtype } from '@/db/schema/capabilities'
 import { job, task, taskCapabilitySubtype } from '@/db/schema/jobs'
 import {
@@ -35,6 +35,7 @@ export async function getJobsPaginated(options: JobsQueryOptions = {}) {
   const offset = (page - 1) * limit
 
   try {
+    const db = dbClient()
     // Build conditions
     const conditions = []
 
@@ -111,6 +112,7 @@ export async function getJobsPaginated(options: JobsQueryOptions = {}) {
 
 export async function getAllJobs() {
   try {
+    const db = dbClient()
     const jobs = await db
       .select({
         id: job.id,
@@ -148,6 +150,7 @@ export async function getAllJobs() {
 
 export async function getJobBySlug(slug: string) {
   try {
+    const db = dbClient()
     const result = await db
       .select()
       .from(job)
@@ -163,6 +166,7 @@ export async function getJobBySlug(slug: string) {
 
 export async function getJobById(id: string) {
   try {
+    const db = dbClient()
     const result = await db.select().from(job).where(eq(job.id, id)).limit(1)
 
     return result[0] ?? null
@@ -174,6 +178,7 @@ export async function getJobById(id: string) {
 
 export async function getJobsByCategory(category: string) {
   try {
+    const db = dbClient()
     const jobs = await db
       .select({
         id: job.id,
@@ -205,6 +210,7 @@ export async function getJobsByCategory(category: string) {
 
 export async function getTasksByJobId(jobId: string) {
   try {
+    const db = dbClient()
     const tasks = await db
       .select({
         id: task.id,
@@ -241,6 +247,7 @@ export async function getTasksByJobId(jobId: string) {
 
 export async function getTaskById(id: string) {
   try {
+    const db = dbClient()
     const result = await db.select().from(task).where(eq(task.id, id)).limit(1)
 
     return result[0] ?? null
@@ -256,6 +263,7 @@ export async function getTaskById(id: string) {
 
 export async function getCapabilityRequirementsByTaskId(taskId: string) {
   try {
+    const db = dbClient()
     const requirements = await db
       .select({
         id: taskCapabilitySubtype.id,
@@ -306,6 +314,7 @@ export async function getCapabilityRequirementsByTaskId(taskId: string) {
  */
 export async function getTechnologiesByJobId(jobId: string) {
   try {
+    const db = dbClient()
     // Get tasks for the job
     const tasks = await db
       .select({ id: task.id })
@@ -382,6 +391,7 @@ export function getReportCountForJob(_jobId: string): number {
 
 export async function getAverageAutomationRisk() {
   try {
+    const db = dbClient()
     const allJobs = await db
       .select({
         automationRiskPercentage: job.automationRiskPercentage,
@@ -416,6 +426,7 @@ export interface CreateJobInput {
 export async function createJob(input: CreateJobInput) {
   try {
     const id = nanoid()
+    const db = dbClient()
     const [newJob] = await db
       .insert(job)
       .values({
@@ -451,6 +462,7 @@ export interface UpdateJobInput {
 export async function updateJob(input: UpdateJobInput) {
   try {
     const { id, ...updates } = input
+    const db = dbClient()
     const [updatedJob] = await db
       .update(job)
       .set(updates as any)
@@ -466,6 +478,7 @@ export async function updateJob(input: UpdateJobInput) {
 
 export async function deleteJob(id: string) {
   try {
+    const db = dbClient()
     await db.delete(job).where(eq(job.id, id))
     return { success: true }
   } catch (error) {
@@ -489,6 +502,7 @@ export interface CreateTaskInput {
 export async function createTask(input: CreateTaskInput) {
   try {
     const id = nanoid()
+    const db = dbClient()
     const [newTask] = await db
       .insert(task)
       .values({
@@ -519,6 +533,7 @@ export interface UpdateTaskInput {
 export async function updateTask(input: UpdateTaskInput) {
   try {
     const { id, ...updates } = input
+    const db = dbClient()
     const [updatedTask] = await db
       .update(task)
       .set(updates as any)
@@ -534,6 +549,7 @@ export async function updateTask(input: UpdateTaskInput) {
 
 export async function deleteTask(id: string) {
   try {
+    const db = dbClient()
     await db.delete(task).where(eq(task.id, id))
     return { success: true }
   } catch (error) {
@@ -559,6 +575,7 @@ export async function createTaskCapabilitySubtype(
 ) {
   try {
     const id = nanoid()
+    const db = dbClient()
     const [newLink] = await db
       .insert(taskCapabilitySubtype)
       .values({
@@ -590,6 +607,7 @@ export async function updateTaskCapabilitySubtype(
 ) {
   try {
     const { id, ...updates } = input
+    const db = dbClient()
     const [updatedLink] = await db
       .update(taskCapabilitySubtype)
       .set(updates as any)
@@ -605,6 +623,7 @@ export async function updateTaskCapabilitySubtype(
 
 export async function deleteTaskCapabilitySubtype(id: string) {
   try {
+    const db = dbClient()
     await db
       .delete(taskCapabilitySubtype)
       .where(eq(taskCapabilitySubtype.id, id))

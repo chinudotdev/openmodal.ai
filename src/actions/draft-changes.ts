@@ -5,7 +5,7 @@ import { and, eq, sql } from 'drizzle-orm'
 import z from 'zod'
 
 import { getDraftChangeById, getDraftChanges } from '@/data-layer/draft-changes'
-import { db } from '@/db'
+import { dbClient } from '@/db'
 import {
   capability,
   capabilitySubtype,
@@ -98,6 +98,7 @@ export const updateDraftChangeStatusFn = createServerFn({ method: 'POST' })
     }
 
     // Wrap both the entity change (if approved) and draft status update in a single transaction
+    const db = dbClient()
     await db.transaction(async (tx) => {
       // If approving a create or update, apply the change to the target entity
       if (
@@ -142,7 +143,7 @@ export const updateDraftChangeStatusFn = createServerFn({ method: 'POST' })
   })
 
 // Helper function to apply capability changes
-async function applyCapabilityChange(draft: any, tx: any = db) {
+async function applyCapabilityChange(draft: any, tx: any = dbClient()) {
   const data = draft.data as {
     slug: string
     name: string
@@ -204,7 +205,7 @@ async function applyCapabilityChange(draft: any, tx: any = db) {
 }
 
 // Helper function to apply capability subtype changes
-async function applyCapabilitySubtypeChange(draft: any, tx: any = db) {
+async function applyCapabilitySubtypeChange(draft: any, tx: any = dbClient()) {
   const rawData = draft.data
 
   // Handle both camelCase and snake_case field names from drafts
@@ -279,7 +280,7 @@ async function applyCapabilitySubtypeChange(draft: any, tx: any = db) {
 }
 
 // Helper function to apply job changes
-async function applyJobChange(draft: any, tx: any = db) {
+async function applyJobChange(draft: any, tx: any = dbClient()) {
   const data = draft.data as {
     slug: string
     name: string
@@ -409,7 +410,7 @@ async function applyJobChange(draft: any, tx: any = db) {
 }
 
 // Helper function to apply organization changes
-async function applyOrganizationChange(draft: any, tx: any = db) {
+async function applyOrganizationChange(draft: any, tx: any = dbClient()) {
   const rawData = draft.data
 
   // Handle both camelCase and snake_case field names from drafts
@@ -477,7 +478,7 @@ async function applyOrganizationChange(draft: any, tx: any = db) {
 }
 
 // Helper function to apply technology changes
-async function applyTechnologyChange(draft: any, tx: any = db) {
+async function applyTechnologyChange(draft: any, tx: any = dbClient()) {
   const rawData = draft.data
 
   // Handle both camelCase and snake_case field names from drafts
@@ -584,7 +585,7 @@ export const createDraftChangeFn = createServerFn({ method: 'POST' })
     }
 
     const id = crypto.randomUUID()
-
+    const db = dbClient()
     await db.insert(draftChange).values({
       id,
       entityType: data.entityType,

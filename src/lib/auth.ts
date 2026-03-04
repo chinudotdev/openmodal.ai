@@ -5,10 +5,12 @@ import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { env } from 'cloudflare:workers'
 
 import { getOnboardingStatus } from '@/data-layer/onboarding'
-import { db } from '@/db'
+import { dbClient } from '@/db'
 import { authSchema } from '@/db/schema'
 import { sendEmailVerification } from '@/emails'
 import { ac, roles } from '@/lib/permissions'
+
+const db = dbClient()
 
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
