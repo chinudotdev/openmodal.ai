@@ -6,8 +6,8 @@ import { Client } from 'pg'
 
 export async function dbClient() {
   const client = new Client({
-     connectionString: env.HYPERDRIVE.connectionString,
-   })
-   await client.connect()
-  return drizzle(env.HYPERDRIVE.connectionString)
+    connectionString: env.HYPERDRIVE.connectionString,
+  })
+  await client.connect()
+  return drizzle({ client })
 }
