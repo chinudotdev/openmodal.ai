@@ -1,9 +1,6 @@
-import { neon } from '@neondatabase/serverless'
-
 import { env } from 'cloudflare:workers'
-import { drizzle } from 'drizzle-orm/neon-http'
+import { drizzle } from 'drizzle-orm/postgres-js'
 
 export function dbClient() {
-  const client = neon(env.DATABASE_URL)
-  return drizzle({ client })
+  return drizzle(env.DATABASE_URL)
 }
