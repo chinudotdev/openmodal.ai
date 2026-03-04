@@ -1,7 +1,7 @@
 import { asc, desc, eq, ilike } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 
-import { db } from '@/db'
+import { dbClient } from '@/db'
 import { capability, capabilitySubtype } from '@/db/schema/capabilities'
 import { job, task, taskCapabilitySubtype } from '@/db/schema/jobs'
 import { organization } from '@/db/schema/organizations'
@@ -16,6 +16,7 @@ import {
 
 export async function getAllCapabilities() {
   try {
+    const db = dbClient()
     const capabilities = await db
       .select({
         id: capability.id,
@@ -63,6 +64,7 @@ export async function getAllCapabilities() {
 
 export async function getCapabilityBySlug(slug: string) {
   try {
+    const db = dbClient()
     const result = await db
       .select()
       .from(capability)
@@ -78,6 +80,7 @@ export async function getCapabilityBySlug(slug: string) {
 
 export async function getCapabilityById(id: string) {
   try {
+    const db = dbClient()
     const result = await db
       .select()
       .from(capability)
@@ -97,6 +100,7 @@ export async function getCapabilityById(id: string) {
 
 export async function getAllSubtypes() {
   try {
+    const db = dbClient()
     const subtypes = await db
       .select({
         id: capabilitySubtype.id,
@@ -133,6 +137,7 @@ export async function getAllSubtypes() {
 
 export async function getSubtypeBySlug(slug: string) {
   try {
+    const db = dbClient()
     const result = await db
       .select()
       .from(capabilitySubtype)
@@ -148,6 +153,7 @@ export async function getSubtypeBySlug(slug: string) {
 
 export async function getSubtypesByCapabilityId(capabilityId: string) {
   try {
+    const db = dbClient()
     const subtypes = await db
       .select({
         id: capabilitySubtype.id,
@@ -176,6 +182,7 @@ export async function getSubtypesByCapabilityId(capabilityId: string) {
 
 export async function getSubtypesByDomain(domain: string) {
   try {
+    const db = dbClient()
     const subtypes = await db
       .select()
       .from(capabilitySubtype)
@@ -195,6 +202,7 @@ export async function getSubtypesByDomain(domain: string) {
 
 export async function getTechnologiesBySubtypeId(subtypeId: string) {
   try {
+    const db = dbClient()
     const technologies = await db
       .select({
         id: technology.id,
@@ -235,6 +243,7 @@ export function getReportCountForTechnology(_technologyId: string): number {
 
 export async function getJobsBySubtypeId(subtypeId: string) {
   try {
+    const db = dbClient()
     // Get jobs through the task → task_capability_subtype relationship
     const jobs = await db
       .select({
@@ -270,6 +279,7 @@ export async function getJobsBySubtypeId(subtypeId: string) {
 
 export async function getOrganizationsBySubtypeId(subtypeId: string) {
   try {
+    const db = dbClient()
     // Get organizations through technology → technology_capability_subtype
     const organizations = await db
       .select({
@@ -335,6 +345,7 @@ export interface CreateCapabilityInput {
 export async function createCapability(input: CreateCapabilityInput) {
   try {
     const id = nanoid()
+    const db = dbClient()
     const [newCapability] = await db
       .insert(capability)
       .values({
@@ -364,6 +375,7 @@ export interface UpdateCapabilityInput {
 export async function updateCapability(input: UpdateCapabilityInput) {
   try {
     const { id, ...updates } = input
+    const db = dbClient()
     const [updatedCapability] = await db
       .update(capability)
       .set(updates)
@@ -379,6 +391,7 @@ export async function updateCapability(input: UpdateCapabilityInput) {
 
 export async function deleteCapability(id: string) {
   try {
+    const db = dbClient()
     await db.delete(capability).where(eq(capability.id, id))
     return { success: true }
   } catch (error) {
@@ -409,6 +422,7 @@ export async function createCapabilitySubtype(
 ) {
   try {
     const id = nanoid()
+    const db = dbClient()
     const [newSubtype] = await db
       .insert(capabilitySubtype)
       .values({
@@ -451,6 +465,7 @@ export async function updateCapabilitySubtype(
 ) {
   try {
     const { id, ...updates } = input
+    const db = dbClient()
     const [updatedSubtype] = await db
       .update(capabilitySubtype)
       .set(updates)
@@ -466,6 +481,7 @@ export async function updateCapabilitySubtype(
 
 export async function deleteCapabilitySubtype(id: string) {
   try {
+    const db = dbClient()
     await db.delete(capabilitySubtype).where(eq(capabilitySubtype.id, id))
     return { success: true }
   } catch (error) {

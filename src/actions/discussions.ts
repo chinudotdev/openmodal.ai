@@ -14,7 +14,7 @@ import {
   getEntityInfo,
   getTrendingTopics,
 } from '@/data-layer/discussions'
-import { db } from '@/db'
+import { dbClient } from '@/db'
 import {  discussion } from '@/db/schema'
 import { authMiddleware, rateLimitMiddleware } from '@/middleware/server'
 
@@ -219,6 +219,7 @@ export const createDiscussionFn = createServerFn({ method: 'POST' })
     }
 
     // Create the discussion
+    const db = dbClient()
     const [newDiscussion] = await db
       .insert(discussion)
       .values({
@@ -272,6 +273,7 @@ export const createReplyFn = createServerFn({ method: 'POST' })
     }
 
     // Create the reply
+    const db = dbClient()
     const [newReply] = await db
       .insert(discussion)
       .values({
@@ -328,6 +330,7 @@ export const updateDiscussionFn = createServerFn({ method: 'POST' })
     }
 
     // Update the discussion
+    const db = dbClient()
     const updated = await db
       .update(discussion)
       .set({
@@ -374,6 +377,7 @@ export const deleteDiscussionFn = createServerFn({ method: 'POST' })
     }
 
     // Soft delete the discussion
+    const db = dbClient()
     const updated = await db
       .update(discussion)
       .set({
@@ -411,6 +415,7 @@ export const voteDiscussionFn = createServerFn({ method: 'POST' })
 
     // In production, track user votes in a separate table
     // For now, just increment the counter
+    const db = dbClient()
     const updateData =
       data.voteType === 'upvote'
         ? { upvotes: sql`${discussion.upvotes} + 1` }

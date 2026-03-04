@@ -205,9 +205,9 @@ function AdminTechnologiesDraftsPage() {
   const handleViewDraft = async (draft: any) => {
     setIsLoading(true)
     try {
-      const result = (await getDraftChangeByIdFn({
+      const result = await getDraftChangeByIdFn({
         data: { id: draft.id },
-      })) as any
+      })
       setSelectedDraft(result)
       setResponse(result?.response || '')
       setIsDialogOpen(true)

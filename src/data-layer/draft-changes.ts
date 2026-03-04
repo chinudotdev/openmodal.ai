@@ -5,7 +5,7 @@ import type {
   DraftChangeStatus,
   DraftChangeType,
 } from '@/db/schema/draft-changes'
-import { db } from '@/db'
+import { dbClient } from '@/db'
 import { draftChange, user } from '@/db/schema'
 
 export interface GetDraftChangesParams {
@@ -19,6 +19,7 @@ export interface GetDraftChangesParams {
 }
 
 export async function getDraftChanges(params: GetDraftChangesParams = {}) {
+  const db = dbClient()
   const {
     entityType,
     status,
@@ -113,6 +114,7 @@ export async function getDraftChanges(params: GetDraftChangesParams = {}) {
 }
 
 export async function getDraftChangeById(id: string) {
+  const db = dbClient()
   const [draft] = await db
     .select({
       id: draftChange.id,
@@ -149,7 +151,8 @@ export async function getDraftChangeById(id: string) {
 
   return {
     ...rest,
-    data: rest.data as { [x: string]: {} },
+    data: rest.data as Record<string, any>,
+    response: rest.response,
     submittedBy: rest.submittedBy
       ? {
           id: rest.submittedBy,

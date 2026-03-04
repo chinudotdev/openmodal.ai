@@ -10,15 +10,20 @@ import {
   getReportById,
   getReportEnrichmentsWithDetails,
   getReportFlagCount,
-  getReportStats,
   getReports,
   getReportsByUserId,
+  getReportStats,
   hasUserFlaggedReport,
   incrementReportViewCount,
 } from '@/data-layer/reports'
-import { db } from '@/db'
+import { dbClient } from '@/db'
 import { impactReport, reportEnrichment, reportFlag } from '@/db/schema'
-import { authMiddleware, rateLimitMiddleware } from '@/middleware/server'
+import {
+  adminMiddleware,
+  authMiddleware,
+  moderatorMiddleware,
+  rateLimitMiddleware,
+} from '@/middleware/server'
 
 // ============================================
 // TYPES & VALIDATION
@@ -210,6 +215,7 @@ export const submitReportFn = createServerFn({ method: 'POST' })
     const parsedEventDate = data.eventDate ? new Date(data.eventDate) : null
 
     // Create the report
+    const db = dbClient()
     const [newReport] = await db
       .insert(impactReport)
       .values({
@@ -263,6 +269,7 @@ export const addEnrichmentFn = createServerFn({ method: 'POST' })
     }
 
     // Create enrichment
+    const db = dbClient()
     const [newEnrichment] = await db
       .insert(reportEnrichment)
       .values({
@@ -310,6 +317,7 @@ export const flagReportFn = createServerFn({ method: 'POST' })
     }
 
     // Create flag
+    const db = dbClient()
     await db.insert(reportFlag).values({
       id: nanoid(),
       reportId: data.reportId,
@@ -350,6 +358,7 @@ export const voteEnrichmentFn = createServerFn({ method: 'POST' })
 
     // In production, track user votes to prevent double voting
     // For now, just increment the counter
+    const db = dbClient()
     const updateData =
       data.voteType === 'upvote'
         ? { upvotes: sql`${reportEnrichment.upvotes} + 1` }
@@ -385,6 +394,7 @@ export const voteReportFn = createServerFn({ method: 'POST' })
     // const userId = context.user.id
 
     // In production, track user votes to prevent double voting
+    const db = dbClient()
     const updateData =
       data.voteType === 'upvote'
         ? { upvotes: sql`${impactReport.upvotes} + 1` }
@@ -438,7 +448,7 @@ export const getMyReportsFn = createServerFn({ method: 'GET' })
  * Moderator: Update report status (e.g., remove flagged report)
  */
 export const updateReportStatusFn = createServerFn({ method: 'POST' })
-  .middleware([authMiddleware]) // In production, use moderator middleware
+  .middleware([moderatorMiddleware])
   .inputValidator(
     z.object({
       reportId: z.string(),
@@ -446,10 +456,7 @@ export const updateReportStatusFn = createServerFn({ method: 'POST' })
     }),
   )
   .handler(async ({ data }) => {
-    // TODO: In production, check if user is moderator/admin
-    // For now, just require authentication
-    // const userId = context.user.id
-
+    const db = dbClient()
     const updated = await db
       .update(impactReport)
       .set({ status: data.status })
@@ -470,7 +477,7 @@ export const updateReportStatusFn = createServerFn({ method: 'POST' })
  * Moderator: Get flagged reports for review
  */
 export const getFlaggedReportsFn = createServerFn({ method: 'GET' })
-  .middleware([authMiddleware]) // In production, use moderator middleware
+  .middleware([moderatorMiddleware])
   .inputValidator(
     z
       .object({
@@ -493,7 +500,7 @@ export const getFlaggedReportsFn = createServerFn({ method: 'GET' })
  * Admin: Get report statistics
  */
 export const getReportStatsFn = createServerFn({ method: 'GET' })
-  .middleware([authMiddleware]) // In production, use admin middleware
+  .middleware([adminMiddleware])
   .handler(async () => {
     const stats = await getReportStats()
 

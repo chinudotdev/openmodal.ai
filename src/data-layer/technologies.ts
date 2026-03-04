@@ -1,11 +1,11 @@
-import { and, asc, count, desc, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, ilike, ne, or, sql } from 'drizzle-orm'
 
 import type {
   SubmissionStatus,
   TechnologyStage,
   TechnologyType,
 } from '@/db/schema/technologies'
-import { db } from '@/db'
+import { dbClient } from '@/db'
 import {
   capability,
   capabilitySubtype,
@@ -83,6 +83,7 @@ export interface ReportBreakdown {
  * Get all technologies with optional filters
  */
 export async function getAllTechnologies(filters: TechnologyFilters = {}) {
+  const db = dbClient()
   const { type, stage, status, search, sortBy = 'newest' } = filters
 
   const conditions = []
@@ -174,6 +175,7 @@ export async function getAllTechnologies(filters: TechnologyFilters = {}) {
 export async function getTechnologyBySlug(
   slug: string,
 ): Promise<TechnologyDetail | null> {
+  const db = dbClient()
   try {
     // Get technology with organization
     const techResults = await db
@@ -286,7 +288,7 @@ export async function getTechnologyBySlug(
       .where(
         and(
           eq(technology.type, techResult.type),
-          sql`${technology.id} != ${techResult.id}`,
+          ne(technology.id, techResult.id),
           eq(technology.status, 'approved'),
         ),
       )
@@ -313,10 +315,10 @@ export async function getTechnologyBySlug(
           slug: r.orgSlug!,
           name: r.orgName!,
           logo: r.orgLogo,
-          types: (r.orgTypes as any) || [],
-          sponsorTier: r.orgSponsorTier as any,
-          isSponsor: r.orgIsSponsor as any,
-          verifiedBadge: r.orgVerifiedBadge as any,
+          types: r.orgTypes,
+          sponsorTier: r.orgSponsorTier,
+          isSponsor: r.orgIsSponsor,
+          verifiedBadge: r.orgVerifiedBadge,
         },
         _count: { reports: r.reportCount },
       }))
@@ -362,6 +364,7 @@ export async function getTechnologyBySlug(
  * Get technologies by organization
  */
 export async function getTechnologiesByOrganization(organizationId: string) {
+  const db = dbClient()
   try {
     const results = await db
       .select({
@@ -407,6 +410,7 @@ export async function getTechnologiesByOrganization(organizationId: string) {
  * Get report count for a specific technology
  */
 export async function getTechnologyReportCount(technologyId: string) {
+  const db = dbClient()
   try {
     const result = await db
       .select({
@@ -429,6 +433,7 @@ export async function getTechnologyReportCount(technologyId: string) {
 export async function getTechnologyReportBreakdown(
   technologyId: string,
 ): Promise<Array<ReportBreakdown>> {
+  const db = dbClient()
   try {
     const results = await db
       .select({
@@ -484,6 +489,7 @@ export async function createTechnology(data: {
   status: SubmissionStatus
   submittedBy: string
 }) {
+  const db = dbClient()
   try {
     const [newTech] = await db
       .insert(technology)
@@ -527,6 +533,7 @@ export async function updateTechnology(
     status?: SubmissionStatus
   },
 ) {
+  const db = dbClient()
   try {
     const [updatedTech] = await db
       .update(technology)
@@ -557,6 +564,7 @@ export async function updateTechnology(
  * Delete a technology
  */
 export async function deleteTechnology(id: string) {
+  const db = dbClient()
   try {
     await db.delete(technology).where(eq(technology.id, id))
   } catch (error) {
@@ -569,6 +577,7 @@ export async function deleteTechnology(id: string) {
  * Get technology by ID
  */
 export async function getTechnologyById(id: string) {
+  const db = dbClient()
   try {
     const result = await db
       .select()
@@ -589,6 +598,7 @@ export async function getTechnologyById(id: string) {
 export async function getTechnologiesByOrganizationForAdmin(
   organizationId: string,
 ) {
+  const db = dbClient()
   try {
     const results = await db
       .select({
@@ -629,6 +639,7 @@ export async function getTechnologiesByOrganizationForAdmin(
  * Get capability subtypes mapped to a technology
  */
 export async function getTechnologyCapabilityMappings(technologyId: string) {
+  const db = dbClient()
   try {
     const mappings = await db
       .select({
@@ -677,6 +688,7 @@ export async function updateTechnologyCapabilityMappings(
     performanceScore?: number | null
   }>,
 ) {
+  const db = dbClient()
   try {
     // Delete existing mappings
     await db

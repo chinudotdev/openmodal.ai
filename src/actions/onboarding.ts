@@ -3,7 +3,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { and, eq, ne } from 'drizzle-orm'
 import z from 'zod'
 
-import { db } from '@/db'
+import { dbClient } from '@/db'
 import { user as userTable } from '@/db/schema'
 import { authMiddleware } from '@/middleware/server'
 
@@ -25,6 +25,7 @@ export const completeOnboardingFn = createServerFn({ method: 'POST' })
   .handler(async ({ data: { name, username }, context: { user } }) => {
     const userId = user.id
     // Check if username already exists (excluding current user)
+    const db = dbClient()
     const existingUser = await db
       .select({
         id: userTable.id,

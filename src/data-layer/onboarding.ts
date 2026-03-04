@@ -1,10 +1,11 @@
 import { eq } from 'drizzle-orm'
 
-import { db } from '@/db'
+import { dbClient } from '@/db'
 import { user } from '@/db/schema'
 
 export async function getOnboardingStatus(userId: string) {
   try {
+    const db = dbClient()
     const session = await db
       .select({
         completed: user.onboardingCompleted,
@@ -24,6 +25,6 @@ export async function getOnboardingStatus(userId: string) {
     }
   } catch (error) {
     console.error('Error getting onboarding status:', error)
-    return { onboarded: false, role: null }
+    return { completed: false, role: null }
   }
 }

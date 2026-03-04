@@ -1,11 +1,12 @@
 import { createMiddleware } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 
-import { auth } from '@/lib/auth'
+import { getAuth } from '@/lib/auth'
 
 export const authMiddleware = createMiddleware({ type: 'function' }).server(
   async ({ next }) => {
     const headers = getRequestHeaders()
+    const auth = getAuth()
     const session = await auth.api.getSession({ headers })
 
     if (!session) {
@@ -13,7 +14,16 @@ export const authMiddleware = createMiddleware({ type: 'function' }).server(
     }
     return next({
       context: {
-        user: session.user,
+        user: session.user as typeof session.user & {
+          role:
+            | 'admin'
+            | 'observer'
+            | 'moderator'
+            | 'contributor'
+            | 'trusted'
+            | 'expert'
+          onboardingCompleted: boolean
+        },
         session: session.session,
       },
     })
@@ -36,6 +46,26 @@ export const adminMiddleware = createMiddleware({ type: 'function' })
       context: {
         ...context,
         isAdmin: true,
+      },
+    })
+  })
+
+/**
+ * Moderator middleware - chains authMiddleware and checks for moderator or admin role
+ * Use this for server actions that require moderation privileges
+ */
+export const moderatorMiddleware = createMiddleware({ type: 'function' })
+  .middleware([authMiddleware])
+  .server(async ({ next, context }) => {
+    // Check if user has moderator or admin role (authMiddleware already validated user exists)
+    if (context.user.role !== 'moderator' && context.user.role !== 'admin') {
+      throw new Error('Forbidden: Moderator or admin role required')
+    }
+
+    return next({
+      context: {
+        ...context,
+        isModerator: true,
       },
     })
   })

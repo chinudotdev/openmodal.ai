@@ -1,10 +1,11 @@
 import { eq } from 'drizzle-orm'
 
-import { db } from '@/db'
+import { dbClient } from '@/db'
 import { user } from '@/db/schema'
 
 export async function getUserByEmail(email: string) {
   try {
+    const db = dbClient()
     const result = await db
       .select()
       .from(user)
