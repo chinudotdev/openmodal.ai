@@ -17,7 +17,7 @@ export const searchCapabilitiesAndJobsFn = createServerFn({ method: 'POST' })
     }),
   )
   .handler(async ({ data: { query, type } }) => {
-    const db = dbClient()
+    const db = await dbClient()
     const searchTerm = `%${query}%`
 
     const results: Array<{
@@ -100,7 +100,7 @@ export const submitSuggestionsFn = createServerFn({ method: 'POST' })
       data.type = 'organization'
     }
 
-    const db = dbClient()
+    const db = await dbClient()
     await db.insert(suggestion).values({
       id: crypto.randomUUID(),
       type: data.type,
@@ -176,7 +176,7 @@ export const getSuggestionsFn = createServerFn({ method: 'POST' })
         ? desc(suggestion.createdAt)
         : suggestion.createdAt
 
-    const db = dbClient()
+    const db = await dbClient()
     const suggestions = await db
       .select({
         id: suggestion.id,
@@ -236,7 +236,7 @@ export const updateSuggestionStatusFn = createServerFn({ method: 'POST' })
       }
     }
 
-    const db = dbClient()
+    const db = await dbClient()
     await db
       .update(suggestion)
       .set({

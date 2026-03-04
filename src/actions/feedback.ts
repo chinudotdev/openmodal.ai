@@ -31,7 +31,7 @@ export const submitFeedbackFn = createServerFn({ method: 'POST' })
       }
     }
 
-    const db = dbClient()
+    const db = await dbClient()
     await db.insert(feedback).values({
       id: crypto.randomUUID(),
       content: data.content,
@@ -96,7 +96,7 @@ export const getFeedbacksFn = createServerFn({ method: 'POST' })
       data.sortBy === 'oldest' ? feedback.createdAt : desc(feedback.createdAt)
 
     // Get feedbacks with user info
-    const db = dbClient()
+    const db = await dbClient()
     const feedbacks = await db
       .select({
         id: feedback.id,
@@ -155,7 +155,7 @@ export const markFeedbackReviewedFn = createServerFn({ method: 'POST' })
       }
     }
 
-    const db = dbClient()
+    const db = await dbClient()
     await db
       .update(feedback)
       .set({

@@ -10,7 +10,7 @@ import { authSchema } from '@/db/schema'
 import { sendEmailVerification } from '@/emails'
 import { ac, roles } from '@/lib/permissions'
 
-const db = dbClient()
+const db = await dbClient()
 
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,

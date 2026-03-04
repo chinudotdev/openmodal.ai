@@ -210,7 +210,7 @@ export const submitReportFn = createServerFn({ method: 'POST' })
     const parsedEventDate = data.eventDate ? new Date(data.eventDate) : null
 
     // Create the report
-    const db = dbClient()
+    const db = await dbClient()
     const [newReport] = await db
       .insert(impactReport)
       .values({
@@ -264,7 +264,7 @@ export const addEnrichmentFn = createServerFn({ method: 'POST' })
     }
 
     // Create enrichment
-    const db = dbClient()
+    const db = await dbClient()
     const [newEnrichment] = await db
       .insert(reportEnrichment)
       .values({
@@ -312,7 +312,7 @@ export const flagReportFn = createServerFn({ method: 'POST' })
     }
 
     // Create flag
-    const db = dbClient()
+    const db = await dbClient()
     await db.insert(reportFlag).values({
       id: nanoid(),
       reportId: data.reportId,
@@ -353,7 +353,7 @@ export const voteEnrichmentFn = createServerFn({ method: 'POST' })
 
     // In production, track user votes to prevent double voting
     // For now, just increment the counter
-    const db = dbClient()
+    const db = await dbClient()
     const updateData =
       data.voteType === 'upvote'
         ? { upvotes: sql`${reportEnrichment.upvotes} + 1` }
@@ -389,7 +389,7 @@ export const voteReportFn = createServerFn({ method: 'POST' })
     // const userId = context.user.id
 
     // In production, track user votes to prevent double voting
-    const db = dbClient()
+    const db = await dbClient()
     const updateData =
       data.voteType === 'upvote'
         ? { upvotes: sql`${impactReport.upvotes} + 1` }
@@ -455,7 +455,7 @@ export const updateReportStatusFn = createServerFn({ method: 'POST' })
     // For now, just require authentication
     // const userId = context.user.id
 
-    const db = dbClient()
+    const db = await dbClient()
     const updated = await db
       .update(impactReport)
       .set({ status: data.status })
