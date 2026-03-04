@@ -58,7 +58,7 @@ import { env } from 'cloudflare:workers'
 import { drizzle } from 'drizzle-orm/neon-http'
 
 const sql = neon(env.DATABASE_URL)
-export const db = await drizzle(sql)
+export const db =  drizzle(sql)
 ```
 
 ### Usage in Data Layer

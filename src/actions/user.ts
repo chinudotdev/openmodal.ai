@@ -15,7 +15,7 @@ export const checkUsernameAvailabilityFn = createServerFn({ method: 'POST' })
   )
   .middleware([authMiddleware])
   .handler(async ({ data: { username } }) => {
-    const db = await dbClient()
+    const db =  dbClient()
     const existingUser = await db
       .select({
         username: userTable.username,

@@ -5,7 +5,7 @@ import { user } from '@/db/schema'
 
 export async function getOnboardingStatus(userId: string) {
   try {
-    const db = await dbClient()
+    const db =  dbClient()
     const session = await db
       .select({
         completed: user.onboardingCompleted,

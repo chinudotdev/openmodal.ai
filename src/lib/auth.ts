@@ -10,8 +10,6 @@ import { authSchema } from '@/db/schema'
 import { sendEmailVerification } from '@/emails'
 import { ac, roles } from '@/lib/permissions'
 
-const db = await dbClient()
-
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   emailVerification: {
@@ -25,7 +23,7 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
   },
-  database: drizzleAdapter(db, {
+  database: drizzleAdapter(dbClient(), {
     provider: 'pg',
     schema: authSchema,
   }),

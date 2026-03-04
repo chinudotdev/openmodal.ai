@@ -5,7 +5,7 @@ import { user } from '@/db/schema'
 
 export async function getUserByEmail(email: string) {
   try {
-    const db = await dbClient()
+    const db =  dbClient()
     const result = await db
       .select()
       .from(user)

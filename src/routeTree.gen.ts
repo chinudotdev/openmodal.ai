@@ -17,7 +17,6 @@ import { Route as PublicRouteRouteImport } from './routes/_public/route'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
-import { Route as ApiHelloRouteImport } from './routes/api/hello'
 import { Route as PublicTermsRouteImport } from './routes/_public/terms'
 import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
@@ -109,11 +108,6 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PublicRouteRoute,
-} as any)
-const ApiHelloRoute = ApiHelloRouteImport.update({
-  id: '/api/hello',
-  path: '/api/hello',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const PublicTermsRoute = PublicTermsRouteImport.update({
   id: '/terms',
@@ -419,7 +413,6 @@ export interface FileRoutesByFullPath {
   '/about': typeof PublicAboutRoute
   '/privacy': typeof PublicPrivacyRoute
   '/terms': typeof PublicTermsRoute
-  '/api/hello': typeof ApiHelloRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/capabilities/add': typeof AdminCapabilitiesAddRoute
   '/admin/jobs/add': typeof AdminJobsAddRoute
@@ -480,7 +473,6 @@ export interface FileRoutesByTo {
   '/about': typeof PublicAboutRoute
   '/privacy': typeof PublicPrivacyRoute
   '/terms': typeof PublicTermsRoute
-  '/api/hello': typeof ApiHelloRoute
   '/admin': typeof AdminIndexRoute
   '/admin/capabilities/add': typeof AdminCapabilitiesAddRoute
   '/admin/jobs/add': typeof AdminJobsAddRoute
@@ -544,7 +536,6 @@ export interface FileRoutesById {
   '/_public/about': typeof PublicAboutRoute
   '/_public/privacy': typeof PublicPrivacyRoute
   '/_public/terms': typeof PublicTermsRoute
-  '/api/hello': typeof ApiHelloRoute
   '/_public/': typeof PublicIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/capabilities/add': typeof AdminCapabilitiesAddRoute
@@ -609,7 +600,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/privacy'
     | '/terms'
-    | '/api/hello'
     | '/admin/'
     | '/admin/capabilities/add'
     | '/admin/jobs/add'
@@ -670,7 +660,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/privacy'
     | '/terms'
-    | '/api/hello'
     | '/admin'
     | '/admin/capabilities/add'
     | '/admin/jobs/add'
@@ -733,7 +722,6 @@ export interface FileRouteTypes {
     | '/_public/about'
     | '/_public/privacy'
     | '/_public/terms'
-    | '/api/hello'
     | '/_public/'
     | '/admin/'
     | '/admin/capabilities/add'
@@ -795,7 +783,6 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
-  ApiHelloRoute: typeof ApiHelloRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -856,13 +843,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRouteRoute
-    }
-    '/api/hello': {
-      id: '/api/hello'
-      path: '/api/hello'
-      fullPath: '/api/hello'
-      preLoaderRoute: typeof ApiHelloRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/_public/terms': {
       id: '/_public/terms'
@@ -1390,7 +1370,6 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   VerifyEmailRoute: VerifyEmailRoute,
-  ApiHelloRoute: ApiHelloRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

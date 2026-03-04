@@ -83,7 +83,7 @@ export interface ReportBreakdown {
  * Get all technologies with optional filters
  */
 export async function getAllTechnologies(filters: TechnologyFilters = {}) {
-  const db = await dbClient()
+  const db =  dbClient()
   const { type, stage, status, search, sortBy = 'newest' } = filters
 
   const conditions = []
@@ -175,7 +175,7 @@ export async function getAllTechnologies(filters: TechnologyFilters = {}) {
 export async function getTechnologyBySlug(
   slug: string,
 ): Promise<TechnologyDetail | null> {
-  const db = await dbClient()
+  const db =  dbClient()
   try {
     // Get technology with organization
     const techResults = await db
@@ -364,7 +364,7 @@ export async function getTechnologyBySlug(
  * Get technologies by organization
  */
 export async function getTechnologiesByOrganization(organizationId: string) {
-  const db = await dbClient()
+  const db =  dbClient()
   try {
     const results = await db
       .select({
@@ -410,7 +410,7 @@ export async function getTechnologiesByOrganization(organizationId: string) {
  * Get report count for a specific technology
  */
 export async function getTechnologyReportCount(technologyId: string) {
-  const db = await dbClient()
+  const db =  dbClient()
   try {
     const result = await db
       .select({
@@ -433,7 +433,7 @@ export async function getTechnologyReportCount(technologyId: string) {
 export async function getTechnologyReportBreakdown(
   technologyId: string,
 ): Promise<Array<ReportBreakdown>> {
-  const db = await dbClient()
+  const db =  dbClient()
   try {
     const results = await db
       .select({
@@ -489,7 +489,7 @@ export async function createTechnology(data: {
   status: SubmissionStatus
   submittedBy: string
 }) {
-  const db = await dbClient()
+  const db =  dbClient()
   try {
     const [newTech] = await db
       .insert(technology)
@@ -533,7 +533,7 @@ export async function updateTechnology(
     status?: SubmissionStatus
   },
 ) {
-  const db = await dbClient()
+  const db =  dbClient()
   try {
     const [updatedTech] = await db
       .update(technology)
@@ -564,7 +564,7 @@ export async function updateTechnology(
  * Delete a technology
  */
 export async function deleteTechnology(id: string) {
-  const db = await dbClient()
+  const db =  dbClient()
   try {
     await db.delete(technology).where(eq(technology.id, id))
   } catch (error) {
@@ -577,7 +577,7 @@ export async function deleteTechnology(id: string) {
  * Get technology by ID
  */
 export async function getTechnologyById(id: string) {
-  const db = await dbClient()
+  const db =  dbClient()
   try {
     const result = await db
       .select()
@@ -598,7 +598,7 @@ export async function getTechnologyById(id: string) {
 export async function getTechnologiesByOrganizationForAdmin(
   organizationId: string,
 ) {
-  const db = await dbClient()
+  const db =  dbClient()
   try {
     const results = await db
       .select({
@@ -639,7 +639,7 @@ export async function getTechnologiesByOrganizationForAdmin(
  * Get capability subtypes mapped to a technology
  */
 export async function getTechnologyCapabilityMappings(technologyId: string) {
-  const db = await dbClient()
+  const db =  dbClient()
   try {
     const mappings = await db
       .select({
@@ -688,7 +688,7 @@ export async function updateTechnologyCapabilityMappings(
     performanceScore?: number | null
   }>,
 ) {
-  const db = await dbClient()
+  const db =  dbClient()
   try {
     // Delete existing mappings
     await db

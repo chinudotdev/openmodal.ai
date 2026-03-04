@@ -98,7 +98,7 @@ export const updateDraftChangeStatusFn = createServerFn({ method: 'POST' })
     }
 
     // Wrap both the entity change (if approved) and draft status update in a single transaction
-    const db = await dbClient()
+    const db =  dbClient()
     await db.transaction(async (tx) => {
       // If approving a create or update, apply the change to the target entity
       if (
@@ -585,7 +585,7 @@ export const createDraftChangeFn = createServerFn({ method: 'POST' })
     }
 
     const id = crypto.randomUUID()
-    const db = await dbClient()
+    const db =  dbClient()
     await db.insert(draftChange).values({
       id,
       entityType: data.entityType,
