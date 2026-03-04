@@ -1,6 +1,10 @@
 import { env } from 'cloudflare:workers'
 import { drizzle } from 'drizzle-orm/node-postgres'
+import { Pool } from 'pg'
 
 export function dbClient() {
-  return drizzle(env.HYPERDRIVE.connectionString)
+  const pool = new Pool({
+    connectionString: env.HYPERDRIVE.connectionString,
+  })
+  return drizzle({ client: pool })
 }
