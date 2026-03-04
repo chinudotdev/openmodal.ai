@@ -4,7 +4,7 @@ import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
 
 import { getUserByEmail } from '@/data-layer/users'
-import { auth } from '@/lib/auth'
+import { getAuth } from '@/lib/auth'
 import { rateLimitMiddleware } from '@/middleware/server'
 
 /**
@@ -28,6 +28,8 @@ export const loginOrSignupFn = createServerFn({ method: 'POST' })
     // First, check if user exists
     const existingUser = await getUserByEmail(email)
 
+    const auth = getAuth()
+
     if (existingUser) {
       // Check if user's email is verified
       if (!existingUser.emailVerified) {
@@ -38,7 +40,6 @@ export const loginOrSignupFn = createServerFn({ method: 'POST' })
             'Email not verified. Please check your email for a verification link.',
         }
       }
-
       // User exists and email is verified, try to sign in
       try {
         await auth.api.signInEmail({

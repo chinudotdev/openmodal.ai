@@ -6,7 +6,8 @@ import z from 'zod'
 
 import { dbClient } from '@/db'
 import { feedback, user } from '@/db/schema'
-import { auth } from '@/lib/auth'
+import { getAuth } from '@/lib/auth'
+import { adminMiddleware } from '@/middleware/server'
 
 // Submit feedback
 export const submitFeedbackFn = createServerFn({ method: 'POST' })
@@ -20,6 +21,7 @@ export const submitFeedbackFn = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
+    const auth = getAuth()
     const session = await auth.api.getSession({ headers })
     const userId = session?.user ? session.user.id : null
 
@@ -31,7 +33,7 @@ export const submitFeedbackFn = createServerFn({ method: 'POST' })
       }
     }
 
-    const db =  dbClient()
+    const db = dbClient()
     await db.insert(feedback).values({
       id: crypto.randomUUID(),
       content: data.content,
@@ -60,14 +62,8 @@ export const getFeedbacksFn = createServerFn({ method: 'POST' })
       limit: z.number().optional().default(50),
     }),
   )
+  .middleware([adminMiddleware])
   .handler(async ({ data }) => {
-    const headers = getRequestHeaders()
-    const session = await auth.api.getSession({ headers })
-
-    if (!session || session.user.role !== 'admin') {
-      throw new Error('Unauthorized: Admin access required')
-    }
-
     // Build conditions
     const conditions = []
 
@@ -96,7 +92,7 @@ export const getFeedbacksFn = createServerFn({ method: 'POST' })
       data.sortBy === 'oldest' ? feedback.createdAt : desc(feedback.createdAt)
 
     // Get feedbacks with user info
-    const db =  dbClient()
+    const db = dbClient()
     const feedbacks = await db
       .select({
         id: feedback.id,
@@ -144,23 +140,14 @@ export const markFeedbackReviewedFn = createServerFn({ method: 'POST' })
       notes: z.string().optional(),
     }),
   )
-  .handler(async ({ data }) => {
-    const headers = getRequestHeaders()
-    const session = await auth.api.getSession({ headers })
-
-    if (!session || session.user.role !== 'admin') {
-      return {
-        success: false,
-        error: 'Unauthorized: Admin access required',
-      }
-    }
-
-    const db =  dbClient()
+  .middleware([adminMiddleware])
+  .handler(async ({ data, context }) => {
+    const db = dbClient()
     await db
       .update(feedback)
       .set({
         reviewed: data.reviewed || 'true',
-        reviewedBy: session.user.id,
+        reviewedBy: context.user.id,
         reviewedAt: new Date(),
         adminNotes: data.notes,
       })

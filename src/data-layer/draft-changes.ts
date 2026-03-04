@@ -19,7 +19,7 @@ export interface GetDraftChangesParams {
 }
 
 export async function getDraftChanges(params: GetDraftChangesParams = {}) {
-  const db =  dbClient()
+  const db = dbClient()
   const {
     entityType,
     status,
@@ -114,7 +114,7 @@ export async function getDraftChanges(params: GetDraftChangesParams = {}) {
 }
 
 export async function getDraftChangeById(id: string) {
-  const db =  dbClient()
+  const db = dbClient()
   const [draft] = await db
     .select({
       id: draftChange.id,

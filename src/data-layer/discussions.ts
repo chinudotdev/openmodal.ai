@@ -167,7 +167,7 @@ export async function getDiscussions(options: {
       orderByClause = [desc(discussion.createdAt)]
       break
   }
-  const db =  dbClient()
+  const db = dbClient()
 
   // Get total count
   const [{ count }] = await db
@@ -225,7 +225,7 @@ export async function getDiscussions(options: {
 export async function getDiscussionById(
   discussionId: string,
 ): Promise<DiscussionWithAuthor | null> {
-  const db =  dbClient()
+  const db = dbClient()
   const results = await db
     .select({
       id: discussion.id,
@@ -275,7 +275,7 @@ export async function getDiscussionReplies(
   discussionId: string,
 ): Promise<Array<DiscussionThread>> {
   // Get all descendants of this discussion
-  const db =  dbClient()
+  const db = dbClient()
   const allReplies = await db
     .select({
       id: discussion.id,
@@ -355,7 +355,7 @@ export async function getDiscussionByEntity(
   entityType: EntityType,
   entityId: string,
 ): Promise<DiscussionWithAuthor | null> {
-  const db =  dbClient()
+  const db = dbClient()
   const results = await db
     .select({
       id: discussion.id,
@@ -405,7 +405,7 @@ export async function getEntityInfo(
   entityType: EntityType,
   entityId: string,
 ): Promise<{ name: string; slug: string | null } | null> {
-  const db =  dbClient()
+  const db = dbClient()
   let result
 
   switch (entityType) {
@@ -466,7 +466,7 @@ export async function getEntityInfo(
  * Get trending topics (most discussed entities)
  */
 export async function getTrendingTopics(limit = 5) {
-  const db =  dbClient()
+  const db = dbClient()
   // Group by entity_type and entity_id, count replies
   const trending = await db
     .select({
@@ -504,7 +504,7 @@ export async function getDiscussionsByUserId(
   userId: string,
   options?: { limit?: number; offset?: number },
 ) {
-  const db =  dbClient()
+  const db = dbClient()
   const { limit = 20, offset = 0 } = options || {}
 
   const conditions = [

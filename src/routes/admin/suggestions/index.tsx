@@ -123,20 +123,15 @@ function AdminSuggestionsPage() {
 
     setIsLoading(true)
     try {
-      const result = await updateSuggestionStatusFn({
+      await updateSuggestionStatusFn({
         data: {
           id: selectedSuggestion.id,
           status: newStatus,
           response: response || undefined,
         },
       })
-
-      if (result.success) {
-        await fetchSuggestions()
-        handleCloseDialog()
-      } else {
-        alert(result.error)
-      }
+      await fetchSuggestions()
+      handleCloseDialog()
     } catch (error) {
       console.error('Failed to update suggestion:', error)
       alert('Failed to update suggestion')

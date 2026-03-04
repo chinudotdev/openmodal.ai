@@ -118,19 +118,15 @@ function AdminFeedbackPage() {
 
     setIsLoading(true)
     try {
-      const result = await markFeedbackReviewedFn({
+      await markFeedbackReviewedFn({
         data: {
           id: selectedFeedback.id,
           notes: adminNotes || undefined,
         },
       })
 
-      if (result.success) {
-        await fetchFeedbacks()
-        handleCloseDialog()
-      } else {
-        alert(result.error)
-      }
+      await fetchFeedbacks()
+      handleCloseDialog()
     } catch (error) {
       console.error('Failed to update feedback:', error)
       alert('Failed to update feedback')

@@ -1,11 +1,12 @@
 import { createMiddleware } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 
-import { auth } from '@/lib/auth'
+import { getAuth } from '@/lib/auth'
 
 export const authMiddleware = createMiddleware({ type: 'function' }).server(
   async ({ next }) => {
     const headers = getRequestHeaders()
+    const auth = getAuth()
     const session = await auth.api.getSession({ headers })
 
     if (!session) {
@@ -13,7 +14,10 @@ export const authMiddleware = createMiddleware({ type: 'function' }).server(
     }
     return next({
       context: {
-        user: session.user,
+        user: session.user as typeof session.user & {
+          role: 'admin' | 'observer'
+          onboardingCompleted: boolean
+        },
         session: session.session,
       },
     })

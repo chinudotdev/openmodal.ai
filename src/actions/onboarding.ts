@@ -25,7 +25,7 @@ export const completeOnboardingFn = createServerFn({ method: 'POST' })
   .handler(async ({ data: { name, username }, context: { user } }) => {
     const userId = user.id
     // Check if username already exists (excluding current user)
-    const db =  dbClient()
+    const db = dbClient()
     const existingUser = await db
       .select({
         id: userTable.id,

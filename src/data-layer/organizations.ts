@@ -67,7 +67,7 @@ export interface ReportBreakdown {
  * Get all organizations with optional filters
  */
 export async function getAllOrganizations(filters: OrganizationFilters = {}) {
-  const db =  dbClient()
+  const db = dbClient()
   const {
     types,
     sponsorTier,
@@ -179,7 +179,7 @@ export async function getAllOrganizations(filters: OrganizationFilters = {}) {
 export async function getOrganizationBySlug(
   slug: string,
 ): Promise<OrganizationDetail | null> {
-  const db =  dbClient()
+  const db = dbClient()
   try {
     // Get organization with counts
     const orgResults = await db
@@ -308,7 +308,7 @@ export async function getOrganizationBySlug(
  * Get sponsors by tier
  */
 export async function getSponsorOrganizations(tier: SponsorTier) {
-  const db =  dbClient()
+  const db = dbClient()
   try {
     const results = await db
       .select({
@@ -370,7 +370,7 @@ export async function getSponsorOrganizations(tier: SponsorTier) {
 export async function getOrganizationReportBreakdown(
   organizationId: string,
 ): Promise<Array<ReportBreakdown>> {
-  const db =  dbClient()
+  const db = dbClient()
   try {
     // Get all reports for technologies belonging to this organization
     const results = await db
@@ -438,7 +438,7 @@ export function getSponsorTiers() {
  * Get organization by ID for admin
  */
 export async function getOrganizationById(id: string) {
-  const db =  dbClient()
+  const db = dbClient()
   try {
     const results = await db
       .select()
@@ -469,7 +469,7 @@ export async function createOrganization(data: {
   isClaimed?: boolean
   verifiedBadge?: boolean
 }) {
-  const db =  dbClient()
+  const db = dbClient()
   try {
     const id = crypto.randomUUID()
 
@@ -515,7 +515,7 @@ export async function updateOrganization(data: {
   isClaimed?: boolean
   verifiedBadge?: boolean
 }) {
-  const db =  dbClient()
+  const db = dbClient()
   try {
     const updateData: Record<string, unknown> = {}
 
@@ -552,7 +552,7 @@ export async function updateOrganization(data: {
  * Delete an organization
  */
 export async function deleteOrganization(id: string) {
-  const db =  dbClient()
+  const db = dbClient()
   try {
     await db.delete(organization).where(eq(organization.id, id))
   } catch (error) {

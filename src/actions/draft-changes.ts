@@ -16,7 +16,8 @@ import {
   taskCapabilitySubtype,
   technology,
 } from '@/db/schema'
-import { auth } from '@/lib/auth'
+import { getAuth } from '@/lib/auth'
+import { adminMiddleware } from '@/middleware/server'
 
 // Get draft changes (admin only)
 export const getDraftChangesFn = createServerFn({ method: 'POST' })
@@ -39,14 +40,8 @@ export const getDraftChangesFn = createServerFn({ method: 'POST' })
       offset: z.number().optional().default(0),
     }),
   )
+  .middleware([adminMiddleware])
   .handler(async ({ data }) => {
-    const headers = getRequestHeaders()
-    const session = await auth.api.getSession({ headers })
-
-    if (!session || session.user.role !== 'admin') {
-      throw new Error('Unauthorized: Admin access required')
-    }
-
     return getDraftChanges(data)
   })
 
@@ -57,14 +52,8 @@ export const getDraftChangeByIdFn = createServerFn({ method: 'POST' })
       id: z.string(),
     }),
   )
+  .middleware([adminMiddleware])
   .handler(async ({ data }) => {
-    const headers = getRequestHeaders()
-    const session = await auth.api.getSession({ headers })
-
-    if (!session || session.user.role !== 'admin') {
-      throw new Error('Unauthorized: Admin access required')
-    }
-
     return getDraftChangeById(data.id)
   })
 
@@ -77,17 +66,8 @@ export const updateDraftChangeStatusFn = createServerFn({ method: 'POST' })
       response: z.string().optional(),
     }),
   )
-  .handler(async ({ data }) => {
-    const headers = getRequestHeaders()
-    const session = await auth.api.getSession({ headers })
-
-    if (!session || session.user.role !== 'admin') {
-      return {
-        success: false,
-        error: 'Unauthorized: Admin access required',
-      }
-    }
-
+  .middleware([adminMiddleware])
+  .handler(async ({ data, context }) => {
     // Fetch the draft first to get the operation type
     const draft = await getDraftChangeById(data.id)
     if (!draft) {
@@ -98,7 +78,7 @@ export const updateDraftChangeStatusFn = createServerFn({ method: 'POST' })
     }
 
     // Wrap both the entity change (if approved) and draft status update in a single transaction
-    const db =  dbClient()
+    const db = dbClient()
     await db.transaction(async (tx) => {
       // If approving a create or update, apply the change to the target entity
       if (
@@ -130,7 +110,7 @@ export const updateDraftChangeStatusFn = createServerFn({ method: 'POST' })
         .set({
           status: data.status,
           response: data.response,
-          reviewedBy: session.user.id,
+          reviewedBy: context.user.id,
           reviewedAt: new Date(),
           updatedAt: new Date(),
         })
@@ -575,6 +555,7 @@ export const createDraftChangeFn = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
+    const auth = getAuth()
     const session = await auth.api.getSession({ headers })
 
     if (!session) {
@@ -585,7 +566,7 @@ export const createDraftChangeFn = createServerFn({ method: 'POST' })
     }
 
     const id = crypto.randomUUID()
-    const db =  dbClient()
+    const db = dbClient()
     await db.insert(draftChange).values({
       id,
       entityType: data.entityType,

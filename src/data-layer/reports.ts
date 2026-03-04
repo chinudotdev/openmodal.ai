@@ -97,7 +97,7 @@ export async function getReports(options: {
   limit?: number
   offset?: number
 }) {
-  const db =  dbClient()
+  const db = dbClient()
   const { filters = {}, sort = 'recent', limit = 20, offset = 0 } = options
 
   // Build where conditions
@@ -231,7 +231,7 @@ export async function getReports(options: {
 export async function getReportById(
   reportId: string,
 ): Promise<ReportWithEnrichments | null> {
-  const db =  dbClient()
+  const db = dbClient()
   const results = await db
     .select({
       id: impactReport.id,
@@ -276,10 +276,11 @@ export async function getReportById(
     .where(eq(impactReport.id, reportId))
     .limit(1)
 
-  const report = results[0] ?? null
-  if (!report) {
+  if (results.length === 0) {
     return null
   }
+
+  const report = results[0]
 
   // Get enrichments with user info
   const enrichments = await db
@@ -321,7 +322,7 @@ export async function getReportById(
  * Get reports by user ID
  */
 export async function getReportsByUserId(userId: string, limit = 10) {
-  const db =  dbClient()
+  const db = dbClient()
   const reports = await db
     .select({
       id: impactReport.id,
@@ -371,7 +372,7 @@ export async function getFeaturedReports(limit = 6) {
  * Increment view count for a report
  */
 export async function incrementReportViewCount(reportId: string) {
-  const db =  dbClient()
+  const db = dbClient()
   await db
     .update(impactReport)
     .set({
@@ -387,7 +388,7 @@ export async function hasUserFlaggedReport(
   reportId: string,
   userId: string,
 ): Promise<boolean> {
-  const db =  dbClient()
+  const db = dbClient()
   const [flag] = await db
     .select()
     .from(reportFlag)
@@ -403,7 +404,7 @@ export async function hasUserFlaggedReport(
  * Get flag count for a report
  */
 export async function getReportFlagCount(reportId: string): Promise<number> {
-  const db =  dbClient()
+  const db = dbClient()
   const [{ count }] = await db
     .select({ count: sql<number>`count(*)` })
     .from(reportFlag)
@@ -416,7 +417,7 @@ export async function getReportFlagCount(reportId: string): Promise<number> {
  * Get enrichments for a report with linked entity details
  */
 export async function getReportEnrichmentsWithDetails(reportId: string) {
-  const db =  dbClient()
+  const db = dbClient()
   const enrichments = await db
     .select({
       id: reportEnrichment.id,
@@ -502,7 +503,7 @@ export async function getReportEnrichmentsWithDetails(reportId: string) {
  * Get report stats for admin/moderator dashboard
  */
 export async function getReportStats() {
-  const db =  dbClient()
+  const db = dbClient()
   const [
     [{ count: totalReports }],
     [{ count: publishedReports }],

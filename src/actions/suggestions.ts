@@ -6,7 +6,8 @@ import z from 'zod'
 
 import { dbClient } from '@/db'
 import { capability, job, suggestion, technology, user } from '@/db/schema'
-import { auth } from '@/lib/auth'
+import { getAuth } from '@/lib/auth'
+import { adminMiddleware } from '@/middleware/server'
 
 // Search capabilities, jobs, and technologies
 export const searchCapabilitiesAndJobsFn = createServerFn({ method: 'POST' })
@@ -17,7 +18,7 @@ export const searchCapabilitiesAndJobsFn = createServerFn({ method: 'POST' })
     }),
   )
   .handler(async ({ data: { query, type } }) => {
-    const db =  dbClient()
+    const db = dbClient()
     const searchTerm = `%${query}%`
 
     const results: Array<{
@@ -85,6 +86,7 @@ export const submitSuggestionsFn = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
+    const auth = getAuth()
     const session = await auth.api.getSession({ headers })
     const userId = session?.user ? session.user.id : null
 
@@ -100,7 +102,7 @@ export const submitSuggestionsFn = createServerFn({ method: 'POST' })
       data.type = 'organization'
     }
 
-    const db =  dbClient()
+    const db = dbClient()
     await db.insert(suggestion).values({
       id: crypto.randomUUID(),
       type: data.type,
@@ -139,14 +141,8 @@ export const getSuggestionsFn = createServerFn({ method: 'POST' })
       offset: z.number().optional().default(0),
     }),
   )
+  .middleware([adminMiddleware])
   .handler(async ({ data }) => {
-    const headers = getRequestHeaders()
-    const session = await auth.api.getSession({ headers })
-
-    if (!session || session.user.role !== 'admin') {
-      throw new Error('Unauthorized: Admin access required')
-    }
-
     const conditions = []
 
     // Filter by type
@@ -176,7 +172,7 @@ export const getSuggestionsFn = createServerFn({ method: 'POST' })
         ? desc(suggestion.createdAt)
         : suggestion.createdAt
 
-    const db =  dbClient()
+    const db = dbClient()
     const suggestions = await db
       .select({
         id: suggestion.id,
@@ -225,24 +221,15 @@ export const updateSuggestionStatusFn = createServerFn({ method: 'POST' })
       response: z.string().optional(),
     }),
   )
-  .handler(async ({ data }) => {
-    const headers = getRequestHeaders()
-    const session = await auth.api.getSession({ headers })
-
-    if (!session || session.user.role !== 'admin') {
-      return {
-        success: false,
-        error: 'Unauthorized: Admin access required',
-      }
-    }
-
-    const db =  dbClient()
+  .middleware([adminMiddleware])
+  .handler(async ({ data, context }) => {
+    const db = dbClient()
     await db
       .update(suggestion)
       .set({
         status: data.status,
         response: data.response,
-        reviewedBy: session.user.id,
+        reviewedBy: context.user.id,
         reviewedAt: new Date(),
         updatedAt: new Date(),
       })
