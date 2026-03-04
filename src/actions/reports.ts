@@ -10,9 +10,9 @@ import {
   getReportById,
   getReportEnrichmentsWithDetails,
   getReportFlagCount,
-  getReportStats,
   getReports,
   getReportsByUserId,
+  getReportStats,
   hasUserFlaggedReport,
   incrementReportViewCount,
 } from '@/data-layer/reports'
@@ -455,9 +455,7 @@ export const updateReportStatusFn = createServerFn({ method: 'POST' })
       status: z.enum(['published', 'flagged', 'removed']),
     }),
   )
-  .handler(async ({ data, context }) => {
-    const userId = context.user.id
-
+  .handler(async ({ data }) => {
     const db = dbClient()
     const updated = await db
       .update(impactReport)
