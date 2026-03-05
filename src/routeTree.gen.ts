@@ -36,6 +36,7 @@ import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashb
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminOrganizationsAddRouteImport } from './routes/admin/organizations/add'
 import { Route as AdminJobsAddRouteImport } from './routes/admin/jobs/add'
+import { Route as AdminCapabilitiesDraftRouteImport } from './routes/admin/capabilities/draft'
 import { Route as AdminCapabilitiesAddRouteImport } from './routes/admin/capabilities/add'
 import { Route as AdminOrganizationsSlugIndexRouteImport } from './routes/admin/organizations/$slug/index'
 import { Route as AdminJobsSlugIndexRouteImport } from './routes/admin/jobs/$slug/index'
@@ -203,6 +204,11 @@ const AdminOrganizationsAddRoute = AdminOrganizationsAddRouteImport.update({
 const AdminJobsAddRoute = AdminJobsAddRouteImport.update({
   id: '/jobs/add',
   path: '/jobs/add',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCapabilitiesDraftRoute = AdminCapabilitiesDraftRouteImport.update({
+  id: '/capabilities/draft',
+  path: '/capabilities/draft',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminCapabilitiesAddRoute = AdminCapabilitiesAddRouteImport.update({
@@ -415,6 +421,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof PublicTermsRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/capabilities/add': typeof AdminCapabilitiesAddRoute
+  '/admin/capabilities/draft': typeof AdminCapabilitiesDraftRoute
   '/admin/jobs/add': typeof AdminJobsAddRoute
   '/admin/organizations/add': typeof AdminOrganizationsAddRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -475,6 +482,7 @@ export interface FileRoutesByTo {
   '/terms': typeof PublicTermsRoute
   '/admin': typeof AdminIndexRoute
   '/admin/capabilities/add': typeof AdminCapabilitiesAddRoute
+  '/admin/capabilities/draft': typeof AdminCapabilitiesDraftRoute
   '/admin/jobs/add': typeof AdminJobsAddRoute
   '/admin/organizations/add': typeof AdminOrganizationsAddRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -539,6 +547,7 @@ export interface FileRoutesById {
   '/_public/': typeof PublicIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/capabilities/add': typeof AdminCapabilitiesAddRoute
+  '/admin/capabilities/draft': typeof AdminCapabilitiesDraftRoute
   '/admin/jobs/add': typeof AdminJobsAddRoute
   '/admin/organizations/add': typeof AdminOrganizationsAddRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -602,6 +611,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/'
     | '/admin/capabilities/add'
+    | '/admin/capabilities/draft'
     | '/admin/jobs/add'
     | '/admin/organizations/add'
     | '/api/auth/$'
@@ -662,6 +672,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin'
     | '/admin/capabilities/add'
+    | '/admin/capabilities/draft'
     | '/admin/jobs/add'
     | '/admin/organizations/add'
     | '/api/auth/$'
@@ -725,6 +736,7 @@ export interface FileRouteTypes {
     | '/_public/'
     | '/admin/'
     | '/admin/capabilities/add'
+    | '/admin/capabilities/draft'
     | '/admin/jobs/add'
     | '/admin/organizations/add'
     | '/api/auth/$'
@@ -975,6 +987,13 @@ declare module '@tanstack/react-router' {
       path: '/jobs/add'
       fullPath: '/admin/jobs/add'
       preLoaderRoute: typeof AdminJobsAddRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/capabilities/draft': {
+      id: '/admin/capabilities/draft'
+      path: '/capabilities/draft'
+      fullPath: '/admin/capabilities/draft'
+      preLoaderRoute: typeof AdminCapabilitiesDraftRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/capabilities/add': {
@@ -1301,6 +1320,7 @@ const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
 interface AdminRouteRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminCapabilitiesAddRoute: typeof AdminCapabilitiesAddRoute
+  AdminCapabilitiesDraftRoute: typeof AdminCapabilitiesDraftRoute
   AdminJobsAddRoute: typeof AdminJobsAddRoute
   AdminOrganizationsAddRoute: typeof AdminOrganizationsAddRoute
   AdminCapabilitiesIndexRoute: typeof AdminCapabilitiesIndexRoute
@@ -1330,6 +1350,7 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminCapabilitiesAddRoute: AdminCapabilitiesAddRoute,
+  AdminCapabilitiesDraftRoute: AdminCapabilitiesDraftRoute,
   AdminJobsAddRoute: AdminJobsAddRoute,
   AdminOrganizationsAddRoute: AdminOrganizationsAddRoute,
   AdminCapabilitiesIndexRoute: AdminCapabilitiesIndexRoute,

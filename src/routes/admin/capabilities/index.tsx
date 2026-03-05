@@ -39,9 +39,14 @@ function AdminCapabilitiesPage() {
           <h1 className="text-3xl font-semibold mb-2">Capabilities</h1>
           <p className="text-muted-foreground">Manage AI capabilities</p>
         </div>
-        <Link to="/admin/capabilities/add">
-          <Button>Add Capability</Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link to="/admin/capabilities/draft">
+            <Button variant="outline">View Drafts</Button>
+          </Link>
+          <Link to="/admin/capabilities/add">
+            <Button>Add Capability</Button>
+          </Link>
+        </div>
       </div>
 
       <div className="bg-background border border-border/40 rounded-lg overflow-hidden">

@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm'
 import { createServerFn } from '@tanstack/react-start'
 
 import z from 'zod'
@@ -15,6 +16,8 @@ import {
   updateCapability,
   updateCapabilitySubtype,
 } from '@/data-layer/capabilities'
+import { dbClient } from '@/db'
+import { draftChange } from '@/db/schema'
 import { adminMiddleware } from '@/middleware/server'
 
 // ============================================
@@ -42,12 +45,40 @@ export const createCapabilityFn = createServerFn({ method: 'POST' })
         .min(10, 'Description must be at least 10 characters')
         .max(500),
       icon: z.string().optional(),
+      draftId: z.string().optional(),
     }),
   )
   .middleware([adminMiddleware])
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { draftId, ...capabilityData } = data
+
     try {
-      const capability = await createCapability(data)
+      if (draftId) {
+        // Wrap both capability creation and draft approval in a single transaction
+        const db = dbClient()
+        const capability = await db.transaction(async (tx) => {
+          // Create the capability
+          const newCapability = await createCapability(capabilityData)
+
+          // Update draft status to approved
+          await tx
+            .update(draftChange)
+            .set({
+              status: 'approved',
+              reviewedBy: context.user.id,
+              reviewedAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .where(eq(draftChange.id, draftId))
+
+          return newCapability
+        })
+
+        return { success: true, data: capability }
+      }
+
+      // Regular create capability without draft
+      const capability = await createCapability(capabilityData)
       return { success: true, data: capability }
     } catch (error) {
       console.error('Error creating capability:', error)

@@ -1,6 +1,6 @@
-import { useForm } from '@tanstack/react-form'
-import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 import { useRef } from 'react'
+import { useForm } from '@tanstack/react-form'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 
 import z from 'zod'
 
@@ -10,6 +10,7 @@ import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
+import { getDraftChangeById } from '@/data-layer/draft-changes'
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -29,20 +30,43 @@ const formSchema = z.object({
 })
 
 export const Route = createFileRoute('/admin/capabilities/add')({
+  validateSearch: z.object({
+    draftId: z.string().optional(),
+  }),
+  loaderDeps: ({ search }) => ({ draftId: search.draftId }),
+  loader: async ({ deps }) => {
+    const draftId = deps.draftId
+    if (!draftId) {
+      return { draft: null }
+    }
+    const draft = await getDraftChangeById(draftId)
+    return { draft }
+  },
   component: AddCapabilityPage,
 })
 
 function AddCapabilityPage() {
   const router = useRouter()
+  const { draft } = Route.useLoaderData()
+  console.log('Component draft:', draft)
   const slugManuallyEdited = useRef(false)
 
+  const defaultValues = draft?.data
+    ? {
+        name: draft.data.name || '',
+        slug: draft.data.slug || '',
+        description: draft.data.description || '',
+        icon: draft.data.icon || '',
+      }
+    : {
+        name: '',
+        slug: '',
+        description: '',
+        icon: '',
+      }
+
   const form = useForm({
-    defaultValues: {
-      name: '',
-      slug: '',
-      description: '',
-      icon: '',
-    },
+    defaultValues,
     validators: {
       onSubmit: formSchema,
     },
@@ -53,6 +77,7 @@ function AddCapabilityPage() {
           slug: value.slug,
           description: value.description,
           ...(value.icon && { icon: value.icon }),
+          ...(draft?.id && { draftId: draft.id }),
         },
       })
 
@@ -96,9 +121,25 @@ function AddCapabilityPage() {
               ← Back
             </Button>
           </Link>
-          <h1 className="text-3xl font-semibold">Add Capability</h1>
+          <h1 className="text-3xl font-semibold">
+            {draft ? 'Review Draft' : 'Add Capability'}
+          </h1>
+          {draft && (
+            <span className="text-muted-foreground text-sm">
+              (from: {draft.submittedBy?.name || 'Unknown'})
+            </span>
+          )}
         </div>
-        <p className="text-muted-foreground">Create a new AI capability</p>
+        <p className="text-muted-foreground">
+          {draft
+            ? 'Review and approve the draft to create this capability'
+            : 'Create a new AI capability'}
+        </p>
+        {draft?.reason && (
+          <p className="text-sm text-muted-foreground mt-2 bg-muted/50 dark:bg-muted/30 p-3 rounded-md">
+            <strong>Reason:</strong> {draft.reason}
+          </p>
+        )}
       </div>
 
       <form
@@ -180,7 +221,11 @@ function AddCapabilityPage() {
               <>
                 <Button type="submit" disabled={!canSubmit || isSubmitting}>
                   {isSubmitting ? <Spinner className="mr-2 h-4 w-4" /> : null}
-                  {isSubmitting ? 'Creating...' : 'Create Capability'}
+                  {isSubmitting
+                    ? 'Submitting...'
+                    : draft
+                      ? 'Approve & Create Capability'
+                      : 'Create Capability'}
                 </Button>
                 <Link to="/admin/capabilities">
                   <Button
