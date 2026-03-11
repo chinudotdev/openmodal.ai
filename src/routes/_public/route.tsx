@@ -58,6 +58,12 @@ function PublicLayout() {
                 Home
               </Link>
               <Link
+                to="/methodology"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Methodology
+              </Link>
+              <Link
                 to="/about"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >

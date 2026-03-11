@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -16,7 +15,7 @@ export function BetaWelcomeModal() {
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
-    // Check if user has seen the beta welcome
+    // Check if user has seen beta welcome
     const hasSeenBeta = localStorage.getItem(BETA_STORAGE_KEY)
     if (!hasSeenBeta) {
       // Small delay to avoid popup blocking
@@ -34,54 +33,47 @@ export function BetaWelcomeModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <div className="flex items-center gap-2 mb-2">
-            <DialogTitle className="text-2xl">Welcome to OpenModal</DialogTitle>
+          <div className="flex items-center gap-2 mb-3">
+            <DialogTitle className="text-2xl">OpenModal</DialogTitle>
             <Badge variant="secondary">Beta</Badge>
           </div>
-          <DialogDescription className="text-base pt-2">
-            <div className="space-y-4">
-              <p>
-                Thank you for visiting! We're building a community-driven
-                platform to track AI's real-world impact on jobs and
-                capabilities.
-              </p>
 
-              <div className="bg-muted/50 rounded-lg p-4 space-y-3 text-sm">
-                <p className="font-medium">
-                  <span className="text-yellow-600 dark:text-yellow-400">
-                    🚧 Under Construction
-                  </span>
-                </p>
-                <ul className="space-y-2 text-muted-foreground ml-4">
-                  <li>
-                    • Most capabilities, jobs, and technologies are not yet
-                    mapped
-                  </li>
-                  <li>• Information may be incomplete or inaccurate</li>
-                  <li>• We need your help to build this knowledge base</li>
-                </ul>
+          <div className="space-y-4 text-base pt-2">
+            <p className="text-muted-foreground">
+              We're building the first community-driven observatory for AI's
+              real-world impact — tracked through verified evidence from
+              workers, not analyst predictions.
+            </p>
+
+            <div className="bg-muted/50 rounded-lg p-4 space-y-3 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-primary font-medium">You're early.</span>
               </div>
-
-              <p className="text-sm">
-                If you spot incorrect information, please help us improve by
-                contributing accurate data.
+              <p className="text-muted-foreground leading-relaxed">
+                The customer service vertical is seeded. More industries are
+                coming. The data will grow as the community contributes.
               </p>
-
-              <div className="flex items-center justify-center gap-2 pt-2">
-                <span className="text-sm text-muted-foreground">
-                  Join our community at
-                </span>
-                <a
-                  href="https://discord.gg/bBsF3MjA9"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium text-primary hover:underline"
-                >
-                  discord.gg/bBsF3MjA9
-                </a>
-              </div>
             </div>
-          </DialogDescription>
+
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Have firsthand experience with AI at work? Your report matters
+              more than you know.
+            </p>
+
+            <div className="flex items-center gap-2 pt-1">
+              <span className="text-sm text-muted-foreground">
+                Join our community →
+              </span>
+              <a
+                href="https://discord.gg/bBsF3MjA9"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                discord.gg/bBsF3MjA9
+              </a>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="flex flex-col sm:flex-row gap-3 pt-4">
@@ -95,7 +87,7 @@ export function BetaWelcomeModal() {
             </a>
           </Button>
           <Button onClick={handleClose} className="flex-1">
-            I Understand
+            Start Exploring
           </Button>
         </div>
       </DialogContent>

@@ -17,6 +17,7 @@ import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicTermsRouteImport } from './routes/_public/terms'
 import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
+import { Route as PublicMethodologyRouteImport } from './routes/_public/methodology'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/technologies/index'
 import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
@@ -80,6 +81,11 @@ const PublicTermsRoute = PublicTermsRouteImport.update({
 const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicMethodologyRoute = PublicMethodologyRouteImport.update({
+  id: '/methodology',
+  path: '/methodology',
   getParentRoute: () => PublicRouteRoute,
 } as any)
 const PublicAboutRoute = PublicAboutRouteImport.update({
@@ -235,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/verify-email': typeof VerifyEmailRoute
   '/about': typeof PublicAboutRoute
+  '/methodology': typeof PublicMethodologyRoute
   '/privacy': typeof PublicPrivacyRoute
   '/terms': typeof PublicTermsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -269,6 +276,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/verify-email': typeof VerifyEmailRoute
   '/about': typeof PublicAboutRoute
+  '/methodology': typeof PublicMethodologyRoute
   '/privacy': typeof PublicPrivacyRoute
   '/terms': typeof PublicTermsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -305,6 +313,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/verify-email': typeof VerifyEmailRoute
   '/_public/about': typeof PublicAboutRoute
+  '/_public/methodology': typeof PublicMethodologyRoute
   '/_public/privacy': typeof PublicPrivacyRoute
   '/_public/terms': typeof PublicTermsRoute
   '/_public/': typeof PublicIndexRoute
@@ -342,6 +351,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/verify-email'
     | '/about'
+    | '/methodology'
     | '/privacy'
     | '/terms'
     | '/api/auth/$'
@@ -376,6 +386,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/verify-email'
     | '/about'
+    | '/methodology'
     | '/privacy'
     | '/terms'
     | '/api/auth/$'
@@ -411,6 +422,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/verify-email'
     | '/_public/about'
+    | '/_public/methodology'
     | '/_public/privacy'
     | '/_public/terms'
     | '/_public/'
@@ -506,6 +518,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PublicPrivacyRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/methodology': {
+      id: '/_public/methodology'
+      path: '/methodology'
+      fullPath: '/methodology'
+      preLoaderRoute: typeof PublicMethodologyRouteImport
       parentRoute: typeof PublicRouteRoute
     }
     '/_public/about': {
@@ -716,6 +735,7 @@ const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
 
 interface PublicRouteRouteChildren {
   PublicAboutRoute: typeof PublicAboutRoute
+  PublicMethodologyRoute: typeof PublicMethodologyRoute
   PublicPrivacyRoute: typeof PublicPrivacyRoute
   PublicTermsRoute: typeof PublicTermsRoute
   PublicIndexRoute: typeof PublicIndexRoute
@@ -742,6 +762,7 @@ interface PublicRouteRouteChildren {
 
 const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicAboutRoute: PublicAboutRoute,
+  PublicMethodologyRoute: PublicMethodologyRoute,
   PublicPrivacyRoute: PublicPrivacyRoute,
   PublicTermsRoute: PublicTermsRoute,
   PublicIndexRoute: PublicIndexRoute,

@@ -10,9 +10,9 @@ import {
   getReportById,
   getReportEnrichmentsWithDetails,
   getReportFlagCount,
+  getReportStats,
   getReports,
   getReportsByUserId,
-  getReportStats,
   hasUserFlaggedReport,
   incrementReportViewCount,
 } from '@/data-layer/reports'

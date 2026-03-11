@@ -11,7 +11,6 @@ const navLinks = [
   { to: '/capabilities', label: 'Capabilities' },
   { to: '/jobs', label: 'Jobs' },
   { to: '/technologies', label: 'Technologies' },
-  { to: '/discussions', label: 'Discussions' },
   { to: '/reports', label: 'Reports' },
 ]
 
@@ -26,17 +25,6 @@ export function PublicNav() {
           <Link
             key={link.to}
             to={link.to}
-            search={
-              link.to === '/discussions'
-                ? {
-                    entityType: undefined,
-                    search: undefined,
-                    sort: 'recent',
-                    timeRange: undefined,
-                    page: 1,
-                  }
-                : undefined
-            }
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             {link.label}
@@ -66,22 +54,7 @@ export function PublicNav() {
               className="justify-start text-lg"
               onClick={() => setOpen(false)}
             >
-              <Link
-                to={link.to}
-                search={
-                  link.to === '/discussions'
-                    ? {
-                        entityType: undefined,
-                        search: undefined,
-                        sort: 'recent',
-                        timeRange: undefined,
-                        page: 1,
-                      }
-                    : undefined
-                }
-              >
-                {link.label}
-              </Link>
+              <Link to={link.to}>{link.label}</Link>
             </Button>
           ))}
           <Button asChild onClick={() => setOpen(false)} className="pt-2">
