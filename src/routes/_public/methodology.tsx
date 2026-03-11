@@ -132,7 +132,7 @@ function RouteComponent() {
             </div>
 
             {/* 01 OVERVIEW */}
-            <section className="method-section" id="overview">
+            <section id="overview" className="border-t border-border/50 pt-8 first:pt-0 mb-6 first:mb-0">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
                 01 — Overview
               </div>
@@ -196,7 +196,7 @@ function RouteComponent() {
             </section>
 
             {/* 02 IMPACT REPORTS */}
-            <section className="method-section" id="reports">
+            <section id="reports" className="border-t border-border/50 pt-8 first:mt-0 mb-6 first:mb-0">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
                 02 — Impact Reports
               </div>
@@ -261,7 +261,7 @@ function RouteComponent() {
             </section>
 
             {/* 03 IMPACT TYPES */}
-            <section className="method-section" id="impact-types">
+            <section id="impact-types" className="border-t border-border/50 pt-8 first:mt-0 mb-6 first:mb-0">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
                 03 — Impact Types
               </div>
@@ -340,7 +340,7 @@ function RouteComponent() {
             </section>
 
             {/* 04 QUALITY CONTROL */}
-            <section className="method-section" id="quality">
+            <section id="quality" className="border-t border-border/50 pt-8 first:mt-0 mb-6 first:mb-0">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
                 04 — Quality Control
               </div>
@@ -418,7 +418,7 @@ function RouteComponent() {
             </section>
 
             {/* 05 CAPABILITY SCORING */}
-            <section className="method-section" id="capabilities">
+            <section id="capabilities" className="border-t border-border/50 pt-8 first:mt-0 mb-6 first:mb-0">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
                 05 — Capability Scoring
               </div>
@@ -489,7 +489,7 @@ function RouteComponent() {
             </section>
 
             {/* 06 LIMITATIONS */}
-            <section className="method-section" id="limitations">
+            <section id="limitations" className="border-t border-border/50 pt-8 first:mt-0 mb-6 first:mb-0">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
                 06 — Known Limitations
               </div>
@@ -581,7 +581,7 @@ function RouteComponent() {
             </section>
 
             {/* 07 CITING */}
-            <section className="method-section" id="citing">
+            <section id="citing" className="border-t border-border/50 pt-8 first:mt-0 mb-6 first:mb-0">
               <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
                 07 — Citing OpenModal
               </div>

@@ -63,6 +63,12 @@ function PublicLayout() {
               >
                 Methodology
               </Link>
+              <Link
+                to="/about"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                About
+              </Link>
               <a
                 href="https://discord.gg/bBsF3MjA9"
                 target="_blank"
