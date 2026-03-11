@@ -8,41 +8,45 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import type { createStart } from '@tanstack/react-start'
+
+import type { getRouter } from './router.tsx'
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VerifyEmailRouteImport } from './routes/verify-email'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as PublicRouteRouteImport } from './routes/_public/route'
-import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
-import { Route as PublicIndexRouteImport } from './routes/_public/index'
-import { Route as PublicTermsRouteImport } from './routes/_public/terms'
-import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
-import { Route as PublicAboutRouteImport } from './routes/_public/about'
-import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/technologies/index'
-import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
-import { Route as PublicOrganizationsIndexRouteImport } from './routes/_public/organizations/index'
-import { Route as PublicJobsIndexRouteImport } from './routes/_public/jobs/index'
-import { Route as PublicDiscussionsIndexRouteImport } from './routes/_public/discussions/index'
-import { Route as PublicCapabilitiesIndexRouteImport } from './routes/_public/capabilities/index'
-import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as PublicTechnologiesSlugIndexRouteImport } from './routes/_public/technologies/$slug/index'
-import { Route as PublicReportsIdIndexRouteImport } from './routes/_public/reports/$id/index'
-import { Route as PublicOrganizationsSlugIndexRouteImport } from './routes/_public/organizations/$slug/index'
-import { Route as PublicJobsSlugIndexRouteImport } from './routes/_public/jobs/$slug/index'
-import { Route as PublicDiscussionsIdIndexRouteImport } from './routes/_public/discussions/$id/index'
-import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
-import { Route as AuthedDashboardSuggestionsIndexRouteImport } from './routes/_authed/dashboard/suggestions/index'
-import { Route as AuthedDashboardReportsIndexRouteImport } from './routes/_authed/dashboard/reports/index'
 import { Route as AuthedDashboardFeedbackIndexRouteImport } from './routes/_authed/dashboard/feedback/index'
-import { Route as PublicTechnologiesSlugDiscussionRouteImport } from './routes/_public/technologies/$slug/discussion'
-import { Route as PublicReportsIdDiscussionRouteImport } from './routes/_public/reports/$id/discussion'
-import { Route as PublicOrganizationsSlugDiscussionRouteImport } from './routes/_public/organizations/$slug/discussion'
-import { Route as PublicJobsSlugDiscussionRouteImport } from './routes/_public/jobs/$slug/discussion'
-import { Route as PublicCapabilitiesSlugDiscussionRouteImport } from './routes/_public/capabilities/$slug/discussion'
-import { Route as PublicCapabilitiesSlugSubslugIndexRouteImport } from './routes/_public/capabilities/$slug/$subslug/index'
+import { Route as AuthedDashboardIndexRouteImport } from './routes/_authed/dashboard/index'
+import { Route as AuthedDashboardReportsIndexRouteImport } from './routes/_authed/dashboard/reports/index'
 import { Route as AuthedDashboardReportsSubmitIndexRouteImport } from './routes/_authed/dashboard/reports/submit/index'
+import { Route as AuthedDashboardSuggestionsIndexRouteImport } from './routes/_authed/dashboard/suggestions/index'
+import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
+import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as PublicCapabilitiesSlugSubslugDiscussionRouteImport } from './routes/_public/capabilities/$slug/$subslug/discussion'
+import { Route as PublicCapabilitiesSlugSubslugIndexRouteImport } from './routes/_public/capabilities/$slug/$subslug/index'
+import { Route as PublicCapabilitiesSlugDiscussionRouteImport } from './routes/_public/capabilities/$slug/discussion'
+import { Route as PublicCapabilitiesSlugIndexRouteImport } from './routes/_public/capabilities/$slug/index'
+import { Route as PublicCapabilitiesIndexRouteImport } from './routes/_public/capabilities/index'
+import { Route as PublicDiscussionsIdIndexRouteImport } from './routes/_public/discussions/$id/index'
+import { Route as PublicDiscussionsIndexRouteImport } from './routes/_public/discussions/index'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as PublicJobsSlugDiscussionRouteImport } from './routes/_public/jobs/$slug/discussion'
+import { Route as PublicJobsSlugIndexRouteImport } from './routes/_public/jobs/$slug/index'
+import { Route as PublicJobsIndexRouteImport } from './routes/_public/jobs/index'
+import { Route as PublicMethodologyRouteImport } from './routes/_public/methodology'
+import { Route as PublicOrganizationsSlugDiscussionRouteImport } from './routes/_public/organizations/$slug/discussion'
+import { Route as PublicOrganizationsSlugIndexRouteImport } from './routes/_public/organizations/$slug/index'
+import { Route as PublicOrganizationsIndexRouteImport } from './routes/_public/organizations/index'
+import { Route as PublicPrivacyRouteImport } from './routes/_public/privacy'
+import { Route as PublicReportsIdDiscussionRouteImport } from './routes/_public/reports/$id/discussion'
+import { Route as PublicReportsIdIndexRouteImport } from './routes/_public/reports/$id/index'
+import { Route as PublicReportsIndexRouteImport } from './routes/_public/reports/index'
+import { Route as PublicRouteRouteImport } from './routes/_public/route'
+import { Route as PublicTechnologiesSlugDiscussionRouteImport } from './routes/_public/technologies/$slug/discussion'
+import { Route as PublicTechnologiesSlugIndexRouteImport } from './routes/_public/technologies/$slug/index'
+import { Route as PublicTechnologiesIndexRouteImport } from './routes/_public/technologies/index'
+import { Route as PublicTermsRouteImport } from './routes/_public/terms'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -80,6 +84,11 @@ const PublicTermsRoute = PublicTermsRouteImport.update({
 const PublicPrivacyRoute = PublicPrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicMethodologyRoute = PublicMethodologyRouteImport.update({
+  id: '/methodology',
+  path: '/methodology',
   getParentRoute: () => PublicRouteRoute,
 } as any)
 const PublicAboutRoute = PublicAboutRouteImport.update({
@@ -235,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/verify-email': typeof VerifyEmailRoute
   '/about': typeof PublicAboutRoute
+  '/methodology': typeof PublicMethodologyRoute
   '/privacy': typeof PublicPrivacyRoute
   '/terms': typeof PublicTermsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -269,6 +279,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/verify-email': typeof VerifyEmailRoute
   '/about': typeof PublicAboutRoute
+  '/methodology': typeof PublicMethodologyRoute
   '/privacy': typeof PublicPrivacyRoute
   '/terms': typeof PublicTermsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -305,6 +316,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/verify-email': typeof VerifyEmailRoute
   '/_public/about': typeof PublicAboutRoute
+  '/_public/methodology': typeof PublicMethodologyRoute
   '/_public/privacy': typeof PublicPrivacyRoute
   '/_public/terms': typeof PublicTermsRoute
   '/_public/': typeof PublicIndexRoute
@@ -342,6 +354,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/verify-email'
     | '/about'
+    | '/methodology'
     | '/privacy'
     | '/terms'
     | '/api/auth/$'
@@ -376,6 +389,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/verify-email'
     | '/about'
+    | '/methodology'
     | '/privacy'
     | '/terms'
     | '/api/auth/$'
@@ -411,6 +425,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/verify-email'
     | '/_public/about'
+    | '/_public/methodology'
     | '/_public/privacy'
     | '/_public/terms'
     | '/_public/'
@@ -506,6 +521,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PublicPrivacyRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/methodology': {
+      id: '/_public/methodology'
+      path: '/methodology'
+      fullPath: '/methodology'
+      preLoaderRoute: typeof PublicMethodologyRouteImport
       parentRoute: typeof PublicRouteRoute
     }
     '/_public/about': {
@@ -716,6 +738,7 @@ const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
 
 interface PublicRouteRouteChildren {
   PublicAboutRoute: typeof PublicAboutRoute
+  PublicMethodologyRoute: typeof PublicMethodologyRoute
   PublicPrivacyRoute: typeof PublicPrivacyRoute
   PublicTermsRoute: typeof PublicTermsRoute
   PublicIndexRoute: typeof PublicIndexRoute
@@ -742,6 +765,7 @@ interface PublicRouteRouteChildren {
 
 const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicAboutRoute: PublicAboutRoute,
+  PublicMethodologyRoute: PublicMethodologyRoute,
   PublicPrivacyRoute: PublicPrivacyRoute,
   PublicTermsRoute: PublicTermsRoute,
   PublicIndexRoute: PublicIndexRoute,
@@ -785,8 +809,6 @@ export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
