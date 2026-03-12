@@ -1,25 +1,17 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 
-import {
-  getAllCapabilitiesFn,
-  getOverallProgressFn,
-} from '@/actions/capabilities'
-import { Badge } from '@/components/ui/badge'
+import { getAllCapabilitiesFn } from '@/actions/capabilities'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 
 export const Route = createFileRoute('/_public/capabilities/')({
   component: CapabilitiesPage,
   loader: async () => {
-    const [capabilities, overallProgress] = await Promise.all([
-      getAllCapabilitiesFn(),
-      getOverallProgressFn(),
-    ])
+    const capabilities = await getAllCapabilitiesFn()
 
     return {
       capabilities,
-      overallProgress,
     }
   },
   pendingComponent: () => (
@@ -33,39 +25,13 @@ export const Route = createFileRoute('/_public/capabilities/')({
 })
 
 function CapabilitiesPage() {
-  const { capabilities, overallProgress } = Route.useLoaderData()
+  const { capabilities } = Route.useLoaderData()
 
   // Transform data for display
   const capabilitiesList = capabilities.map((cap) => ({
     ...cap,
     status: cap.status.charAt(0).toUpperCase() + cap.status.slice(1),
   }))
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Solved':
-        return 'bg-green-500/10 text-green-500 dark:text-green-400 border-green-500/20'
-      case 'Partial':
-        return 'bg-yellow-500/10 text-yellow-500 dark:text-yellow-400 border-yellow-500/20'
-      case 'Unsolved':
-        return 'bg-red-500/10 text-red-500 dark:text-red-400 border-red-500/20'
-      default:
-        return ''
-    }
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Solved':
-        return '✅'
-      case 'Partial':
-        return '⚠️'
-      case 'Unsolved':
-        return '❌'
-      default:
-        return ''
-    }
-  }
 
   return (
     <>
@@ -87,98 +53,58 @@ function CapabilitiesPage() {
 
       {/* Capabilities List */}
       <section className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {capabilitiesList.map((capability) => (
-            <Link
-              key={capability.slug}
-              to="/capabilities/$slug"
-              params={{ slug: capability.slug }}
-              className="group"
-            >
-              <Card className="h-full transition-all hover:shadow-lg hover:border-primary/50">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold group-hover:text-primary transition-colors">
-                        {capability.name}
-                      </h3>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className={getStatusColor(capability.status)}
-                    >
-                      {getStatusIcon(capability.status)} {capability.status}
-                    </Badge>
+        <div className="border border-border/40 rounded-md overflow-hidden">
+          {/* Header */}
+          <div className="bg-muted/50 flex items-center">
+            <div className="flex-1 px-4 py-3">
+              <p className="text-sm font-medium">Name</p>
+            </div>
+            <div className="flex items-center gap-4 px-4 py-3">
+              <p className="text-sm font-medium whitespace-nowrap">Progress</p>
+              <p className="text-sm font-medium whitespace-nowrap">Subtypes</p>
+              <p className="text-sm font-medium whitespace-nowrap w-8"></p>
+            </div>
+          </div>
+
+          {/* Rows */}
+          <div>
+            {capabilitiesList.map((capability, index) => (
+              <Link
+                key={capability.slug}
+                to="/capabilities/$slug"
+                params={{ slug: capability.slug }}
+                className="group block"
+              >
+                <div className={cn(
+                  'flex items-center border-t border-border/40 hover:bg-muted/30 transition-colors',
+                  index === capabilitiesList.length - 1 ? '' : 'border-b'
+                )}>
+                  <div className="flex-1 px-4 py-3 min-w-0">
+                    <h3 className="font-semibold group-hover:text-primary transition-colors truncate">
+                      {capability.name}
+                    </h3>
                   </div>
 
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {capability.description}
-                  </p>
-
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-muted-foreground">
-                          Overall Progress
-                        </span>
-                        <span className="text-xs font-medium">
-                          {capability.progress}%
-                        </span>
-                      </div>
-                      <Progress value={capability.progress} className="h-2" />
+                  <div className="flex items-center gap-4 px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {capability.progress}%
+                      </span>
+                      <Progress
+                        value={capability.progress}
+                        className="h-1.5 w-16 sm:w-32 md:w-60 lg:w-80"
+                      />
                     </div>
-
-                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/40">
-                      <span>{capability.subtypesCount} subtypes</span>
-                      <span>View details →</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Overall Progress */}
-      <section className="bg-muted/30 py-12">
-        <div className="container mx-auto px-6">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-semibold mb-4">
-              Overall AGI Progress
-            </h2>
-            <p className="text-muted-foreground mb-8">
-              Average progress across all capability domains
-            </p>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {capabilitiesList.map((cap) => (
-                    <div key={cap.slug}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">{cap.name}</span>
-                        <span className="text-sm text-muted-foreground">
-                          {cap.progress}%
-                        </span>
-                      </div>
-                      <Progress value={cap.progress} className="h-2" />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 pt-6 border-t border-border/40 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-semibold text-foreground">
-                      Average Progress: {overallProgress.overall}%
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {capability.subtypesCount} subtypes
                     </span>
-                    <br />
-                    AI is making steady progress, but significant gaps remain in
-                    domain-specific reasoning and real-world applications.
-                  </p>
+                    <span className="text-muted-foreground group-hover:text-primary transition-colors whitespace-nowrap w-8">
+                      →
+                    </span>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
