@@ -4,9 +4,9 @@ import { Search } from 'lucide-react'
 import { useCallback } from 'react'
 
 import { getJobsPaginatedFn } from '@/actions/jobs'
+import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import {
@@ -16,6 +16,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+
+type Job = {
+  id: string
+  slug: string
+  name: string
+  category: string
+  description: string
+  icon: string | null
+  automationRiskPercentage: number
+  riskLevel: string
+  timelineEstimate: string | null
+  confidence: string
+  createdAt: Date
+}
 
 // Search params schema for the jobs page
 const jobsSearchSchema = {
@@ -109,12 +123,6 @@ function JobsPage() {
     if (risk >= 70) return 'text-red-500'
     if (risk >= 40) return 'text-yellow-500'
     return 'text-green-500'
-  }
-
-  const getRiskLabel = (risk: number) => {
-    if (risk >= 70) return 'High Risk'
-    if (risk >= 40) return 'Medium Risk'
-    return 'Low Risk'
   }
 
   const categoryLabel = (category: string) => {
@@ -310,59 +318,70 @@ function JobsPage() {
       <section className="container mx-auto px-6 pb-12">
         {jobs.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {jobs.map((job: any) => (
-                <Link
-                  key={job.id}
-                  to="/jobs/$slug"
-                  params={{ slug: job.slug }}
-                  className="group"
-                >
-                  <Card className="h-full transition-all hover:shadow-lg hover:border-primary/50">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="font-semibold group-hover:text-primary transition-colors">
-                            {job.name}
-                          </h3>
-                          <p className="text-xs text-muted-foreground">
-                            {categoryLabel(job.category)}
-                          </p>
+            <div className="border border-border/40 rounded-md overflow-hidden">
+              {/* Header */}
+              <div className="bg-muted/50 flex items-center">
+                <div className="flex-1 px-4 py-3">
+                  <p className="text-sm font-medium">Name</p>
+                </div>
+                <div className="flex items-center gap-4 px-4 py-3">
+                  <p className="text-sm font-medium whitespace-nowrap">AI Impact Progress</p>
+                  <p className="text-sm font-medium whitespace-nowrap w-[100px] text-center">Status</p>
+                  <p className="text-sm font-medium whitespace-nowrap w-8"></p>
+                </div>
+              </div>
+
+              {/* Rows */}
+              <div>
+                {jobs.map((job: Job, index: number) => (
+                  <Link
+                    key={job.id}
+                    to="/jobs/$slug"
+                    params={{ slug: job.slug }}
+                    className="group block"
+                  >
+                    <div className={cn(
+                      'flex items-center hover:bg-muted/30 transition-colors',
+                      index === jobs.length - 1 ? '' : 'border-b border-border/40'
+                    )}>
+                      <div className="flex-1 px-4 py-3 min-w-0">
+                        <h3 className="font-semibold group-hover:text-primary transition-colors truncate">
+                          {job.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {categoryLabel(job.category)}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-4 px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-xs font-medium ${getRiskColor(job.automationRiskPercentage)}`}
+                          >
+                            {job.automationRiskPercentage}%
+                          </span>
+                          <Progress
+                            value={job.automationRiskPercentage}
+                            className="h-1.5 w-16 sm:w-32 md:w-40 lg:w-60"
+                          />
                         </div>
                         <Badge
                           variant="outline"
-                          className={getRiskColor(job.automationRiskPercentage)}
+                          className={cn(
+                            getRiskColor(job.automationRiskPercentage),
+                            'min-w-[100px] justify-center'
+                          )}
                         >
-                          {getRiskLabel(job.automationRiskPercentage)}
+                          {job.riskLevel}
                         </Badge>
+                        <span className="text-muted-foreground group-hover:text-primary transition-colors whitespace-nowrap w-8">
+                          →
+                        </span>
                       </div>
-
-                      <div className="space-y-3">
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs text-muted-foreground">
-                              Automation Risk
-                            </span>
-                            <span
-                              className={`text-xs font-medium ${getRiskColor(job.automationRiskPercentage)}`}
-                            >
-                              {job.automationRiskPercentage}%
-                            </span>
-                          </div>
-                          <Progress
-                            value={job.automationRiskPercentage}
-                            className="h-2"
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border/40">
-                          <span>View analysis →</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
 
             {/* Pagination */}
