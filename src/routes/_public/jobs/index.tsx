@@ -17,6 +17,20 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+type Job = {
+  id: string
+  slug: string
+  name: string
+  category: string
+  description: string
+  icon: string | null
+  automationRiskPercentage: number
+  riskLevel: string
+  timelineEstimate: string | null
+  confidence: string
+  createdAt: Date
+}
+
 // Search params schema for the jobs page
 const jobsSearchSchema = {
   page: 1,
@@ -319,7 +333,7 @@ function JobsPage() {
 
               {/* Rows */}
               <div>
-                {jobs.map((job: any, index: number) => (
+                {jobs.map((job: Job, index: number) => (
                   <Link
                     key={job.id}
                     to="/jobs/$slug"
@@ -327,8 +341,8 @@ function JobsPage() {
                     className="group block"
                   >
                     <div className={cn(
-                      'flex items-center border-t border-border/40 hover:bg-muted/30 transition-colors',
-                      index === jobs.length - 1 ? '' : 'border-b'
+                      'flex items-center hover:bg-muted/30 transition-colors',
+                      index === jobs.length - 1 ? '' : 'border-b border-border/40'
                     )}>
                       <div className="flex-1 px-4 py-3 min-w-0">
                         <h3 className="font-semibold group-hover:text-primary transition-colors truncate">
@@ -353,7 +367,10 @@ function JobsPage() {
                         </div>
                         <Badge
                           variant="outline"
-                          className={`${getRiskColor(job.automationRiskPercentage)} min-w-[100px] justify-center`}
+                          className={cn(
+                            getRiskColor(job.automationRiskPercentage),
+                            'min-w-[100px] justify-center'
+                          )}
                         >
                           {job.riskLevel}
                         </Badge>

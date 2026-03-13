@@ -36,7 +36,6 @@ function CapabilitiesPage() {
   return (
     <>
       {/* Hero Section */}
-      {/* Hero Section */}
       <section className="border-b border-border/40 bg-muted/30">
         <div className="container mx-auto px-6 py-16">
           <div className="max-w-3xl">
@@ -76,8 +75,8 @@ function CapabilitiesPage() {
                 className="group block"
               >
                 <div className={cn(
-                  'flex items-center border-t border-border/40 hover:bg-muted/30 transition-colors',
-                  index === capabilitiesList.length - 1 ? '' : 'border-b'
+                  'flex items-center hover:bg-muted/30 transition-colors',
+                  index === capabilitiesList.length - 1 ? '' : 'border-b border-border/40'
                 )}>
                   <div className="flex-1 px-4 py-3 min-w-0">
                     <h3 className="font-semibold group-hover:text-primary transition-colors truncate">

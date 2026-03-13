@@ -31,21 +31,22 @@ function CapabilityPage() {
   const { subtypes, ...capability } = result.data
 
   // Calculate overall progress from subtypes
-  const overallProgress = Math.round(
-    subtypes.reduce((sum: number, s: any) => sum + s.progressPercentage, 0) /
-      subtypes.length,
-  )
+  const overallProgress =
+    subtypes.length === 0
+      ? 0
+      : Math.round(
+          subtypes.reduce((sum: number, s: any) => sum + s.progressPercentage, 0) /
+            subtypes.length,
+        )
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    const normalizedStatus = status.toLowerCase()
+    switch (normalizedStatus) {
       case 'solved':
-      case 'Solved':
         return 'bg-green-500/10 text-green-500 dark:text-green-400 border-green-500/20'
       case 'partial':
-      case 'Partial':
         return 'bg-yellow-500/10 text-yellow-500 dark:text-yellow-400 border-yellow-500/20'
       case 'unsolved':
-      case 'Unsolved':
         return 'bg-red-500/10 text-red-500 dark:text-red-400 border-red-500/20'
       default:
         return ''
@@ -53,15 +54,13 @@ function CapabilityPage() {
   }
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
+    const normalizedStatus = status.toLowerCase()
+    switch (normalizedStatus) {
       case 'solved':
-      case 'Solved':
         return '✅'
       case 'partial':
-      case 'Partial':
         return '⚠️'
       case 'unsolved':
-      case 'Unsolved':
         return '❌'
       default:
         return ''
@@ -154,8 +153,8 @@ function CapabilityPage() {
                     className="group block"
                   >
                     <div className={cn(
-                      'flex items-center border-t border-border/40 hover:bg-muted/30 transition-colors',
-                      index === subtypes.length - 1 ? '' : 'border-b'
+                      'flex items-center hover:bg-muted/30 transition-colors',
+                      index === subtypes.length - 1 ? '' : 'border-b border-border/40'
                     )}>
                       <div className="flex-1 px-4 py-3 min-w-0">
                         <h3 className="font-semibold group-hover:text-primary transition-colors truncate">
@@ -178,7 +177,10 @@ function CapabilityPage() {
                         </div>
                         <Badge
                           variant="outline"
-                          className={`${getStatusColor(subtype.status)} min-w-[100px] justify-center`}
+                          className={cn(
+                            getStatusColor(subtype.status),
+                            'min-w-[100px] justify-center'
+                          )}
                         >
                           {getStatusIcon(subtype.status)} {subtypeStatus}
                         </Badge>
