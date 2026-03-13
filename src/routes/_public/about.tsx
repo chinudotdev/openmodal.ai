@@ -4,6 +4,42 @@ import { useState } from 'react'
 type Tab = 'question' | 'problem' | 'track' | 'who' | 'matters'
 
 export const Route = createFileRoute('/_public/about')({
+  head: () => ({
+    meta: [
+      {
+        title: 'About OpenModal - An Observatory for AI\'s Real-World Impact',
+      },
+      {
+        name: 'description',
+        content:
+          'OpenModal is a community-driven observatory tracking AI\'s real-world impact on humans. Learn what we track, who it\'s for, and why it matters.',
+      },
+      // Open Graph
+      {
+        property: 'og:title',
+        content: 'About OpenModal - An Observatory for AI\'s Real-World Impact',
+      },
+      {
+        property: 'og:description',
+        content:
+          'OpenModal is a community-driven observatory tracking AI\'s real-world impact on humans.',
+      },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: 'https://openmodal.ai/about' },
+      { property: 'og:site_name', content: 'OpenModal' },
+      // Twitter Card
+      { name: 'twitter:card', content: 'summary_large_image' },
+      {
+        name: 'twitter:title',
+        content: 'About OpenModal - An Observatory for AI\'s Real-World Impact',
+      },
+      {
+        name: 'twitter:description',
+        content:
+          'OpenModal is a community-driven observatory tracking AI\'s real-world impact on humans.',
+      },
+    ],
+  }),
   component: RouteComponent,
 })
 

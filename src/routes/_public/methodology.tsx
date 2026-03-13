@@ -4,6 +4,42 @@ import { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 
 export const Route = createFileRoute('/_public/methodology')({
+  head: () => ({
+    meta: [
+      {
+        title: 'Methodology - How OpenModal Works',
+      },
+      {
+        name: 'description',
+        content:
+          'A transparent account of how OpenModal collects, verifies, and presents data about AI\'s real-world impact. Learn about our impact reports, capability scoring, and quality control process.',
+      },
+      // Open Graph
+      {
+        property: 'og:title',
+        content: 'Methodology - How OpenModal Works',
+      },
+      {
+        property: 'og:description',
+        content:
+          'A transparent account of how OpenModal collects, verifies, and presents data about AI\'s real-world impact.',
+      },
+      { property: 'og:type', content: 'article' },
+      { property: 'og:url', content: 'https://openmodal.ai/methodology' },
+      { property: 'og:site_name', content: 'OpenModal' },
+      // Twitter Card
+      { name: 'twitter:card', content: 'summary_large_image' },
+      {
+        name: 'twitter:title',
+        content: 'Methodology - How OpenModal Works',
+      },
+      {
+        name: 'twitter:description',
+        content:
+          'A transparent account of how OpenModal collects, verifies, and presents data about AI\'s real-world impact.',
+      },
+    ],
+  }),
   component: RouteComponent,
 })
 

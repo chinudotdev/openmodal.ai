@@ -22,7 +22,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: "OpenModal.ai - Track AI's Real Impact on Work",
+        title: 'AI is advancing fast. What is it doing to people?',
       },
     ],
     links: [

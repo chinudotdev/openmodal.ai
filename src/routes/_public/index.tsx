@@ -4,6 +4,42 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/_public/')({
+  head: () => ({
+    meta: [
+      {
+        title: 'OpenModal | Track AI\'s Real-World Impact',
+      },
+      {
+        name: 'description',
+        content:
+          'OpenModal tracks AI\'s real-world capabilities and human impact — through verified evidence, not analyst predictions',
+      },
+      // Open Graph
+      {
+        property: 'og:title',
+        content: 'OpenModal | Track AI\'s Real-World Impact',
+      },
+      {
+        property: 'og:description',
+        content:
+          'OpenModal tracks AI\'s real-world capabilities and human impact — through verified evidence, not analyst predictions',
+      },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: 'https://openmodal.ai' },
+      { property: 'og:site_name', content: 'OpenModal' },
+      // Twitter Card
+      { name: 'twitter:card', content: 'summary_large_image' },
+      {
+        name: 'twitter:title',
+        content: 'OpenModal | Track AI\'s Real-World Impact',
+      },
+      {
+        name: 'twitter:description',
+        content:
+          'OpenModal tracks AI\'s real-world capabilities and human impact — through verified evidence, not analyst predictions',
+      },
+    ],
+  }),
   component: RouteComponent,
 })
 
@@ -238,10 +274,10 @@ function RouteComponent() {
               </span>
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-medium tracking-tight">
-              What is AI actually
+              AI is advancing fast.
               <br />
               <span className="italic text-muted-foreground">
-                doing to people?
+                What is it doing to people?
               </span>
             </h1>
             <p className="text-base text-muted-foreground max-w-lg leading-relaxed">
