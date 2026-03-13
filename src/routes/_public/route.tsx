@@ -1,6 +1,5 @@
 import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
 
-import { BetaWelcomeModal } from '@/components/beta-welcome-modal'
 import { PublicNav } from '@/components/public-nav'
 import { Badge } from '@/components/ui/badge'
 
@@ -105,8 +104,6 @@ function PublicLayout() {
         </div>
       </footer>
 
-      {/* Beta Welcome Modal */}
-      <BetaWelcomeModal />
     </div>
   )
 }
