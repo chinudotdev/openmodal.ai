@@ -43,8 +43,7 @@ function CapabilitiesPage() {
               AI Capabilities
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Track what AI can and can't do across different domains. See how
-              capabilities are progressing and which jobs they affect.
+              The building blocks of AI — fundamental cognitive and physical abilities comparable to human skills. See how they're progressing and what that means for us.
             </p>
           </div>
         </div>

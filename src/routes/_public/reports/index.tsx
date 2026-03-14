@@ -118,9 +118,7 @@ function ReportsPage() {
               Impact Reports
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Real-world experiences with AI&apos;s impact on jobs and
-              capabilities. Browse community reports and contribute your own
-              story.
+              Real-world accounts of AI&apos;s impact on professional life — from workers, managers, and founders. Browse what others are experiencing and share your own.
             </p>
             <div className="flex items-center gap-4">
               <Link to="/dashboard/reports/submit">

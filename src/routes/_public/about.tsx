@@ -1,5 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
 
 type Tab = 'question' | 'problem' | 'track' | 'who' | 'matters'
 
@@ -7,22 +7,22 @@ export const Route = createFileRoute('/_public/about')({
   head: () => ({
     meta: [
       {
-        title: 'About OpenModal - An Observatory for AI\'s Real-World Impact',
+        title: "About OpenModal - An Observatory for AI's Real-World Impact",
       },
       {
         name: 'description',
         content:
-          'OpenModal is a community-driven observatory tracking AI\'s real-world impact on humans. Learn what we track, who it\'s for, and why it matters.',
+          "OpenModal is a community-driven observatory tracking AI's real-world impact on humans. Learn what we track, who it's for, and why it matters.",
       },
       // Open Graph
       {
         property: 'og:title',
-        content: 'About OpenModal - An Observatory for AI\'s Real-World Impact',
+        content: "About OpenModal - An Observatory for AI's Real-World Impact",
       },
       {
         property: 'og:description',
         content:
-          'OpenModal is a community-driven observatory tracking AI\'s real-world impact on humans.',
+          "OpenModal is a community-driven observatory tracking AI's real-world impact on humans.",
       },
       { property: 'og:type', content: 'website' },
       { property: 'og:url', content: 'https://openmodal.ai/about' },
@@ -31,12 +31,12 @@ export const Route = createFileRoute('/_public/about')({
       { name: 'twitter:card', content: 'summary_large_image' },
       {
         name: 'twitter:title',
-        content: 'About OpenModal - An Observatory for AI\'s Real-World Impact',
+        content: "About OpenModal - An Observatory for AI's Real-World Impact",
       },
       {
         name: 'twitter:description',
         content:
-          'OpenModal is a community-driven observatory tracking AI\'s real-world impact on humans.',
+          "OpenModal is a community-driven observatory tracking AI's real-world impact on humans.",
       },
     ],
   }),
@@ -102,7 +102,7 @@ function RouteComponent() {
             </div>
 
             {/* Content Panel */}
-            <div className="min-h-[320px]">
+            <div className="min-h-80">
               {activeTab === 'question' && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
                   <h2 className="text-2xl font-semibold mb-6">The Question</h2>

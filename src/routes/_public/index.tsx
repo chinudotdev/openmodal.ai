@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -7,22 +7,22 @@ export const Route = createFileRoute('/_public/')({
   head: () => ({
     meta: [
       {
-        title: 'OpenModal | Track AI\'s Real-World Impact',
+        title: "OpenModal | Track AI's Real-World Impact",
       },
       {
         name: 'description',
         content:
-          'OpenModal tracks AI\'s real-world capabilities and human impact — through verified evidence, not analyst predictions',
+          "OpenModal tracks AI's real-world capabilities and human impact — through verified evidence, not analyst predictions",
       },
       // Open Graph
       {
         property: 'og:title',
-        content: 'OpenModal | Track AI\'s Real-World Impact',
+        content: "OpenModal | Track AI's Real-World Impact",
       },
       {
         property: 'og:description',
         content:
-          'OpenModal tracks AI\'s real-world capabilities and human impact — through verified evidence, not analyst predictions',
+          "OpenModal tracks AI's real-world capabilities and human impact — through verified evidence, not analyst predictions",
       },
       { property: 'og:type', content: 'website' },
       { property: 'og:url', content: 'https://openmodal.ai' },
@@ -31,12 +31,12 @@ export const Route = createFileRoute('/_public/')({
       { name: 'twitter:card', content: 'summary_large_image' },
       {
         name: 'twitter:title',
-        content: 'OpenModal | Track AI\'s Real-World Impact',
+        content: "OpenModal | Track AI's Real-World Impact",
       },
       {
         name: 'twitter:description',
         content:
-          'OpenModal tracks AI\'s real-world capabilities and human impact — through verified evidence, not analyst predictions',
+          "OpenModal tracks AI's real-world capabilities and human impact — through verified evidence, not analyst predictions",
       },
     ],
   }),
@@ -384,7 +384,7 @@ function RouteComponent() {
                   search: undefined,
                   sort: 'recent',
                 }}
-                className={`bg-muted/50 border border-border rounded-xl p-5 hover:border-border transition-all hover:-translate-y-0.5 ${report.featured ? 'md:col-span-2 bg-gradient-to-br from-muted/50 to-muted/30 border-border' : ''}`}
+                className={`bg-muted/50 border border-border rounded-xl p-5 hover:border-border transition-all hover:-translate-y-0.5 ${report.featured ? 'md:col-span-2 bg-linear-to-br from-muted/50 to-muted/30 border-border' : ''}`}
               >
                 <div className="flex flex-col gap-3.5 h-full">
                   <div className="flex items-center gap-2 flex-wrap">

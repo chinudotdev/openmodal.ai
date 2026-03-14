@@ -164,11 +164,10 @@ function JobsPage() {
         <div className="container mx-auto px-6 py-8">
           <div className="max-w-3xl">
             <h1 className="text-2xl md:text-4xl font-semibold tracking-tight mb-2">
-              Jobs at Risk of Automation
+              AI Impact on Jobs
             </h1>
             <p className="text-muted-foreground">
-              Understand which jobs are most affected by AI capabilities and
-              automation. Track how the job market is evolving.
+              Understand how AI is reshaping roles across industries — from automation risk to new opportunities. Track how the job market is evolving in real time.
             </p>
           </div>
         </div>

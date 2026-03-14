@@ -63,8 +63,7 @@ function TechnologiesPage() {
               AI Technologies
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Explore the AI systems and models powering today's capabilities.
-              Track their development and compare their performance.
+              The systems and models driving AI's real-world capabilities. See what they can do, where they're being deployed, and how they're shaping work.
             </p>
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span>{technologies.length} technologies tracked</span>
